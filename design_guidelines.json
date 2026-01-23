@@ -1,0 +1,115 @@
+{
+  "identity": {
+    "name": "BricsCoin Dashboard",
+    "persona": "E1 - The Anti-AI Designer",
+    "archetype": "Digital Gold Mine (Jewel & Luxury + Electric Tech)",
+    "vibe": "Serious, Decentralized, High-Value, Precision",
+    "target_audience": "Crypto Miners, Blockchain Enthusiasts, Speculators"
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Unbounded, sans-serif",
+      "weights": ["400", "700", "900"],
+      "usage": "Main page titles, hero sections, major stats. Use tight tracking (-0.02em).",
+      "import_url": "https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&display=swap"
+    },
+    "body": {
+      "font_family": "Manrope, sans-serif",
+      "weights": ["400", "500", "600"],
+      "usage": "General UI text, labels, descriptions.",
+      "import_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap"
+    },
+    "mono": {
+      "font_family": "JetBrains Mono, monospace",
+      "weights": ["400"],
+      "usage": "Transaction hashes, block heights, wallet addresses, raw data.",
+      "import_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap"
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": "#050505",
+      "foreground": "#FAFAFA",
+      "card": "#0A0A0A",
+      "card_foreground": "#FAFAFA",
+      "primary": "#FFD700",
+      "primary_foreground": "#000000",
+      "secondary": "#10B981",
+      "secondary_foreground": "#000000",
+      "muted": "#1E293B",
+      "muted_foreground": "#94A3B8",
+      "accent": "#27272A",
+      "accent_foreground": "#FFD700",
+      "border": "#27272A",
+      "input": "#27272A",
+      "ring": "#FFD700"
+    },
+    "gradients": {
+      "gold_rush": "linear-gradient(135deg, #FFD700 0%, #B8860B 100%)",
+      "dark_matter": "linear-gradient(180deg, rgba(5,5,5,0) 0%, #050505 100%)"
+    },
+    "rules": [
+      "NEVER use gradients for text unless it's a massive hero title.",
+      "Use the 'Gold' primary color sparingly for high-value actions (Mining Start, Send Coin).",
+      "Backgrounds must be deep black/charcoal, not grey."
+    ]
+  },
+  "layout_strategy": {
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "spacing": "Generous padding (p-6, p-8) inside containers, tight gaps (gap-4) between containers.",
+    "container_style": "Sharp edges or minimal rounded-md (4px). 1px border with 10% opacity white.",
+    "glassmorphism": "Use backdrop-blur-xl with bg-black/60 for sticky headers and floating wallet panels."
+  },
+  "components": {
+    "overrides": {
+      "Card": "Remove default shadow. Add 1px border-white/10. Hover: border-primary/50 transition-colors.",
+      "Button": "Sharp edges (rounded-sm). Primary buttons use 'Gold Rush' gradient. Secondary buttons are outline only.",
+      "Input": "bg-black border-white/20 focus:border-primary/100 focus:ring-0 rounded-sm font-mono.",
+      "Table": "Compact density. Row hover: bg-white/5. Font-mono for all data cells."
+    },
+    "custom_components": [
+      {
+        "name": "HashStreamBackground",
+        "description": "A background component that renders falling/fading hex characters (Matrix style but gold/grey) at very low opacity (0.05)."
+      },
+      {
+        "name": "MinerStatusGauge",
+        "description": "A circular or semi-circular gauge showing hashrate intensity using SVG or Recharts."
+      },
+      {
+        "name": "BlockFeed",
+        "description": "A live-updating list of recent blocks that animates new items in from the top."
+      }
+    ]
+  },
+  "visual_enhancers": {
+    "textures": "Add a subtle noise texture overlay (opacity 0.03) to the entire app to kill digital flatness.",
+    "borders": "The 'Tracing Beam' effect on the active mining card.",
+    "motion": "Use framer-motion for all list entrances. Stagger children by 0.05s."
+  },
+  "assets": {
+    "images": {
+      "hero_abstract": "https://images.unsplash.com/photo-1712857793235-b0a67cbe01d9?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "mining_farm": "https://images.pexels.com/photos/8370332/pexels-photo-8370332.jpeg",
+      "network_bg": "https://images.unsplash.com/photo-1758260759878-f58196990628?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "server_rack": "https://images.pexels.com/photos/8369659/pexels-photo-8369659.jpeg"
+    },
+    "icons": "Use 'lucide-react' for standard UI. Use 'react-icons/fa' (FontAwesome) for specific crypto brand icons if needed."
+  },
+  "universal_guidelines": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts. Use asymmetry.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Every interaction needs micro-animations.",
+    "Use 2-3x more spacing than feels comfortable inside text containers.",
+    "All interactive elements MUST include data-testid attributes."
+  ],
+  "instructions_to_main_agent": [
+    "1. Install fonts: Unbounded, Manrope, JetBrains Mono.",
+    "2. Update tailwind.config.js with the specific color palette provided.",
+    "3. Create the 'HashStreamBackground' component first to set the vibe.",
+    "4. Build the Dashboard using the Bento Grid layout.",
+    "5. Ensure the Mining interface uses the 'mining_farm' image as a subtle background or cover.",
+    "6. Use 'sonner' for all notifications (mining started, block found)."
+  ]
+}
