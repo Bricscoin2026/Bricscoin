@@ -1,34 +1,219 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
-}
-
-.App-header {
-    background-color: #0f0f10;
+/* App specific styles */
+.App {
     min-height: 100vh;
+}
+
+/* Hash stream background */
+.hash-stream-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.hash-column {
+    position: absolute;
+    top: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+    gap: 8px;
+    opacity: 0.05;
+    color: #FFD700;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
 }
 
-.App-link {
-    color: #61dafb;
+/* Mining animation */
+.mining-active {
+    position: relative;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+.mining-active::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #FFD700, #B8860B, #FFD700);
+    border-radius: inherit;
+    z-index: -1;
+    animation: borderGlow 2s linear infinite;
+}
+
+@keyframes borderGlow {
+    0% {
+        opacity: 0.5;
     }
-    to {
-        transform: rotate(360deg);
+    50% {
+        opacity: 1;
     }
+    100% {
+        opacity: 0.5;
+    }
+}
+
+/* Stat card shine */
+.stat-shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 215, 0, 0.1),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.stat-shine:hover::before {
+    left: 100%;
+}
+
+/* Table row hover */
+.table-row-hover {
+    transition: background-color 0.15s ease;
+}
+
+.table-row-hover:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Address text */
+.address-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+}
+
+/* Truncate hash */
+.hash-truncate {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* QR code container */
+.qr-container {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+/* Mining gauge */
+.gauge-container {
+    position: relative;
+    width: 200px;
+    height: 100px;
+    overflow: hidden;
+}
+
+.gauge-background {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 12px solid hsl(var(--muted));
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+
+.gauge-fill {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 12px solid transparent;
+    border-top-color: #FFD700;
+    border-right-color: #FFD700;
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+    transform-origin: center center;
+    transition: transform 0.3s ease;
+}
+
+/* Responsive grid */
+.bento-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 768px) {
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .bento-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Large card span */
+.span-2 {
+    grid-column: span 1;
+}
+
+@media (min-width: 768px) {
+    .span-2 {
+        grid-column: span 2;
+    }
+}
+
+/* Wallet card */
+.wallet-gradient {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+/* Navigation active state */
+.nav-active {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+    border-left: 2px solid #FFD700;
+}
+
+/* Input focus */
+input:focus {
+    outline: none;
+    border-color: #FFD700 !important;
+}
+
+/* Button transitions */
+button {
+    transition: all 0.2s ease;
+}
+
+/* Copy button feedback */
+.copy-success {
+    color: #10B981;
+}
+
+/* Block confirmation badge */
+.confirmed-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10B981;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.pending-badge {
+    background: rgba(255, 215, 0, 0.2);
+    color: #FFD700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
 }
