@@ -51,3 +51,5 @@ wallet-app/node_modules/electron/dist/electron
 wallet-app/dist/linux-arm64-unpacked/bricscoin-wallet
 wallet-app/dist/BricsCoin
 Wallet-1.0.0-arm64.AppImage
+wallet-app/dist/win-arm64-unpacked/BricsCoin
+Wallet.exe
