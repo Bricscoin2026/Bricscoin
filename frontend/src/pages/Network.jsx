@@ -78,17 +78,25 @@ function StatCard({ icon: Icon, title, value, subtitle, color = "primary", delay
 export default function Network() {
   const [stats, setStats] = useState(null);
   const [blocks, setBlocks] = useState([]);
+  const [nodeInfo, setNodeInfo] = useState(null);
+  const [peers, setPeers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [peerUrl, setPeerUrl] = useState("");
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [statsRes, blocksRes] = await Promise.all([
+      const [statsRes, blocksRes, nodeRes, peersRes] = await Promise.all([
         getNetworkStats(),
         getBlocks(50),
+        getNodeInfo().catch(() => ({ data: null })),
+        getPeers().catch(() => ({ data: { peers: [] } })),
       ]);
       setStats(statsRes.data);
       setBlocks(blocksRes.data.blocks);
+      setNodeInfo(nodeRes.data);
+      setPeers(peersRes.data?.peers || []);
     } catch (error) {
       console.error("Error fetching network data:", error);
     } finally {
@@ -106,6 +114,36 @@ export default function Network() {
   const handleRefresh = () => {
     setRefreshing(true);
     fetchData();
+  };
+
+  const handleSync = async () => {
+    try {
+      await triggerSync();
+      toast.success("Blockchain sync triggered");
+      fetchData();
+    } catch (error) {
+      toast.error("Sync failed");
+    }
+  };
+
+  const handleConnectPeer = async () => {
+    if (!peerUrl) {
+      toast.error("Please enter a peer URL");
+      return;
+    }
+    try {
+      await registerPeer({
+        node_id: `web-${Date.now()}`,
+        url: peerUrl,
+        version: "1.0.0"
+      });
+      toast.success("Connected to peer!");
+      setConnectDialogOpen(false);
+      setPeerUrl("");
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to connect to peer");
+    }
   };
 
   // Calculate supply percentage
