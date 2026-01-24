@@ -999,6 +999,34 @@ async def get_node_info():
         "peer_list": [{"node_id": p['node_id'], "url": p['url']} for p in connected_peers.values()]
     }
 
+# ==================== DOWNLOADS ENDPOINTS ====================
+from fastapi.responses import FileResponse
+
+DOWNLOADS_DIR = '/downloads'
+
+@api_router.get("/downloads")
+async def list_downloads():
+    """List available wallet downloads"""
+    files = []
+    if os.path.exists(DOWNLOADS_DIR):
+        for f in os.listdir(DOWNLOADS_DIR):
+            path = os.path.join(DOWNLOADS_DIR, f)
+            if os.path.isfile(path):
+                files.append({
+                    "name": f,
+                    "size": os.path.getsize(path),
+                    "url": f"/api/downloads/{f}"
+                })
+    return {"files": files}
+
+@api_router.get("/downloads/{filename}")
+async def download_file(filename: str):
+    """Download a wallet file"""
+    file_path = os.path.join(DOWNLOADS_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path, filename=filename, media_type="application/octet-stream")
+
 # Include the router
 app.include_router(api_router)
 
