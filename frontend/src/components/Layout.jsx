@@ -36,9 +36,11 @@ export default function Layout() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <NavLink to="/" className="flex items-center gap-3" data-testid="logo-link">
-              <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center">
-                <Coins className="w-6 h-6 text-black" />
-              </div>
+              <img 
+                src="/bricscoin-logo.png" 
+                alt="BricsCoin" 
+                className="w-10 h-10 rounded-sm"
+              />
               <div>
                 <h1 className="font-heading font-bold text-lg gold-text">BRICSCOIN</h1>
                 <p className="text-xs text-muted-foreground -mt-1">SHA256 Blockchain</p>
