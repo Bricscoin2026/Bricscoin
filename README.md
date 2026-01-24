@@ -1,6 +1,6 @@
 # 🪙 BricsCoin - Decentralized SHA256 Blockchain
 
-[![GitHub](https://img.shields.io/badge/GitHub-Jabo86-blue)](https://github.com/Jabo86)
+[![GitHub](https://img.shields.io/badge/GitHub-Bricscoin2026-blue)](https://github.com/Bricscoin2026/Bricscoin)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 A Bitcoin-like cryptocurrency with SHA256 Proof-of-Work. **Mine with ASIC hardware (Bitaxe, NerdMiner, Antminer) or browser!**
@@ -54,8 +54,8 @@ sudo usermod -aG docker $USER
 
 ### 3. Clone & Start
 ```bash
-git clone https://github.com/Jabo86/bricscoin.git
-cd bricscoin
+git clone https://github.com/Bricscoin2026/Bricscoin.git
+cd Bricscoin
 
 # Start all services
 docker-compose -f docker-compose.prod.yml up -d
@@ -196,12 +196,12 @@ MIT License - See [LICENSE](LICENSE) file
 
 ## 🙋 Support
 
-- **GitHub Issues**: [Report bugs](https://github.com/Jabo86/bricscoin/issues)
+- **GitHub Issues**: [Report bugs](https://github.com/Bricscoin2026/Bricscoin/issues)
 - **Telegram**: Coming soon
 - **Discord**: Coming soon
 
 ---
 
-**Made with ❤️ by [Jabo86](https://github.com/Jabo86)**
+**Made with ❤️ by [Bricscoin2026](https://github.com/Bricscoin2026)**
 
 ⛏️ **Happy Mining!** 🪙

@@ -44,10 +44,10 @@ fi
 # Clone repository (if not exists)
 echo "📂 Setting up BricsCoin..."
 cd /home/bricscoin
-if [ ! -d "bricscoin" ]; then
-    sudo -u bricscoin git clone https://github.com/Jabo86/bricscoin.git
+if [ ! -d "Bricscoin" ]; then
+    sudo -u bricscoin git clone https://github.com/Bricscoin2026/Bricscoin.git
 fi
-cd bricscoin
+cd Bricscoin
 
 # Create .env file
 echo "⚙️ Creating configuration..."
