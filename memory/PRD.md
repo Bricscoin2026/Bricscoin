@@ -13,7 +13,7 @@
 - [x] Proof of Work SHA256
 - [x] Supply max: 21,000,000 BRICS
 - [x] Halving ogni 210,000 blocchi (~4 anni)
-- [x] Difficoltà dinamica ogni 2016 blocchi
+- [x] Difficoltà 4 (come Bitcoin genesis)
 - [x] Target: 10 min/blocco
 
 ### Wallet
@@ -25,19 +25,21 @@
 - [x] Esportazione JSON
 
 ### Mining
-- [x] Mining browser (PC funziona)
+- [x] **Mining browser FUNZIONA** (~500-600 H/s)
+- [x] Web Worker per background mining
 - [x] Server Stratum porta 3333
-- [x] Supporto NerdMiner (connesso!)
-- [x] Difficoltà share: 0.001
+- [x] Supporto NerdMiner (connesso)
 
 ### Downloads
 - [x] Linux AppImage (100 MB)
 - [x] Windows ZIP (103 MB)
 - [x] macOS Source (580 KB)
 
-### UI
-- [x] Sfondo Matrix verde
-- [x] Logo BricsCoin 2026
+### UI/UX
+- [x] **Sfondo Matrix verde**
+- [x] **Logo moneta rotonda** (senza sfondo bianco)
+- [x] **Multilingue**: IT, EN, ES, FR, DE, ZH, JA, RU, TR
+- [x] Selettore lingua nel header
 
 ## 🔧 Configurazione NerdMiner
 
@@ -48,13 +50,13 @@ User: TUO_INDIRIZZO_BRICS.nerdminer
 Pass: x
 ```
 
-## ⚠️ Note Importanti
-
-1. **Il NerdMiner si connette** ma la difficoltà del blocco (4 zeri iniziali) è alta
-2. **La blockchain ha 1 blocco** - serve minare per creare nuovi blocchi
-3. **Mining PC funziona** perché usa calcolo diretto senza Stratum
-
 ## Changelog
-- 2026-01-24 22:45: Fix Stratum per NerdMiner, robusto contro dati binari
-- 2026-01-24 22:30: Seed phrase, importa wallet, downloads
-- 2026-01-24 21:30: Sfondo Matrix, logo BricsCoin 2026
+- 2026-01-24 23:08: Mining browser FUNZIONA! 576 H/s
+- 2026-01-24 23:05: Web Worker puro JS per SHA256
+- 2026-01-24 23:00: Sistema multilingue 9 lingue
+- 2026-01-24 22:45: Fix Stratum per NerdMiner
+- 2026-01-24 22:30: Seed phrase, importa wallet
+
+## Known Issues
+- Block submission API ritorna 400 (da verificare)
+- GitHub account sospeso
