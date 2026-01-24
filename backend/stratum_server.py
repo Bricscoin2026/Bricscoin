@@ -212,6 +212,18 @@ class StratumProtocol(asyncio.Protocol):
             self.send_response(msg_id, True)
         elif method == 'mining.get_transactions':
             self.send_response(msg_id, [])
+        elif method == 'mining.suggest_difficulty':
+            # NerdMiner suggests a difficulty - accept it
+            if params and len(params) > 0:
+                suggested = params[0]
+                if isinstance(suggested, (int, float)) and suggested > 0:
+                    self.difficulty = max(0.001, min(suggested, 1))  # Between 0.001 and 1
+                    self.send_notification("mining.set_difficulty", [self.difficulty])
+                    logger.info(f"Set difficulty to {self.difficulty} for {self.miner_id}")
+            self.send_response(msg_id, True)
+        elif method == 'mining.configure':
+            # Support mining.configure for version rolling
+            self.send_response(msg_id, {"version-rolling": False})
         else:
             logger.warning(f"Unknown method: {method}")
             self.send_response(msg_id, None, [20, f"Unknown method: {method}", None])
