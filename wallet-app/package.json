@@ -53,7 +53,7 @@
       "category": "public.app-category.finance"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": ["AppImage"],
       "icon": "icons",
       "category": "Finance",
       "maintainer": "Bricscoin2026 <bricscoin2026@users.noreply.github.com>"
