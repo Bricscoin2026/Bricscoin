@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src http://5.161.254.163:* https://*; img-src 'self' data:;">
+    <title>BricsCoin Wallet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #0a0a0a;
+            --bg-card: #111111;
+            --bg-hover: #1a1a1a;
+            --gold: #FFD700;
+            --gold-dark: #B8860B;
+            --green: #10B981;
+            --red: #EF4444;
+            --text: #ffffff;
+            --text-muted: #888888;
+            --border: #222222;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-app-region: drag;
+        }
+        
+        button, input, a {
+            -webkit-app-region: no-drag;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .network-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .balance-usd {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .wallet-address {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px 16px;
+            background: var(--bg);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+        
+        .wallet-address span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+        
+        .btn-icon {
+            padding: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .btn-icon:hover {
+            background: var(--bg-hover);
+        }
+        
+        /* Actions */
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+        
+        .action-btn svg {
+            width: 32px;
+            height: 32px;
+            color: var(--gold);
+        }
+        
+        .action-btn span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+        
+        .tab.active {
+            background: var(--bg-card);
+            color: var(--gold);
+        }
+        
+        /* Transaction List */
+        .tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .tx-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        
+        .tx-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tx-icon.receive {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+        
+        .tx-icon.send {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+        
+        .tx-details h4 {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .tx-details p {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .tx-amount {
+            text-align: right;
+        }
+        
+        .tx-amount .amount {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .tx-amount .amount.positive { color: var(--green); }
+        .tx-amount .amount.negative { color: var(--red); }
+        
+        .tx-amount .status {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            -webkit-app-region: no-drag;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 24px;
+        }
+        
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        
+        /* QR Code */
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        
+        /* Wallet Selector */
+        .wallet-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .wallet-chip {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+        
+        .wallet-chip.active {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🪙</div>
+                <div class="logo-text">
+                    <h1>BRICSCOIN</h1>
+                    <p>Desktop Wallet</p>
+                </div>
+            </div>
+            <div class="network-status">
+                <div class="status-dot"></div>
+                <span id="networkStatus">Connecting...</span>
+            </div>
+        </header>
+        
+        <!-- No Wallet State -->
+        <div id="noWalletState" class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+            </svg>
+            <h3>No Wallet Yet</h3>
+            <p>Create a new wallet to start sending and receiving BRICS</p>
+            <button class="btn btn-primary" onclick="showCreateWallet()">
+                Create Wallet
+            </button>
+        </div>
+        
+        <!-- Main Wallet View -->
+        <div id="walletView" style="display: none;">
+            <!-- Wallet Selector -->
+            <div class="wallet-selector" id="walletSelector"></div>
+            
+            <!-- Balance Card -->
+            <div class="balance-card">
+                <p class="balance-label">Total Balance</p>
+                <h2 class="balance-amount" id="balanceAmount">0.00 BRICS</h2>
+                <div class="wallet-address">
+                    <span id="currentAddress">Loading...</span>
+                    <button class="btn-icon" onclick="copyAddress()" title="Copy Address">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                    <button class="btn-icon" onclick="showReceive()" title="Show QR Code">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="actions">
+                <div class="action-btn" onclick="showSend()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="19" x2="12" y2="5"/>
+                        <polyline points="5 12 12 5 19 12"/>
+                    </svg>
+                    <span>Send</span>
+                </div>
+                <div class="action-btn" onclick="showReceive()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <polyline points="19 12 12 19 5 12"/>
+                    </svg>
+                    <span>Receive</span>
+                </div>
+                <div class="action-btn" onclick="showCreateWallet()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span>New Wallet</span>
+                </div>
+            </div>
+            
+            <!-- Transactions -->
+            <div class="tabs">
+                <button class="tab active">Transactions</button>
+            </div>
+            <div class="tx-list" id="txList">
+                <div class="empty-state" style="padding: 40px;">
+                    <p>No transactions yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Send Modal -->
+    <div class="modal-overlay" id="sendModal">
+        <div class="modal">
+            <h2>Send BRICS</h2>
+            <div class="form-group">
+                <label>Recipient Address</label>
+                <input type="text" id="sendRecipient" placeholder="BRICS...">
+            </div>
+            <div class="form-group">
+                <label>Amount (BRICS)</label>
+                <input type="number" id="sendAmount" placeholder="0.00" step="0.00000001">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="closeModal('sendModal')" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" onclick="sendTransaction()" style="flex:1;">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Receive Modal -->
+    <div class="modal-overlay" id="receiveModal">
+        <div class="modal">
+            <h2>Receive BRICS</h2>
+            <div class="qr-container">
+                <canvas id="qrCanvas"></canvas>
+            </div>
+            <div class="wallet-address" style="margin: 0;">
+                <span id="receiveAddress" style="font-size: 11px;">Loading...</span>
+                <button class="btn-icon" onclick="copyAddress()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                </button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeModal('receiveModal')" style="width: 100%; margin-top: 20px;">Close</button>
+        </div>
+    </div>
+    
+    <!-- Create Wallet Modal -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal">
+            <h2>Create New Wallet</h2>
+            <div class="form-group">
+                <label>Wallet Name (optional)</label>
+                <input type="text" id="walletName" placeholder="My Wallet">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="closeModal('createModal')" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" onclick="createWallet()" style="flex:1;">Create</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backup Modal -->
+    <div class="modal-overlay" id="backupModal">
+        <div class="modal">
+            <h2>⚠️ Backup Your Wallet</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">
+                Save your private key securely. Anyone with this key can access your funds!
+            </p>
+            <div class="form-group">
+                <label>Private Key</label>
+                <input type="text" id="backupPrivateKey" readonly style="font-size: 11px;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="closeModal('backupModal')" style="flex:1;">I've Saved It</button>
+                <button class="btn btn-primary" onclick="copyPrivateKey()" style="flex:1;">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="wallet.js"></script>
+</body>
+</html>
