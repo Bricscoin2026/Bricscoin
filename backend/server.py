@@ -555,6 +555,12 @@ async def create_transaction(request: TransactionRequest):
     await db.transactions.insert_one(transaction)
     del transaction["_id"]
     
+    # Broadcast transaction to peers
+    asyncio.create_task(broadcast_to_peers(
+        "broadcast/transaction",
+        {"transaction": transaction, "sender_node_id": NODE_ID}
+    ))
+    
     return transaction
 
 @api_router.get("/transactions/address/{address}")
