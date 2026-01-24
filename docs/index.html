@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BricsCoin - SHA256 Cryptocurrency</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪙</text></svg>">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0a0a0a;
+            --card: #111;
+            --gold: #FFD700;
+            --gold-dark: #B8860B;
+            --green: #10B981;
+            --text: #fff;
+            --muted: #888;
+            --border: #222;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        
+        .nav-links a:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        
+        .nav-links a.primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+            border: none;
+            font-weight: 600;
+        }
+        
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+            background: var(--card);
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn:hover, .lang-btn.active {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+        }
+        
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--muted);
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--gold);
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 40px 0;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: var(--muted);
+        }
+        
+        /* Sections */
+        .section {
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .section h2 span {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            transition: all 0.2s;
+        }
+        
+        .card:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+        }
+        
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+        
+        .card p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+        
+        /* Mining Steps */
+        .steps {
+            counter-reset: step;
+        }
+        
+        .step {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            flex-shrink: 0;
+        }
+        
+        .step-content h3 {
+            margin-bottom: 10px;
+        }
+        
+        .step-content p {
+            color: var(--muted);
+            margin-bottom: 15px;
+        }
+        
+        .code-block {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            color: var(--green);
+        }
+        
+        /* Downloads */
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .download-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .download-card:hover {
+            border-color: var(--gold);
+        }
+        
+        .download-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .download-card h3 {
+            margin-bottom: 10px;
+        }
+        
+        .download-card p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        /* Specs Table */
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .specs-table th, .specs-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .specs-table th {
+            background: #1a1a1a;
+            color: var(--gold);
+        }
+        
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        footer p {
+            color: var(--muted);
+        }
+        
+        /* Language content */
+        .lang-content {
+            display: none;
+        }
+        
+        .lang-content.active {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .header-content { justify-content: center; }
+            .step { flex-direction: column; align-items: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <a href="/" class="logo">
+                <div class="logo-icon">🪙</div>
+                <h1>BRICSCOIN</h1>
+            </a>
+            <nav class="nav-links">
+                <a href="http://5.161.254.163:3000">Web App</a>
+                <a href="http://5.161.254.163:3000/wallet">Wallet</a>
+                <a href="http://5.161.254.163:3000/mining">Mining</a>
+                <a href="http://5.161.254.163:3000/explorer">Explorer</a>
+                <a href="#downloads" class="primary">Download</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Language Selector -->
+    <div class="container" style="padding-top: 30px;">
+        <div class="lang-selector">
+            <button class="lang-btn active" onclick="setLang('en')">🇬🇧 English</button>
+            <button class="lang-btn" onclick="setLang('it')">🇮🇹 Italiano</button>
+            <button class="lang-btn" onclick="setLang('fr')">🇫🇷 Français</button>
+            <button class="lang-btn" onclick="setLang('de')">🇩🇪 Deutsch</button>
+            <button class="lang-btn" onclick="setLang('es')">🇪🇸 Español</button>
+            <button class="lang-btn" onclick="setLang('ru')">🇷🇺 Русский</button>
+            <button class="lang-btn" onclick="setLang('zh')">🇨🇳 中文</button>
+            <button class="lang-btn" onclick="setLang('ja')">🇯🇵 日本語</button>
+            <button class="lang-btn" onclick="setLang('tr')">🇹🇷 Türkçe</button>
+        </div>
+    </div>
+
+    <!-- ENGLISH -->
+    <div class="lang-content active" id="lang-en">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>Decentralized SHA256 cryptocurrency. Mine with ASIC, browser, or PC. Anyone can participate!</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ Start Mining</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 Download Wallet</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="stats">
+                <div class="stat-card"><h3>21M</h3><p>Maximum Supply</p></div>
+                <div class="stat-card"><h3>SHA256</h3><p>Mining Algorithm</p></div>
+                <div class="stat-card"><h3>50 BRICS</h3><p>Block Reward</p></div>
+                <div class="stat-card"><h3>10 min</h3><p>Block Time</p></div>
+            </div>
+
+            <section class="section">
+                <h2>⛏️ <span>How to Mine</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Create a Wallet</h3>
+                            <p>Go to the wallet page and create your BRICS address</p>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Create Wallet</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Choose Mining Method</h3>
+                            <p><strong>Browser Mining:</strong> Go to Mining page, paste your address, click Start</p>
+                            <p><strong>ASIC Mining (Bitaxe, NerdMiner, Antminer):</strong></p>
+                            <div class="code-block">
+Pool: 5.161.254.163<br>
+Port: 3333<br>
+User: YOUR_BRICS_ADDRESS.worker1<br>
+Pass: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Start Mining & Earn BRICS!</h3>
+                            <p>When you find a block, you receive 50 BRICS reward (halves every 210,000 blocks)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="downloads">
+                <h2>📥 <span>Download Wallet</span></h2>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="icon">🪟</div>
+                        <h3>Windows</h3>
+                        <p>Windows 10/11 64-bit</p>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Windows.zip" class="btn btn-primary">Download .zip</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🐧</div>
+                        <h3>Linux</h3>
+                        <p>Ubuntu, Debian, Fedora</p>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Linux.AppImage" class="btn btn-primary">Download .AppImage</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🍎</div>
+                        <h3>macOS</h3>
+                        <p>Use Web Wallet or build from source</p>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Web Wallet</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">📱</div>
+                        <h3>Android / iOS</h3>
+                        <p>Install as PWA from browser</p>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Open Web Wallet</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📊 <span>Technical Specifications</span></h2>
+                <table class="specs-table">
+                    <tr><th>Parameter</th><th>Value</th></tr>
+                    <tr><td>Algorithm</td><td>SHA256 (ASIC compatible)</td></tr>
+                    <tr><td>Max Supply</td><td>21,000,000 BRICS</td></tr>
+                    <tr><td>Block Time</td><td>~10 minutes</td></tr>
+                    <tr><td>Initial Reward</td><td>50 BRICS</td></tr>
+                    <tr><td>Halving</td><td>Every 210,000 blocks</td></tr>
+                    <tr><td>Difficulty Adjustment</td><td>Every 2,016 blocks</td></tr>
+                    <tr><td>Signature</td><td>ECDSA secp256k1</td></tr>
+                    <tr><td>Network</td><td>Decentralized P2P</td></tr>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <!-- ITALIANO -->
+    <div class="lang-content" id="lang-it">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>Criptovaluta decentralizzata SHA256. Mina con ASIC, browser o PC. Chiunque può partecipare!</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ Inizia a Minare</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 Scarica Wallet</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="stats">
+                <div class="stat-card"><h3>21M</h3><p>Supply Massima</p></div>
+                <div class="stat-card"><h3>SHA256</h3><p>Algoritmo Mining</p></div>
+                <div class="stat-card"><h3>50 BRICS</h3><p>Ricompensa Blocco</p></div>
+                <div class="stat-card"><h3>10 min</h3><p>Tempo Blocco</p></div>
+            </div>
+
+            <section class="section">
+                <h2>⛏️ <span>Come Minare</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Crea un Wallet</h3>
+                            <p>Vai alla pagina wallet e crea il tuo indirizzo BRICS</p>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Crea Wallet</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Scegli il Metodo di Mining</h3>
+                            <p><strong>Mining da Browser:</strong> Vai alla pagina Mining, incolla il tuo indirizzo, clicca Start</p>
+                            <p><strong>Mining ASIC (Bitaxe, NerdMiner, Antminer):</strong></p>
+                            <div class="code-block">
+Pool: 5.161.254.163<br>
+Porta: 3333<br>
+User: TUO_INDIRIZZO_BRICS.worker1<br>
+Pass: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Mina e Guadagna BRICS!</h3>
+                            <p>Quando trovi un blocco, ricevi 50 BRICS (si dimezza ogni 210.000 blocchi)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="downloads">
+                <h2>📥 <span>Scarica Wallet</span></h2>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="icon">🪟</div>
+                        <h3>Windows</h3>
+                        <p>Windows 10/11 64-bit</p>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Windows.zip" class="btn btn-primary">Scarica .zip</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🐧</div>
+                        <h3>Linux</h3>
+                        <p>Ubuntu, Debian, Fedora</p>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Linux.AppImage" class="btn btn-primary">Scarica .AppImage</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🍎</div>
+                        <h3>macOS</h3>
+                        <p>Usa Web Wallet</p>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Web Wallet</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">📱</div>
+                        <h3>Android / iOS</h3>
+                        <p>Installa come PWA dal browser</p>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Apri Web Wallet</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📊 <span>Specifiche Tecniche</span></h2>
+                <table class="specs-table">
+                    <tr><th>Parametro</th><th>Valore</th></tr>
+                    <tr><td>Algoritmo</td><td>SHA256 (compatibile ASIC)</td></tr>
+                    <tr><td>Supply Massima</td><td>21.000.000 BRICS</td></tr>
+                    <tr><td>Tempo Blocco</td><td>~10 minuti</td></tr>
+                    <tr><td>Ricompensa Iniziale</td><td>50 BRICS</td></tr>
+                    <tr><td>Halving</td><td>Ogni 210.000 blocchi</td></tr>
+                    <tr><td>Aggiustamento Difficoltà</td><td>Ogni 2.016 blocchi</td></tr>
+                    <tr><td>Firma</td><td>ECDSA secp256k1</td></tr>
+                    <tr><td>Rete</td><td>P2P Decentralizzata</td></tr>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <!-- FRANÇAIS -->
+    <div class="lang-content" id="lang-fr">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>Cryptomonnaie décentralisée SHA256. Minez avec ASIC, navigateur ou PC. Tout le monde peut participer!</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ Commencer le Minage</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 Télécharger Wallet</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="stats">
+                <div class="stat-card"><h3>21M</h3><p>Offre Maximum</p></div>
+                <div class="stat-card"><h3>SHA256</h3><p>Algorithme</p></div>
+                <div class="stat-card"><h3>50 BRICS</h3><p>Récompense Bloc</p></div>
+                <div class="stat-card"><h3>10 min</h3><p>Temps de Bloc</p></div>
+            </div>
+
+            <section class="section">
+                <h2>⛏️ <span>Comment Miner</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Créer un Portefeuille</h3>
+                            <p>Allez sur la page wallet et créez votre adresse BRICS</p>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Créer Wallet</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Choisir la Méthode de Minage</h3>
+                            <p><strong>Minage Navigateur:</strong> Page Mining, collez votre adresse, cliquez Start</p>
+                            <p><strong>Minage ASIC (Bitaxe, NerdMiner, Antminer):</strong></p>
+                            <div class="code-block">
+Pool: 5.161.254.163<br>
+Port: 3333<br>
+User: VOTRE_ADRESSE_BRICS.worker1<br>
+Pass: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Minez et Gagnez des BRICS!</h3>
+                            <p>Quand vous trouvez un bloc, vous recevez 50 BRICS (divisé par 2 tous les 210.000 blocs)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="downloads">
+                <h2>📥 <span>Télécharger Wallet</span></h2>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="icon">🪟</div>
+                        <h3>Windows</h3>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Windows.zip" class="btn btn-primary">Télécharger</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🐧</div>
+                        <h3>Linux</h3>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Linux.AppImage" class="btn btn-primary">Télécharger</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🍎</div>
+                        <h3>macOS</h3>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Web Wallet</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">📱</div>
+                        <h3>Mobile</h3>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Web Wallet</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- DEUTSCH -->
+    <div class="lang-content" id="lang-de">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>Dezentralisierte SHA256-Kryptowährung. Mining mit ASIC, Browser oder PC. Jeder kann teilnehmen!</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ Mining Starten</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 Wallet Herunterladen</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="stats">
+                <div class="stat-card"><h3>21M</h3><p>Maximale Menge</p></div>
+                <div class="stat-card"><h3>SHA256</h3><p>Algorithmus</p></div>
+                <div class="stat-card"><h3>50 BRICS</h3><p>Block-Belohnung</p></div>
+                <div class="stat-card"><h3>10 min</h3><p>Blockzeit</p></div>
+            </div>
+
+            <section class="section">
+                <h2>⛏️ <span>Wie man Mint</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Wallet Erstellen</h3>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Wallet Erstellen</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Mining-Methode Wählen</h3>
+                            <p><strong>ASIC Mining (Bitaxe, NerdMiner, Antminer):</strong></p>
+                            <div class="code-block">
+Pool: 5.161.254.163<br>
+Port: 3333<br>
+User: IHRE_BRICS_ADRESSE.worker1<br>
+Pass: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Mining & BRICS Verdienen!</h3>
+                            <p>Bei Blockfund erhalten Sie 50 BRICS (halbiert sich alle 210.000 Blöcke)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="downloads">
+                <h2>📥 <span>Wallet Herunterladen</span></h2>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="icon">🪟</div>
+                        <h3>Windows</h3>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Windows.zip" class="btn btn-primary">Herunterladen</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🐧</div>
+                        <h3>Linux</h3>
+                        <a href="http://5.161.254.163:8001/api/downloads/BricsCoin-Wallet-Linux.AppImage" class="btn btn-primary">Herunterladen</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">🍎</div>
+                        <h3>macOS</h3>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Web Wallet</a>
+                    </div>
+                    <div class="download-card">
+                        <div class="icon">📱</div>
+                        <h3>Mobil</h3>
+                        <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Web Wallet</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ESPAÑOL -->
+    <div class="lang-content" id="lang-es">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>Criptomoneda descentralizada SHA256. Mina con ASIC, navegador o PC. ¡Todos pueden participar!</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ Empezar a Minar</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 Descargar Wallet</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <section class="section">
+                <h2>⛏️ <span>Cómo Minar</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Crear Wallet</h3>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Crear Wallet</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Configurar ASIC</h3>
+                            <div class="code-block">
+Pool: 5.161.254.163<br>
+Puerto: 3333<br>
+User: TU_DIRECCION_BRICS.worker1<br>
+Pass: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>¡Mina y Gana BRICS!</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- РУССКИЙ -->
+    <div class="lang-content" id="lang-ru">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>Децентрализованная криптовалюта SHA256. Майните на ASIC, в браузере или на ПК!</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ Начать Майнинг</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 Скачать Кошелек</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <section class="section">
+                <h2>⛏️ <span>Как Майнить</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Создать Кошелек</h3>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Создать</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Настройка ASIC (Bitaxe, NerdMiner, Antminer)</h3>
+                            <div class="code-block">
+Pool: 5.161.254.163<br>
+Порт: 3333<br>
+User: ВАШ_АДРЕС_BRICS.worker1<br>
+Pass: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Майните и Зарабатывайте!</h3>
+                            <p>Награда: 50 BRICS за блок</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 中文 -->
+    <div class="lang-content" id="lang-zh">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>去中心化SHA256加密货币。使用ASIC、浏览器或PC挖矿。人人都可参与！</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ 开始挖矿</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 下载钱包</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <section class="section">
+                <h2>⛏️ <span>如何挖矿</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>创建钱包</h3>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">创建钱包</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>ASIC矿机配置</h3>
+                            <div class="code-block">
+矿池: 5.161.254.163<br>
+端口: 3333<br>
+用户: 您的BRICS地址.worker1<br>
+密码: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>挖矿赚取BRICS！</h3>
+                            <p>区块奖励：50 BRICS</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 日本語 -->
+    <div class="lang-content" id="lang-ja">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>分散型SHA256暗号通貨。ASIC、ブラウザ、PCでマイニング可能！</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ マイニング開始</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 ウォレットダウンロード</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <section class="section">
+                <h2>⛏️ <span>マイニング方法</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>ウォレット作成</h3>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">作成</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>ASIC設定</h3>
+                            <div class="code-block">
+プール: 5.161.254.163<br>
+ポート: 3333<br>
+ユーザー: あなたのBRICSアドレス.worker1<br>
+パスワード: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>マイニングでBRICSを獲得！</h3>
+                            <p>ブロック報酬：50 BRICS</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- TÜRKÇE -->
+    <div class="lang-content" id="lang-tr">
+        <section class="hero">
+            <div class="container">
+                <h1>BRICSCOIN</h1>
+                <p>Merkezi olmayan SHA256 kripto para. ASIC, tarayıcı veya PC ile madencilik yapın!</p>
+                <div class="hero-buttons">
+                    <a href="http://5.161.254.163:3000/mining" class="btn btn-primary">⛏️ Madenciliğe Başla</a>
+                    <a href="#downloads" class="btn btn-secondary">📥 Cüzdan İndir</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <section class="section">
+                <h2>⛏️ <span>Nasıl Madencilik Yapılır</span></h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Cüzdan Oluştur</h3>
+                            <a href="http://5.161.254.163:3000/wallet" class="btn btn-primary">Cüzdan Oluştur</a>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>ASIC Ayarları</h3>
+                            <div class="code-block">
+Havuz: 5.161.254.163<br>
+Port: 3333<br>
+Kullanıcı: BRICS_ADRESİNİZ.worker1<br>
+Şifre: x
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Madencilik Yap ve BRICS Kazan!</h3>
+                            <p>Blok Ödülü: 50 BRICS</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>🪙 BricsCoin - Decentralized SHA256 Cryptocurrency</p>
+            <p style="margin-top: 10px;">
+                <a href="http://5.161.254.163:3000" style="color: var(--gold);">Web App</a> |
+                <a href="http://5.161.254.163:3000/explorer" style="color: var(--gold);">Explorer</a> |
+                <a href="http://5.161.254.163:8001/api/network/stats" style="color: var(--gold);">API</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function setLang(lang) {
+            // Hide all
+            document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+            
+            // Show selected
+            document.getElementById('lang-' + lang).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Save preference
+            localStorage.setItem('bricscoin-lang', lang);
+        }
+        
+        // Load saved language
+        const savedLang = localStorage.getItem('bricscoin-lang');
+        if (savedLang) {
+            document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('lang-' + savedLang).classList.add('active');
+            document.querySelector(`[onclick="setLang('${savedLang}')"]`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
