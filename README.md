@@ -25,14 +25,14 @@ A Bitcoin-like cryptocurrency with SHA256 Proof-of-Work. **Mine with ASIC hardwa
 
 ### Stratum Connection
 ```
-Pool URL: stratum+tcp://YOUR_SERVER_IP:3333
+Pool URL: stratum+tcp://5.161.254.163:3333
 Worker: YOUR_BRICS_ADDRESS.worker1
 Password: x
 ```
 
 ### Bitaxe Configuration Example
 ```
-Stratum URL: YOUR_SERVER_IP
+Stratum URL: 5.161.254.163
 Port: 3333
 Username: BRICSa8c685d6331a60690cda1f585f3e459eead81...
 Password: x
