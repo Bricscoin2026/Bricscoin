@@ -247,7 +247,7 @@ function ReceiveDialog({ wallet }) {
         </DialogHeader>
         <div className="flex flex-col items-center py-6 space-y-4">
           <div className="qr-container">
-            <QRCode value={wallet?.address || ""} size={200} />
+            <QRCodeSVG value={wallet?.address || ""} size={200} />
           </div>
           <p className="text-sm text-muted-foreground text-center">
             Scan this QR code or copy the address below
