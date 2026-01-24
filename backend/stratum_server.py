@@ -303,54 +303,62 @@ class StratumProtocol(asyncio.Protocol):
             test_data = block_data + full_nonce
             block_hash = sha256(test_data)
             
-            # Check if meets difficulty
-            difficulty = job['difficulty']
+            # Block difficulty (for actual block)
+            block_difficulty = job['difficulty']
             
-            if check_difficulty(block_hash, difficulty):
-                # Valid block found!
-                logger.info(f"🎉 BLOCK FOUND by {self.worker_name}! Hash: {block_hash}")
-                
-                # Submit block to database
-                template = job['template']
-                new_block = {
-                    "index": template['index'],
-                    "timestamp": template['timestamp'],
-                    "transactions": template['transactions'],
-                    "proof": int(nonce, 16),
-                    "previous_hash": template['previous_hash'],
-                    "nonce": int(nonce, 16),
-                    "miner": miners[self.miner_id].get('address', self.worker_name),
-                    "difficulty": difficulty,
-                    "hash": block_hash
-                }
-                
-                # Check if block already exists
-                existing = await db.blocks.find_one({"index": template['index']})
-                if existing:
-                    self.send_response(msg_id, False, [22, "Block already exists", None])
-                    return
-                
-                await db.blocks.insert_one(new_block)
-                
-                # Confirm transactions
-                tx_ids = [tx['id'] for tx in template.get('transactions', [])]
-                if tx_ids:
-                    await db.transactions.update_many(
-                        {"id": {"$in": tx_ids}},
-                        {"$set": {"confirmed": True, "block_index": template['index']}}
-                    )
-                
+            # Share difficulty (much lower for miners)
+            share_difficulty = self.difficulty
+            
+            # First check if meets share difficulty (accept the share)
+            if check_difficulty_float(block_hash, share_difficulty):
                 miners[self.miner_id]['shares_accepted'] += 1
-                miners[self.miner_id]['blocks_found'] = miners[self.miner_id].get('blocks_found', 0) + 1
                 miners[self.miner_id]['last_share'] = datetime.now(timezone.utc).isoformat()
+                logger.info(f"Share accepted from {self.worker_name} - Hash: {block_hash[:16]}...")
+                
+                # Then check if it also meets block difficulty
+                if check_difficulty(block_hash, block_difficulty):
+                    # Valid block found!
+                    logger.info(f"🎉 BLOCK FOUND by {self.worker_name}! Hash: {block_hash}")
+                    
+                    # Submit block to database
+                    template = job['template']
+                    new_block = {
+                        "index": template['index'],
+                        "timestamp": template['timestamp'],
+                        "transactions": template['transactions'],
+                        "proof": int(nonce, 16) if isinstance(nonce, str) else nonce,
+                        "previous_hash": template['previous_hash'],
+                        "nonce": int(nonce, 16) if isinstance(nonce, str) else nonce,
+                        "miner": miners[self.miner_id].get('address', self.worker_name),
+                        "difficulty": block_difficulty,
+                        "hash": block_hash
+                    }
+                    
+                    # Check if block already exists
+                    existing = await db.blocks.find_one({"index": template['index']})
+                    if existing:
+                        self.send_response(msg_id, True)  # Share was still valid
+                        return
+                    
+                    await db.blocks.insert_one(new_block)
+                    
+                    # Confirm transactions
+                    tx_ids = [tx['id'] for tx in template.get('transactions', [])]
+                    if tx_ids:
+                        await db.transactions.update_many(
+                            {"id": {"$in": tx_ids}},
+                            {"$set": {"confirmed": True, "block_index": template['index']}}
+                        )
+                    
+                    miners[self.miner_id]['blocks_found'] = miners[self.miner_id].get('blocks_found', 0) + 1
+                    
+                    # Notify all miners of new job
+                    await self.server.broadcast_new_job()
                 
                 self.send_response(msg_id, True)
                 
-                # Notify all miners of new job
-                await self.server.broadcast_new_job()
-                
             else:
-                # Share doesn't meet difficulty
+                # Share doesn't meet even the share difficulty
                 miners[self.miner_id]['shares_rejected'] += 1
                 self.send_response(msg_id, False, [23, "Low difficulty share", None])
                 
