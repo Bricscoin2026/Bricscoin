@@ -21,6 +21,7 @@ import base64
 import asyncio
 import httpx
 from contextlib import asynccontextmanager
+from mnemonic import Mnemonic
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -380,9 +381,24 @@ async def periodic_sync():
             await sync_blockchain_from_peer(peer['url'])
 
 # ==================== WALLET FUNCTIONS ====================
-def generate_wallet():
-    """Generate new wallet with ECDSA keys"""
-    private_key = SigningKey.generate(curve=SECP256k1)
+# BIP39 Mnemonic generator
+mnemo = Mnemonic("english")
+
+def generate_wallet_from_seed(seed_phrase: str = None):
+    """Generate wallet from seed phrase or create new one"""
+    if seed_phrase:
+        # Validate seed phrase
+        if not mnemo.check(seed_phrase):
+            raise ValueError("Invalid seed phrase")
+        seed = mnemo.to_seed(seed_phrase)
+    else:
+        # Generate new seed phrase (12 words)
+        seed_phrase = mnemo.generate(strength=128)  # 128 bits = 12 words
+        seed = mnemo.to_seed(seed_phrase)
+    
+    # Derive private key from seed (first 32 bytes)
+    private_key_bytes = hashlib.sha256(seed).digest()
+    private_key = SigningKey.from_string(private_key_bytes, curve=SECP256k1)
     public_key = private_key.get_verifying_key()
     
     # Generate address from public key hash
@@ -393,8 +409,31 @@ def generate_wallet():
     return {
         "private_key": private_key.to_string().hex(),
         "public_key": pub_key_hex,
-        "address": address
+        "address": address,
+        "seed_phrase": seed_phrase
     }
+
+def generate_wallet():
+    """Generate new wallet with ECDSA keys and seed phrase"""
+    return generate_wallet_from_seed()
+
+def recover_wallet_from_private_key(private_key_hex: str):
+    """Recover wallet from private key"""
+    try:
+        private_key = SigningKey.from_string(bytes.fromhex(private_key_hex), curve=SECP256k1)
+        public_key = private_key.get_verifying_key()
+        
+        pub_key_hex = public_key.to_string().hex()
+        address_hash = sha256_hash(pub_key_hex)
+        address = "BRICS" + address_hash[:40]
+        
+        return {
+            "private_key": private_key_hex,
+            "public_key": pub_key_hex,
+            "address": address
+        }
+    except Exception as e:
+        raise ValueError(f"Invalid private key: {str(e)}")
 
 def sign_transaction(private_key_hex: str, transaction_data: str) -> str:
     """Sign transaction with private key"""
