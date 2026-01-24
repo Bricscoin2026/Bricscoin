@@ -766,6 +766,153 @@ async def get_address_info(address: str):
         "recent_transactions": recent_txs
     }
 
+# ==================== P2P ENDPOINTS ====================
+@api_router.post("/p2p/register")
+async def register_peer(peer: PeerRegister):
+    """Register a new peer node"""
+    connected_peers[peer.node_id] = {
+        "url": peer.url,
+        "node_id": peer.node_id,
+        "version": peer.version,
+        "last_seen": datetime.now(timezone.utc).isoformat()
+    }
+    
+    logging.info(f"Peer registered: {peer.node_id} at {peer.url}")
+    
+    blocks_count = await db.blocks.count_documents({})
+    
+    return {
+        "node_id": NODE_ID,
+        "version": "1.0.0",
+        "blocks_height": blocks_count,
+        "message": "Peer registered successfully"
+    }
+
+@api_router.get("/p2p/peers")
+async def get_peers():
+    """Get list of connected peers"""
+    return {
+        "node_id": NODE_ID,
+        "peers": list(connected_peers.values()),
+        "peer_count": len(connected_peers)
+    }
+
+@api_router.get("/p2p/chain/info")
+async def get_chain_info():
+    """Get chain information for sync"""
+    blocks_count = await db.blocks.count_documents({})
+    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+    
+    return {
+        "node_id": NODE_ID,
+        "height": blocks_count,
+        "last_block_hash": last_block['hash'] if last_block else None,
+        "difficulty": await get_current_difficulty()
+    }
+
+@api_router.get("/p2p/chain/blocks")
+async def get_chain_blocks(from_height: int = 0, limit: int = 100):
+    """Get blocks for synchronization"""
+    blocks = await db.blocks.find(
+        {"index": {"$gte": from_height}},
+        {"_id": 0}
+    ).sort("index", 1).limit(limit).to_list(limit)
+    
+    return {
+        "blocks": blocks,
+        "from_height": from_height,
+        "count": len(blocks)
+    }
+
+@api_router.post("/p2p/broadcast/block")
+async def receive_broadcast_block(data: BroadcastBlock):
+    """Receive a broadcasted block from a peer"""
+    block = data.block
+    
+    # Check if we already have this block
+    existing = await db.blocks.find_one({"index": block['index']})
+    if existing:
+        return {"status": "already_exists"}
+    
+    # Validate block
+    if not await validate_block(block):
+        return {"status": "invalid_block"}
+    
+    # Add block
+    await db.blocks.insert_one(block)
+    
+    # Confirm transactions in block
+    tx_ids = [tx['id'] for tx in block.get('transactions', [])]
+    if tx_ids:
+        await db.transactions.update_many(
+            {"id": {"$in": tx_ids}},
+            {"$set": {"confirmed": True, "block_index": block['index']}}
+        )
+    
+    logging.info(f"Received block #{block['index']} from peer {data.sender_node_id}")
+    
+    # Re-broadcast to other peers
+    asyncio.create_task(broadcast_to_peers(
+        "broadcast/block",
+        {"block": block, "sender_node_id": NODE_ID},
+        exclude_node=data.sender_node_id
+    ))
+    
+    return {"status": "accepted", "block_index": block['index']}
+
+@api_router.post("/p2p/broadcast/transaction")
+async def receive_broadcast_transaction(data: BroadcastTransaction):
+    """Receive a broadcasted transaction from a peer"""
+    tx = data.transaction
+    
+    # Check if we already have this transaction
+    existing = await db.transactions.find_one({"id": tx['id']})
+    if existing:
+        return {"status": "already_exists"}
+    
+    # Add transaction
+    await db.transactions.insert_one(tx)
+    
+    logging.info(f"Received transaction {tx['id'][:8]}... from peer {data.sender_node_id}")
+    
+    # Re-broadcast to other peers
+    asyncio.create_task(broadcast_to_peers(
+        "broadcast/transaction",
+        {"transaction": tx, "sender_node_id": NODE_ID},
+        exclude_node=data.sender_node_id
+    ))
+    
+    return {"status": "accepted", "tx_id": tx['id']}
+
+@api_router.post("/p2p/sync")
+async def trigger_sync():
+    """Manually trigger blockchain sync with peers"""
+    synced = 0
+    for peer in list(connected_peers.values()):
+        try:
+            await sync_blockchain_from_peer(peer['url'])
+            synced += 1
+        except Exception as e:
+            logging.error(f"Sync failed with {peer['url']}: {e}")
+    
+    return {"status": "sync_complete", "peers_synced": synced}
+
+@api_router.get("/p2p/node/info")
+async def get_node_info():
+    """Get this node's information"""
+    blocks_count = await db.blocks.count_documents({})
+    pending_count = await db.transactions.count_documents({"confirmed": False})
+    
+    return {
+        "node_id": NODE_ID,
+        "node_url": NODE_URL,
+        "version": "1.0.0",
+        "blocks_height": blocks_count,
+        "pending_transactions": pending_count,
+        "connected_peers": len(connected_peers),
+        "peer_list": [{"node_id": p['node_id'], "url": p['url']} for p in connected_peers.values()]
+    }
+
 # Include the router
 app.include_router(api_router)
 
