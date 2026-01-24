@@ -666,6 +666,12 @@ async def submit_mined_block(submission: MiningSubmit):
     
     logging.info(f"Block {new_index} mined by {submission.miner_address}")
     
+    # Broadcast new block to peers
+    asyncio.create_task(broadcast_to_peers(
+        "broadcast/block",
+        {"block": new_block, "sender_node_id": NODE_ID}
+    ))
+    
     return {
         "success": True,
         "block": new_block,
