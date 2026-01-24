@@ -113,6 +113,31 @@ class NetworkStats(BaseModel):
     next_halving_block: int
     current_reward: float
 
+# P2P Models
+class PeerInfo(BaseModel):
+    node_id: str
+    url: str
+    version: str = "1.0.0"
+    blocks_height: int = 0
+
+class PeerRegister(BaseModel):
+    node_id: str
+    url: str
+    version: str = "1.0.0"
+
+class ChainSync(BaseModel):
+    blocks: List[Dict[str, Any]]
+    from_height: int
+    to_height: int
+
+class BroadcastBlock(BaseModel):
+    block: Dict[str, Any]
+    sender_node_id: str
+
+class BroadcastTransaction(BaseModel):
+    transaction: Dict[str, Any]
+    sender_node_id: str
+
 # ==================== BLOCKCHAIN LOGIC ====================
 def sha256_hash(data: str) -> str:
     """Calculate SHA256 hash"""
