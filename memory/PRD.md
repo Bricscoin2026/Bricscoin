@@ -1,97 +1,91 @@
 # BricsCoin - Product Requirements Document
 
-## Overview
-BricsCoin è una criptovaluta decentralizzata basata su SHA256 Proof-of-Work, simile a Bitcoin.
-
 ## Original Problem Statement
-Creare una blockchain simile al Bitcoin chiamata BricsCoin con:
-- Sistema PoW SHA256
-- 21,000,000 di monete massime
-- Mining aperto a tutti nel mondo
-- Mining con ASIC (Bitaxe, NerdMiner, Antminer)
+Creare una criptovaluta simile a Bitcoin chiamata "BricsCoin" con:
+- Blockchain Proof of Work (PoW) con SHA256
+- Supply massima di 21,000,000 monete
+- Halving ogni 4 anni (210,000 blocchi)
+- Rete decentralizzata P2P
+- Supporto mining ASIC (Bitaxe, NerdMiner)
+- Wallet multipiattaforma
 
-## User Choices
-- Dashboard completa con wallet, mining, transazioni, explorer
-- API pubblica + mining nel browser
-- Difficoltà dinamica come Bitcoin
-- Wallet avanzato con storico e QR code
-- Halving come Bitcoin
+## Technical Specifications
 
-## Technical Architecture
-- **Backend**: FastAPI (Python)
-- **Frontend**: React + Tailwind CSS
-- **Database**: MongoDB
-- **Mining Protocol**: Stratum v1 (per ASIC)
+### Blockchain Parameters (Bitcoin-like)
+| Parameter | Value |
+|-----------|-------|
+| Max Supply | 21,000,000 BRICS |
+| Initial Block Reward | 50 BRICS |
+| Halving Interval | 210,000 blocks (~4 years) |
+| Difficulty Adjustment | Every 2016 blocks |
+| Target Block Time | 600 seconds (10 minutes) |
+| Hash Algorithm | SHA256 |
+| Initial Difficulty | 4 leading zeros |
 
-## Core Requirements (Static)
-| Requirement | Status |
-|-------------|--------|
-| SHA256 PoW | ✅ Implementato |
-| 21M Max Supply | ✅ Implementato |
-| Halving ogni 210k blocchi | ✅ Implementato |
-| Difficoltà dinamica | ✅ Implementato |
-| Wallet ECDSA | ✅ Implementato |
-| Browser Mining | ✅ Implementato |
-| Stratum Server | ✅ Implementato |
-| P2P Network | ✅ Implementato |
+### Architecture
+```
+/app/
+├── backend/
+│   ├── server.py          # FastAPI REST API + P2P
+│   └── stratum_server.py  # Stratum mining protocol
+├── frontend/              # React web app
+├── wallet-app/            # Electron desktop wallet
+├── docs/                  # Multilingual documentation
+└── docker-compose.prod.yml
+```
 
-## What's Been Implemented (Jan 2026)
+### Server Endpoints (Hetzner: 5.161.254.163)
+- **Frontend**: http://5.161.254.163:3000
+- **API**: http://5.161.254.163:8001/api
+- **Stratum**: stratum+tcp://5.161.254.163:3333
 
-### Backend
-- [x] Blockchain core con SHA256
-- [x] Sistema wallet ECDSA (secp256k1)
-- [x] API REST completa
-- [x] Mining endpoint
-- [x] Stratum server per ASIC
-- [x] P2P peer sync
+## Implementation Status
 
-### Frontend
-- [x] Dashboard con statistiche
-- [x] Explorer blocchi/transazioni
-- [x] Wallet con QR code
-- [x] Mining interface
-- [x] Network stats
+### ✅ Completed
+- [x] Core blockchain with PoW SHA256
+- [x] FastAPI backend with full REST API
+- [x] React frontend with Matrix-style background
+- [x] Web wallet (create, send, receive)
+- [x] Stratum server for ASIC mining
+- [x] P2P network with seed node
+- [x] Desktop wallet (Electron)
+- [x] Downloads page for wallet binaries
+- [x] BricsCoin 2026 logo
+- [x] Deployed to Hetzner server
 
-### DevOps
-- [x] Dockerfile per API
-- [x] Dockerfile per Stratum
-- [x] docker-compose.prod.yml
-- [x] Setup script Hetzner
-- [x] README completo
+### 🔴 Blocked
+- [ ] GitHub repository access (account suspended)
+- [ ] Automated wallet builds via GitHub Actions
+- [ ] Mac .dmg build (needs macOS runner)
+- [ ] Windows .exe installer (needs Windows runner)
 
-## Prioritized Backlog
+### 🟡 In Progress / Pending
+- [ ] Full multilingual support
+- [ ] Import existing wallet feature
+- [ ] Real NerdMiner testing
 
-### P0 (Critical) - Done ✅
-- Mining funzionante
-- Wallet creation
-- Block explorer
+### 📋 Backlog
+- [ ] Landing page
+- [ ] Mobile apps (iOS/Android)
+- [ ] Block explorer improvements
+- [ ] Transaction fees
 
-### P1 (High) - Done ✅
-- Stratum protocol per ASIC
-- P2P network sync
-- Docker setup
+## Mining Configuration
 
-### P2 (Medium) - Future
-- [ ] SSL/HTTPS setup
-- [ ] Mining pool statistics
-- [ ] Hashrate charts
-- [ ] Mobile responsive improvements
-- [ ] Telegram bot notifications
+### For NerdMiner/Bitaxe:
+```
+Pool: stratum+tcp://5.161.254.163:3333
+User: YOUR_BRICS_ADDRESS.worker_name
+Pass: x
+```
 
-### P3 (Low) - Future
-- [ ] Multi-language support
-- [ ] Advanced block explorer
-- [ ] Mining calculator
-- [ ] Community forum
+## Changelog
+- **2026-01-24**: Matrix background, Downloads page, logo update
+- **2026-01-24**: Stratum server deployed
+- **2026-01-23**: Initial deployment to Hetzner
+- **2026-01-22**: Core blockchain implementation
 
-## Next Tasks
-1. Deploy su Hetzner server
-2. Pubblicare su GitHub (Jabo86/bricscoin)
-3. Test mining con Bitaxe reale
-4. Setup dominio personalizzato
-5. Configurare SSL certificate
-
-## GitHub Repository
-- Owner: Jabo86
-- Repo: bricscoin
-- URL: https://github.com/Jabo86/bricscoin
+## Known Issues
+1. GitHub account (Bricscoin2026) is suspended
+2. Wallet builds are manual workarounds
+3. Difficulty 4 may be too high for solo NerdMiner
