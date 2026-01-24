@@ -735,18 +735,56 @@ async def submit_mined_block(submission: MiningSubmit):
 # Wallet endpoints
 @api_router.post("/wallet/create")
 async def create_wallet(request: WalletCreate):
-    """Create a new wallet"""
+    """Create a new wallet with seed phrase"""
     wallet_data = generate_wallet()
     
     wallet = {
         "address": wallet_data['address'],
         "public_key": wallet_data['public_key'],
         "private_key": wallet_data['private_key'],
+        "seed_phrase": wallet_data['seed_phrase'],
         "name": request.name,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     return wallet
+
+@api_router.post("/wallet/import/seed")
+async def import_wallet_seed(request: WalletImportSeed):
+    """Import wallet from seed phrase (12 words)"""
+    try:
+        wallet_data = generate_wallet_from_seed(request.seed_phrase)
+        
+        wallet = {
+            "address": wallet_data['address'],
+            "public_key": wallet_data['public_key'],
+            "private_key": wallet_data['private_key'],
+            "seed_phrase": wallet_data['seed_phrase'],
+            "name": request.name,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        return wallet
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.post("/wallet/import/key")
+async def import_wallet_key(request: WalletImportPrivateKey):
+    """Import wallet from private key"""
+    try:
+        wallet_data = recover_wallet_from_private_key(request.private_key)
+        
+        wallet = {
+            "address": wallet_data['address'],
+            "public_key": wallet_data['public_key'],
+            "private_key": wallet_data['private_key'],
+            "name": request.name,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        return wallet
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @api_router.get("/wallet/{address}/balance")
 async def get_wallet_balance(address: str):
