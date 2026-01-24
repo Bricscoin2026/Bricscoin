@@ -44,6 +44,15 @@ DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
 INITIAL_DIFFICULTY = 4  # Number of leading zeros
 
+# P2P Network Configuration
+NODE_ID = os.environ.get('NODE_ID', str(uuid.uuid4())[:8])
+NODE_URL = os.environ.get('NODE_URL', '')
+SEED_NODES = os.environ.get('SEED_NODES', '').split(',') if os.environ.get('SEED_NODES') else []
+
+# Store connected peers
+connected_peers: Dict[str, Dict] = {}
+sync_lock = asyncio.Lock()
+
 # ==================== MODELS ====================
 class Transaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
