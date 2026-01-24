@@ -934,7 +934,14 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def startup_event():
     await create_genesis_block()
-    logger.info("BricsCoin node started")
+    logger.info(f"BricsCoin node started - ID: {NODE_ID}")
+    
+    # Discover and connect to seed peers
+    if SEED_NODES:
+        asyncio.create_task(discover_peers())
+    
+    # Start periodic sync task
+    asyncio.create_task(periodic_sync())
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
