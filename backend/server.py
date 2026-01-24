@@ -90,12 +90,21 @@ class MiningSubmit(BaseModel):
 class WalletCreate(BaseModel):
     name: Optional[str] = "My Wallet"
 
+class WalletImportSeed(BaseModel):
+    seed_phrase: str
+    name: Optional[str] = "Imported Wallet"
+
+class WalletImportPrivateKey(BaseModel):
+    private_key: str
+    name: Optional[str] = "Imported Wallet"
+
 class WalletResponse(BaseModel):
     address: str
     public_key: str
     private_key: str
     name: str
     created_at: str
+    seed_phrase: Optional[str] = None
 
 class TransactionRequest(BaseModel):
     sender_private_key: str
