@@ -35,7 +35,7 @@ import {
   createTransaction,
   getAddressTransactions 
 } from "../lib/api";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 
 function WalletCard({ wallet, onRefresh, onSelect, isSelected }) {
   const [balance, setBalance] = useState(null);
