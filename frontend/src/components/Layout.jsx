@@ -7,24 +7,35 @@ import {
   Network,
   Menu,
   X,
-  Coins,
-  Download
+  Download,
+  Globe,
+  ChevronDown
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import HashStreamBackground from "./HashStreamBackground";
-
-const navItems = [
-  { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/explorer", icon: Search, label: "Explorer" },
-  { to: "/wallet", icon: Wallet, label: "Wallet" },
-  { to: "/mining", icon: Pickaxe, label: "Mining" },
-  { to: "/network", icon: Network, label: "Network" },
-  { to: "/downloads", icon: Download, label: "Downloads" },
-];
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t, language, setLanguage, availableLanguages } = useLanguage();
+
+  const navItems = [
+    { to: "/", icon: LayoutDashboard, labelKey: "dashboard" },
+    { to: "/explorer", icon: Search, labelKey: "explorer" },
+    { to: "/wallet", icon: Wallet, labelKey: "wallet" },
+    { to: "/mining", icon: Pickaxe, labelKey: "mining" },
+    { to: "/network", icon: Network, labelKey: "network" },
+    { to: "/downloads", icon: Download, labelKey: "downloads" },
+  ];
+
+  const currentLang = availableLanguages.find(l => l.code === language);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -39,7 +50,7 @@ export default function Layout() {
               <img 
                 src="/bricscoin-logo.png" 
                 alt="BricsCoin" 
-                className="w-10 h-10 rounded-sm"
+                className="w-10 h-10 rounded-full object-cover"
               />
               <div>
                 <h1 className="font-heading font-bold text-lg gold-text">BRICSCOIN</h1>
@@ -53,7 +64,7 @@ export default function Layout() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  data-testid={`nav-${item.label.toLowerCase()}`}
+                  data-testid={`nav-${item.labelKey}`}
                   className={({ isActive }) =>
                     `flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium transition-colors ${
                       isActive
@@ -63,21 +74,48 @@ export default function Layout() {
                   }
                 >
                   <item.icon className="w-4 h-4" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </NavLink>
               ))}
             </nav>
 
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              data-testid="mobile-menu-button"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+            {/* Language Selector & Mobile Menu */}
+            <div className="flex items-center gap-2">
+              {/* Language Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2" data-testid="language-selector">
+                    <Globe className="w-4 h-4" />
+                    <span className="hidden sm:inline">{currentLang?.flag}</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-card border-white/10">
+                  {availableLanguages.map((lang) => (
+                    <DropdownMenuItem
+                      key={lang.code}
+                      onClick={() => setLanguage(lang.code)}
+                      className={`cursor-pointer ${language === lang.code ? 'bg-primary/20' : ''}`}
+                      data-testid={`lang-${lang.code}`}
+                    >
+                      <span className="mr-2">{lang.flag}</span>
+                      {lang.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Mobile menu button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                data-testid="mobile-menu-button"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -89,7 +127,7 @@ export default function Layout() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMobileMenuOpen(false)}
-                data-testid={`mobile-nav-${item.label.toLowerCase()}`}
+                data-testid={`mobile-nav-${item.labelKey}`}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-6 py-4 text-sm font-medium border-b border-white/5 ${
                     isActive
@@ -99,7 +137,7 @@ export default function Layout() {
                 }
               >
                 <item.icon className="w-5 h-5" />
-                {item.label}
+                {t(item.labelKey)}
               </NavLink>
             ))}
           </nav>
