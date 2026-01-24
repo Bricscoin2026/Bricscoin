@@ -1,0 +1,99 @@
+# BricsCoin - Docker Compose for Hetzner Server
+# Full production setup with Stratum mining support
+
+version: '3.8'
+
+services:
+  # MongoDB database
+  mongo:
+    image: mongo:7
+    container_name: bricscoin-db
+    volumes:
+      - bricscoin-data:/data/db
+    restart: always
+    networks:
+      - bricscoin-network
+
+  # BricsCoin API Server (REST API)
+  bricscoin-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bricscoin-api
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - DB_NAME=bricscoin
+      - NODE_ID=${NODE_ID:-mainnet}
+      - NODE_URL=${NODE_URL:-}
+      - SEED_NODES=${SEED_NODES:-}
+      - CORS_ORIGINS=*
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - bricscoin-network
+
+  # BricsCoin Stratum Server (for ASIC miners)
+  bricscoin-stratum:
+    build:
+      context: .
+      dockerfile: Dockerfile.stratum
+    container_name: bricscoin-stratum
+    ports:
+      - "3333:3333"   # Standard Stratum port
+      - "4444:4444"   # Alternative port
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - DB_NAME=bricscoin
+      - STRATUM_PORT=3333
+      - STRATUM_HOST=0.0.0.0
+    depends_on:
+      - mongo
+      - bricscoin-api
+    restart: always
+    networks:
+      - bricscoin-network
+
+  # BricsCoin Frontend (React Web UI)
+  bricscoin-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    container_name: bricscoin-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL:-http://localhost:8001}
+    depends_on:
+      - bricscoin-api
+    restart: always
+    networks:
+      - bricscoin-network
+
+  # Nginx Reverse Proxy (optional, for SSL)
+  nginx:
+    image: nginx:alpine
+    container_name: bricscoin-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - bricscoin-api
+      - bricscoin-frontend
+    restart: always
+    networks:
+      - bricscoin-network
+    profiles:
+      - with-nginx
+
+volumes:
+  bricscoin-data:
+
+networks:
+  bricscoin-network:
+    driver: bridge
