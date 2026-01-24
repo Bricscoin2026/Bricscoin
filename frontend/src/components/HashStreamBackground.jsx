@@ -1,66 +1,92 @@
-import { useEffect, useState, useMemo } from "react";
-
-const CHARS = "0123456789abcdef";
-
-function generateHexChar() {
-  return CHARS[Math.floor(Math.random() * CHARS.length)];
-}
+import { useEffect, useRef } from "react";
 
 export default function HashStreamBackground() {
-  const [columns, setColumns] = useState([]);
-
-  const columnCount = useMemo(() => {
-    if (typeof window !== "undefined") {
-      return Math.floor(window.innerWidth / 40);
-    }
-    return 30;
-  }, []);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    const cols = [];
-    for (let i = 0; i < columnCount; i++) {
-      const chars = [];
-      const charCount = Math.floor(Math.random() * 20) + 10;
-      for (let j = 0; j < charCount; j++) {
-        chars.push(generateHexChar());
-      }
-      cols.push({
-        id: i,
-        chars,
-        left: (i / columnCount) * 100,
-        delay: Math.random() * 8,
-        duration: Math.random() * 4 + 6,
-      });
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    
+    // Set canvas size
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Matrix characters (hex + some special chars)
+    const chars = "0123456789ABCDEFabcdef₿ΣΔΩ";
+    const charArray = chars.split("");
+    
+    const fontSize = 14;
+    const columns = Math.floor(canvas.width / fontSize);
+    
+    // Array of drops - one per column
+    const drops = [];
+    for (let i = 0; i < columns; i++) {
+      drops[i] = Math.random() * -100;
     }
-    setColumns(cols);
-  }, [columnCount]);
+
+    // Draw function
+    const draw = () => {
+      // Semi-transparent black to create trail effect
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Set font
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        // Random character
+        const char = charArray[Math.floor(Math.random() * charArray.length)];
+        
+        // Calculate x position
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // Gradient effect - brighter at the head
+        const gradient = ctx.createLinearGradient(x, y - fontSize * 10, x, y);
+        gradient.addColorStop(0, "rgba(0, 255, 0, 0)");
+        gradient.addColorStop(0.8, "rgba(0, 180, 0, 0.3)");
+        gradient.addColorStop(1, "rgba(0, 255, 0, 0.8)");
+        
+        // Leading character is brighter (gold color for BricsCoin)
+        if (Math.random() > 0.98) {
+          ctx.fillStyle = "#FFD700"; // Gold
+        } else {
+          ctx.fillStyle = `rgba(0, ${150 + Math.random() * 105}, 0, ${0.3 + Math.random() * 0.5})`;
+        }
+        
+        ctx.fillText(char, x, y);
+
+        // Reset drop when it goes below screen
+        if (y > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        
+        // Move drop down
+        drops[i]++;
+      }
+    };
+
+    // Animation loop
+    const interval = setInterval(draw, 50);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
 
   return (
-    <div className="hash-stream-container" data-testid="hash-background">
-      {columns.map((col) => (
-        <div
-          key={col.id}
-          className="hash-column"
-          style={{
-            left: `${col.left}%`,
-            animationDelay: `${col.delay}s`,
-            animationDuration: `${col.duration}s`,
-          }}
-        >
-          {col.chars.map((char, idx) => (
-            <span
-              key={idx}
-              className="hash-char"
-              style={{
-                animationDelay: `${col.delay + idx * 0.1}s`,
-                animationDuration: `${col.duration}s`,
-              }}
-            >
-              {char}
-            </span>
-          ))}
-        </div>
-      ))}
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0"
+      style={{ opacity: 0.4 }}
+      data-testid="matrix-background"
+    />
   );
 }
