@@ -181,16 +181,62 @@ export default function Network() {
           <h1 className="text-3xl font-heading font-bold">Network</h1>
           <p className="text-muted-foreground">BricsCoin blockchain statistics</p>
         </div>
-        <Button
-          variant="outline"
-          className="border-white/20"
-          onClick={handleRefresh}
-          disabled={refreshing}
-          data-testid="refresh-network-btn"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="border-white/20"
+            onClick={handleSync}
+            data-testid="sync-network-btn"
+          >
+            <Link className="w-4 h-4 mr-2" />
+            Sync
+          </Button>
+          <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-white/20" data-testid="connect-peer-btn">
+                <Globe className="w-4 h-4 mr-2" />
+                Connect Peer
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border-white/10" data-testid="connect-peer-dialog">
+              <DialogHeader>
+                <DialogTitle className="font-heading">Connect to Peer Node</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                <Label>Peer Node URL</Label>
+                <Input
+                  placeholder="http://peer-node:8001"
+                  value={peerUrl}
+                  onChange={(e) => setPeerUrl(e.target.value)}
+                  className="font-mono bg-background border-white/20"
+                  data-testid="peer-url-input"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Enter the URL of another BricsCoin node to connect and sync
+                </p>
+              </div>
+              <DialogFooter>
+                <Button
+                  onClick={handleConnectPeer}
+                  className="gold-button rounded-sm"
+                  data-testid="confirm-connect-peer-btn"
+                >
+                  Connect
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button
+            variant="outline"
+            className="border-white/20"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            data-testid="refresh-network-btn"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats Grid */}
