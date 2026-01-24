@@ -53,3 +53,7 @@ wallet-app/dist/BricsCoin
 Wallet-1.0.0-arm64.AppImage
 wallet-app/dist/win-arm64-unpacked/BricsCoin
 Wallet.exe
+-e 
+# Environment files
+*.env
+*.env.*
