@@ -1,8 +1,28 @@
 # 🪙 BricsCoin - Blockchain Decentralizzata SHA256
 
 [![GitHub](https://img.shields.io/badge/GitHub-Bricscoin2026-blue)](https://github.com/Bricscoin2026/Bricscoin)
+[![Download Wallet](https://img.shields.io/badge/Download-Wallet-gold)](https://github.com/Bricscoin2026/Bricscoin/releases)
 
 **BricsCoin è una criptovaluta DECENTRALIZZATA.** Chiunque può eseguire un nodo e partecipare alla rete!
+
+## 📥 Download Wallet
+
+Scarica il wallet per il tuo sistema operativo:
+
+| Piattaforma | Download | Tipo |
+|-------------|----------|------|
+| **Windows** | [BricsCoin-Wallet-Setup.exe](https://github.com/Bricscoin2026/Bricscoin/releases/latest) | Installer |
+| **Windows** | [BricsCoin-Wallet-Portable.exe](https://github.com/Bricscoin2026/Bricscoin/releases/latest) | Portable |
+| **macOS** | [BricsCoin-Wallet.dmg](https://github.com/Bricscoin2026/Bricscoin/releases/latest) | DMG |
+| **Linux** | [BricsCoin-Wallet.AppImage](https://github.com/Bricscoin2026/Bricscoin/releases/latest) | AppImage |
+| **Linux** | [BricsCoin-Wallet.deb](https://github.com/Bricscoin2026/Bricscoin/releases/latest) | Debian/Ubuntu |
+| **Android/iOS** | [Web Wallet](http://5.161.254.163:3000/wallet) | PWA (installa da browser) |
+
+### Installazione Mobile (Android/iOS)
+
+1. Apri **http://5.161.254.163:3000/wallet** nel browser
+2. Clicca "Aggiungi alla schermata Home" / "Install App"
+3. Usa il wallet come un'app nativa!
 
 ## 🌐 Come Funziona la Decentralizzazione
 
