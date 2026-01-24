@@ -140,7 +140,7 @@ class StratumProtocol(asyncio.Protocol):
         self.authorized = False
         self.subscribed = False
         self.extranonce1 = None
-        self.difficulty = 1
+        self.difficulty = 0.001  # Very low difficulty for NerdMiner/small devices
         
     def connection_made(self, transport):
         self.transport = transport
