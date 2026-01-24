@@ -8,14 +8,28 @@ import {
   Activity,
   Server,
   Shield,
-  RefreshCw
+  RefreshCw,
+  Globe,
+  Link,
+  Users
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
 import { Skeleton } from "../components/ui/skeleton";
-import { getNetworkStats, getBlocks } from "../lib/api";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "../components/ui/dialog";
+import { getNetworkStats, getBlocks, getNodeInfo, getPeers, registerPeer, triggerSync } from "../lib/api";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { 
   LineChart, 
   Line, 
