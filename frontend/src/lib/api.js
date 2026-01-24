@@ -13,6 +13,13 @@ const api = axios.create({
 // Network
 export const getNetworkStats = () => api.get("/network/stats");
 
+// P2P
+export const getNodeInfo = () => api.get("/p2p/node/info");
+export const getPeers = () => api.get("/p2p/peers");
+export const registerPeer = (data) => api.post("/p2p/register", data);
+export const triggerSync = () => api.post("/p2p/sync");
+export const getChainInfo = () => api.get("/p2p/chain/info");
+
 // Blocks
 export const getBlocks = (limit = 20, offset = 0) => 
   api.get(`/blocks?limit=${limit}&offset=${offset}`);
