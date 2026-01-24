@@ -63,8 +63,28 @@ def get_mining_reward(block_height: int) -> float:
     return INITIAL_REWARD / (2 ** halvings)
 
 def check_difficulty(hash_value: str, difficulty: int) -> bool:
-    """Check if hash meets difficulty requirement"""
+    """Check if hash meets difficulty requirement (integer difficulty = number of leading zeros)"""
     return hash_value.startswith('0' * difficulty)
+
+def check_difficulty_float(hash_value: str, difficulty: float) -> bool:
+    """Check if hash meets float difficulty (for share validation)
+    
+    For very low difficulties (< 1), we use a target-based system.
+    Difficulty 1 = hash must be < 00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    Difficulty 0.001 = hash must be < much higher target (easier)
+    """
+    if difficulty >= 1:
+        # For difficulty >= 1, use leading zeros method
+        return hash_value.startswith('0' * int(difficulty))
+    
+    # For fractional difficulty, convert to target
+    # Bitcoin-like: target = max_target / difficulty
+    # We use a simplified version
+    max_target = int('f' * 64, 16)  # Maximum possible hash value
+    target = int(max_target / (difficulty * 65535))  # Scale factor for low difficulties
+    
+    hash_int = int(hash_value, 16)
+    return hash_int < target
 
 async def get_current_difficulty() -> int:
     """Get current network difficulty"""
