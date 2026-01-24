@@ -236,6 +236,149 @@ async def create_genesis_block():
     await db.blocks.insert_one(genesis_block)
     logging.info("Genesis block created")
 
+# ==================== P2P NETWORK FUNCTIONS ====================
+async def register_with_peer(peer_url: str) -> bool:
+    """Register this node with a peer"""
+    if not NODE_URL:
+        return False
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            blocks_count = await db.blocks.count_documents({})
+            response = await client.post(
+                f"{peer_url}/api/p2p/register",
+                json={
+                    "node_id": NODE_ID,
+                    "url": NODE_URL,
+                    "version": "1.0.0"
+                }
+            )
+            if response.status_code == 200:
+                peer_data = response.json()
+                connected_peers[peer_data['node_id']] = {
+                    "url": peer_url,
+                    "node_id": peer_data['node_id'],
+                    "version": peer_data.get('version', '1.0.0'),
+                    "last_seen": datetime.now(timezone.utc).isoformat()
+                }
+                logging.info(f"Registered with peer: {peer_url}")
+                return True
+    except Exception as e:
+        logging.error(f"Failed to register with peer {peer_url}: {e}")
+    return False
+
+async def broadcast_to_peers(endpoint: str, data: dict, exclude_node: str = None):
+    """Broadcast data to all connected peers"""
+    tasks = []
+    for node_id, peer in connected_peers.items():
+        if node_id == exclude_node:
+            continue
+        tasks.append(send_to_peer(peer['url'], endpoint, data))
+    
+    if tasks:
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+async def send_to_peer(peer_url: str, endpoint: str, data: dict) -> bool:
+    """Send data to a specific peer"""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(f"{peer_url}/api/p2p/{endpoint}", json=data)
+            return response.status_code == 200
+    except Exception as e:
+        logging.error(f"Failed to send to peer {peer_url}: {e}")
+        return False
+
+async def sync_blockchain_from_peer(peer_url: str):
+    """Sync blockchain from a peer if they have a longer chain"""
+    async with sync_lock:
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Get peer's chain info
+                response = await client.get(f"{peer_url}/api/p2p/chain/info")
+                if response.status_code != 200:
+                    return
+                
+                peer_info = response.json()
+                our_height = await db.blocks.count_documents({})
+                
+                if peer_info['height'] <= our_height:
+                    return  # Our chain is longer or equal
+                
+                # Get blocks we don't have
+                response = await client.get(
+                    f"{peer_url}/api/p2p/chain/blocks",
+                    params={"from_height": our_height, "limit": 100}
+                )
+                
+                if response.status_code != 200:
+                    return
+                
+                blocks_data = response.json()
+                
+                # Validate and add blocks
+                for block in blocks_data['blocks']:
+                    if await validate_block(block):
+                        # Check if block already exists
+                        existing = await db.blocks.find_one({"index": block['index']})
+                        if not existing:
+                            await db.blocks.insert_one(block)
+                            logging.info(f"Synced block #{block['index']} from peer")
+                
+                logging.info(f"Synced {len(blocks_data['blocks'])} blocks from {peer_url}")
+                
+        except Exception as e:
+            logging.error(f"Failed to sync from peer {peer_url}: {e}")
+
+async def validate_block(block: dict) -> bool:
+    """Validate a block"""
+    try:
+        # Verify hash
+        calculated_hash = calculate_block_hash(
+            block['index'],
+            block['timestamp'],
+            block['transactions'],
+            block.get('proof', block.get('nonce', 0)),
+            block['previous_hash'],
+            block.get('nonce', 0)
+        )
+        
+        if block['hash'] != calculated_hash:
+            # Try alternative calculation for submitted blocks
+            block_data = f"{block['index']}{block['timestamp']}{json.dumps(block['transactions'], sort_keys=True)}{block['previous_hash']}"
+            full_data = block_data + str(block.get('nonce', 0))
+            alt_hash = sha256_hash(full_data)
+            if block['hash'] != alt_hash:
+                return False
+        
+        # Verify difficulty
+        if not check_difficulty(block['hash'], block.get('difficulty', INITIAL_DIFFICULTY)):
+            return False
+        
+        # Verify previous hash (except genesis)
+        if block['index'] > 0:
+            prev_block = await db.blocks.find_one({"index": block['index'] - 1}, {"_id": 0})
+            if prev_block and prev_block['hash'] != block['previous_hash']:
+                return False
+        
+        return True
+    except Exception as e:
+        logging.error(f"Block validation error: {e}")
+        return False
+
+async def discover_peers():
+    """Discover peers from seed nodes"""
+    for seed_url in SEED_NODES:
+        if seed_url and seed_url.strip():
+            await register_with_peer(seed_url.strip())
+            # Also sync blockchain from seed
+            await sync_blockchain_from_peer(seed_url.strip())
+
+async def periodic_sync():
+    """Periodically sync with peers"""
+    while True:
+        await asyncio.sleep(60)  # Sync every minute
+        for peer in list(connected_peers.values()):
+            await sync_blockchain_from_peer(peer['url'])
+
 # ==================== WALLET FUNCTIONS ====================
 def generate_wallet():
     """Generate new wallet with ECDSA keys"""
