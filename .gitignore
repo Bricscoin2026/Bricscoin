@@ -47,3 +47,4 @@ coverage/
 *.bak
 *.tmp
 frontend/node_modules/.cache/default-development/3.pack
+wallet-app/node_modules/electron/dist/electron
