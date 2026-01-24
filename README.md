@@ -1,230 +1,207 @@
 # 🪙 BricsCoin - Decentralized SHA256 Blockchain
 
-A Bitcoin-like cryptocurrency with SHA256 Proof-of-Work consensus. Anyone in the world can run a node and mine BRICS coins!
+[![GitHub](https://img.shields.io/badge/GitHub-Jabo86-blue)](https://github.com/Jabo86)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+A Bitcoin-like cryptocurrency with SHA256 Proof-of-Work. **Mine with ASIC hardware (Bitaxe, NerdMiner, Antminer) or browser!**
 
 ## 🌟 Features
 
-- **SHA256 Proof-of-Work** - Same algorithm as Bitcoin
-- **21 Million Max Supply** - Deflationary by design
-- **Halving Every 210,000 Blocks** - Decreasing rewards like Bitcoin
-- **Dynamic Difficulty** - Adjusts every 2,016 blocks
+- **SHA256 Proof-of-Work** - Compatible with Bitcoin ASIC miners
+- **Stratum Protocol** - Works with Bitaxe, NerdMiner, Antminer, etc.
+- **21 Million Max Supply** - Deflationary like Bitcoin
+- **Halving Every 210,000 Blocks** - Decreasing rewards
+- **Browser Mining** - Mine directly from web interface
 - **P2P Network** - Decentralized node synchronization
-- **Browser Mining** - Mine directly from the web interface
-- **ECDSA Signatures** - Secure transactions with secp256k1
 
-## 🚀 Quick Start
+## ⛏️ Mining with ASIC Hardware
 
-### Option 1: Run Your Own Node (Recommended)
+### Supported Miners
+- ✅ **Bitaxe** (all versions)
+- ✅ **NerdMiner**
+- ✅ **Antminer** (S9, S19, etc.)
+- ✅ **Whatsminer**
+- ✅ **Any SHA256 ASIC miner**
 
+### Stratum Connection
+```
+Pool URL: stratum+tcp://YOUR_SERVER_IP:3333
+Worker: YOUR_BRICS_ADDRESS.worker1
+Password: x
+```
+
+### Bitaxe Configuration Example
+```
+Stratum URL: YOUR_SERVER_IP
+Port: 3333
+Username: BRICSa8c685d6331a60690cda1f585f3e459eead81...
+Password: x
+```
+
+## 🚀 Quick Start (Hetzner/VPS)
+
+### 1. Server Requirements
+- Ubuntu 22.04 LTS
+- 2+ CPU cores
+- 4GB+ RAM
+- Docker & Docker Compose
+
+### 2. Install Docker
 ```bash
-# Clone or download the project
-git clone <your-repo-url>
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+```
+
+### 3. Clone & Start
+```bash
+git clone https://github.com/Jabo86/bricscoin.git
 cd bricscoin
 
-# Start your node
-docker-compose up -d
-
-# Your node is now running at http://localhost:8001
+# Start all services
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Option 2: Run with Full Frontend
-
+### 4. Verify Services
 ```bash
-# Start node + web interface
-docker-compose --profile with-frontend up -d
+# Check all containers are running
+docker-compose -f docker-compose.prod.yml ps
 
-# Web UI: http://localhost:3000
-# API: http://localhost:8001
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
 ```
 
-## 🌐 Join the Network
-
-To participate in the BricsCoin network, configure your node to connect to seed nodes:
-
+### 5. Configure Firewall
 ```bash
-# Set environment variables before starting
-export NODE_URL=http://your-public-ip:8001
-export SEED_NODES=https://bricscoin-sha256.preview.emergentagent.com
-
-docker-compose up -d
+# Open required ports
+sudo ufw allow 80/tcp    # Web UI
+sudo ufw allow 443/tcp   # HTTPS
+sudo ufw allow 3333/tcp  # Stratum mining
+sudo ufw allow 8001/tcp  # API
 ```
 
-## ⛏️ Mining
+## 🌐 Access Points
 
-### Browser Mining
-1. Open the web interface
-2. Go to "Mining" page
-3. Enter your wallet address
-4. Click "Start Mining"
+| Service | Port | URL |
+|---------|------|-----|
+| Web UI | 3000 | http://YOUR_IP:3000 |
+| API | 8001 | http://YOUR_IP:8001/api |
+| Stratum | 3333 | stratum+tcp://YOUR_IP:3333 |
 
-### API Mining (More Efficient)
+## 📊 API Endpoints
+
+### Mining
 ```bash
-# Get mining template
-curl http://localhost:8001/api/mining/template
+# Get mining template (for custom miners)
+curl http://YOUR_IP:8001/api/mining/template
 
 # Submit mined block
-curl -X POST http://localhost:8001/api/mining/submit \
+curl -X POST http://YOUR_IP:8001/api/mining/submit \
   -H "Content-Type: application/json" \
-  -d '{
-    "block_data": "<block_data_from_template>",
-    "nonce": 12345,
-    "hash": "<your_computed_hash>",
-    "miner_address": "BRICSyouraddress..."
-  }'
+  -d '{"block_data":"...", "nonce":12345, "hash":"0000...", "miner_address":"BRICS..."}'
 ```
 
-### Custom Miner Script (Python Example)
-```python
-import hashlib
-import requests
-
-API_URL = "http://localhost:8001/api"
-MINER_ADDRESS = "BRICSyouraddress..."
-
-def sha256(data):
-    return hashlib.sha256(data.encode()).hexdigest()
-
-def mine():
-    # Get template
-    template = requests.get(f"{API_URL}/mining/template").json()
-    block_data = template['block_data']
-    difficulty = template['difficulty']
-    target = '0' * difficulty
-    
-    nonce = 0
-    while True:
-        test_hash = sha256(block_data + str(nonce))
-        if test_hash.startswith(target):
-            print(f"Found! Nonce: {nonce}, Hash: {test_hash}")
-            
-            # Submit block
-            result = requests.post(f"{API_URL}/mining/submit", json={
-                "block_data": block_data,
-                "nonce": nonce,
-                "hash": test_hash,
-                "miner_address": MINER_ADDRESS
-            })
-            print(result.json())
-            break
-        nonce += 1
-        if nonce % 100000 == 0:
-            print(f"Tried {nonce} hashes...")
-
-if __name__ == "__main__":
-    mine()
-```
-
-## 📡 P2P Network API
-
-### Register Your Node
+### Wallet
 ```bash
-curl -X POST http://seed-node:8001/api/p2p/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "node_id": "mynode123",
-    "url": "http://my-public-ip:8001",
-    "version": "1.0.0"
-  }'
+# Create wallet
+curl -X POST http://YOUR_IP:8001/api/wallet/create
+
+# Check balance
+curl http://YOUR_IP:8001/api/wallet/BRICS.../balance
 ```
 
-### Get Connected Peers
+### Network
 ```bash
-curl http://localhost:8001/api/p2p/peers
+# Network stats
+curl http://YOUR_IP:8001/api/network/stats
+
+# Node info
+curl http://YOUR_IP:8001/api/p2p/node/info
 ```
 
-### Get Node Info
-```bash
-curl http://localhost:8001/api/p2p/node/info
+## 🔧 Configuration
+
+### Environment Variables
+Create `.env` file in project root:
+
+```env
+# Node Configuration
+NODE_ID=mainnet-node-1
+NODE_URL=http://your-domain.com:8001
+SEED_NODES=
+
+# Database
+MONGO_URL=mongodb://mongo:27017
+DB_NAME=bricscoin
+
+# Stratum
+STRATUM_PORT=3333
+STRATUM_HOST=0.0.0.0
+
+# Frontend
+REACT_APP_BACKEND_URL=http://your-domain.com:8001
 ```
 
-### Sync Blockchain
-```bash
-curl -X POST http://localhost:8001/api/p2p/sync
-```
-
-## 💼 Wallet Operations
-
-### Create Wallet
-```bash
-curl -X POST http://localhost:8001/api/wallet/create \
-  -H "Content-Type: application/json" \
-  -d '{"name": "My Wallet"}'
-```
-
-### Check Balance
-```bash
-curl http://localhost:8001/api/wallet/BRICSyouraddress.../balance
-```
-
-### Send Transaction
-```bash
-curl -X POST http://localhost:8001/api/transactions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sender_private_key": "your_private_key_hex",
-    "sender_address": "BRICSsenderaddress...",
-    "recipient_address": "BRICSrecipientaddress...",
-    "amount": 10.0
-  }'
-```
-
-## 📊 Technical Specifications
+## 📈 Technical Specifications
 
 | Parameter | Value |
 |-----------|-------|
-| Algorithm | SHA256 |
+| Algorithm | SHA256 (ASIC compatible) |
 | Max Supply | 21,000,000 BRICS |
-| Block Time Target | 10 minutes |
+| Block Time | ~10 minutes |
 | Initial Reward | 50 BRICS |
-| Halving Interval | 210,000 blocks |
+| Halving | Every 210,000 blocks |
 | Difficulty Adjustment | Every 2,016 blocks |
-| Signature | ECDSA (secp256k1) |
+| Signature | ECDSA secp256k1 |
 
-## 🛠️ Environment Variables
+## 🛠️ Development
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MONGO_URL` | MongoDB connection string | `mongodb://mongo:27017` |
-| `DB_NAME` | Database name | `bricscoin` |
-| `NODE_ID` | Unique node identifier | Auto-generated |
-| `NODE_URL` | Public URL of your node | Empty |
-| `SEED_NODES` | Comma-separated seed node URLs | Main network |
-| `CORS_ORIGINS` | Allowed CORS origins | `*` |
+### Local Development
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+python server.py
 
-## 🔗 API Endpoints
+# Stratum Server
+python stratum_server.py
 
-### Network
-- `GET /api/network/stats` - Network statistics
+# Frontend
+cd frontend
+yarn install
+yarn start
+```
 
-### Blocks
-- `GET /api/blocks` - List blocks
-- `GET /api/blocks/{index}` - Get block by height
-- `GET /api/blocks/hash/{hash}` - Get block by hash
+### Run Tests
+```bash
+# API tests
+curl http://localhost:8001/api/network/stats
 
-### Transactions
-- `GET /api/transactions` - List transactions
-- `POST /api/transactions` - Create transaction
-- `GET /api/transactions/{id}` - Get transaction
+# Stratum test (using netcat)
+echo '{"id":1,"method":"mining.subscribe","params":[]}' | nc localhost 3333
+```
 
-### Mining
-- `GET /api/mining/template` - Get mining template
-- `POST /api/mining/submit` - Submit mined block
+## 🤝 Contributing
 
-### Wallet
-- `POST /api/wallet/create` - Create wallet
-- `GET /api/wallet/{address}/balance` - Get balance
-- `GET /api/wallet/{address}/qr` - Get QR code
-
-### P2P
-- `POST /api/p2p/register` - Register peer
-- `GET /api/p2p/peers` - List peers
-- `GET /api/p2p/node/info` - Node info
-- `POST /api/p2p/sync` - Trigger sync
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
+5. Open Pull Request
 
 ## 📜 License
 
-MIT License - Feel free to use, modify, and distribute!
+MIT License - See [LICENSE](LICENSE) file
 
 ---
 
-**Happy Mining! ⛏️🪙**
+## 🙋 Support
+
+- **GitHub Issues**: [Report bugs](https://github.com/Jabo86/bricscoin/issues)
+- **Telegram**: Coming soon
+- **Discord**: Coming soon
+
+---
+
+**Made with ❤️ by [Jabo86](https://github.com/Jabo86)**
+
+⛏️ **Happy Mining!** 🪙
