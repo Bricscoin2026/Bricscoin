@@ -53,6 +53,12 @@ export const submitMinedBlock = (data) => api.post("/mining/submit", data);
 export const createWallet = (name = "My Wallet") => 
   api.post("/wallet/create", { name });
 
+export const importWalletSeed = (seed_phrase, name = "Imported Wallet") =>
+  api.post("/wallet/import/seed", { seed_phrase, name });
+
+export const importWalletKey = (private_key, name = "Imported Wallet") =>
+  api.post("/wallet/import/key", { private_key, name });
+
 export const getWalletBalance = (address) => 
   api.get(`/wallet/${address}/balance`);
 
