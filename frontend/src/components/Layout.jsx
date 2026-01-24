@@ -7,7 +7,8 @@ import {
   Network,
   Menu,
   X,
-  Coins
+  Coins,
+  Download
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -19,6 +20,7 @@ const navItems = [
   { to: "/wallet", icon: Wallet, label: "Wallet" },
   { to: "/mining", icon: Pickaxe, label: "Mining" },
   { to: "/network", icon: Network, label: "Network" },
+  { to: "/downloads", icon: Download, label: "Downloads" },
 ];
 
 export default function Layout() {

@@ -8,6 +8,7 @@ import Wallet from "./pages/Wallet";
 import Mining from "./pages/Mining";
 import Network from "./pages/Network";
 import TransactionDetail from "./pages/TransactionDetail";
+import Downloads from "./pages/Downloads";
 import "./App.css";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="wallet" element={<Wallet />} />
             <Route path="mining" element={<Mining />} />
             <Route path="network" element={<Network />} />
+            <Route path="downloads" element={<Downloads />} />
           </Route>
         </Routes>
       </BrowserRouter>
