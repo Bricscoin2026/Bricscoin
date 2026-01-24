@@ -170,9 +170,17 @@ class StratumProtocol(asyncio.Protocol):
         
         while b'\n' in self.buffer:
             line, self.buffer = self.buffer.split(b'\n', 1)
+            if not line or line.strip() == b'':
+                continue
             try:
-                message = json.loads(line.decode('utf-8'))
-                asyncio.create_task(self.handle_message(message))
+                decoded = line.decode('utf-8').strip()
+                if not decoded:
+                    continue
+                message = json.loads(decoded)
+                if isinstance(message, dict):
+                    asyncio.create_task(self.handle_message(message))
+                else:
+                    logger.warning(f"Invalid message type: {type(message)}")
             except json.JSONDecodeError as e:
                 logger.error(f"JSON decode error: {e}")
     
