@@ -422,18 +422,18 @@ class StratumProtocol(asyncio.Protocol):
             
         job = current_job
         
-        # mining.notify params:
+        # mining.notify params (Bitcoin Stratum format):
         # job_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, clean_jobs
         params = [
-            job['job_id'],
-            job['prevhash'],
-            job['coinbase'],  # coinb1
-            "",  # coinb2
-            [],  # merkle_branch (simplified)
-            job['version'],
-            job['nbits'],
-            job['ntime'],
-            job['clean_jobs']
+            job['job_id'],           # Job ID
+            job['prevhash'],         # Previous block hash (64 hex chars)
+            job.get('coinb1', job['coinbase']),  # Coinbase part 1
+            job.get('coinb2', ''),   # Coinbase part 2
+            [],                      # Merkle branches (empty for single tx)
+            job['version'],          # Block version
+            job['nbits'],            # Difficulty target bits
+            job['ntime'],            # Current timestamp
+            job['clean_jobs']        # Clean jobs flag
         ]
         
         self.send_notification("mining.notify", params)
