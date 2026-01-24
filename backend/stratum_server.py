@@ -125,25 +125,54 @@ def create_job(template: dict) -> dict:
     job_counter += 1
     
     # Create coinbase transaction (miner reward)
-    coinbase = f"BRICS Block {template['index']} Reward {template['reward']}"
+    reward = template['reward']
+    coinbase_hex = f"BRICS{template['index']:08x}{int(reward*100000000):016x}".encode().hex()
     
-    # Merkle root (simplified - just hash of transactions)
-    tx_data = json.dumps(template['transactions'], sort_keys=True)
-    merkle_root = sha256(tx_data) if template['transactions'] else sha256(coinbase)
+    # Merkle root (simplified - just hash of transactions + coinbase)
+    tx_data = json.dumps(template['transactions'], sort_keys=True) if template['transactions'] else ""
+    merkle_root = sha256(coinbase_hex + tx_data)
     
-    # Block header data for mining
-    block_data = f"{template['index']}{template['timestamp']}{tx_data}{template['previous_hash']}"
+    # Previous hash - ensure it's 64 hex chars
+    prevhash = template['previous_hash']
+    if len(prevhash) < 64:
+        prevhash = prevhash.zfill(64)
+    
+    # Block header components (simplified but structured)
+    version = "20000000"  # Version 2 in little-endian hex
+    
+    # nbits - Bitcoin compact difficulty representation
+    # For difficulty 4 (4 leading zeros), target is 0x000f... 
+    # nbits format: 0x1d00ffff for difficulty 1
+    # We use a simplified version
+    difficulty = template['difficulty']
+    if difficulty <= 1:
+        nbits = "207fffff"  # Very easy
+    elif difficulty <= 2:
+        nbits = "1f00ffff"
+    elif difficulty <= 4:
+        nbits = "1d00ffff"  # Bitcoin genesis difficulty
+    else:
+        nbits = "1c00ffff"
+    
+    # Current time as 32-bit hex
+    ntime = f"{int(time.time()):08x}"
+    
+    # Block header for hashing (80 bytes in Bitcoin, we use a simplified version)
+    # version(4) + prevhash(32) + merkle(32) + time(4) + bits(4) + nonce(4)
+    block_header = version + prevhash[:64] + merkle_root[:64] + ntime + nbits
     
     return {
         "job_id": f"{job_counter:08x}",
-        "prevhash": template['previous_hash'],
-        "coinbase": coinbase,
+        "prevhash": prevhash[:64],
+        "coinbase": coinbase_hex,
+        "coinb1": coinbase_hex[:len(coinbase_hex)//2],
+        "coinb2": coinbase_hex[len(coinbase_hex)//2:],
         "merkle_root": merkle_root,
-        "block_data": block_data,
-        "version": "00000001",
-        "nbits": f"{template['difficulty']:08x}",
-        "ntime": hex(int(time.time()))[2:],
-        "difficulty": template['difficulty'],
+        "block_data": block_header,
+        "version": version,
+        "nbits": nbits,
+        "ntime": ntime,
+        "difficulty": difficulty,
         "template": template,
         "clean_jobs": True
     }
