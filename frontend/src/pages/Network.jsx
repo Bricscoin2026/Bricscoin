@@ -526,6 +526,137 @@ export default function Network() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* P2P Node Info */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2 }}
+      >
+        <Card className="bg-card border-white/10" data-testid="node-info-card">
+          <CardHeader className="border-b border-white/10">
+            <CardTitle className="font-heading flex items-center gap-2">
+              <Server className="w-5 h-5 text-primary" />
+              Node Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Node ID</p>
+                <p className="font-mono text-primary">{nodeInfo?.node_id || "N/A"}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Version</p>
+                <p className="font-mono">{nodeInfo?.version || "1.0.0"}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Block Height</p>
+                <p className="font-mono">{nodeInfo?.blocks_height?.toLocaleString() || 0}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Connected Peers</p>
+                <p className="font-mono text-secondary">{nodeInfo?.connected_peers || 0}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Connected Peers */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3 }}
+      >
+        <Card className="bg-card border-white/10" data-testid="peers-card">
+          <CardHeader className="border-b border-white/10">
+            <CardTitle className="font-heading flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Connected Peers ({peers.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {peers.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                <Globe className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No peers connected yet</p>
+                <p className="text-sm mt-2">
+                  Run your own node and connect to expand the network!
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {peers.map((peer, idx) => (
+                  <div
+                    key={peer.node_id || idx}
+                    className="flex items-center justify-between p-4 table-row-hover"
+                    data-testid={`peer-${peer.node_id}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-sm bg-secondary/20 flex items-center justify-center">
+                        <Server className="w-5 h-5 text-secondary" />
+                      </div>
+                      <div>
+                        <p className="font-mono text-sm">{peer.node_id}</p>
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {peer.url}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="confirmed-badge">Connected</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Run Your Node CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.4 }}
+      >
+        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30" data-testid="run-node-cta">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="font-heading font-bold text-lg gold-text">Run Your Own Node</h3>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Download the Docker image and join the BricsCoin network. Mine blocks and earn rewards!
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="border-white/20"
+                  onClick={() => {
+                    navigator.clipboard.writeText("docker-compose up -d");
+                    toast.success("Command copied!");
+                  }}
+                  data-testid="copy-docker-cmd-btn"
+                >
+                  Copy Docker Command
+                </Button>
+              </div>
+            </div>
+            <div className="mt-4 p-4 bg-background/50 rounded-sm border border-white/10">
+              <pre className="font-mono text-xs text-muted-foreground overflow-x-auto">
+{`# Quick Start
+git clone https://github.com/your-repo/bricscoin.git
+cd bricscoin
+docker-compose up -d
+
+# Your node will sync with the network automatically!`}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
