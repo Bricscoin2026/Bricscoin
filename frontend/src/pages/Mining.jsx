@@ -5,10 +5,10 @@ import {
   Square, 
   Cpu, 
   Zap,
-  Clock,
   Trophy,
   Hash,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -18,16 +18,10 @@ import { Progress } from "../components/ui/progress";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { getMiningTemplate, submitMinedBlock, getNetworkStats } from "../lib/api";
-
-// SHA256 implementation for browser
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Mining() {
+  const { t } = useLanguage();
   const [minerAddress, setMinerAddress] = useState("");
   const [isMining, setIsMining] = useState(false);
   const [hashrate, setHashrate] = useState(0);
@@ -37,10 +31,97 @@ export default function Mining() {
   const [stats, setStats] = useState(null);
   const [blocksFound, setBlocksFound] = useState(0);
   const [lastHash, setLastHash] = useState("");
+  const [workerStatus, setWorkerStatus] = useState("idle");
   
-  const miningRef = useRef(false);
-  const startTimeRef = useRef(null);
-  const hashCountRef = useRef(0);
+  const workerRef = useRef(null);
+  const templateRef = useRef(null);
+
+  // Initialize Web Worker
+  useEffect(() => {
+    workerRef.current = new Worker('/miningWorker.js');
+    
+    workerRef.current.onmessage = async (e) => {
+      const { type, nonce, hash, hashCount, hashrate: workerHashrate } = e.data;
+      
+      switch (type) {
+        case 'STARTED':
+          setWorkerStatus("mining");
+          toast.success(t('startMining') + "!");
+          break;
+          
+        case 'PROGRESS':
+          setCurrentNonce(nonce);
+          setLastHash(hash);
+          setTotalHashes(hashCount);
+          setHashrate(workerHashrate);
+          break;
+          
+        case 'BLOCK_FOUND':
+          console.log("Block found!", { nonce, hash });
+          setWorkerStatus("submitting");
+          
+          try {
+            const result = await submitMinedBlock({
+              block_data: templateRef.current?.block_data,
+              nonce: nonce,
+              hash: hash,
+              miner_address: minerAddress
+            });
+            
+            toast.success(`Block #${result.data.block.index} mined! +${result.data.reward} BRICS`, {
+              duration: 10000
+            });
+            
+            setBlocksFound(prev => prev + 1);
+            
+            // Get new template and continue mining
+            const newTemplate = await fetchTemplate();
+            if (newTemplate && workerRef.current) {
+              workerRef.current.postMessage({
+                type: 'NEW_JOB',
+                data: {
+                  blockData: newTemplate.block_data,
+                  target: newTemplate.target
+                }
+              });
+            }
+          } catch (error) {
+            if (error.response?.status === 409) {
+              toast.info("Block already mined, getting new template...");
+              const newTemplate = await fetchTemplate();
+              if (newTemplate && workerRef.current) {
+                workerRef.current.postMessage({
+                  type: 'NEW_JOB',
+                  data: {
+                    blockData: newTemplate.block_data,
+                    target: newTemplate.target
+                  }
+                });
+              }
+            } else {
+              toast.error("Failed to submit block");
+            }
+          }
+          setWorkerStatus("mining");
+          break;
+          
+        case 'STOPPED':
+          setWorkerStatus("idle");
+          break;
+          
+        case 'STATUS':
+          setHashrate(e.data.hashrate);
+          setTotalHashes(e.data.hashCount);
+          break;
+      }
+    };
+    
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, [minerAddress, t]);
 
   // Load miner address from localStorage
   useEffect(() => {
@@ -48,7 +129,6 @@ export default function Mining() {
     if (saved) {
       setMinerAddress(saved);
     } else {
-      // Try to load from wallets
       const wallets = localStorage.getItem("bricscoin_wallets");
       if (wallets) {
         const parsed = JSON.parse(wallets);
@@ -74,18 +154,15 @@ export default function Mining() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update hashrate display
+  // Periodically request status from worker
   useEffect(() => {
     if (!isMining) return;
     
     const interval = setInterval(() => {
-      if (startTimeRef.current) {
-        const elapsed = (Date.now() - startTimeRef.current) / 1000;
-        const rate = hashCountRef.current / elapsed;
-        setHashrate(Math.round(rate));
-        setTotalHashes(hashCountRef.current);
+      if (workerRef.current) {
+        workerRef.current.postMessage({ type: 'GET_STATUS' });
       }
-    }, 500);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [isMining]);
@@ -94,6 +171,7 @@ export default function Mining() {
     try {
       const res = await getMiningTemplate();
       setTemplate(res.data);
+      templateRef.current = res.data;
       return res.data;
     } catch (error) {
       console.error("Error fetching template:", error);
@@ -102,94 +180,38 @@ export default function Mining() {
     }
   };
 
-  const mine = useCallback(async () => {
-    if (!miningRef.current) return;
-
-    const currentTemplate = await fetchTemplate();
-    if (!currentTemplate || !miningRef.current) return;
-
-    const { block_data, difficulty, target } = currentTemplate;
-    let nonce = 0;
-    const batchSize = 1000;
-
-    while (miningRef.current) {
-      for (let i = 0; i < batchSize; i++) {
-        const testData = block_data + nonce;
-        const hash = await sha256(testData);
-        
-        hashCountRef.current++;
-        setCurrentNonce(nonce);
-        
-        if (nonce % 100 === 0) {
-          setLastHash(hash);
-        }
-
-        if (hash.startsWith(target)) {
-          // Found a valid block!
-          console.log("Block found!", { nonce, hash });
-          
-          try {
-            const result = await submitMinedBlock({
-              block_data: block_data,
-              nonce: nonce,
-              hash: hash,
-              miner_address: minerAddress
-            });
-            
-            toast.success(`Block #${result.data.block.index} mined! Reward: ${result.data.reward} BRICS`, {
-              duration: 10000
-            });
-            
-            setBlocksFound(prev => prev + 1);
-            
-            // Get new template and continue
-            if (miningRef.current) {
-              setTimeout(() => mine(), 1000);
-            }
-            return;
-          } catch (error) {
-            if (error.response?.status === 409) {
-              // Block already mined, get new template
-              toast.info("Block already mined by someone else, getting new template...");
-              if (miningRef.current) {
-                setTimeout(() => mine(), 500);
-              }
-              return;
-            }
-            console.error("Error submitting block:", error);
-            toast.error("Failed to submit block");
-          }
-        }
-        
-        nonce++;
-      }
-
-      // Yield to UI
-      await new Promise(resolve => setTimeout(resolve, 0));
-    }
-  }, [minerAddress]);
-
   const startMining = async () => {
     if (!minerAddress) {
-      toast.error("Please enter a miner address");
+      toast.error(t('minerAddress') + " required");
       return;
     }
 
     localStorage.setItem("bricscoin_miner_address", minerAddress);
     
-    miningRef.current = true;
-    setIsMining(true);
-    startTimeRef.current = Date.now();
-    hashCountRef.current = 0;
+    const currentTemplate = await fetchTemplate();
+    if (!currentTemplate) return;
     
-    toast.success("Mining started!");
-    mine();
+    setIsMining(true);
+    setTotalHashes(0);
+    setHashrate(0);
+    
+    if (workerRef.current) {
+      workerRef.current.postMessage({
+        type: 'START',
+        data: {
+          blockData: currentTemplate.block_data,
+          target: currentTemplate.target
+        }
+      });
+    }
   };
 
   const stopMining = () => {
-    miningRef.current = false;
+    if (workerRef.current) {
+      workerRef.current.postMessage({ type: 'STOP' });
+    }
     setIsMining(false);
-    toast.info("Mining stopped");
+    toast.info(t('stopMining'));
   };
 
   const formatHashrate = (rate) => {
@@ -202,17 +224,17 @@ export default function Mining() {
     <div className="space-y-6" data-testid="mining-page">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-heading font-bold">Mining</h1>
-        <p className="text-muted-foreground">Mine BRICS using your browser</p>
+        <h1 className="text-3xl font-heading font-bold">{t('miningTitle')}</h1>
+        <p className="text-muted-foreground">{t('miningSubtitle')}</p>
       </div>
 
       {/* Mining Control */}
-      <Card className={`bg-card border-white/10 ${isMining ? "mining-active" : ""}`} data-testid="mining-control-card">
+      <Card className={`bg-card border-white/10 ${isMining ? "mining-active ring-2 ring-primary/50" : ""}`} data-testid="mining-control-card">
         <CardContent className="p-6">
           <div className="space-y-6">
             {/* Miner Address */}
             <div>
-              <Label>Miner Address</Label>
+              <Label>{t('minerAddress')}</Label>
               <Input
                 placeholder="BRICS..."
                 value={minerAddress}
@@ -222,7 +244,7 @@ export default function Mining() {
                 data-testid="miner-address-input"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Mining rewards will be sent to this address
+                {t('rewardsToAddress')}
               </p>
             </div>
 
@@ -236,7 +258,7 @@ export default function Mining() {
                   data-testid="start-mining-btn"
                 >
                   <Play className="w-5 h-5 mr-2" />
-                  Start Mining
+                  {t('startMining')}
                 </Button>
               ) : (
                 <Button
@@ -246,7 +268,7 @@ export default function Mining() {
                   data-testid="stop-mining-btn"
                 >
                   <Square className="w-5 h-5 mr-2" />
-                  Stop Mining
+                  {t('stopMining')}
                 </Button>
               )}
               <Button
@@ -259,6 +281,20 @@ export default function Mining() {
                 <RefreshCw className="w-4 h-4" />
               </Button>
             </div>
+            
+            {/* Worker Status */}
+            {isMining && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className={`w-2 h-2 rounded-full ${
+                  workerStatus === 'mining' ? 'bg-green-500 animate-pulse' : 
+                  workerStatus === 'submitting' ? 'bg-yellow-500' : 'bg-gray-500'
+                }`} />
+                <span className="text-muted-foreground">
+                  {workerStatus === 'mining' ? 'Mining in background...' : 
+                   workerStatus === 'submitting' ? 'Submitting block...' : 'Idle'}
+                </span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -277,7 +313,7 @@ export default function Mining() {
                   <Zap className={`w-5 h-5 text-primary ${isMining ? "animate-pulse" : ""}`} />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Hashrate</p>
+                  <p className="text-sm text-muted-foreground">{t('hashrate')}</p>
                   <p className="text-xl font-heading font-bold">
                     {formatHashrate(hashrate)}
                   </p>
@@ -299,7 +335,7 @@ export default function Mining() {
                   <Hash className="w-5 h-5 text-secondary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Hashes</p>
+                  <p className="text-sm text-muted-foreground">{t('totalHashes')}</p>
                   <p className="text-xl font-heading font-bold">
                     {totalHashes.toLocaleString()}
                   </p>
@@ -321,7 +357,7 @@ export default function Mining() {
                   <Trophy className="w-5 h-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Blocks Found</p>
+                  <p className="text-sm text-muted-foreground">{t('blocksFound')}</p>
                   <p className="text-xl font-heading font-bold">{blocksFound}</p>
                 </div>
               </div>
@@ -341,7 +377,7 @@ export default function Mining() {
                   <Cpu className="w-5 h-5 text-orange-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Difficulty</p>
+                  <p className="text-sm text-muted-foreground">{t('difficulty')}</p>
                   <p className="text-xl font-heading font-bold">
                     {template?.difficulty || stats?.current_difficulty || 4}
                   </p>
@@ -362,20 +398,20 @@ export default function Mining() {
             <CardHeader className="border-b border-white/10">
               <CardTitle className="font-heading flex items-center gap-2">
                 <Pickaxe className="w-5 h-5 text-primary animate-bounce" />
-                Mining in Progress
+                {t('miningInProgress')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Current Nonce</span>
+                  <span className="text-muted-foreground">{t('currentNonce')}</span>
                   <span className="font-mono">{currentNonce.toLocaleString()}</span>
                 </div>
                 <Progress value={(currentNonce % 10000) / 100} className="h-2" />
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Latest Hash</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('lastHash')}</p>
                 <div className="bg-background p-3 rounded-sm border border-white/10">
                   <p className="font-mono text-xs break-all text-muted-foreground">
                     {lastHash || "Computing..."}
@@ -384,7 +420,7 @@ export default function Mining() {
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Target (must start with)</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('target')}</p>
                 <div className="bg-background p-3 rounded-sm border border-white/10">
                   <p className="font-mono text-sm text-primary">
                     {"0".repeat(template?.difficulty || 4)}...
@@ -405,15 +441,15 @@ export default function Mining() {
         >
           <Card className="bg-card border-white/10 h-full" data-testid="how-it-works-card">
             <CardHeader className="border-b border-white/10">
-              <CardTitle className="font-heading">How Mining Works</CardTitle>
+              <CardTitle className="font-heading">{t('howMiningWorks')}</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <ol className="space-y-3 text-sm text-muted-foreground list-decimal list-inside">
-                <li>Your browser receives a block template from the network</li>
-                <li>It tries different nonce values, hashing with SHA256</li>
-                <li>When a hash starts with enough zeros (difficulty), you win!</li>
-                <li>The block is submitted and you receive the mining reward</li>
-                <li>Difficulty adjusts every 2016 blocks to maintain 10min blocks</li>
+                <li>{t('miningStep1')}</li>
+                <li>{t('miningStep2')}</li>
+                <li>{t('miningStep3')}</li>
+                <li>{t('miningStep4')}</li>
+                <li>{t('miningStep5')}</li>
               </ol>
             </CardContent>
           </Card>
@@ -426,24 +462,24 @@ export default function Mining() {
         >
           <Card className="bg-card border-white/10 h-full" data-testid="rewards-card">
             <CardHeader className="border-b border-white/10">
-              <CardTitle className="font-heading">Mining Rewards</CardTitle>
+              <CardTitle className="font-heading">{t('miningRewards')}</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Current Reward</span>
+                  <span className="text-muted-foreground">{t('currentReward')}</span>
                   <span className="font-mono text-primary text-lg">
                     {stats?.current_reward || 50} BRICS
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Next Halving</span>
+                  <span className="text-muted-foreground">{t('nextHalving')}</span>
                   <span className="font-mono">
                     Block #{stats?.next_halving_block?.toLocaleString() || "210,000"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Halving Interval</span>
+                  <span className="text-muted-foreground">{t('halvingInterval')}</span>
                   <span className="font-mono">210,000 blocks</span>
                 </div>
                 <div className="pt-2 border-t border-white/10">
@@ -459,10 +495,10 @@ export default function Mining() {
 
       {/* Warning */}
       <Card className="bg-yellow-500/10 border-yellow-500/30" data-testid="mining-warning-card">
-        <CardContent className="p-4">
+        <CardContent className="p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0" />
           <p className="text-sm text-yellow-500">
-            <strong>Note:</strong> Browser mining is less efficient than dedicated mining software. 
-            For better performance, consider using a native miner with the API endpoints.
+            <strong>Note:</strong> {t('miningWarning')}
           </p>
         </CardContent>
       </Card>
