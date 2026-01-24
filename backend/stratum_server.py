@@ -222,9 +222,16 @@ class StratumProtocol(asyncio.Protocol):
             if not line or line.strip() == b'':
                 continue
             try:
-                decoded = line.decode('utf-8').strip()
-                if not decoded:
+                # Try to decode as UTF-8, skip invalid bytes
+                try:
+                    decoded = line.decode('utf-8', errors='ignore').strip()
+                except:
+                    decoded = line.decode('latin-1', errors='ignore').strip()
+                    
+                if not decoded or decoded[0] != '{':
+                    # Not a JSON message, skip
                     continue
+                    
                 message = json.loads(decoded)
                 if isinstance(message, dict):
                     asyncio.create_task(self.handle_message(message))
