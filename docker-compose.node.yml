@@ -1,0 +1,67 @@
+# BricsCoin Node - Docker Compose per nodi secondari
+# Questo si connette al seed node principale e sincronizza la blockchain
+
+version: '3.8'
+
+services:
+  # MongoDB locale per questo nodo
+  mongo:
+    image: mongo:7
+    container_name: bricscoin-db
+    volumes:
+      - bricscoin-data:/data/db
+    restart: always
+    networks:
+      - bricscoin-network
+
+  # BricsCoin Node
+  bricscoin-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bricscoin-node
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - DB_NAME=bricscoin
+      # ID unico per questo nodo (cambialo!)
+      - NODE_ID=${NODE_ID:-node-${HOSTNAME}}
+      # URL pubblico di questo nodo (per ricevere connessioni P2P)
+      - NODE_URL=${NODE_URL:-}
+      # IMPORTANTE: Connettiti al seed node principale
+      - SEED_NODES=http://5.161.254.163:8001
+      - CORS_ORIGINS=*
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - bricscoin-network
+
+  # Stratum Server (opzionale - per mining locale)
+  bricscoin-stratum:
+    build:
+      context: .
+      dockerfile: Dockerfile.stratum
+    container_name: bricscoin-stratum
+    ports:
+      - "3333:3333"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - DB_NAME=bricscoin
+      - STRATUM_PORT=3333
+    depends_on:
+      - mongo
+      - bricscoin-node
+    restart: always
+    networks:
+      - bricscoin-network
+    profiles:
+      - with-mining
+
+volumes:
+  bricscoin-data:
+
+networks:
+  bricscoin-network:
+    driver: bridge
