@@ -642,8 +642,13 @@ async def get_block_by_hash(block_hash: str):
 
 # Transaction endpoints
 @api_router.get("/transactions")
-async def get_transactions(limit: int = 20, offset: int = 0, confirmed: Optional[bool] = None):
+@limiter.limit("60/minute")
+async def get_transactions(request: Request, limit: int = 20, offset: int = 0, confirmed: Optional[bool] = None):
     """Get transactions with pagination"""
+    # Input validation
+    limit = min(max(1, limit), 100)  # Clamp between 1-100
+    offset = max(0, offset)
+    
     query = {}
     if confirmed is not None:
         query["confirmed"] = confirmed
@@ -653,44 +658,157 @@ async def get_transactions(limit: int = 20, offset: int = 0, confirmed: Optional
     return {"transactions": transactions, "total": total}
 
 @api_router.get("/transactions/{tx_id}")
-async def get_transaction(tx_id: str):
+@limiter.limit("120/minute")
+async def get_transaction(request: Request, tx_id: str):
     """Get specific transaction"""
+    # Validate tx_id format (UUID)
+    if not re.match(r'^[a-fA-F0-9-]{36}$', tx_id):
+        raise HTTPException(status_code=400, detail="Invalid transaction ID format")
+    
     tx = await db.transactions.find_one({"id": tx_id}, {"_id": 0})
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return tx
 
-@api_router.post("/transactions")
-async def create_transaction(request: TransactionRequest):
-    """Create and broadcast a new transaction"""
+@api_router.post("/transactions/secure")
+@limiter.limit("10/minute")
+async def create_secure_transaction(request: Request, tx_request: SecureTransactionRequest):
+    """
+    Create a secure transaction - PRIVATE KEY NEVER SENT TO SERVER.
+    
+    The transaction must be signed CLIENT-SIDE before submission.
+    This endpoint only verifies the signature and processes the transaction.
+    """
+    client_ip = get_remote_address(request)
+    
+    # Check if IP is blacklisted
+    if client_ip in ip_blacklist:
+        if datetime.now(timezone.utc) < ip_blacklist[client_ip]:
+            security_logger.warning(f"Blacklisted IP attempted transaction: {client_ip}")
+            raise HTTPException(status_code=403, detail="Access temporarily blocked")
+        else:
+            del ip_blacklist[client_ip]
+    
     # Validate sender has enough balance
-    sender_balance = await get_balance(request.sender_address)
-    if sender_balance < request.amount:
+    sender_balance = await get_balance(tx_request.sender_address)
+    if sender_balance < tx_request.amount:
         raise HTTPException(status_code=400, detail=f"Insufficient balance. Available: {sender_balance}")
     
-    if request.amount <= 0:
+    # Verify that the public key matches the sender address
+    expected_address = generate_address_from_public_key(tx_request.public_key)
+    if expected_address != tx_request.sender_address:
+        failed_attempts[client_ip] += 1
+        if failed_attempts[client_ip] >= MAX_FAILED_ATTEMPTS:
+            ip_blacklist[client_ip] = datetime.now(timezone.utc).replace(
+                second=datetime.now(timezone.utc).second + BLACKLIST_DURATION
+            )
+            security_logger.warning(f"IP blacklisted for failed attempts: {client_ip}")
+        security_logger.warning(f"Address mismatch attempt from {client_ip}: {tx_request.sender_address}")
+        raise HTTPException(status_code=400, detail="Public key does not match sender address")
+    
+    # Create transaction data for verification (same format as client-side signing)
+    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{tx_request.timestamp}"
+    
+    # CRITICAL: Verify the signature
+    try:
+        is_valid = verify_signature(tx_request.public_key, tx_request.signature, tx_data)
+        if not is_valid:
+            failed_attempts[client_ip] += 1
+            security_logger.warning(f"Invalid signature from {client_ip} for address {tx_request.sender_address}")
+            raise HTTPException(status_code=400, detail="Invalid transaction signature")
+    except BadSignatureError:
+        failed_attempts[client_ip] += 1
+        security_logger.warning(f"Bad signature from {client_ip}")
+        raise HTTPException(status_code=400, detail="Invalid transaction signature")
+    except Exception as e:
+        security_logger.error(f"Signature verification error: {e}")
+        raise HTTPException(status_code=400, detail="Signature verification failed")
+    
+    # Check for replay attacks - timestamp must be recent (within 5 minutes)
+    try:
+        tx_time = datetime.fromisoformat(tx_request.timestamp.replace('Z', '+00:00'))
+        time_diff = abs((datetime.now(timezone.utc) - tx_time).total_seconds())
+        if time_diff > 300:  # 5 minutes
+            security_logger.warning(f"Stale transaction attempt from {client_ip}")
+            raise HTTPException(status_code=400, detail="Transaction timestamp too old or too far in future")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid timestamp format")
+    
+    # Check for duplicate transactions (same signature = replay attack)
+    existing = await db.transactions.find_one({"signature": tx_request.signature})
+    if existing:
+        security_logger.warning(f"Replay attack attempt from {client_ip}")
+        raise HTTPException(status_code=400, detail="Transaction already exists (possible replay attack)")
+    
+    # Reset failed attempts on successful validation
+    failed_attempts[client_ip] = 0
+    
+    # Create transaction
+    tx_id = str(uuid.uuid4())
+    transaction = {
+        "id": tx_id,
+        "sender": tx_request.sender_address,
+        "recipient": tx_request.recipient_address,
+        "amount": tx_request.amount,
+        "timestamp": tx_request.timestamp,
+        "signature": tx_request.signature,
+        "public_key": tx_request.public_key,
+        "confirmed": False,
+        "block_index": None,
+        "ip_hash": hashlib.sha256(client_ip.encode()).hexdigest()[:16]  # Anonymized IP for audit
+    }
+    
+    await db.transactions.insert_one(transaction)
+    del transaction["_id"]
+    del transaction["ip_hash"]  # Don't return ip_hash to client
+    
+    # Broadcast transaction to peers
+    asyncio.create_task(broadcast_to_peers(
+        "broadcast/transaction",
+        {"transaction": transaction, "sender_node_id": NODE_ID}
+    ))
+    
+    logger.info(f"Secure transaction created: {tx_id} ({tx_request.amount} BRICS)")
+    return transaction
+
+# DEPRECATED: Legacy endpoint - will be removed in future versions
+@api_router.post("/transactions")
+@limiter.limit("5/minute")
+async def create_transaction_legacy(request: Request, tx_request: TransactionRequest):
+    """
+    DEPRECATED: This endpoint sends private keys over the network and is insecure.
+    Use POST /transactions/secure instead with client-side signing.
+    """
+    security_logger.warning(f"Deprecated /transactions endpoint used from {get_remote_address(request)}")
+    
+    # Validate sender has enough balance
+    sender_balance = await get_balance(tx_request.sender_address)
+    if sender_balance < tx_request.amount:
+        raise HTTPException(status_code=400, detail=f"Insufficient balance. Available: {sender_balance}")
+    
+    if tx_request.amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be positive")
     
     # Create transaction data for signing
     tx_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()
-    tx_data = f"{request.sender_address}{request.recipient_address}{request.amount}{timestamp}"
+    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{timestamp}"
     
     # Sign transaction
     try:
-        signature = sign_transaction(request.sender_private_key, tx_data)
+        signature = sign_transaction(tx_request.sender_private_key, tx_data)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid private key: {str(e)}")
     
     # Get public key from private key
-    private_key = SigningKey.from_string(bytes.fromhex(request.sender_private_key), curve=SECP256k1)
+    private_key = SigningKey.from_string(bytes.fromhex(tx_request.sender_private_key), curve=SECP256k1)
     public_key_hex = private_key.get_verifying_key().to_string().hex()
     
     transaction = {
         "id": tx_id,
-        "sender": request.sender_address,
-        "recipient": request.recipient_address,
-        "amount": request.amount,
+        "sender": tx_request.sender_address,
+        "recipient": tx_request.recipient_address,
+        "amount": tx_request.amount,
         "timestamp": timestamp,
         "signature": signature,
         "public_key": public_key_hex,
@@ -707,7 +825,10 @@ async def create_transaction(request: TransactionRequest):
         {"transaction": transaction, "sender_node_id": NODE_ID}
     ))
     
-    return transaction
+    return {
+        **transaction,
+        "warning": "DEPRECATED: This endpoint is insecure. Use /transactions/secure with client-side signing."
+    }
 
 @api_router.get("/transactions/address/{address}")
 async def get_address_transactions(address: str, limit: int = 50):
