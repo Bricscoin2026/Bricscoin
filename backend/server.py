@@ -1,12 +1,14 @@
-from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Request, Depends
+from fastapi.responses import StreamingResponse, JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import re
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone
@@ -22,6 +24,11 @@ import asyncio
 import httpx
 from contextlib import asynccontextmanager
 from mnemonic import Mnemonic
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from collections import defaultdict
+import ipaddress
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
