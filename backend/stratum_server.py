@@ -230,16 +230,38 @@ async def get_block_template() -> Optional[dict]:
         if len(prev_hash) < 64:
             prev_hash = prev_hash.zfill(64)
         
+        # Get pending transactions (up to 100 per block)
+        pending_txs = await db.transactions.find(
+            {"confirmed": False}, 
+            {"_id": 0}
+        ).limit(100).to_list(100)
+        
+        # Convert to simple format for block
+        transactions = []
+        for tx in pending_txs:
+            transactions.append({
+                "id": tx.get("id"),
+                "sender": tx.get("sender"),
+                "recipient": tx.get("recipient"),
+                "amount": tx.get("amount"),
+                "timestamp": tx.get("timestamp")
+            })
+        
         template = {
             "index": new_index,
             "timestamp": int(time.time()),
             "previous_hash": prev_hash,
             "difficulty": NETWORK_DIFFICULTY,
             "reward": reward,
-            "transactions": []
+            "transactions": transactions,
+            "pending_tx_ids": [tx.get("id") for tx in pending_txs]  # Track IDs for confirmation
         }
         
-        logger.info(f"Template: block #{new_index}, prev={prev_hash[:16]}..., reward={reward/COIN} BRICS")
+        if transactions:
+            logger.info(f"Template: block #{new_index}, {len(transactions)} pending txs, reward={reward/COIN} BRICS")
+        else:
+            logger.info(f"Template: block #{new_index}, prev={prev_hash[:16]}..., reward={reward/COIN} BRICS")
+        
         return template
         
     except Exception as e:
