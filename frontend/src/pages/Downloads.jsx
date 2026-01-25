@@ -86,29 +86,7 @@ function getOSInfo(filename) {
       priority: 2
     };
   }
-      priority: 2
-    };
-  }
-  if (lower.includes('mac') || lower.includes('darwin')) {
-    return { 
-      os: 'macOS', 
-      icon: Apple, 
-      color: 'text-gray-400',
-      bgColor: 'bg-gray-500/20',
-      description: 'Source code - Manual build required',
-      priority: 2
-    };
-  }
-  if (lower.includes('android') || lower.includes('apk')) {
-    return { 
-      os: 'Android', 
-      icon: Smartphone, 
-      color: 'text-green-500',
-      bgColor: 'bg-green-500/20',
-      description: 'APK for Android devices',
-      priority: 2
-    };
-  }
+  
   return { 
     os: 'Download', 
     icon: FileArchive, 
