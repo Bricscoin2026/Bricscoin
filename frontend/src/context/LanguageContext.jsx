@@ -125,6 +125,7 @@ const translations = {
     mining: "Mining",
     network: "Network",
     downloads: "Downloads",
+    runNode: "Run Node",
     
     // Common
     loading: "Loading...",
