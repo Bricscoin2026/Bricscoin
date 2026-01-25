@@ -27,7 +27,7 @@ const translations = {
     // Dashboard
     heroTitle: "BRICSCOIN",
     heroSubtitle: "Criptovaluta decentralizzata basata su Proof-of-Work SHA256. Unisciti alla rete di mining globale.",
-    startMining: "Inizia Mining",
+    startMining: "Mining Info",
     createWallet: "Crea Portafoglio",
     circulatingSupply: "In Circolazione",
     remainingSupply: "Da Minare",
@@ -227,7 +227,7 @@ const translations = {
     // Dashboard
     heroTitle: "BRICSCOIN",
     heroSubtitle: "Decentralized cryptocurrency powered by SHA256 Proof-of-Work. Join the global mining network today.",
-    startMining: "Start Mining",
+    startMining: "Mining Info",
     createWallet: "Create Wallet",
     circulatingSupply: "Circulating Supply",
     remainingSupply: "Remaining to Mine",
