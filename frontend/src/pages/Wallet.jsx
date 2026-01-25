@@ -141,6 +141,8 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed }) {
   );
 }
 
+const TRANSACTION_FEE = 0.05; // Fee per transaction
+
 function SendDialog({ wallet, onSuccess }) {
   const [open, setOpen] = useState(false);
   const [recipient, setRecipient] = useState("");
@@ -175,8 +177,9 @@ function SendDialog({ wallet, onSuccess }) {
       return;
     }
 
-    if (balance !== null && parseFloat(amount) > balance) {
-      toast.error(`Saldo insufficiente! Disponibile: ${balance} BRICS`);
+    const totalCost = parseFloat(amount) + TRANSACTION_FEE;
+    if (balance !== null && totalCost > balance) {
+      toast.error(`Saldo insufficiente! Serve: ${totalCost} BRICS (${amount} + ${TRANSACTION_FEE} fee). Disponibile: ${balance} BRICS`);
       return;
     }
 
@@ -200,7 +203,7 @@ function SendDialog({ wallet, onSuccess }) {
       toast.success(
         <div className="flex items-center gap-2">
           <Shield className="w-4 h-4 text-green-500" />
-          <span>Transazione sicura inviata!</span>
+          <span>Transazione inviata! (Fee: {TRANSACTION_FEE} BRICS)</span>
         </div>
       );
       setOpen(false);
@@ -217,7 +220,9 @@ function SendDialog({ wallet, onSuccess }) {
 
   const handleMaxAmount = () => {
     if (balance !== null) {
-      setAmount(balance.toString());
+      // Max = balance - fee
+      const maxAmount = Math.max(0, balance - TRANSACTION_FEE);
+      setAmount(maxAmount.toString());
     }
   };
 
