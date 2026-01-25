@@ -136,7 +136,15 @@ async function syncBlockchain() {
 
 // Ottieni statistiche
 ipcMain.handle('get-stats', async () => {
-  return blockchain.getStats();
+  const localStats = blockchain.getStats();
+  const networkStats = await blockchain.getNetworkStats();
+  
+  return {
+    ...localStats,
+    ...networkStats,
+    localHeight: localStats.height,
+    networkHeight: networkStats.total_blocks - 1
+  };
 });
 
 // Ottieni blocchi
