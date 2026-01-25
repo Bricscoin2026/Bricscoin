@@ -206,9 +206,14 @@
     <!-- Wallet -->
     <div id="wallet" class="section">
       <div class="card">
+        <h2>Create New Wallet</h2>
+        <input type="text" id="new-wallet-name" placeholder="Wallet name (e.g. My Wallet)">
+        <button onclick="createWallet()">Create Wallet</button>
+      </div>
+      
+      <div class="card">
         <h2>Your Wallets</h2>
         <div id="wallets-list"></div>
-        <button onclick="createWallet()" style="margin-top: 15px;">+ Create New Wallet</button>
       </div>
       
       <div class="card">
