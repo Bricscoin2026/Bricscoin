@@ -97,3 +97,7 @@ bricscoin-core/node_modules/electron/dist/electron
 bricscoin-core/dist/BricsCoin
 Core-2.1.0-arm64.AppImage
 bricscoin-core/dist/linux-arm64-unpacked/bricscoin-core
+-e 
+# Environment files
+*.env
+*.env.*
