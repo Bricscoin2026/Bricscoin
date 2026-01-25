@@ -647,8 +647,8 @@ export default function Network() {
             <div className="mt-4 p-4 bg-background/50 rounded-sm border border-white/10">
               <pre className="font-mono text-xs text-muted-foreground overflow-x-auto">
 {`# Quick Start
-git clone https://github.com/your-repo/bricscoin.git
-cd bricscoin
+git clone https://github.com/bricscoin26/Bricscoin26.git
+cd Bricscoin26
 docker-compose up -d
 
 # Your node will sync with the network automatically!`}
