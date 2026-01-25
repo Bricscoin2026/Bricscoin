@@ -6,9 +6,10 @@ const translations = {
     dashboard: "Cruscotto",
     explorer: "Esplora",
     wallet: "Portafoglio",
-    mining: "Estrazione mineraria",
+    mining: "Estrazione",
     network: "Rete",
     downloads: "Download",
+    runNode: "Esegui Nodo",
     
     // Common
     loading: "Caricamento...",
