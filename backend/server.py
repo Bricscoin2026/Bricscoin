@@ -116,6 +116,7 @@ class TransactionRequest(BaseModel):
 class NetworkStats(BaseModel):
     total_supply: float
     circulating_supply: float
+    remaining_supply: float
     total_blocks: int
     current_difficulty: int
     hashrate_estimate: float
@@ -510,6 +511,7 @@ async def get_network_stats():
     return NetworkStats(
         total_supply=MAX_SUPPLY,
         circulating_supply=circulating,
+        remaining_supply=MAX_SUPPLY - circulating,
         total_blocks=blocks_count,
         current_difficulty=current_difficulty,
         hashrate_estimate=hashrate_estimate,
