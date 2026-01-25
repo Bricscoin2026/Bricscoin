@@ -1303,7 +1303,7 @@ async def get_node_info():
 # ==================== DOWNLOADS ENDPOINTS ====================
 from fastapi.responses import FileResponse
 
-DOWNLOADS_DIR = '/downloads'
+DOWNLOADS_DIR = '/app/downloads'
 
 @api_router.get("/downloads")
 async def list_downloads():
