@@ -129,6 +129,13 @@ POST /api/transactions
 
 ## Changelog
 
+### v2.3.0 (2026-01-25) - BricsCoin Core P2P Update
+- ✅ BricsCoin Core v2.1 with P2P network sync
+- ✅ Secure client-side transaction signing in desktop wallet
+- ✅ Network tab showing peers and sync status
+- ✅ Configurable server URL for custom nodes
+- ✅ GitHub repository structure prepared
+
 ### v2.2.0 (2026-01-25) - Wallet Refresh Fix
 - ✅ Fixed wallet balance refresh bug
 - ✅ Added loading state indicator
