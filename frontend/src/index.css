@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
 
+/* Hide external badges */
+#emergent-badge,
+[id*="emergent"],
+a[href*="emergent.sh"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
