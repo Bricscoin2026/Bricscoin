@@ -21,7 +21,6 @@ export default function Layout() {
     { to: "/", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/explorer", icon: Search, label: "Explorer" },
     { to: "/wallet", icon: Wallet, label: "Wallet" },
-    { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/network", icon: Network, label: "Network" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/node", icon: Server, label: "Run Node" },
