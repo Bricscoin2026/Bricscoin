@@ -139,6 +139,7 @@ function TransactionsTable({ transactions, loading, t }) {
 }
 
 export default function Explorer() {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [blocks, setBlocks] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -200,7 +201,7 @@ export default function Explorer() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                placeholder="Search by block height, hash, transaction ID, or address..."
+                placeholder={t('searchPlaceholder')}
                 className="pl-10 bg-background border-white/20 font-mono"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -208,7 +209,7 @@ export default function Explorer() {
               />
             </div>
             <Button type="submit" className="gold-button rounded-sm" data-testid="explorer-search-btn">
-              Search
+              {t('search')}
             </Button>
           </form>
         </CardContent>
@@ -226,7 +227,7 @@ export default function Explorer() {
             data-testid="blocks-tab"
           >
             <Blocks className="w-4 h-4 mr-2" />
-            Blocks
+            {t('blocks')}
           </TabsTrigger>
           <TabsTrigger 
             value="transactions"
@@ -234,7 +235,7 @@ export default function Explorer() {
             data-testid="transactions-tab"
           >
             <ArrowRightLeft className="w-4 h-4 mr-2" />
-            Transactions
+            {t('transactions')}
           </TabsTrigger>
         </TabsList>
 
@@ -242,11 +243,11 @@ export default function Explorer() {
           <Card className="bg-card border-white/10">
             <CardHeader className="border-b border-white/10">
               <CardTitle className="font-heading">
-                Latest Blocks ({blocksTotal.toLocaleString()} total)
+                {t('latestBlocks')} ({blocksTotal.toLocaleString()} {t('total')})
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <BlocksTable blocks={blocks} loading={loading} />
+              <BlocksTable blocks={blocks} loading={loading} t={t} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -255,16 +256,16 @@ export default function Explorer() {
           <Card className="bg-card border-white/10">
             <CardHeader className="border-b border-white/10">
               <CardTitle className="font-heading">
-                Latest Transactions ({txTotal.toLocaleString()} total)
+                {t('latestTransactions')} ({txTotal.toLocaleString()} {t('total')})
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {transactions.length === 0 && !loading ? (
                 <div className="p-8 text-center text-muted-foreground">
-                  No transactions yet
+                  {t('noTransactions')}
                 </div>
               ) : (
-                <TransactionsTable transactions={transactions} loading={loading} />
+                <TransactionsTable transactions={transactions} loading={loading} t={t} />
               )}
             </CardContent>
           </Card>
@@ -283,10 +284,10 @@ export default function Explorer() {
             data-testid="prev-page-btn"
           >
             <ChevronLeft className="w-4 h-4" />
-            Previous
+            {t('previous')}
           </Button>
           <span className="text-sm text-muted-foreground px-4">
-            Page {page} of {totalPages}
+            {t('page')} {page} {t('of')} {totalPages}
           </span>
           <Button
             variant="outline"
@@ -296,7 +297,7 @@ export default function Explorer() {
             onClick={() => setSearchParams({ tab, page: (page + 1).toString() })}
             data-testid="next-page-btn"
           >
-            Next
+            {t('next')}
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
