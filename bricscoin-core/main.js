@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, clipboard } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -8,13 +8,42 @@ let win, walletsPath, mining = false;
 
 const sha256 = d => crypto.createHash('sha256').update(d).digest('hex');
 
-const makeWallet = () => {
-  const priv = crypto.randomBytes(32).toString('hex');
+// BIP39-like word list (simplified)
+const WORD_LIST = [
+  'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract',
+  'absurd', 'abuse', 'access', 'accident', 'account', 'accuse', 'achieve', 'acid',
+  'acoustic', 'acquire', 'across', 'act', 'action', 'actor', 'actress', 'actual',
+  'adapt', 'add', 'addict', 'address', 'adjust', 'admit', 'adult', 'advance',
+  'advice', 'aerobic', 'affair', 'afford', 'afraid', 'again', 'age', 'agent',
+  'agree', 'ahead', 'aim', 'air', 'airport', 'aisle', 'alarm', 'album',
+  'alcohol', 'alert', 'alien', 'all', 'alley', 'allow', 'almost', 'alone',
+  'alpha', 'already', 'also', 'alter', 'always', 'amateur', 'amazing', 'among',
+  'amount', 'amused', 'analyst', 'anchor', 'ancient', 'anger', 'angle', 'angry',
+  'animal', 'ankle', 'announce', 'annual', 'answer', 'antenna', 'antique', 'anxiety',
+  'any', 'apart', 'apology', 'appear', 'apple', 'approve', 'april', 'arch',
+  'arctic', 'area', 'arena', 'argue', 'arm', 'armed', 'armor', 'army'
+];
+
+const makeWallet = (seedPhrase = null) => {
+  let seed;
+  if (seedPhrase) {
+    // Import from seed phrase
+    seed = sha256(seedPhrase);
+  } else {
+    // Generate new seed phrase
+    const words = [];
+    for (let i = 0; i < 12; i++) {
+      words.push(WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)]);
+    }
+    seedPhrase = words.join(' ');
+    seed = sha256(seedPhrase);
+  }
+  
+  const priv = sha256(seed + 'privkey');
   const pub = sha256(priv);
   const addr = 'BRICS' + sha256(pub).substring(0, 40);
-  const words = 'apple banana cherry dog elephant fish grape hat ice jam kite lamp moon nest orange pear quilt rose star tree'.split(' ');
-  const seed = Array(12).fill(0).map(() => words[Math.floor(Math.random() * words.length)]).join(' ');
-  return { address: addr, privateKey: priv, seedPhrase: seed };
+  
+  return { address: addr, privateKey: priv, seedPhrase: seedPhrase };
 };
 
 const getWallets = () => {
@@ -28,7 +57,7 @@ app.whenReady().then(() => {
   walletsPath = path.join(app.getPath('userData'), 'wallets.json');
   
   win = new BrowserWindow({
-    width: 1100, height: 750,
+    width: 1200, height: 800,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true }
   });
   win.loadFile('index.html');
@@ -62,6 +91,38 @@ ipcMain.handle('newwallet', (e, name) => {
   return w;
 });
 
+// Import wallet from seed phrase
+ipcMain.handle('importwallet', (e, name, seedPhrase) => {
+  const w = makeWallet(seedPhrase.trim().toLowerCase());
+  w.name = name || 'Imported Wallet';
+  const list = getWallets();
+  
+  // Check if wallet already exists
+  if (list.find(x => x.address === w.address)) {
+    throw new Error('Wallet already exists');
+  }
+  
+  list.push(w);
+  saveWallets(list);
+  return w;
+});
+
+// Delete wallet
+ipcMain.handle('deletewallet', (e, address) => {
+  const list = getWallets();
+  const idx = list.findIndex(x => x.address === address);
+  if (idx === -1) throw new Error('Wallet not found');
+  list.splice(idx, 1);
+  saveWallets(list);
+  return true;
+});
+
+// Copy to clipboard
+ipcMain.handle('copy', (e, text) => {
+  clipboard.writeText(text);
+  return true;
+});
+
 ipcMain.handle('send', async (e, from, to, amt) => {
   const list = getWallets();
   const w = list.find(x => x.address === from);
@@ -72,6 +133,16 @@ ipcMain.handle('send', async (e, from, to, amt) => {
   });
   if (!r.ok) throw new Error((await r.json()).detail || 'Failed');
   return true;
+});
+
+// Get transactions for a wallet
+ipcMain.handle('transactions', async (e, address) => {
+  try {
+    const r = await fetch(SERVER + '/api/wallet/' + address + '/transactions');
+    if (!r.ok) return [];
+    const data = await r.json();
+    return data.transactions || [];
+  } catch { return []; }
 });
 
 ipcMain.handle('mine', async (e, addr) => {
