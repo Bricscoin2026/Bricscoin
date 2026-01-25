@@ -264,8 +264,20 @@ def get_mining_reward(block_height: int) -> float:
     return INITIAL_REWARD / (2 ** halvings)
 
 def check_difficulty(hash_value: str, difficulty: int) -> bool:
-    """Check if hash meets difficulty requirement"""
-    return hash_value.startswith('0' * difficulty)
+    """
+    Check if hash meets difficulty requirement (Bitcoin-style).
+    Converts hash to integer and compares against target.
+    Higher difficulty = lower target = harder to find valid hash.
+    """
+    # Bitcoin-style: target = max_target / difficulty
+    # max_target for SHA256 is 2^256 - 1, but we use a practical max
+    max_target = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    target = max_target // difficulty
+    
+    # Convert hash to integer
+    hash_int = int(hash_value, 16)
+    
+    return hash_int <= target
 
 async def get_current_difficulty() -> int:
     """Calculate current difficulty based on block times"""
