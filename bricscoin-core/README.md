@@ -1,111 +1,78 @@
 # BricsCoin Core - Full Node Wallet
 
-**BricsCoin Core** è il wallet desktop ufficiale per BricsCoin. Funziona come un nodo completo della rete, memorizzando l'intera blockchain localmente e contribuendo alla decentralizzazione della rete.
+**BricsCoin Core** is the official desktop wallet for BricsCoin. It works as a full node, storing the blockchain locally and contributing to network decentralization.
 
-## Caratteristiche
+## Features
 
-- 🔐 **Wallet Sicuro**: Genera seed phrase BIP39 a 12 parole
-- ⛏️ **Mining Integrato**: Mina BRICS direttamente dal wallet
-- 🌐 **Full Node**: Scarica e verifica l'intera blockchain
-- 🔄 **P2P Network**: Connessione automatica ai nodi della rete
-- 💾 **Storage Locale**: I tuoi dati rimangono sul tuo computer
+- 🔐 **Secure Wallet**: Generates 12-word BIP39 seed phrase
+- ⛏️ **Real Mining**: Mine BRICS on the main network
+- 🌐 **Full Node**: Downloads and verifies the blockchain
+- 🔄 **Auto-Sync**: Automatically syncs with bricscoin26.org
+- 💾 **Local Storage**: Your data stays on your computer
 
-## Requisiti
+## Requirements
 
 - **Node.js** >= 18
-- **Yarn** (consigliato) o npm
-- **Python** (per compilare better-sqlite3)
-- **Build Tools**:
-  - Windows: Visual Studio Build Tools
-  - macOS: Xcode Command Line Tools (`xcode-select --install`)
-  - Linux: `build-essential`
+- **npm** or **yarn**
 
-## Installazione
+**No compilation needed!** Works on Mac, Windows, and Linux without build tools.
 
-### 1. Estrai l'archivio
+## Installation
+
+### 1. Extract the archive
 
 ```bash
 tar -xzf BricsCoin-Core-Source.tar.gz
 cd bricscoin-core
 ```
 
-### 2. Installa le dipendenze
+### 2. Install dependencies
 
+```bash
+npm install
+```
+or
 ```bash
 yarn install
 ```
 
-Questo installerà tutte le dipendenze e ricompilerà automaticamente `better-sqlite3` per Electron.
+### 3. Start the application
 
-### 3. Avvia l'applicazione
-
+```bash
+npm start
+```
+or
 ```bash
 yarn start
 ```
 
-## Utilizzo
+## Usage
 
-### Crea un Nuovo Wallet
-1. Vai nella sezione **Wallet**
-2. Clicca **Nuovo Wallet**
-3. **SALVA LE 12 PAROLE** - Sono l'unico modo per recuperare i tuoi fondi!
-
-### Importa un Wallet Esistente
-1. Vai nella sezione **Wallet**
-2. Clicca **Importa**
-3. Inserisci le 12 parole della seed phrase
+### Create a New Wallet
+1. Go to **Wallet** section
+2. Click **New Wallet**
+3. **SAVE THE 12 WORDS** - They are the only way to recover your funds!
 
 ### Mining
-1. Vai nella sezione **Mining**
-2. Seleziona un wallet per ricevere le ricompense
-3. Clicca **Avvia Mining**
+1. Go to **Mining** section
+2. Select a wallet to receive rewards
+3. Click **Start Mining**
+4. Mined blocks will appear on https://bricscoin26.org
 
-### Sincronizzazione
-La blockchain si sincronizza automaticamente all'avvio. Puoi forzare una sincronizzazione dal menu **Blockchain > Sincronizza**.
+### Sync
+The blockchain syncs automatically on startup and every 30 seconds.
 
-## Build Eseguibili
+## Important
 
-Per creare pacchetti installabili:
+- Blocks mined with BricsCoin Core are **real** and visible on the main network
+- Transactions are sent to the **real** blockchain
+- Your wallet balance is fetched from the main network
 
-```bash
-# Windows
-yarn build:win
+## Support
 
-# macOS  
-yarn build:mac
+- **Website**: https://bricscoin26.org
+- **Node Guide**: https://bricscoin26.org/node
 
-# Linux
-yarn build:linux
-```
+## License
 
-I file saranno creati nella cartella `dist/`.
-
-## Struttura File
-
-```
-bricscoin-core/
-├── main.js          # Processo principale Electron
-├── preload.js       # Script preload (bridge sicuro)
-├── index.html       # Interfaccia utente
-├── src/
-│   └── blockchain.js # Logica blockchain e wallet
-├── icons/           # Icone applicazione
-└── package.json     # Configurazione
-```
-
-## Seed Nodes
-
-BricsCoin Core si connette automaticamente ai seguenti nodi:
-
-- `https://bricscoin26.org` (Nodo principale)
-
-Puoi aggiungere altri nodi dalla sezione **Rete**.
-
-## Supporto
-
-- **Sito Web**: https://bricscoin26.org
-- **Guida Nodo**: https://bricscoin26.org/node
-
-## Licenza
-
-MIT License - Codice open source
+MIT License - Open source
