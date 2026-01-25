@@ -268,7 +268,7 @@ export default function Network() {
         <StatCard
           icon={Shield}
           title="Difficulty"
-          value={stats?.current_difficulty || 4}
+          value={stats?.current_difficulty?.toLocaleString() || "-"}
           subtitle="Leading zeros required"
           color="orange"
           delay={3}
