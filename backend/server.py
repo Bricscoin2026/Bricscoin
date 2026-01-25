@@ -1254,12 +1254,62 @@ async def download_file(filename: str):
 # Include the router
 app.include_router(api_router)
 
+# Security Headers Middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        # Security headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        
+        # Remove server header
+        if "server" in response.headers:
+            del response.headers["server"]
+        
+        return response
+
+# IP Blocking Middleware
+class IPBlockingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        client_ip = get_remote_address(request)
+        
+        # Check if IP is blacklisted
+        if client_ip in ip_blacklist:
+            if datetime.now(timezone.utc).timestamp() < ip_blacklist[client_ip].timestamp():
+                security_logger.warning(f"Blocked request from blacklisted IP: {client_ip}")
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Access temporarily blocked due to suspicious activity"}
+                )
+            else:
+                del ip_blacklist[client_ip]
+        
+        response = await call_next(request)
+        return response
+
+# Add security middlewares
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(IPBlockingMiddleware)
+
+# CORS Middleware - Restricted to allowed origins
+cors_origins = os.environ.get('CORS_ORIGINS', 'https://bricscoin26.org').split(',')
+# Clean up origins
+cors_origins = [origin.strip() for origin in cors_origins if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=cors_origins,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+    expose_headers=["X-Request-ID"],
+    max_age=600,  # Cache preflight for 10 minutes
 )
 
 # Configure logging
@@ -1268,6 +1318,12 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Security logger with separate handler
+security_handler = logging.StreamHandler()
+security_handler.setLevel(logging.WARNING)
+security_handler.setFormatter(logging.Formatter('%(asctime)s - SECURITY - %(levelname)s - %(message)s'))
+security_logger.addHandler(security_handler)
 
 @app.on_event("startup")
 async def startup_event():
