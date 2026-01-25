@@ -10,6 +10,7 @@ import Network from "./pages/Network";
 import TransactionDetail from "./pages/TransactionDetail";
 import Downloads from "./pages/Downloads";
 import RunNode from "./pages/RunNode";
+import About from "./pages/About";
 import "./App.css";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="network" element={<Network />} />
             <Route path="downloads" element={<Downloads />} />
             <Route path="node" element={<RunNode />} />
+            <Route path="about" element={<About />} />
           </Route>
         </Routes>
       </BrowserRouter>
