@@ -259,21 +259,6 @@ ipcMain.handle('send-transaction', async (event, { fromAddress, toAddress, amoun
   return result;
 });
 
-// Broadcast transazione ai peer
-async function broadcastTransaction(tx) {
-  for (const peer of blockchain.peers) {
-    try {
-      await fetch(`${peer}/api/transactions/new`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tx)
-      });
-    } catch (e) {
-      console.error(`Failed to broadcast to ${peer}:`, e.message);
-    }
-  }
-}
-
 // Avvia mining
 ipcMain.handle('start-mining', async (event, minerAddress) => {
   if (isMining) return { success: false, message: 'Already mining' };
