@@ -14,7 +14,6 @@ import { Button } from "../components/ui/button";
 import { Skeleton } from "../components/ui/skeleton";
 import { getNetworkStats, getBlocks } from "../lib/api";
 import { motion } from "framer-motion";
-import { useLanguage } from "../context/LanguageContext";
 
 function StatCard({ icon: Icon, title, value, subtitle, delay = 0 }) {
   return (
@@ -43,7 +42,7 @@ function StatCard({ icon: Icon, title, value, subtitle, delay = 0 }) {
   );
 }
 
-function BlockRow({ block, index, t }) {
+function BlockRow({ block, index }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -59,26 +58,27 @@ function BlockRow({ block, index, t }) {
             <Blocks className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="font-mono text-sm">{t('block')} #{block.index}</p>
-            <p className="text-xs text-muted-foreground font-mono hash-truncate">
-              {block.hash}
+            <p className="font-medium">Block #{block.index}</p>
+            <p className="text-sm text-muted-foreground font-mono">
+              {block.hash?.substring(0, 16)}...
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-sm">{block.transactions?.length || 0} {t('txs')}</p>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {new Date(block.timestamp).toLocaleString()}
+          </p>
           <p className="text-xs text-muted-foreground">
-            {new Date(block.timestamp).toLocaleTimeString()}
+            {block.transactions?.length || 0} txs
           </p>
         </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </Link>
     </motion.div>
   );
 }
 
 export default function Dashboard() {
-  const { t } = useLanguage();
   const [stats, setStats] = useState(null);
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ export default function Dashboard() {
       try {
         const [statsRes, blocksRes] = await Promise.all([
           getNetworkStats(),
-          getBlocks(5),
+          getBlocks(5)
         ]);
         setStats(statsRes.data);
         setBlocks(blocksRes.data.blocks);
@@ -106,10 +106,14 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-32 bg-card" />
+            <Card key={i} className="bg-card border-white/10">
+              <CardContent className="p-6">
+                <Skeleton className="h-20 bg-muted/20" />
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -117,31 +121,32 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8" data-testid="dashboard">
+    <div className="space-y-6" data-testid="dashboard">
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-8"
       >
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-black gold-text mb-4">
-          {t('heroTitle')}
+        <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text mb-4">
+          BRICSCOIN
         </h1>
-        <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-          {t('heroSubtitle')}
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
+          Decentralized cryptocurrency powered by SHA256 Proof-of-Work. Join the global mining network today.
         </p>
-        <div className="flex justify-center gap-4 mt-6">
-          <Link to="/mining">
-            <Button className="gold-button rounded-sm">
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button asChild className="gold-button rounded-sm" data-testid="start-mining-btn">
+            <Link to="/mining">
               <Pickaxe className="w-4 h-4 mr-2" />
-              {t('startMining')}
-            </Button>
-          </Link>
-          <Link to="/wallet">
-            <Button variant="outline" className="rounded-sm border-white/20">
-              {t('createWallet')}
-            </Button>
-          </Link>
+              Start Mining
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="create-wallet-btn">
+            <Link to="/wallet">
+              <Coins className="w-4 h-4 mr-2" />
+              Create Wallet
+            </Link>
+          </Button>
         </div>
       </motion.div>
 
@@ -149,30 +154,30 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Coins}
-          title={t('circulatingSupply')}
+          title="Circulating Supply"
           value={`${stats?.circulating_supply?.toLocaleString() || 0} BRICS`}
-          subtitle={`${t('ofMax').replace('{max}', (21000000).toLocaleString())}`}
+          subtitle={`of ${(21000000).toLocaleString()} max`}
           delay={0}
         />
         <StatCard
           icon={TrendingUp}
-          title={t('remainingSupply')}
+          title="Remaining to Mine"
           value={`${stats?.remaining_supply?.toLocaleString() || 0} BRICS`}
-          subtitle={`${t('ofMax').replace('{max}', (21000000).toLocaleString())}`}
+          subtitle={`of ${(21000000).toLocaleString()} max`}
           delay={1}
         />
         <StatCard
           icon={Blocks}
-          title={t('totalBlocks')}
+          title="Total Blocks"
           value={stats?.total_blocks?.toLocaleString() || 0}
-          subtitle={`${t('difficulty')}: ${stats?.current_difficulty || 0}`}
+          subtitle={`Difficulty: ${stats?.current_difficulty || 0}`}
           delay={2}
         />
         <StatCard
           icon={Activity}
-          title={t('pendingTransactions')}
+          title="Pending Transactions"
           value={stats?.pending_transactions || 0}
-          subtitle={t('inMempool')}
+          subtitle="In mempool"
           delay={3}
         />
       </div>
@@ -186,9 +191,9 @@ export default function Dashboard() {
         >
           <StatCard
             icon={Pickaxe}
-            title={t('blockReward')}
+            title="Block Reward"
             value={`${stats?.current_reward || 50} BRICS`}
-            subtitle={`${t('nextHalving')} ${stats?.next_halving_block?.toLocaleString() || 210000}`}
+            subtitle={`Next halving: Block ${stats?.next_halving_block?.toLocaleString() || 210000}`}
             delay={0}
           />
         </motion.div>
@@ -203,85 +208,28 @@ export default function Dashboard() {
         <Card className="bg-card border-white/10">
           <CardHeader className="border-b border-white/10">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 font-heading">
-                <Clock className="w-5 h-5 text-primary" />
-                {t('recentBlocks')}
-              </CardTitle>
-              <Link to="/explorer">
-                <Button variant="ghost" size="sm" className="text-primary">
-                  {t('viewAll')} <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
+              <CardTitle className="font-heading">Recent Blocks</CardTitle>
+              <Button asChild variant="ghost" size="sm" className="text-primary">
+                <Link to="/explorer">
+                  View All
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Link>
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {blocks.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
-                {t('noBlocksYet')}
+                No blocks mined yet. Be the first to mine!
               </div>
             ) : (
-              blocks.map((block, idx) => (
-                <BlockRow key={block.index} block={block} index={idx} t={t} />
+              blocks.map((block, index) => (
+                <BlockRow key={block.index} block={block} index={index} />
               ))
             )}
           </CardContent>
         </Card>
       </motion.div>
-
-      {/* Network Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="bg-card border-white/10 h-full">
-            <CardContent className="p-6">
-              <h3 className="font-heading font-bold text-lg mb-4">{t('halvingSchedule')}</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">{t('currentReward')}</span>
-                  <span className="font-mono text-primary">{stats?.current_reward || 50} BRICS</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">{t('blocksUntilHalving')}</span>
-                  <span className="font-mono">{((stats?.next_halving_block || 210000) - (stats?.total_blocks || 0)).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">{t('halvingInterval')}</span>
-                  <span className="font-mono">210,000 {t('block').toLowerCase()}s</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card className="bg-card border-white/10 h-full">
-            <CardContent className="p-6">
-              <h3 className="font-heading font-bold text-lg mb-4">{t('miningInfo')}</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">{t('algorithm')}</span>
-                  <span className="font-mono text-primary">SHA256</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">{t('currentDifficulty')}</span>
-                  <span className="font-mono">{stats?.current_difficulty || 4}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">{t('targetBlockTime')}</span>
-                  <span className="font-mono">10 {t('minutes')}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
     </div>
   );
 }
