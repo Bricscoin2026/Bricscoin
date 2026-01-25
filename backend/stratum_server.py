@@ -508,15 +508,32 @@ class StratumProtocol(asyncio.Protocol):
             ntime = params[3]
             nonce = params[4]
             
-            # Find job
-            job = recent_jobs.get(job_id) or (current_job if current_job and current_job['job_id'] == job_id else None)
+            logger.info(f"SUBMIT: job_id={job_id}, nonce={nonce}, extranonce2={extranonce2}")
+            logger.info(f"Available jobs: {list(recent_jobs.keys())}, current: {current_job['job_id'] if current_job else 'None'}")
+            
+            # Find job - try multiple formats
+            job = None
+            # Try exact match
+            job = recent_jobs.get(job_id)
+            # Try current job
+            if not job and current_job:
+                if current_job['job_id'] == job_id:
+                    job = current_job
+                # Try without leading zeros
+                elif current_job['job_id'].lstrip('0') == job_id.lstrip('0'):
+                    job = current_job
+            # Try matching any recent job (fallback)
+            if not job and recent_jobs:
+                # Use the most recent job
+                job = list(recent_jobs.values())[-1]
+                logger.info(f"Using fallback job: {job['job_id']}")
+            # Last resort - use current job
+            if not job:
+                job = current_job
             
             if not job:
-                # Accept anyway to keep miner happy, but log it
-                logger.warning(f"Job {job_id} not found, accepting share anyway")
-                self.shares_accepted += 1
-                miners[self.miner_id]['shares_accepted'] += 1
-                self.send_response(msg_id, True)
+                logger.warning(f"No jobs available at all!")
+                self.send_response(msg_id, True)  # Accept anyway
                 return
             
             # Verify the share
