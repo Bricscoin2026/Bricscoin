@@ -1,105 +1,132 @@
-<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin.
+<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project has since evolved based on user feedback.
 
 **PRODUCT REQUIREMENTS:**
-- **Blockchain Core:** Proof of Work (PoW) consensus, SHA256 hashing algorithm, a total supply of 21,000,000 coins, dynamic difficulty adjustment, and a block reward halving mechanism similar to Bitcoin.
-- **Decentralization:** The network must be decentralized, allowing anyone in the world to run a node and participate in mining. A seed node system for P2P discovery is required.
-- **Mining:** Support for both browser-based mining and hardware mining via ASICs (e.g., Bitaxe, Nerdminer) through the Stratum protocol.
-- **Wallet:** An advanced, multi-platform wallet for Windows, Mac, Linux, Android, and iOS to allow users to store, send, and receive BricsCoin. The wallets should be downloadable.
-- **Deployment:** The entire application (web app, API, Stratum server) should be deployed on the user's Hetzner server.
-- **Source Code:** The project's source code should be publicly available on the user's GitHub repository.
-- **Documentation:** A multilingual how-to guide (Italian, English, French, German, Chinese, Japanese, Russian, Spanish, Turkish) explaining the project, how to get the code, and how to mine.
+- **Blockchain Core:** Proof of Work (PoW) consensus, SHA256 hashing algorithm, a total supply of 21,000,000 coins, dynamic difficulty adjustment, and a block reward halving mechanism.
+- **Decentralization:** The network must be fully decentralized. Initially, this was a seed-node model, but the user has now requested a BricsCoin Core style desktop wallet that functions as a full node, stores the blockchain locally, and participates in the P2P network, ensuring the blockchain survives even if the main server goes offline.
+- **Mining:** Support for both browser-based mining (in a background web worker) and hardware mining via ASICs (e.g., Bitaxe, Nerdminer) through the Stratum protocol.
+- **Wallet:**
+    - A web wallet integrated into the main site.
+    - A new BricsCoin Core full-node desktop wallet for Windows, Mac, and Linux.
+    - Wallets must support creation, sending/receiving, and recovery via a 12-word mnemonic seed phrase (BIP39).
+- **Premine:** A one-time premine of 1,000,000 BRICS to a user-specified address was requested and completed.
+- **Deployment & Domain:** The web application and seed node are deployed on the user's Hetzner server and accessible via the domain . The Stratum server should be accessible via a subdomain.
+- **UI/UX:** The website must have a Matrix style animated background, use the user-provided coin logo (without a white square), and be fully multilingual (Italian and English implemented so far).
+- **Source Code:** The project's source code should be publicly available on GitHub (currently blocked).
+- **Documentation:** The site must include a Run a Node page with instructions and a guide for setting up Stratum mining.
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack BricsCoin application is deployed and running on the user's Hetzner server (IP: ).
-- **Backend:** A FastAPI application serves the main API, P2P node communication, and file downloads. It uses MongoDB as its database.
-- **Frontend:** A React-based web application provides a dashboard, blockchain explorer, web wallet (as a PWA for mobile), and a browser-based mining interface.
-- **Stratum Server:** A separate Python server handles connections from ASIC miners, enabling hardware-based mining.
-- **Decentralization:** The Hetzner server is configured as the primary seed node. The repository contains a  file for other users to easily spin up their own nodes, which connect to the seed.
-- **Wallets:** Executable wallets are available for download directly from the server's API:
-    - Linux:  file.
-    - Windows: A zipped folder of the unpacked application.
-    - Mac: A zipped folder of the source code for manual execution.
-- **Documentation:** A multilingual HTML page explaining the project has been created and is hosted on the server.
+A full-stack BricsCoin application is deployed and running on the user's Hetzner server (), accessible via  and the official domain .
+- **Backend:** A FastAPI application serves the main API, P2P node communication, and file downloads. It uses MongoDB as its database. It has been updated to support BIP39 mnemonic seed phrases for wallet creation and import. A premine transaction of 1,000,000 BRICS has been added to the genesis block.
+- **Frontend:** A React web app with a Matrix background and updated logo. It includes a dashboard, explorer, web wallet, background browser mining, a downloads page, and a Run a Node guide. It is partially multilingual (EN/IT).
+- **Stratum Server:** A Python server handles ASIC miner connections. It has been significantly improved for compatibility with NerdMiners, handling variable difficulty and malformed requests.
+- **Domain:** The domain  is configured via Cloudflare (in Flexible SSL mode) to point to the Hetzner server. Nginx is set up as a reverse proxy.
+- **BricsCoin Core Project:** A new project for a full-node desktop wallet () has been scaffolded with Electron and NeDB, but contains no functional logic yet.
 
 **Last working item**:
-- Last item agent was working: The agent was creating an API endpoint () to serve the new multilingual documentation page () from the Hetzner server. The agent added the necessary code to  and uploaded the documentation file.
+- Last item agent was working: Scaffolding the new **BricsCoin Core** desktop wallet application to fulfill the user's request for true decentralization. The agent created the project structure, , installed initial dependencies (, ), and created placeholder files for the main process (), blockchain logic (), preload script (), and UI ().
 - Status: IN PROGRESS
 - Agent Testing Done: N
-- Which testing method agent to use? backend testing agent. The agent must verify that the new endpoint is live and serves the correct content by executing a  command on the Hetzner server.
+- Which testing method agent to use? This is a large feature. After building the core functionalities (wallet creation, DB storage, P2P sync), the  will be required to build and test the application on different platforms.
 - User Testing Done: N
 
 **All Pending/In progress Issue list**:
 - Issue 1: GitHub Account Suspended (P0)
 - Issue 2: Mac Wallet Build is Incomplete (P1)
 - Issue 3: Windows Wallet Build is not a proper installer (P2)
+- Issue 4: NerdMiner mining not fully functional (P1)
+- Issue 5: Web miner fails to submit found blocks (P2)
+- Issue 6: Stratum server not configured with domain name (P2)
 
 Issues Detail:
 - Issue 1:
-    - Attempted fixes: The agent tried to push updates to the user's repository () but received a 403 Forbidden - account suspended error. The agent advised the user to contact GitHub support or use an alternative account.
-    - Next debug checklist:
-        - Ask the user for an update on their GitHub account status.
-        - If unresolved, ask the user to provide a new GitHub account and a Personal Access Token with  and  scopes.
-    - Why fix this issue and what will be achieved with the fix?: This is a critical blocker. Fixing it will allow for proper source code management, version control, automated builds via GitHub Actions, and will make the project accessible to the community as requested.
+    - Attempted fixes: Push attempts fail with a 403 error. Agent confirmed with the user that the account is suspended.
+    - Next debug checklist: Ask the user for an update on their GitHub account status. If unresolved, request a new GitHub account and Personal Access Token.
+    - Why fix this issue and what will be achieved with the fix?: Critical blocker for source code backup, community collaboration, and automated CI/CD builds for desktop wallets.
     - Status: BLOCKED
     - Is recurring issue? Y
     - Should Test frontend/backend/both after fix? N/A
-    - Blocked on other issue: Blocked on user action to resolve their GitHub account suspension.
+    - Blocked on other issue: User action.
 
-- Issue 2:
-    - Attempted fixes: The agent could not build a  file for macOS because the build environment is ARM-based Linux, and cross-compilation requires a native macOS environment. The workaround was to provide a zip file with the source code for users to build manually.
-    - Next debug checklist:
-        - Once the GitHub issue is resolved, complete the  file to use a  runner to build the  file automatically.
-        - Upload the resulting  file as a release artifact on GitHub.
-    - Why fix this issue and what will be achieved with the fix?: To provide a user-friendly, one-click installation experience for Mac users, as per the original request.
+- Issue 2 & 3:
+    - Attempted fixes: Workarounds (zipped source/unpacked folder) were provided. Proper builds require native OS environments.
+    - Next debug checklist: Implement a GitHub Actions workflow () using  and  runners once the GitHub issue is resolved.
+    - Why fix this issue and what will be achieved with the fix?: Provide standard, user-friendly installers for Mac (.dmg) and Windows (.exe).
     - Status: BLOCKED
     - Is recurring issue? N
     - Should Test frontend/backend/both after fix? N/A
-    - Blocked on other issue: Issue 1: GitHub Account Suspended
+    - Blocked on other issue: Issue 1: GitHub Account Suspended.
 
-- Issue 3:
-    - Attempted fixes: The agent failed to build a proper  installer on the Hetzner (x86 Linux) server due to issues with Wine. The workaround was to zip the  folder.
+- Issue 4:
+    - Attempted fixes: The Stratum server was heavily refactored to support  and handle malformed data. The agent confirmed the NerdMiner connects and has its difficulty set, but the user reports hashrate remains at 0.
     - Next debug checklist:
-        - Once the GitHub issue is resolved, update the  to use a  runner to build a proper  installer.
-        - Upload the  as a release artifact.
-    - Why fix this issue and what will be achieved with the fix?: To provide a standard and trusted installer for Windows users.
-    - Status: BLOCKED
+        - Add extensive logging to the  function in  to inspect the exact shares being received from the NerdMiner.
+        - Verify the job format sent by  is fully compatible with NerdMiner firmware.
+        - Temporarily lower the main blockchain difficulty in  to 1 to see if a block can be found.
+    - Why fix this issue and what will be achieved with the fix?: Enables hardware mining, a key requirement for the project's legitimacy and network security.
+    - Status: IN PROGRESS
+    - Is recurring issue? Y
+    - Should Test frontend/backend/both after fix? backend
+
+- Issue 5:
+    - Attempted fixes: None. The issue was observed in logs () after the web worker found a valid hash.
+    - Next debug checklist:
+        - Check the browser console logs on the mining page when a block is found.
+        - Inspect the  function in  and the data format it sends.
+        - Compare this payload with the expected format in the  endpoint in . The issue is likely a data mismatch.
+    - Why fix this issue and what will be achieved with the fix?: Allows users to contribute to the network and earn rewards via browser mining.
+    - Status: NOT STARTED
+    - Is recurring issue? N
+    - Should Test frontend/backend/both after fix? both
+
+- Issue 6:
+    - Attempted fixes: None.
+    - Next debug checklist:
+        - Instruct the user to add a new A record in their Cloudflare DNS settings for the subdomain .
+        - The record must point to the Hetzner IP .
+        - The Proxy status (orange cloud) for this specific record MUST be set to DNS only (grey cloud), as Cloudflare proxy does not support the TCP protocol used by Stratum.
+    - Why fix this issue and what will be achieved with the fix?: Provides a user-friendly, branded endpoint for miners instead of a raw IP address.
+    - Status: NOT STARTED
     - Is recurring issue? N
     - Should Test frontend/backend/both after fix? N/A
-    - Blocked on other issue: Issue 1: GitHub Account Suspended
 
 **In progress Task List**:
-- Task 1: Finalize and Verify the Multilingual Documentation (P0)
-    - Where to resume: The agent added the  endpoint to . The next step is to rebuild and restart the  Docker container on the Hetzner server to apply the changes.
-    - What will be achieved with this?: It will make the user-requested multilingual documentation accessible to everyone via a direct URL.
+- Task 1: Implement BricsCoin Core (Full-Node Desktop Wallet) (P0)
+    - Where to resume: The project is scaffolded at . The next steps are to build out the core logic:
+        1.  In : Implement blockchain logic using  for local file-based storage of blocks and transactions.
+        2.  In : Create Electron IPC handlers for UI actions (create wallet, get balance, send transaction, get sync status).
+        3.  In  and a new : Build the user interface to interact with the main process via the  bridge.
+        4.  Implement P2P logic for discovering peers and synchronizing the blockchain with other nodes.
+    - What will be achieved with this?: A standalone, resilient desktop wallet that makes the BricsCoin network truly decentralized, addressing the user's core request.
     - Status: IN PROGRESS
-    - Should Test frontend/backend/both after fix? backend
-    - Blocked on something: No
+    - Should Test frontend/backend/both after fix? both
+    - Blocked on something: No.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-    - **P0: Test P2P Synchronization:** Verify that the decentralization works as intended by simulating a new user running a node. This involves cloning the repo on a separate environment, running , and checking if the new node successfully connects to the seed node and syncs the blockchain.
-    - **P1: Create a Downloads Page:** Add a new page to the frontend that fetches the list of available wallet files from the  endpoint and displays them with user-friendly download links.
+    - **P1: Complete Multilingual Support**: Refactor all remaining pages (, , , etc.) to use the  and remove hardcoded English text.
+    - **P1: Test P2P Synchronization**: Once BricsCoin Core has basic P2P functionality, test the decentralization by running two instances and verifying they sync correctly.
 
 - **Future Tasks:**
-    - **P1: Implement GitHub Actions:** Once the GitHub account is restored, finalize the  workflow to automate the build and release of wallets for Windows, Mac, and Linux.
-    - **P2: Create a Landing Page:** As suggested by the agent, create a dedicated landing page to promote BricsCoin and onboard new users.
-    - **P2: Refactor Deployment:** Improve the Hetzner deployment scripts for better error handling and robustness.
+    - **P1: Finalize GitHub Actions**: Automate wallet builds for Windows, Mac, and Linux once the GitHub account is restored.
+    - **P2: Create a Landing Page:** Design a dedicated landing page to promote BricsCoin.
 
 **Completed work in this session**
-- **BricsCoin Blockchain:** Implemented the core logic for a PoW, SHA256-based blockchain.
-- **Full-Stack Application:** Created a FastAPI backend and React frontend with a dashboard, explorer, and web-based mining.
-- **P2P Decentralization:** Configured the application to run in a decentralized model with a main seed node and instructions for others to run their own nodes.
-- **ASIC Mining Support:** Implemented a Stratum protocol server to allow mining with hardware like ASICs.
-- **Hetzner Deployment:** Successfully deployed the entire stack (API, Frontend, Stratum, DB) to the user's Hetzner server using Docker.
-- **Source Code Push:** Pushed the initial version of the project to the user's GitHub repository.
-- **Desktop Wallet Creation:** Created an Electron-based desktop wallet application.
-- **Wallet Hosting:** Built wallet binaries for Linux/Windows and hosted them for download directly from the Hetzner server.
-- **Multilingual Documentation:** Created a multi-language HTML page with project details and instructions.
+- **Domain & SSL:** Successfully configured  with Cloudflare and Nginx on the Hetzner server.
+- **Wallet Overhaul:** Implemented BIP39 seed phrase generation and import for the web wallet.
+- **Premine:** Executed a 1,000,000 BRICS premine transaction into the genesis block.
+- **Frontend UI/UX:** Implemented the Matrix background, updated the logo to one without a background, and added a language switcher.
+- **Background Mining:** Migrated the browser miner to a Web Worker so it continues running when the tab is not active.
+- **Decentralization Guide:** Added a Run a Node page with detailed instructions for setting up a new community node.
+- **Stratum Server:** Heavily refactored the Stratum server for better compatibility with hardware miners like NerdMiner.
+- **Downloads Page:** Fixed and verified the Downloads page, which now correctly lists all available wallet builds.
+- **BricsCoin Core Scaffolding:** Created the initial project structure and files for the new full-node desktop wallet.
+- **Multilingual Framework:** Implemented a multilingual framework with EN/IT translations and applied it to the main layout, Dashboard, and Mining pages.
 
 **Earlier issues found/mentioned but not fixed**
-- None. The current pending issues (GitHub, Wallet Builds) were identified and are being tracked.
+- Web miner fails to submit found blocks (400 Bad Request).
+- NerdMiner connects but does not appear to successfully mine (user reports hashrate at 0).
 
 **Known issue recurrence from previous fork**
 - None.
@@ -108,13 +135,11 @@ Issues Detail:
 
 
 **Key Technical Concepts**
-- **Backend:** FastAPI, Python, MongoDB (via )
-- **Frontend:** React, JavaScript, Tailwind CSS
-- **Blockchain:** Proof of Work (PoW), SHA256, Dynamic Difficulty, Halving
-- **P2P:** REST API-based node registration and chain/transaction synchronization.
-- **Mining:** Stratum TCP protocol for hardware miners.
-- **Desktop Wallet:** Electron.js
-- **Deployment:** Docker, Docker Compose, Nginx (as reverse proxy in containers).
+- **Backend:** FastAPI, Python, MongoDB (), 
+- **Frontend:** React, JavaScript, Tailwind CSS, Web Workers
+- **Blockchain:** Proof of Work (PoW), SHA256, BIP39 ()
+- **Desktop Wallet:** Electron, NeDB (for )
+- **Deployment:** Docker, Docker Compose, Nginx, Cloudflare
 
 **key DB schema**
 - : 
@@ -122,69 +147,117 @@ Issues Detail:
 - : 
 
 **changes in tech stack**
-- None.
+- **Backend:** Added  library for BIP39 seed phrases.
+- **Frontend:** Implemented a Web Worker for background processing.
+- **New Project (BricsCoin Core):** Introduced  for the desktop app and  for local, file-based database storage.
+- **Deployment:** Added Cloudflare for DNS/Proxy and Nginx as a reverse proxy.
 
 **All files of reference**
-- : Core logic for API, P2P, and file downloads.
-- : Logic for ASIC mining connections.
-- : Defines all services for the main Hetzner deployment.
-- : Simplified compose file for community nodes.
-- : Contains scripts to build the desktop wallets.
-- : Contains all multilingual documentation.
-- : Contains the live configuration for the Hetzner server.
+- : Major changes to add seed phrase/import logic.
+- : Heavily refactored for NerdMiner compatibility.
+- : New file for background browser mining.
+- : Overhauled to support seed phrases and import.
+- : Overhauled to use the web worker and add Stratum info.
+- : New page to list wallet downloads.
+- : New page with guide for running a community node.
+- : New context for managing multilingual translations.
+- : Updated to include new navigation links and a language switcher.
+- : New directory for the full-node desktop wallet.
+- : Nginx configuration file on the Hetzner server.
 
 **Areas that need refactoring**
-- The wallet build process is highly manual and brittle. It should be fully automated via GitHub Actions once the account issue is resolved.
-- The file download logic in  and the file serving setup on the Hetzner server were implemented through trial and error. This could be streamlined and made more robust.
+- **Incomplete Multilingual Implementation:** Only a few pages have been converted to use the . All pages with user-facing text need to be refactored for a consistent experience.
+- **Deprecate :** The original Electron  is now functionally replaced by the web wallet and the future . It should be considered for removal to avoid confusion.
 
 **key api endpoints**
-- : Get blockchain stats.
-- : Get the full blockchain.
-- : Mine a new block.
-- : Create a new transaction.
-- : Get list of peer nodes.
-- : List available wallet downloads.
-- : Download a specific wallet file.
-- : View the multilingual documentation.
+- : Returns address and a new 12-word seed phrase.
+- : Imports a wallet from a seed phrase.
+- : Imports a wallet from a private key.
+- : Lists available wallet downloads (confirmed working).
 - : Stratum server for ASIC miners.
 
 **Critical Info for New Agent**
-- **DO NOT USE GITHUB:** The user's GitHub account () is suspended. All operations requiring  will fail. All work must be done directly on the Hetzner server until the user resolves this.
-- **HETZNER SSH ACCESS:** The agent has root SSH access to the production server at . The password () was shared in the chat. Use  for scripted access.
-- **WALLET BUILDS ARE MANUAL:** Wallet builds for Windows and Mac are problematic. The current builds are workarounds. A proper solution is blocked by the GitHub issue.
-- **LIVE DEPLOYMENT:** The application is live and publicly accessible. Any changes made on the Hetzner server will affect real users immediately. Proceed with caution.
+- **Primary Goal:** The user's highest priority is now the development of the  full-node wallet to achieve true decentralization.
+- **GitHub Block:** The user's GitHub account is suspended. Do not attempt to use usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add       Add file contents to the index
+   mv        Move or rename a file, a directory, or a symlink
+   restore   Restore working tree files
+   rm        Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect    Use binary search to find the commit that introduced a bug
+   diff      Show changes between commits, commit and working tree, etc
+   grep      Print lines matching a pattern
+   log       Show commit logs
+   show      Show various types of objects
+   status    Show the working tree status
+
+grow, mark and tweak your common history
+   branch    List, create, or delete branches
+   commit    Record changes to the repository
+   merge     Join two or more development histories together
+   rebase    Reapply commits on top of another base tip
+   reset     Reset current HEAD to the specified state
+   switch    Switch branches
+   tag       Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch     Download objects and refs from another repository
+   pull      Fetch from and integrate with another repository or a local branch
+   push      Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system.. This blocks automated builds.
+- **Two Environments:**
+    1.  **Live Web App:** Deployed on Hetzner () and accessed via . Changes to  or  must be deployed to Hetzner to be visible.
+    2.  **Local :** The new desktop app at  is developed locally in the agent environment.
+- **Cloudflare & Stratum:** Cloudflare proxies HTTP/S traffic to  but **does not** proxy the TCP traffic for the Stratum server. Miners **must** connect to the direct IP .
 
 **documents and test reports created in this job**
-- 
-- 
+-  (updated extensively)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requests a wallet for Mac and a solution for the GitHub problem.
-2.  **User:** Asks for a multilingual guide on how to mine, where to see the code, and project explanation.
-3.  **User:** Interrupts the agent, asking Why did you stop.
-4.  **User:** Tells the agent to Continue.
-5.  **User:** Informs the agent, I saved, now you can continue.
-6.  **User:** States, We can continue the project.
-7.  **User:** Provides a screenshot of their suspended GitHub account.
-8.  **User:** Asks It works but how do I mine, where do I find the wallets to download for PC and mobile?.
-9.  **User:** Provides a screenshot of the desired icon for the wallet.
-10. **User:** Asks for help with pushing to his GitHub .
+1.  **User:** Requests help setting up a domain for the site.
+2.  **User:** Confirms they don't have a domain.
+3.  **User:** Agrees with the choice of Cloudflare.
+4.  **User:** Provides the domain name .
+5.  **User:** Confirms they have added the DNS records on Cloudflare.
+6.  **User:** Reports the domain is not working (Error 521).
+7.  **User:** Reports that after the domain was fixed, nothing else works (wallet, mining, downloads).
+8.  **User:** Reports Stratum mining stopped working after domain setup.
+9.  **User:** Asks if the blockchain is truly decentralized.
+10. **User:** Agrees with the plan to create a full-node BricsCoin Core wallet to achieve true decentralization and asks the agent to proceed.
 
 **Project Health Check:**
 - **Broken:**
-    - GitHub repository access (account suspended).
-    - Automated wallet build process (depends on GitHub Actions).
+    - GitHub repository access.
+    - Automated wallet build/release pipeline.
 - **Mocked:**
     - None.
 
 **3rd Party Integrations**
-- None.
+- **Cloudflare:** Used for DNS management and as an HTTP/S proxy/CDN for the domain .
 
 **Testing status**
 - Testing agent used after significant changes: NO
 - Troubleshoot agent used after agent stuck in loop: NO
 - Test files created: []
-- Known regressions: []
+- Known regressions: Browser mining submission is broken. NerdMiner mining is not confirmed to be working.
 
 **Credentials to test flow:**
 - **Hetzner Server SSH:**
@@ -193,5 +266,5 @@ Issues Detail:
     - Password: 
 
 **What agent forgot to execute**
-- The agent did not fully test the P2P synchronization by launching a secondary node and confirming it connected to the seed and synced the chain.
-- The agent did not verify the final implementation of the  endpoint after adding it to the code on the server.</analysis>
+- The agent identified the  error when the web miner tries to submit a block but did not investigate or fix it.
+- The agent did not guide the user on how to create the  subdomain with proxying disabled.</analysis>
