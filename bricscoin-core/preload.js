@@ -1,46 +1,46 @@
 // BricsCoin Core - Preload Script
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Esponi API sicure al renderer
 contextBridge.exposeInMainWorld('bricscoin', {
-  // Statistiche
+  // Stats
   getStats: () => ipcRenderer.invoke('get-stats'),
+  getNetworkStats: () => ipcRenderer.invoke('get-network-stats'),
   
-  // Blocchi
-  getBlocks: (params) => ipcRenderer.invoke('get-blocks', params),
+  // Blocks
+  getBlocks: (limit, offset) => ipcRenderer.invoke('get-blocks', { limit, offset }),
   getBlock: (height) => ipcRenderer.invoke('get-block', height),
   
   // Wallet
   createWallet: (name) => ipcRenderer.invoke('create-wallet', name),
-  importWallet: (data) => ipcRenderer.invoke('import-wallet', data),
+  importWallet: (seedPhrase, name) => ipcRenderer.invoke('import-wallet', { seedPhrase, name }),
   getWallets: () => ipcRenderer.invoke('get-wallets'),
   getWallet: (address) => ipcRenderer.invoke('get-wallet', address),
   getBalance: (address) => ipcRenderer.invoke('get-balance', address),
-  
-  // Transazioni
-  sendTransaction: (data) => ipcRenderer.invoke('send-transaction', data),
-  getMempool: () => ipcRenderer.invoke('get-mempool'),
+  sendTransaction: (fromAddress, toAddress, amount) => 
+    ipcRenderer.invoke('send-transaction', { fromAddress, toAddress, amount }),
   
   // Mining
-  startMining: (address) => ipcRenderer.invoke('start-mining', address),
+  startMining: (minerAddress) => ipcRenderer.invoke('start-mining', minerAddress),
   stopMining: () => ipcRenderer.invoke('stop-mining'),
   
-  // Network
-  sync: () => ipcRenderer.invoke('sync'),
-  addPeer: (url) => ipcRenderer.invoke('add-peer', url),
-  getPeers: () => ipcRenderer.invoke('get-peers'),
+  // Sync
+  syncBlockchain: () => ipcRenderer.invoke('sync-blockchain'),
   
-  // Eventi
-  onNewBlock: (callback) => ipcRenderer.on('new-block', (_, data) => callback(data)),
-  onNewTransaction: (callback) => ipcRenderer.on('new-transaction', (_, data) => callback(data)),
-  onMiningStarted: (callback) => ipcRenderer.on('mining-started', () => callback()),
-  onMiningStopped: (callback) => ipcRenderer.on('mining-stopped', () => callback()),
-  onMiningProgress: (callback) => ipcRenderer.on('mining-progress', (_, data) => callback(data)),
-  onBlockMined: (callback) => ipcRenderer.on('block-mined', (_, data) => callback(data)),
-  onSyncStarted: (callback) => ipcRenderer.on('sync-started', () => callback()),
-  onSyncProgress: (callback) => ipcRenderer.on('sync-progress', (_, data) => callback(data)),
-  onSyncComplete: (callback) => ipcRenderer.on('sync-complete', (_, data) => callback(data)),
-  onMenuAction: (callback) => ipcRenderer.on('menu-action', (_, action) => callback(action)),
+  // Events
+  on: (channel, callback) => {
+    const validChannels = [
+      'new-block', 'sync-started', 'sync-progress', 'sync-complete', 'sync-error',
+      'mining-started', 'mining-stopped', 'mining-progress', 'block-mined', 'mining-error',
+      'menu-action'
+    ];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.on(channel, (event, ...args) => callback(...args));
+    }
+  },
+  
+  removeAllListeners: (channel) => {
+    ipcRenderer.removeAllListeners(channel);
+  },
   
   // Info
   version: '1.0.0',
