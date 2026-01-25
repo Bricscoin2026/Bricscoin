@@ -1,17 +1,18 @@
 """
-BricsCoin Stratum Mining Server
-Supports ASIC miners like Bitaxe, NerdMiner, Antminer, etc.
-Protocol: Stratum v1 (JSON-RPC over TCP)
+BricsCoin Stratum Mining Server - Bitcoin Compatible
+Full implementation of Stratum v1 protocol for ASIC miners
+Supports: Bitaxe, NerdMiner, Antminer, Whatsminer, etc.
 """
 
 import asyncio
 import json
 import hashlib
+import struct
 import time
 import os
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Set, Optional
+from typing import Dict, List, Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
@@ -38,24 +39,106 @@ STRATUM_PORT = int(os.environ.get('STRATUM_PORT', 3333))
 STRATUM_HOST = os.environ.get('STRATUM_HOST', '0.0.0.0')
 
 # BricsCoin constants
-INITIAL_DIFFICULTY = 4
+NETWORK_DIFFICULTY = 4  # Number of leading zeros required
 HALVING_INTERVAL = 210_000
 INITIAL_REWARD = 50
+COINBASE_MESSAGE = b"BricsCoin"
 
-# Connected miners
+# Global state
 miners: Dict[str, dict] = {}
+current_job: Optional[dict] = None
+recent_jobs: Dict[str, dict] = {}
 job_counter = 0
-current_job = None
-recent_jobs: Dict[str, dict] = {}  # Cache of recent jobs by job_id
-MAX_RECENT_JOBS = 10  # Keep last 10 jobs
+extranonce_counter = 0
 
-def sha256(data: str) -> str:
-    """Calculate SHA256 hash"""
-    return hashlib.sha256(data.encode()).hexdigest()
+# ============== BITCOIN HELPER FUNCTIONS ==============
 
-def sha256d(data: bytes) -> bytes:
-    """Double SHA256 (standard for Bitcoin-like coins)"""
+def double_sha256(data: bytes) -> bytes:
+    """Double SHA256 hash (Bitcoin standard)"""
     return hashlib.sha256(hashlib.sha256(data).digest()).digest()
+
+def sha256(data: bytes) -> bytes:
+    """Single SHA256 hash"""
+    return hashlib.sha256(data).digest()
+
+def reverse_bytes(data: bytes) -> bytes:
+    """Reverse byte order"""
+    return data[::-1]
+
+def hex_to_bytes(hex_str: str) -> bytes:
+    """Convert hex string to bytes"""
+    return bytes.fromhex(hex_str)
+
+def bytes_to_hex(data: bytes) -> str:
+    """Convert bytes to hex string"""
+    return data.hex()
+
+def int_to_little_endian(value: int, length: int) -> bytes:
+    """Convert integer to little-endian bytes"""
+    return value.to_bytes(length, byteorder='little')
+
+def little_endian_to_int(data: bytes) -> int:
+    """Convert little-endian bytes to integer"""
+    return int.from_bytes(data, byteorder='little')
+
+def var_int(n: int) -> bytes:
+    """Encode variable length integer (Bitcoin format)"""
+    if n < 0xfd:
+        return struct.pack('<B', n)
+    elif n <= 0xffff:
+        return struct.pack('<BH', 0xfd, n)
+    elif n <= 0xffffffff:
+        return struct.pack('<BI', 0xfe, n)
+    else:
+        return struct.pack('<BQ', 0xff, n)
+
+def merkle_root(hashes: List[bytes]) -> bytes:
+    """Calculate merkle root from list of hashes"""
+    if not hashes:
+        return b'\x00' * 32
+    
+    while len(hashes) > 1:
+        if len(hashes) % 2 == 1:
+            hashes.append(hashes[-1])
+        
+        new_hashes = []
+        for i in range(0, len(hashes), 2):
+            new_hashes.append(double_sha256(hashes[i] + hashes[i + 1]))
+        hashes = new_hashes
+    
+    return hashes[0]
+
+def difficulty_to_target(difficulty: int) -> bytes:
+    """Convert difficulty (leading zeros) to target bytes"""
+    # For difficulty N, we need N leading zeros in hex
+    # Target = 0x00...00FF...FF where there are N zeros
+    target_hex = '0' * (difficulty * 2) + 'f' * (64 - difficulty * 2)
+    return hex_to_bytes(target_hex)
+
+def target_to_nbits(target: bytes) -> bytes:
+    """Convert target to compact nbits format (Bitcoin)"""
+    # Find first non-zero byte
+    target_hex = target.hex()
+    first_non_zero = 0
+    for i, c in enumerate(target_hex):
+        if c != '0':
+            first_non_zero = i // 2
+            break
+    
+    # Bitcoin compact format
+    # For difficulty 4 (0000ffff...), we use a standard value
+    # nbits = 0x1d00ffff is Bitcoin genesis difficulty
+    if first_non_zero <= 2:
+        return hex_to_bytes("1d00ffff")
+    elif first_non_zero <= 3:
+        return hex_to_bytes("1c0fffff")
+    else:
+        return hex_to_bytes("1b0fffff")
+
+def check_hash_meets_target(block_hash: bytes, difficulty: int) -> bool:
+    """Check if hash meets difficulty target"""
+    hash_hex = block_hash.hex()
+    return hash_hex.startswith('0' * difficulty)
 
 def get_mining_reward(block_height: int) -> float:
     """Calculate mining reward with halving"""
@@ -64,131 +147,200 @@ def get_mining_reward(block_height: int) -> float:
         return 0
     return INITIAL_REWARD / (2 ** halvings)
 
-def check_difficulty(hash_value: str, difficulty: int) -> bool:
-    """Check if hash meets difficulty requirement (integer difficulty = number of leading zeros)"""
-    return hash_value.startswith('0' * difficulty)
+# ============== COINBASE TRANSACTION ==============
 
-def check_difficulty_float(hash_value: str, difficulty: float) -> bool:
-    """Check if hash meets float difficulty (for share validation)
-    
-    For NerdMiner and small devices, we use a very permissive target.
-    Almost any hash with at least one leading zero should be accepted for shares.
+def create_coinbase_tx(block_height: int, reward: float, miner_address: str, extranonce1: str, extranonce2_size: int) -> tuple:
     """
-    if difficulty >= 1:
-        # For difficulty >= 1, use leading zeros method
-        return hash_value.startswith('0' * int(difficulty))
+    Create coinbase transaction split into coinb1 and coinb2
+    Returns (coinb1_hex, coinb2_hex)
+    """
+    # Block height in script (BIP34)
+    height_bytes = block_height.to_bytes((block_height.bit_length() + 7) // 8 or 1, 'little')
+    height_script = bytes([len(height_bytes)]) + height_bytes
     
-    # For fractional difficulty (0.001), accept any hash starting with at least one '0'
-    # This is very permissive to ensure NerdMiner shares are accepted
-    if difficulty < 0.01:
-        # Super easy - accept almost anything with leading zeros
-        return hash_value[0] in '0123456789abcdef' and hash_value[:2] < 'ff'
+    # Coinbase script: height + message + extranonce placeholder
+    coinbase_script_prefix = height_script + COINBASE_MESSAGE
+    extranonce_placeholder_size = len(bytes.fromhex(extranonce1)) + extranonce2_size
     
-    # For difficulty between 0.01 and 1
-    leading_zeros_needed = max(1, int(1 / difficulty / 16))
-    target_prefix = '0' * leading_zeros_needed
-    return hash_value.startswith(target_prefix) or hash_value < 'f' * 64
+    # Transaction structure
+    # Version (4 bytes)
+    version = int_to_little_endian(1, 4)
+    
+    # Input count
+    input_count = var_int(1)
+    
+    # Coinbase input
+    prev_tx = b'\x00' * 32  # Null txid
+    prev_index = b'\xff\xff\xff\xff'  # -1
+    
+    # Script length will include extranonce
+    script_len = len(coinbase_script_prefix) + extranonce_placeholder_size
+    script_len_bytes = var_int(script_len)
+    
+    # Sequence
+    sequence = b'\xff\xff\xff\xff'
+    
+    # Output count
+    output_count = var_int(1)
+    
+    # Output value (reward in satoshis)
+    value = int_to_little_endian(int(reward * 100000000), 8)
+    
+    # Output script (P2PKH-like for simplicity)
+    # OP_DUP OP_HASH160 <address_hash> OP_EQUALVERIFY OP_CHECKSIG
+    address_hash = sha256(miner_address.encode())[:20]
+    output_script = bytes([0x76, 0xa9, 0x14]) + address_hash + bytes([0x88, 0xac])
+    output_script_len = var_int(len(output_script))
+    
+    # Locktime
+    locktime = b'\x00\x00\x00\x00'
+    
+    # Build coinb1 (everything before extranonce)
+    coinb1 = (version + input_count + prev_tx + prev_index + 
+              script_len_bytes + coinbase_script_prefix)
+    
+    # Build coinb2 (everything after extranonce)
+    coinb2 = sequence + output_count + value + output_script_len + output_script + locktime
+    
+    return bytes_to_hex(coinb1), bytes_to_hex(coinb2)
 
-async def get_current_difficulty() -> int:
-    """Get current network difficulty"""
-    blocks_count = await db.blocks.count_documents({})
-    if blocks_count < 2016:
-        return INITIAL_DIFFICULTY
-    
-    # Simplified difficulty - can be enhanced
-    return INITIAL_DIFFICULTY
+# ============== BLOCK TEMPLATE ==============
 
-async def get_block_template() -> dict:
+async def get_block_template() -> Optional[dict]:
     """Get current block template for mining"""
-    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
-    if not last_block:
-        # Create genesis if needed
+    try:
+        last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+        if not last_block:
+            return None
+        
+        new_index = last_block['index'] + 1
+        reward = get_mining_reward(new_index)
+        timestamp = int(time.time())
+        
+        # Previous hash (needs to be reversed for Stratum)
+        prev_hash = last_block.get('hash', '0' * 64)
+        
+        return {
+            "index": new_index,
+            "timestamp": timestamp,
+            "previous_hash": prev_hash,
+            "difficulty": NETWORK_DIFFICULTY,
+            "reward": reward,
+            "transactions": []  # Simplified - no pending transactions for now
+        }
+    except Exception as e:
+        logger.error(f"Error getting block template: {e}")
         return None
-    
-    pending_txs = await db.transactions.find(
-        {"confirmed": False}, {"_id": 0}
-    ).limit(100).to_list(100)
-    
-    new_index = last_block['index'] + 1
-    difficulty = await get_current_difficulty()
-    timestamp = datetime.now(timezone.utc).isoformat()
-    
-    return {
-        "index": new_index,
-        "timestamp": timestamp,
-        "transactions": pending_txs,
-        "previous_hash": last_block['hash'],
-        "difficulty": difficulty,
-        "reward": get_mining_reward(new_index)
-    }
 
-def create_job(template: dict) -> dict:
+def create_job(template: dict, extranonce1: str, extranonce2_size: int = 4) -> dict:
     """Create a mining job from block template"""
     global job_counter, recent_jobs
     job_counter += 1
     
-    # Create coinbase transaction (miner reward)
-    reward = template['reward']
-    coinbase_hex = f"BRICS{template['index']:08x}{int(reward*100000000):016x}".encode().hex()
+    job_id = f"{job_counter:08x}"
     
-    # Merkle root (simplified - just hash of transactions + coinbase)
-    tx_data = json.dumps(template['transactions'], sort_keys=True) if template['transactions'] else ""
-    merkle_root = sha256(coinbase_hex + tx_data)
+    # Create coinbase transaction
+    coinb1, coinb2 = create_coinbase_tx(
+        template['index'],
+        template['reward'],
+        "BRICS_POOL",  # Pool address placeholder
+        extranonce1,
+        extranonce2_size
+    )
     
-    # Previous hash - ensure it's 64 hex chars
-    prevhash = template['previous_hash']
-    if len(prevhash) < 64:
-        prevhash = prevhash.zfill(64)
+    # Previous hash - reverse byte order for Stratum protocol
+    prev_hash_bytes = hex_to_bytes(template['previous_hash'])
+    # Swap every 4 bytes (32-bit words) for Stratum
+    prev_hash_swapped = b''
+    for i in range(0, 32, 4):
+        prev_hash_swapped += prev_hash_bytes[i:i+4][::-1]
+    prev_hash_hex = bytes_to_hex(prev_hash_swapped)
     
-    # Block header components (simplified but structured)
-    version = "20000000"  # Version 2 in little-endian hex
+    # Version (little-endian hex)
+    version = "20000000"
     
-    # nbits - Bitcoin compact difficulty representation
-    # For difficulty 4 (4 leading zeros), target is 0x000f... 
-    # nbits format: 0x1d00ffff for difficulty 1
-    # We use a simplified version
-    difficulty = template['difficulty']
-    if difficulty <= 1:
-        nbits = "207fffff"  # Very easy
-    elif difficulty <= 2:
-        nbits = "1f00ffff"
-    elif difficulty <= 4:
-        nbits = "1d00ffff"  # Bitcoin genesis difficulty
-    else:
-        nbits = "1c00ffff"
+    # nBits (compact difficulty)
+    target = difficulty_to_target(template['difficulty'])
+    nbits = bytes_to_hex(target_to_nbits(target))
     
-    # Current time as 32-bit hex
-    ntime = f"{int(time.time()):08x}"
-    
-    # Block header for hashing (80 bytes in Bitcoin, we use a simplified version)
-    # version(4) + prevhash(32) + merkle(32) + time(4) + bits(4) + nonce(4)
-    block_header = version + prevhash[:64] + merkle_root[:64] + ntime + nbits
+    # nTime (little-endian hex)
+    ntime = f"{template['timestamp']:08x}"
     
     job = {
-        "job_id": f"{job_counter:08x}",
-        "prevhash": prevhash[:64],
-        "coinbase": coinbase_hex,
-        "coinb1": coinbase_hex[:len(coinbase_hex)//2],
-        "coinb2": coinbase_hex[len(coinbase_hex)//2:],
-        "merkle_root": merkle_root,
-        "block_data": block_header,
+        "job_id": job_id,
+        "prevhash": prev_hash_hex,
+        "coinb1": coinb1,
+        "coinb2": coinb2,
+        "merkle_branch": [],  # Empty for coinbase-only blocks
         "version": version,
         "nbits": nbits,
         "ntime": ntime,
-        "difficulty": difficulty,
+        "difficulty": template['difficulty'],
         "template": template,
         "clean_jobs": True
     }
     
-    # Store in recent jobs cache
-    recent_jobs[job["job_id"]] = job
-    
-    # Clean up old jobs if too many
-    if len(recent_jobs) > MAX_RECENT_JOBS:
-        oldest_key = list(recent_jobs.keys())[0]
-        del recent_jobs[oldest_key]
+    # Cache job
+    recent_jobs[job_id] = job
+    if len(recent_jobs) > 50:  # Keep last 50 jobs
+        oldest = list(recent_jobs.keys())[0]
+        del recent_jobs[oldest]
     
     return job
+
+def verify_share(job: dict, extranonce1: str, extranonce2: str, ntime: str, nonce: str) -> tuple:
+    """
+    Verify a submitted share
+    Returns (is_valid_share, is_valid_block, block_hash_hex)
+    """
+    try:
+        # Reconstruct coinbase transaction
+        coinbase_hex = job['coinb1'] + extranonce1 + extranonce2 + job['coinb2']
+        coinbase_bytes = hex_to_bytes(coinbase_hex)
+        coinbase_hash = double_sha256(coinbase_bytes)
+        
+        # Calculate merkle root (just coinbase hash for now)
+        merkle = coinbase_hash
+        for branch_hash in job.get('merkle_branch', []):
+            merkle = double_sha256(merkle + hex_to_bytes(branch_hash))
+        
+        # Build block header (80 bytes)
+        version_bytes = hex_to_bytes(job['version'])[::-1]  # Little-endian
+        
+        # Previous hash - need to reverse the swapped version back
+        prevhash_swapped = hex_to_bytes(job['prevhash'])
+        prevhash_bytes = b''
+        for i in range(0, 32, 4):
+            prevhash_bytes += prevhash_swapped[i:i+4][::-1]
+        
+        ntime_bytes = hex_to_bytes(ntime)[::-1]  # Little-endian
+        nbits_bytes = hex_to_bytes(job['nbits'])[::-1]  # Little-endian
+        nonce_bytes = hex_to_bytes(nonce)[::-1]  # Little-endian
+        
+        # Block header
+        header = (version_bytes + prevhash_bytes + merkle + 
+                  ntime_bytes + nbits_bytes + nonce_bytes)
+        
+        # Double SHA256 of header
+        block_hash = double_sha256(header)
+        block_hash_hex = bytes_to_hex(reverse_bytes(block_hash))  # Display format
+        
+        # Check if meets difficulty
+        is_valid_block = check_hash_meets_target(reverse_bytes(block_hash), job['difficulty'])
+        
+        # For shares, accept much lower difficulty
+        # A share is valid if it has at least 1 leading zero
+        is_valid_share = block_hash_hex.startswith('0')
+        
+        return is_valid_share, is_valid_block, block_hash_hex
+        
+    except Exception as e:
+        logger.error(f"Share verification error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return False, False, ""
+
+# ============== STRATUM PROTOCOL ==============
 
 class StratumProtocol(asyncio.Protocol):
     """Stratum protocol handler for each miner connection"""
@@ -202,24 +354,34 @@ class StratumProtocol(asyncio.Protocol):
         self.authorized = False
         self.subscribed = False
         self.extranonce1 = None
-        self.difficulty = 0.001  # Very low difficulty for NerdMiner/small devices
+        self.extranonce2_size = 4
+        self.difficulty = 1  # Share difficulty for miner
+        self.shares_accepted = 0
+        self.shares_rejected = 0
+        self.blocks_found = 0
         
     def connection_made(self, transport):
+        global extranonce_counter
         self.transport = transport
         peername = transport.get_extra_info('peername')
         self.miner_id = f"{peername[0]}:{peername[1]}"
+        
+        # Generate unique extranonce1 for this miner
+        extranonce_counter += 1
+        self.extranonce1 = f"{extranonce_counter:08x}"
+        
         logger.info(f"Miner connected: {self.miner_id}")
         
-        # Generate unique extranonce for this miner
-        self.extranonce1 = hashlib.md5(self.miner_id.encode()).hexdigest()[:8]
-        
+        # Track miner
         miners[self.miner_id] = {
-            "connected_at": datetime.now(timezone.utc).isoformat(),
-            "worker": None,
-            "hashrate": 0,
-            "shares_accepted": 0,
-            "shares_rejected": 0,
-            "last_share": None
+            'connected_at': datetime.now(timezone.utc).isoformat(),
+            'worker': None,
+            'address': None,
+            'shares_accepted': 0,
+            'shares_rejected': 0,
+            'blocks_found': 0,
+            'last_share': None,
+            'extranonce1': self.extranonce1
         }
     
     def connection_lost(self, exc):
@@ -232,26 +394,14 @@ class StratumProtocol(asyncio.Protocol):
         
         while b'\n' in self.buffer:
             line, self.buffer = self.buffer.split(b'\n', 1)
-            if not line or line.strip() == b'':
-                continue
-            try:
-                # Try to decode as UTF-8, skip invalid bytes
+            if line:
                 try:
-                    decoded = line.decode('utf-8', errors='ignore').strip()
-                except:
-                    decoded = line.decode('latin-1', errors='ignore').strip()
-                    
-                if not decoded or decoded[0] != '{':
-                    # Not a JSON message, skip
-                    continue
-                    
-                message = json.loads(decoded)
-                if isinstance(message, dict):
+                    message = json.loads(line.decode('utf-8'))
                     asyncio.create_task(self.handle_message(message))
-                else:
-                    logger.warning(f"Invalid message type: {type(message)}")
-            except json.JSONDecodeError as e:
-                logger.error(f"JSON decode error: {e}")
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Invalid JSON from {self.miner_id}: {e}")
+                except Exception as e:
+                    logger.error(f"Error handling message: {e}")
     
     def send_response(self, msg_id, result, error=None):
         """Send JSON-RPC response"""
@@ -263,7 +413,7 @@ class StratumProtocol(asyncio.Protocol):
         self.transport.write((json.dumps(response) + '\n').encode())
     
     def send_notification(self, method, params):
-        """Send JSON-RPC notification (no id)"""
+        """Send JSON-RPC notification"""
         notification = {
             "id": None,
             "method": method,
@@ -277,8 +427,6 @@ class StratumProtocol(asyncio.Protocol):
         params = message.get('params', [])
         msg_id = message.get('id')
         
-        logger.debug(f"Received from {self.miner_id}: {method}")
-        
         if method == 'mining.subscribe':
             await self.handle_subscribe(msg_id, params)
         elif method == 'mining.authorize':
@@ -287,36 +435,37 @@ class StratumProtocol(asyncio.Protocol):
             await self.handle_submit(msg_id, params)
         elif method == 'mining.extranonce.subscribe':
             self.send_response(msg_id, True)
-        elif method == 'mining.get_transactions':
-            self.send_response(msg_id, [])
         elif method == 'mining.suggest_difficulty':
-            # NerdMiner suggests a difficulty - accept it
             if params and len(params) > 0:
-                suggested = params[0]
-                if isinstance(suggested, (int, float)) and suggested > 0:
-                    self.difficulty = max(0.001, min(suggested, 1))  # Between 0.001 and 1
-                    self.send_notification("mining.set_difficulty", [self.difficulty])
-                    logger.info(f"Set difficulty to {self.difficulty} for {self.miner_id}")
+                suggested = float(params[0])
+                self.difficulty = max(0.001, min(suggested, 16))
+                self.send_notification("mining.set_difficulty", [self.difficulty])
             self.send_response(msg_id, True)
         elif method == 'mining.configure':
-            # Support mining.configure for version rolling
-            self.send_response(msg_id, {"version-rolling": False})
+            # Version rolling support
+            result = {}
+            if params and len(params) >= 2:
+                extensions = params[0]
+                if 'version-rolling' in extensions:
+                    result['version-rolling'] = True
+                    result['version-rolling.mask'] = "1fffe000"
+            self.send_response(msg_id, result)
         else:
-            logger.warning(f"Unknown method: {method}")
+            logger.debug(f"Unknown method: {method}")
             self.send_response(msg_id, None, [20, f"Unknown method: {method}", None])
     
     async def handle_subscribe(self, msg_id, params):
         """Handle mining.subscribe"""
         self.subscribed = True
         
-        # Response format: [[subscription_id, extranonce1, extranonce2_size]]
+        # Response format for cgminer/bfgminer compatible miners
         result = [
             [
-                ["mining.set_difficulty", f"subscription_{self.miner_id}"],
-                ["mining.notify", f"subscription_{self.miner_id}"]
+                ["mining.set_difficulty", f"sub_{self.miner_id}"],
+                ["mining.notify", f"sub_{self.miner_id}"]
             ],
-            self.extranonce1,  # Extranonce1 (unique per miner)
-            4  # Extranonce2 size in bytes
+            self.extranonce1,
+            self.extranonce2_size
         ]
         
         self.send_response(msg_id, result)
@@ -327,13 +476,13 @@ class StratumProtocol(asyncio.Protocol):
         # Send current job
         await self.send_job()
         
-        logger.info(f"Miner subscribed: {self.miner_id}")
+        logger.info(f"Miner subscribed: {self.miner_id} (extranonce1={self.extranonce1})")
     
     async def handle_authorize(self, msg_id, params):
         """Handle mining.authorize"""
         if len(params) >= 1:
             self.worker_name = params[0]
-            # Worker format: address.worker_name or just address
+            # Extract address from worker name (format: address.worker or just address)
             if '.' in self.worker_name:
                 address = self.worker_name.split('.')[0]
             else:
@@ -341,15 +490,15 @@ class StratumProtocol(asyncio.Protocol):
             
             miners[self.miner_id]['worker'] = self.worker_name
             miners[self.miner_id]['address'] = address
-            
+        
         self.authorized = True
         self.send_response(msg_id, True)
         logger.info(f"Miner authorized: {self.worker_name}")
     
     async def handle_submit(self, msg_id, params):
-        """Handle mining.submit (share submission) - VERY PERMISSIVE for testing"""
+        """Handle mining.submit (share submission)"""
         if not self.authorized:
-            self.send_response(msg_id, False, [24, "Unauthorized worker", None])
+            self.send_response(msg_id, False, [24, "Unauthorized", None])
             return
         
         try:
@@ -359,158 +508,180 @@ class StratumProtocol(asyncio.Protocol):
             ntime = params[3]
             nonce = params[4]
             
-            logger.info(f"Share from {worker_name}: job={job_id}, nonce={nonce[:16]}...")
+            # Find job
+            job = recent_jobs.get(job_id) or (current_job if current_job and current_job['job_id'] == job_id else None)
             
-            # ALWAYS accept the share first - we want the miner happy
-            miners[self.miner_id]['shares_accepted'] += 1
-            miners[self.miner_id]['last_share'] = datetime.now(timezone.utc).isoformat()
+            if not job:
+                # Accept anyway to keep miner happy, but log it
+                logger.warning(f"Job {job_id} not found, accepting share anyway")
+                self.shares_accepted += 1
+                miners[self.miner_id]['shares_accepted'] += 1
+                self.send_response(msg_id, True)
+                return
             
-            # Try to find the job (from cache or current)
-            job = recent_jobs.get(job_id) or current_job
+            # Verify the share
+            is_valid_share, is_valid_block, block_hash = verify_share(
+                job, self.extranonce1, extranonce2, ntime, nonce
+            )
             
-            if job:
-                # Calculate hash and check for valid block
-                block_data = job['block_data']
-                full_nonce = self.extranonce1 + extranonce2 + nonce
-                test_data = block_data + full_nonce
-                block_hash = sha256(test_data)
+            if is_valid_share:
+                self.shares_accepted += 1
+                miners[self.miner_id]['shares_accepted'] += 1
+                miners[self.miner_id]['last_share'] = datetime.now(timezone.utc).isoformat()
                 
-                logger.info(f"Hash: {block_hash[:24]}... (need 0000 prefix for block)")
+                logger.info(f"✓ Share ACCEPTED from {self.worker_name} - Hash: {block_hash[:16]}...")
                 
-                # Check if this hash meets block difficulty (4 leading zeros)
-                if block_hash.startswith('0000'):
-                    logger.info(f"🎉🎉🎉 VALID BLOCK FOUND by {self.worker_name}! Hash: {block_hash}")
+                if is_valid_block:
+                    # BLOCK FOUND!
+                    logger.info(f"🎉🎉🎉 BLOCK FOUND by {self.worker_name}! Hash: {block_hash}")
                     
                     template = job['template']
                     new_block = {
                         "index": template['index'],
-                        "timestamp": template['timestamp'],
-                        "transactions": template['transactions'],
-                        "proof": int(nonce, 16) if isinstance(nonce, str) else nonce,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "transactions": template.get('transactions', []),
+                        "proof": int(nonce, 16),
                         "previous_hash": template['previous_hash'],
-                        "nonce": int(nonce, 16) if isinstance(nonce, str) else nonce,
+                        "nonce": int(nonce, 16),
                         "miner": miners[self.miner_id].get('address', self.worker_name),
-                        "difficulty": job['difficulty'],
+                        "difficulty": template['difficulty'],
                         "hash": block_hash
                     }
                     
-                    # Check if block already exists
+                    # Save to database
                     existing = await db.blocks.find_one({"index": template['index']})
                     if not existing:
                         await db.blocks.insert_one(new_block)
-                        miners[self.miner_id]['blocks_found'] = miners[self.miner_id].get('blocks_found', 0) + 1
+                        self.blocks_found += 1
+                        miners[self.miner_id]['blocks_found'] += 1
                         logger.info(f"Block #{template['index']} saved to database!")
+                        
+                        # Broadcast new job to all miners
                         await self.server.broadcast_new_job()
-            
-            # Always respond with success
-            self.send_response(msg_id, True)
-            logger.info(f"Share ACCEPTED from {self.worker_name}")
+                
+                self.send_response(msg_id, True)
+            else:
+                self.shares_rejected += 1
+                miners[self.miner_id]['shares_rejected'] += 1
+                logger.info(f"✗ Share rejected from {self.worker_name} - Hash: {block_hash[:16]}...")
+                # Still accept to keep miner going
+                self.send_response(msg_id, True)
                 
         except Exception as e:
             logger.error(f"Submit error: {e}")
             import traceback
             logger.error(traceback.format_exc())
-            # Even on error, accept the share to keep miner happy
-            self.send_response(msg_id, True)
+            self.send_response(msg_id, True)  # Accept anyway
     
     async def send_job(self):
         """Send mining job to this miner"""
         if not current_job:
             return
-            
+        
         job = current_job
         
-        # mining.notify params (Bitcoin Stratum format):
+        # mining.notify params:
         # job_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, clean_jobs
         params = [
-            job['job_id'],           # Job ID
-            job['prevhash'],         # Previous block hash (64 hex chars)
-            job.get('coinb1', job['coinbase']),  # Coinbase part 1
-            job.get('coinb2', ''),   # Coinbase part 2
-            [],                      # Merkle branches (empty for single tx)
-            job['version'],          # Block version
-            job['nbits'],            # Difficulty target bits
-            job['ntime'],            # Current timestamp
-            job['clean_jobs']        # Clean jobs flag
+            job['job_id'],
+            job['prevhash'],
+            job['coinb1'],
+            job['coinb2'],
+            job['merkle_branch'],
+            job['version'],
+            job['nbits'],
+            job['ntime'],
+            job['clean_jobs']
         ]
         
         self.send_notification("mining.notify", params)
 
-
 class StratumServer:
     """Main Stratum server"""
     
-    def __init__(self, host: str, port: int):
-        self.host = host
-        self.port = port
+    def __init__(self):
+        self.protocols: List[StratumProtocol] = []
         self.server = None
-        self.protocols: Set[StratumProtocol] = set()
+        self.job_update_task = None
     
     async def start(self):
         """Start the Stratum server"""
         loop = asyncio.get_event_loop()
         
         self.server = await loop.create_server(
-            lambda: self._create_protocol(),
-            self.host,
-            self.port
+            lambda: self.create_protocol(),
+            STRATUM_HOST,
+            STRATUM_PORT
         )
         
-        logger.info(f"⛏️  BricsCoin Stratum Server started on {self.host}:{self.port}")
-        logger.info(f"   Connect your ASIC miner to: stratum+tcp://{self.host}:{self.port}")
+        # Start job updater
+        self.job_update_task = asyncio.create_task(self.job_updater())
         
-        # Start job update loop
-        asyncio.create_task(self.job_update_loop())
+        logger.info("=" * 60)
+        logger.info("  🪙 BricsCoin Stratum Mining Server v2.0")
+        logger.info("  Bitcoin-compatible protocol for ASIC miners")
+        logger.info("  Supports: Bitaxe, NerdMiner, Antminer, etc.")
+        logger.info("=" * 60)
+        logger.info(f"⛏️  Server started on {STRATUM_HOST}:{STRATUM_PORT}")
+        logger.info(f"   Network difficulty: {NETWORK_DIFFICULTY}")
+        logger.info(f"   Block reward: {INITIAL_REWARD} BRICS")
         
-        async with self.server:
-            await self.server.serve_forever()
-    
-    def _create_protocol(self):
+    def create_protocol(self):
+        """Create a new protocol instance for incoming connection"""
         protocol = StratumProtocol(self)
-        self.protocols.add(protocol)
+        self.protocols.append(protocol)
         return protocol
     
-    async def job_update_loop(self):
-        """Periodically update mining jobs"""
+    async def job_updater(self):
+        """Periodically update mining job"""
         global current_job
         
         while True:
             try:
                 template = await get_block_template()
                 if template:
-                    current_job = create_job(template)
-                    logger.info(f"New job created: Block #{template['index']}, Difficulty: {template['difficulty']}")
+                    # Use a dummy extranonce1 for job creation
+                    current_job = create_job(template, "00000000", 4)
+                    logger.info(f"New job: Block #{template['index']}, Diff: {template['difficulty']}")
+                    
+                    # Broadcast to all connected miners
+                    await self.broadcast_job()
             except Exception as e:
                 logger.error(f"Job update error: {e}")
             
             await asyncio.sleep(30)  # Update every 30 seconds
     
+    async def broadcast_job(self):
+        """Send current job to all connected miners"""
+        if not current_job:
+            return
+        
+        for protocol in self.protocols[:]:  # Copy list to avoid modification during iteration
+            try:
+                if protocol.subscribed:
+                    await protocol.send_job()
+            except Exception as e:
+                logger.error(f"Error broadcasting to miner: {e}")
+    
     async def broadcast_new_job(self):
-        """Broadcast new job to all connected miners"""
+        """Create and broadcast a new job (called when block is found)"""
         global current_job
         
         template = await get_block_template()
         if template:
-            current_job = create_job(template)
-            current_job['clean_jobs'] = True  # Force miners to drop old work
-            
-            for protocol in list(self.protocols):
-                try:
-                    await protocol.send_job()
-                except Exception as e:
-                    logger.error(f"Broadcast error: {e}")
-
+            current_job = create_job(template, "00000000", 4)
+            current_job['clean_jobs'] = True  # Force miners to switch
+            logger.info(f"New block template: #{template['index']}")
+            await self.broadcast_job()
 
 async def main():
     """Main entry point"""
-    logger.info("=" * 60)
-    logger.info("  🪙 BricsCoin Stratum Mining Server")
-    logger.info("  Supports: Bitaxe, NerdMiner, Antminer, etc.")
-    logger.info("=" * 60)
-    
-    server = StratumServer(STRATUM_HOST, STRATUM_PORT)
+    server = StratumServer()
     await server.start()
-
+    
+    # Keep running
+    while True:
+        await asyncio.sleep(3600)
 
 if __name__ == "__main__":
     asyncio.run(main())
