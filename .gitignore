@@ -101,3 +101,7 @@ bricscoin-core/dist/linux-arm64-unpacked/bricscoin-core
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
