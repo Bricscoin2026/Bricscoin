@@ -160,26 +160,47 @@ function SendDialog({ wallet, onSuccess }) {
       return;
     }
 
+    // Validate recipient address format
+    if (!isValidAddress(recipient)) {
+      toast.error("Indirizzo destinatario non valido. Deve iniziare con BRICS");
+      return;
+    }
+
     if (balance !== null && parseFloat(amount) > balance) {
       toast.error(`Saldo insufficiente! Disponibile: ${balance} BRICS`);
       return;
     }
 
+    if (parseFloat(amount) <= 0) {
+      toast.error("L'importo deve essere maggiore di zero");
+      return;
+    }
+
     setSending(true);
     try {
-      await createTransaction({
-        sender_private_key: wallet.private_key,
-        sender_address: wallet.address,
-        recipient_address: recipient,
-        amount: parseFloat(amount),
-      });
-      toast.success("Transazione inviata!");
+      // SECURE: Sign transaction locally - private key NEVER sent to server
+      const secureTransaction = prepareSecureTransaction(
+        wallet,
+        recipient,
+        parseFloat(amount)
+      );
+      
+      // Send pre-signed transaction to server
+      await createSecureTransaction(secureTransaction);
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <Shield className="w-4 h-4 text-green-500" />
+          <span>Transazione sicura inviata!</span>
+        </div>
+      );
       setOpen(false);
       setRecipient("");
       setAmount("");
       onSuccess();
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Invio fallito");
+      const errorMsg = error.response?.data?.detail || "Invio fallito";
+      toast.error(errorMsg);
     } finally {
       setSending(false);
     }
@@ -201,9 +222,21 @@ function SendDialog({ wallet, onSuccess }) {
       </DialogTrigger>
       <DialogContent className="bg-card border-white/10" data-testid="send-dialog">
         <DialogHeader>
-          <DialogTitle className="font-heading">Invia BRICS</DialogTitle>
+          <DialogTitle className="font-heading flex items-center gap-2">
+            <Shield className="w-5 h-5 text-green-500" />
+            Invia BRICS (Sicuro)
+          </DialogTitle>
+          <DialogDescription className="text-green-500/80 text-xs">
+            La chiave privata non lascia mai il tuo dispositivo
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          {/* Security Badge */}
+          <div className="flex items-center gap-2 p-2 bg-green-500/10 border border-green-500/20 rounded-sm">
+            <Shield className="w-4 h-4 text-green-500" />
+            <span className="text-xs text-green-500">Firma client-side - Massima sicurezza</span>
+          </div>
+          
           {/* Available Balance */}
           <div className="p-3 bg-primary/10 border border-primary/20 rounded-sm">
             <p className="text-sm text-muted-foreground">Saldo Disponibile</p>
@@ -266,7 +299,7 @@ function SendDialog({ wallet, onSuccess }) {
             className="gold-button rounded-sm"
             data-testid="confirm-send-btn"
           >
-            {sending ? "Invio..." : "Invia Transazione"}
+            {sending ? "Firma e Invio..." : "Firma e Invia"}
           </Button>
         </DialogFooter>
       </DialogContent>
