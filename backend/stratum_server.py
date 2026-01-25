@@ -417,12 +417,19 @@ def verify_share(job: dict, extranonce1: str, extranonce2: str, ntime: str, nonc
         # Valid share = ANY submission (accept all for now to debug)
         is_share = True
         
-        # Valid block = meets network difficulty (4 leading zeros)
-        is_block = leading_zeros >= NETWORK_DIFFICULTY
+        # Valid block = meets network difficulty (Bitcoin-style target comparison)
+        # Convert hash to integer and compare against target
+        max_target = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        target = max_target // NETWORK_DIFFICULTY
+        hash_int = int(block_hash_hex, 16)
+        is_block = hash_int <= target
         
-        # Log if we get ANY leading zeros (good sign)
+        # Log if we get a good hash
         if leading_zeros > 0:
             logger.info(f"*** GOOD HASH with {leading_zeros} leading zeros: {block_hash_hex[:16]}...")
+        
+        if is_block:
+            logger.info(f"*** BLOCK FOUND! Hash: {block_hash_hex[:16]}... Target: {hex(target)[:16]}...")
         
         return is_share, is_block, block_hash_hex
         
