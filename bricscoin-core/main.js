@@ -198,28 +198,34 @@ ipcMain.handle('import-wallet', async (event, { seedPhrase, name }) => {
 
 // Lista wallet
 ipcMain.handle('get-wallets', async () => {
-  const wallets = db.prepare('SELECT address, name, created_at FROM wallets').all();
+  const wallets = db.prepare('SELECT address, name, created_at, seed_phrase_encrypted FROM wallets').all();
   
-  // Aggiungi saldi
-  return wallets.map(w => ({
-    ...w,
-    balance: blockchain.getBalance(w.address)
-  }));
+  // Aggiungi saldi dal network
+  const walletsWithBalance = [];
+  for (const w of wallets) {
+    const balance = await blockchain.getBalance(w.address);
+    walletsWithBalance.push({
+      ...w,
+      balance,
+      seed_phrase: w.seed_phrase_encrypted // Per mostrare nell'UI
+    });
+  }
+  return walletsWithBalance;
 });
 
 // Ottieni wallet completo
 ipcMain.handle('get-wallet', async (event, address) => {
   const wallet = db.prepare('SELECT * FROM wallets WHERE address = ?').get(address);
   if (wallet) {
-    wallet.balance = blockchain.getBalance(address);
-    wallet.transactions = blockchain.getTransactions(address);
+    wallet.balance = await blockchain.getBalance(address);
+    wallet.seed_phrase = wallet.seed_phrase_encrypted;
   }
   return wallet;
 });
 
 // Ottieni saldo
 ipcMain.handle('get-balance', async (event, address) => {
-  return blockchain.getBalance(address);
+  return await blockchain.getBalance(address);
 });
 
 // Invia transazione
@@ -229,17 +235,20 @@ ipcMain.handle('send-transaction', async (event, { fromAddress, toAddress, amoun
     throw new Error('Wallet not found');
   }
   
-  const balance = blockchain.getBalance(fromAddress);
+  const balance = await blockchain.getBalance(fromAddress);
   if (balance < amount) {
     throw new Error('Insufficient balance');
   }
   
-  const tx = blockchain.createTransaction(fromAddress, toAddress, amount, wallet.private_key_encrypted);
+  // Invia al network principale
+  const result = await blockchain.sendTransaction(
+    wallet.private_key_encrypted,
+    fromAddress,
+    toAddress,
+    amount
+  );
   
-  // Broadcast to peers
-  broadcastTransaction(tx);
-  
-  return tx;
+  return result;
 });
 
 // Broadcast transazione ai peer
