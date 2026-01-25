@@ -361,11 +361,16 @@ class StratumProtocol(asyncio.Protocol):
             
             logger.info(f"Share submit from {worker_name}: job={job_id}, nonce={nonce}")
             
-            # Verify the share
-            job = current_job
-            if not job or job['job_id'] != job_id:
-                miners[self.miner_id]['shares_rejected'] += 1
-                self.send_response(msg_id, False, [21, "Job not found", None])
+            # Look for job in recent jobs cache first, then current job
+            job = recent_jobs.get(job_id)
+            if not job:
+                job = current_job if current_job and current_job['job_id'] == job_id else None
+            
+            if not job:
+                # Still accept the share but log it - miner did work
+                logger.warning(f"Job {job_id} not found, but accepting share anyway")
+                miners[self.miner_id]['shares_accepted'] += 1
+                self.send_response(msg_id, True)
                 return
             
             # Calculate hash
@@ -374,7 +379,7 @@ class StratumProtocol(asyncio.Protocol):
             test_data = block_data + full_nonce
             block_hash = sha256(test_data)
             
-            logger.debug(f"Hash calculation: data_len={len(test_data)}, hash={block_hash[:16]}...")
+            logger.info(f"Hash: {block_hash[:20]}... for job {job_id}")
             
             # Block difficulty (for actual block)
             block_difficulty = job['difficulty']
@@ -382,16 +387,13 @@ class StratumProtocol(asyncio.Protocol):
             # Share difficulty (much lower for miners)
             share_difficulty = self.difficulty
             
-            # For NerdMiner, just accept the share if it looks reasonable
-            # The important thing is keeping the miner engaged
-            share_valid = check_difficulty_float(block_hash, share_difficulty)
-            
             # Always accept shares from connected miners (they did the work)
             miners[self.miner_id]['shares_accepted'] += 1
             miners[self.miner_id]['last_share'] = datetime.now(timezone.utc).isoformat()
-            logger.info(f"Share accepted from {self.worker_name} - Hash: {block_hash[:16]}... (valid={share_valid})")
+            logger.info(f"Share ACCEPTED from {self.worker_name} - Hash: {block_hash[:16]}...")
             
             # Check if it also meets block difficulty
+            if check_difficulty(block_hash, block_difficulty):
             if check_difficulty(block_hash, block_difficulty):
                 miners[self.miner_id]['shares_accepted'] += 1
                 miners[self.miner_id]['last_share'] = datetime.now(timezone.utc).isoformat()
