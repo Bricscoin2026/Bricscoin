@@ -271,14 +271,14 @@ export default function Downloads() {
             <div className="md:col-span-2 p-4 bg-primary/10 border border-primary/20 rounded-sm">
               <div className="flex items-center gap-2 mb-3">
                 <HardDrive className="w-5 h-5 text-primary" />
-                <h4 className="font-bold text-primary">BricsCoin Core v1.1 (Recommended)</h4>
+                <h4 className="font-bold text-primary">BricsCoin Core v1.2 (Recommended)</h4>
               </div>
               <p className="text-sm text-muted-foreground mb-3">
                 The official Full Node wallet with professional Matrix-style UI. Connects to the BricsCoin network and supports mining.
               </p>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download <code className="bg-white/10 px-1 rounded">bricscoin-core-v1.1.tar.gz</code></li>
-                <li>Extract: <code className="bg-white/10 px-1 rounded">tar -xzf bricscoin-core-v1.1.tar.gz</code></li>
+                <li>Download <code className="bg-white/10 px-1 rounded">BricsCoin-Core-v1.2.tar.gz</code></li>
+                <li>Extract: <code className="bg-white/10 px-1 rounded">tar -xzf BricsCoin-Core-v1.2.tar.gz</code></li>
                 <li>Enter the folder: <code className="bg-white/10 px-1 rounded">cd bricscoin-core</code></li>
                 <li>Install dependencies: <code className="bg-white/10 px-1 rounded">npm install</code></li>
                 <li>Start: <code className="bg-white/10 px-1 rounded">npm start</code></li>
