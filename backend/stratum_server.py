@@ -425,15 +425,12 @@ class StratumProtocol(asyncio.Protocol):
                     # Notify all miners of new job
                     await self.server.broadcast_new_job()
                 
-                self.send_response(msg_id, True)
-                
-            else:
-                # Share doesn't meet even the share difficulty
-                miners[self.miner_id]['shares_rejected'] += 1
-                self.send_response(msg_id, False, [23, "Low difficulty share", None])
+            self.send_response(msg_id, True)
                 
         except Exception as e:
             logger.error(f"Submit error: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             self.send_response(msg_id, False, [20, str(e), None])
     
     async def send_job(self):
