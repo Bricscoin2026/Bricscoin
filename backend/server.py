@@ -311,7 +311,8 @@ async def get_circulating_supply() -> float:
     """Calculate total circulating supply (premine + mining rewards)"""
     blocks_count = await db.blocks.count_documents({})
     supply = PREMINE_AMOUNT  # Start with premine
-    for i in range(blocks_count):
+    # Start from block 1 (not 0) - genesis block doesn't give mining reward
+    for i in range(1, blocks_count):
         supply += get_mining_reward(i)
     return min(supply, MAX_SUPPLY)
 
