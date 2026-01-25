@@ -14,11 +14,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Build Linux
+      - name: Install dependencies
         working-directory: ./bricscoin-core
         run: |
-          yarn install
-          yarn build:linux
+          yarn install --frozen-lockfile || yarn install
+      - name: Build Linux
+        working-directory: ./bricscoin-core
+        run: yarn build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
           name: linux-build
@@ -31,11 +35,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Install dependencies
+        working-directory: ./bricscoin-core
+        run: yarn install
       - name: Build Windows
         working-directory: ./bricscoin-core
-        run: |
-          yarn install
-          yarn build:win
+        run: yarn build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
           name: windows-build
@@ -48,11 +55,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Build macOS
+      - name: Install dependencies
         working-directory: ./bricscoin-core
         run: |
-          yarn install
-          yarn build:mac
+          yarn install --frozen-lockfile || yarn install
+      - name: Build macOS
+        working-directory: ./bricscoin-core
+        run: yarn build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
           name: mac-build
@@ -62,14 +73,18 @@ jobs:
     needs: [build-linux, build-windows, build-mac]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Display structure
+        run: ls -R artifacts
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            linux-build/*
-            windows-build/*
-            mac-build/*
+            artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
