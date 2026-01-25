@@ -132,13 +132,13 @@ export default function Dashboard() {
           BRICSCOIN
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
-          Decentralized cryptocurrency powered by SHA256 Proof-of-Work. Join the global mining network today.
+          Decentralized cryptocurrency powered by SHA256 Proof-of-Work. Mine with ASIC hardware and join the network.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button asChild className="gold-button rounded-sm" data-testid="start-mining-btn">
             <Link to="/mining">
               <Pickaxe className="w-4 h-4 mr-2" />
-              Start Mining
+              Mining Info
             </Link>
           </Button>
           <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="create-wallet-btn">
