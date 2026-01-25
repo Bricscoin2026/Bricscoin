@@ -12,6 +12,7 @@ const api = axios.create({
 
 // Network
 export const getNetworkStats = () => api.get("/network/stats");
+export const getTokenomics = () => api.get("/tokenomics");
 
 // P2P
 export const getNodeInfo = () => api.get("/p2p/node/info");
