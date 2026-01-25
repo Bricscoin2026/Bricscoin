@@ -658,12 +658,17 @@ class StratumServer:
         if not current_job:
             return
         
+        active_miners = 0
         for protocol in self.protocols[:]:  # Copy list to avoid modification during iteration
             try:
                 if protocol.subscribed:
                     await protocol.send_job()
+                    active_miners += 1
             except Exception as e:
                 logger.error(f"Error broadcasting to miner: {e}")
+        
+        if active_miners > 0:
+            logger.info(f"Job sent to {active_miners} miners")
     
     async def broadcast_new_job(self):
         """Create and broadcast a new job (called when block is found)"""
