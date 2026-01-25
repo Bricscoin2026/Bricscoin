@@ -298,6 +298,22 @@ function SendDialog({ wallet, onSuccess }) {
               data-testid="amount-input"
             />
           </div>
+          
+          {/* Fee Info */}
+          <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-sm">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Fee di rete:</span>
+              <span className="text-yellow-500 font-mono">{TRANSACTION_FEE} BRICS</span>
+            </div>
+            {amount && (
+              <div className="flex justify-between text-sm mt-1 pt-1 border-t border-yellow-500/20">
+                <span className="text-muted-foreground">Totale:</span>
+                <span className="text-primary font-bold font-mono">
+                  {(parseFloat(amount || 0) + TRANSACTION_FEE).toFixed(2)} BRICS
+                </span>
+              </div>
+            )}
+          </div>
         </div>
         <DialogFooter>
           <Button
