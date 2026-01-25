@@ -175,6 +175,11 @@ window.bc.on('found',d=>{fnd++;document.getElementById('fd').textContent=fnd;toa
 
 loadStats();loadBlocks();loadW();
 setInterval(loadStats,10000);
+
+document.getElementById('createBtn').addEventListener('click', function() {
+  console.log('Button clicked!');
+  newW();
+});
 </script>
 </body>
 </html>
