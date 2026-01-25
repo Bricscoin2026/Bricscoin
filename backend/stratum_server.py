@@ -124,7 +124,7 @@ async def get_block_template() -> dict:
 
 def create_job(template: dict) -> dict:
     """Create a mining job from block template"""
-    global job_counter
+    global job_counter, recent_jobs
     job_counter += 1
     
     # Create coinbase transaction (miner reward)
@@ -164,7 +164,7 @@ def create_job(template: dict) -> dict:
     # version(4) + prevhash(32) + merkle(32) + time(4) + bits(4) + nonce(4)
     block_header = version + prevhash[:64] + merkle_root[:64] + ntime + nbits
     
-    return {
+    job = {
         "job_id": f"{job_counter:08x}",
         "prevhash": prevhash[:64],
         "coinbase": coinbase_hex,
@@ -179,6 +179,16 @@ def create_job(template: dict) -> dict:
         "template": template,
         "clean_jobs": True
     }
+    
+    # Store in recent jobs cache
+    recent_jobs[job["job_id"]] = job
+    
+    # Clean up old jobs if too many
+    if len(recent_jobs) > MAX_RECENT_JOBS:
+        oldest_key = list(recent_jobs.keys())[0]
+        del recent_jobs[oldest_key]
+    
+    return job
 
 class StratumProtocol(asyncio.Protocol):
     """Stratum protocol handler for each miner connection"""
