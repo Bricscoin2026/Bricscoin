@@ -232,8 +232,8 @@ export default function BlockDetail() {
                 <p className="font-mono text-lg text-primary">SHA256</p>
               </div>
               <div className="text-center p-4 bg-background rounded-sm border border-white/10">
-                <p className="text-muted-foreground text-sm mb-1">Difficulty Target</p>
-                <p className="font-mono text-lg">{"0".repeat(block.difficulty)}...</p>
+                <p className="text-muted-foreground text-sm mb-1">Difficulty</p>
+                <p className="font-mono text-lg">{block.difficulty?.toLocaleString() || "-"}</p>
               </div>
               <div className="text-center p-4 bg-background rounded-sm border border-white/10">
                 <p className="text-muted-foreground text-sm mb-1">Proof of Work</p>
