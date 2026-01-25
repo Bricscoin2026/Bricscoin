@@ -47,8 +47,8 @@ bricscoin/
 
 ```bash
 # Clone the repository
-git clone https://github.com/bricscoin26/bricscoin.git
-cd bricscoin
+git clone https://github.com/bricscoin26/Bricscoin26.git
+cd Bricscoin26
 
 # Copy environment files
 cp backend/.env.example backend/.env
@@ -142,7 +142,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## Links
 
 - **Website**: [bricscoin26.org](https://bricscoin26.org)
-- **GitHub**: [github.com/bricscoin26](https://github.com/bricscoin26)
+- **GitHub**: [github.com/bricscoin26/Bricscoin26](https://github.com/bricscoin26/Bricscoin26)
 
 ## Disclaimer
 
