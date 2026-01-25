@@ -80,7 +80,7 @@ INITIAL_REWARD = 50
 HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
-INITIAL_DIFFICULTY = 10000  # Network difficulty (increased for ASIC miners)
+INITIAL_DIFFICULTY = 4  # Number of leading zeros (4 = "0000" prefix required)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 
 # P2P Network Configuration
