@@ -87,7 +87,13 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed }) {
         <div>
           <p className="text-sm text-muted-foreground">{wallet.name}</p>
           <p className="text-2xl font-heading font-bold gold-text mt-1">
-            {balance !== null ? `${balance.toLocaleString()} BRICS` : "Loading..."}
+            {loading ? (
+              <span className="animate-pulse">Caricamento...</span>
+            ) : balance !== null ? (
+              `${balance.toLocaleString()} BRICS`
+            ) : (
+              "Errore"
+            )}
           </p>
         </div>
         <div className="w-10 h-10 rounded-sm bg-primary/20 flex items-center justify-center">
