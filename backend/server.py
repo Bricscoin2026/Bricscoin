@@ -646,6 +646,39 @@ async def get_network_stats():
         current_reward=get_mining_reward(current_height)
     )
 
+@api_router.get("/tokenomics")
+async def get_tokenomics():
+    """Get tokenomics and premine transparency info"""
+    blocks_count = await db.blocks.count_documents({})
+    mining_rewards = sum(get_mining_reward(i) for i in range(1, blocks_count))
+    
+    return {
+        "total_supply": MAX_SUPPLY,
+        "premine": {
+            "amount": PREMINE_AMOUNT,
+            "percentage": round((PREMINE_AMOUNT / MAX_SUPPLY) * 100, 2),
+            "allocation": {
+                "development": {"amount": 400000, "percentage": 40, "description": "Protocol improvements and maintenance"},
+                "marketing": {"amount": 300000, "percentage": 30, "description": "Community growth and adoption"},
+                "liquidity": {"amount": 200000, "percentage": 20, "description": "Exchange listings and market making"},
+                "team": {"amount": 100000, "percentage": 10, "description": "Core contributor compensation"}
+            },
+            "note": "Premine is held by the development team and will be used transparently for project growth."
+        },
+        "mining_rewards": {
+            "total_available": MAX_SUPPLY - PREMINE_AMOUNT,
+            "mined_so_far": mining_rewards,
+            "percentage_mined": round((mining_rewards / (MAX_SUPPLY - PREMINE_AMOUNT)) * 100, 4),
+            "current_block_reward": get_mining_reward(blocks_count),
+            "halving_interval": HALVING_INTERVAL,
+            "next_halving": ((blocks_count // HALVING_INTERVAL) + 1) * HALVING_INTERVAL
+        },
+        "fees": {
+            "transaction_fee": TRANSACTION_FEE,
+            "note": "Fees are collected by miners who include transactions in blocks."
+        }
+    }
+
 # Block endpoints
 @api_router.get("/blocks")
 async def get_blocks(limit: int = 20, offset: int = 0):
