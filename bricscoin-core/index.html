@@ -849,7 +849,7 @@
     // Load all blocks
     async function loadAllBlocks() {
       try {
-        const blocks = await window.bricscoin.getBlocks({ limit: 50 });
+        const blocks = await window.bricscoin.getBlocks(50, 0);
         const tbody = document.getElementById('all-blocks-table');
         
         tbody.innerHTML = blocks.map(b => `
