@@ -74,7 +74,7 @@ function BlocksTable({ blocks, loading }) {
   );
 }
 
-function TransactionsTable({ transactions, loading, t }) {
+function TransactionsTable({ transactions, loading }) {
   if (loading) {
     return (
       <div className="space-y-2">
@@ -90,11 +90,11 @@ function TransactionsTable({ transactions, loading, t }) {
       <table className="w-full" data-testid="transactions-table">
         <thead>
           <tr className="border-b border-white/10 text-left">
-            <th className="p-4 text-sm font-medium text-muted-foreground">{t('txHash')}</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">{t('from')}</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">{t('to')}</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">{t('amount')}</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">{t('status')}</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">TX Hash</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">From</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">To</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">Amount</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -126,7 +126,7 @@ function TransactionsTable({ transactions, loading, t }) {
               </td>
               <td className="p-4">
                 <span className={tx.confirmed ? "confirmed-badge" : "pending-badge"}>
-                  {tx.confirmed ? t('confirmed') : t('pending')}
+                  {tx.confirmed ? "Confirmed" : "Pending"}
                 </span>
               </td>
             </motion.tr>
