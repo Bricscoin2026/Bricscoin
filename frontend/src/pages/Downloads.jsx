@@ -271,20 +271,18 @@ export default function Downloads() {
             <div className="md:col-span-2 p-4 bg-primary/10 border border-primary/20 rounded-sm">
               <div className="flex items-center gap-2 mb-3">
                 <HardDrive className="w-5 h-5 text-primary" />
-                <h4 className="font-bold text-primary">BricsCoin Core v2.0 (Recommended)</h4>
+                <h4 className="font-bold text-primary">BricsCoin Core v2.1 (Recommended)</h4>
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                The official Desktop Wallet with professional Matrix-style UI. Create wallets, send/receive BRICS, view blocks and transactions.
+                The official Desktop Wallet with professional Matrix-style UI, P2P sync, and secure client-side signing. Create wallets, send/receive BRICS, view blocks and transactions.
               </p>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download <code className="bg-white/10 px-1 rounded">BricsCoin-Core-v2.0.tar.gz</code></li>
-                <li>Extract: <code className="bg-white/10 px-1 rounded">tar -xzf BricsCoin-Core-v2.0.tar.gz</code></li>
-                <li>Enter the folder: <code className="bg-white/10 px-1 rounded">cd bricscoin-core</code></li>
-                <li>Install dependencies: <code className="bg-white/10 px-1 rounded">npm install</code></li>
-                <li>Start: <code className="bg-white/10 px-1 rounded">npm start</code></li>
+                <li>Download <code className="bg-white/10 px-1 rounded">BricsCoin-Core-2.1.0-Linux.AppImage</code> for Linux</li>
+                <li>Make executable: <code className="bg-white/10 px-1 rounded">chmod +x BricsCoin-Core-*.AppImage</code></li>
+                <li>Run: <code className="bg-white/10 px-1 rounded">./BricsCoin-Core-*.AppImage</code></li>
               </ol>
               <p className="text-xs text-muted-foreground mt-3">
-                Requirements: Node.js 18+, npm or yarn
+                Or build from source: Download tar.gz, extract, run <code className="bg-white/10 px-1 rounded">yarn install && yarn start</code>
               </p>
             </div>
 
@@ -330,7 +328,7 @@ export default function Downloads() {
             <Button
               variant="outline"
               className="border-white/20"
-              onClick={() => window.open('https://github.com/Bricscoin2026/Bricscoin', '_blank')}
+              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}
               data-testid="github-link-btn"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
