@@ -631,7 +631,12 @@ class StratumMiner:
         """Save a found block to the database, confirm transactions, and create mining reward"""
         try:
             template = job['template']
-            miner_address = job.get('miner_address', self.worker_name)  # Use job's miner address
+            
+            # CRITICAL FIX: ALWAYS use the miner who SUBMITTED the winning share
+            # This is self.worker_name - the authenticated address of this miner connection
+            miner_address = self.worker_name
+            
+            logger.info(f"Saving block for miner: {miner_address}")
             
             # Create mining reward transaction
             reward_amount = template['reward'] / COIN  # Convert from satoshis to BRICS
@@ -664,7 +669,7 @@ class StratumMiner:
                 "proof": int(nonce, 16),
                 "previous_hash": template['previous_hash'],
                 "hash": block_hash,
-                "miner": miner_address,  # FIXED: Use miner address from job
+                "miner": miner_address,  # The miner who submitted the winning share
                 "difficulty": template['difficulty'],
                 "nonce": int(nonce, 16)
             }
