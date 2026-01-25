@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Skeleton } from "../components/ui/skeleton";
 import { getBlocks, getTransactions } from "../lib/api";
 import { motion } from "framer-motion";
+import { useLanguage } from "../context/LanguageContext";
 
 function truncateHash(hash, length = 16) {
   if (!hash) return "";
