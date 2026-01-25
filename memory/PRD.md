@@ -129,6 +129,10 @@ POST /api/transactions
 
 ## Changelog
 
+### v2.1.0 (2026-01-25) - No Fees Release
+- ✅ Removed transaction fees - transfers are FREE
+- ✅ Instant transactions (processed immediately)
+
 ### v2.0.0 (2026-01-25) - Security Release
 - ✅ Client-side transaction signing
 - ✅ CORS restrictions
