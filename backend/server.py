@@ -956,9 +956,10 @@ async def submit_mined_block(submission: MiningSubmit):
         "reward": get_mining_reward(new_index)
     }
 
-# Wallet endpoints
+# Wallet endpoints - with rate limiting
 @api_router.post("/wallet/create")
-async def create_wallet(request: WalletCreate):
+@limiter.limit("5/minute")
+async def create_wallet(request: Request, wallet_request: WalletCreate):
     """Create a new wallet with seed phrase"""
     wallet_data = generate_wallet()
     
@@ -967,24 +968,33 @@ async def create_wallet(request: WalletCreate):
         "public_key": wallet_data['public_key'],
         "private_key": wallet_data['private_key'],
         "seed_phrase": wallet_data['seed_phrase'],
-        "name": request.name,
+        "name": wallet_request.name,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
+    
+    # Log wallet creation (without sensitive data)
+    logger.info(f"Wallet created: {wallet_data['address'][:20]}...")
     
     return wallet
 
 @api_router.post("/wallet/import/seed")
-async def import_wallet_seed(request: WalletImportSeed):
+@limiter.limit("5/minute")
+async def import_wallet_seed(request: Request, wallet_request: WalletImportSeed):
     """Import wallet from seed phrase (12 words)"""
+    # Validate seed phrase format
+    words = wallet_request.seed_phrase.strip().split()
+    if len(words) != 12:
+        raise HTTPException(status_code=400, detail="Seed phrase must be exactly 12 words")
+    
     try:
-        wallet_data = generate_wallet_from_seed(request.seed_phrase)
+        wallet_data = generate_wallet_from_seed(wallet_request.seed_phrase)
         
         wallet = {
             "address": wallet_data['address'],
             "public_key": wallet_data['public_key'],
             "private_key": wallet_data['private_key'],
             "seed_phrase": wallet_data['seed_phrase'],
-            "name": request.name,
+            "name": wallet_request.name,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
@@ -993,10 +1003,11 @@ async def import_wallet_seed(request: WalletImportSeed):
         raise HTTPException(status_code=400, detail=str(e))
 
 @api_router.post("/wallet/import/key")
-async def import_wallet_key(request: WalletImportPrivateKey):
+@limiter.limit("5/minute")
+async def import_wallet_key(request: Request, wallet_request: WalletImportPrivateKey):
     """Import wallet from private key"""
     try:
-        wallet_data = recover_wallet_from_private_key(request.private_key)
+        wallet_data = recover_wallet_from_private_key(wallet_request.private_key)
         
         wallet = {
             "address": wallet_data['address'],
