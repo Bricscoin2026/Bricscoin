@@ -277,19 +277,26 @@ ipcMain.handle('start-mining', async (event, minerAddress) => {
     if (!isMining) return;
     
     try {
-      const block = await blockchain.mineBlock(minerAddress, (progress) => {
+      const result = await blockchain.mineBlock(minerAddress, (progress) => {
         mainWindow.webContents.send('mining-progress', progress);
       });
       
-      mainWindow.webContents.send('block-mined', block);
-      
-      // Broadcast blocco
-      broadcastBlock(block);
+      if (result.success) {
+        mainWindow.webContents.send('block-mined', {
+          block: result.block,
+          reward: result.reward
+        });
+      } else if (result.aborted) {
+        console.log('Mining aborted');
+        return;
+      }
       
     } catch (e) {
       console.error('Mining error:', e.message);
+      mainWindow.webContents.send('mining-error', { error: e.message });
     }
     
+    // Continua mining
     if (isMining) {
       setTimeout(mine, 100);
     }
@@ -302,6 +309,7 @@ ipcMain.handle('start-mining', async (event, minerAddress) => {
 // Ferma mining
 ipcMain.handle('stop-mining', async () => {
   isMining = false;
+  blockchain.stopMining();
   mainWindow.webContents.send('mining-stopped');
   return { success: true };
 });
