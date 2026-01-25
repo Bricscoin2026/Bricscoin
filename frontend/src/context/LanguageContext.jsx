@@ -73,8 +73,8 @@ const translations = {
     of: "di",
     
     // Mining
-    miningTitle: "Estrazione",
-    miningSubtitle: "Mina BRICS usando il tuo browser",
+    miningTitle: "Mining Hardware",
+    miningSubtitle: "Mina BRICS con hardware ASIC (Bitaxe, Antminer, etc.)",
     minerAddress: "Indirizzo Minatore",
     rewardsToAddress: "Le ricompense saranno inviate a questo indirizzo",
     stopMining: "Ferma Mining",
@@ -84,15 +84,15 @@ const translations = {
     miningInProgress: "Mining in Corso",
     currentNonce: "Nonce Attuale",
     lastHash: "Ultimo Hash",
-    target: "Target (deve iniziare con)",
+    target: "Target",
     howMiningWorks: "Come Funziona il Mining",
     miningRewards: "Ricompense Mining",
-    miningWarning: "Il mining via browser è meno efficiente del software dedicato.",
-    miningStep1: "Il browser riceve un template di blocco dalla rete",
-    miningStep2: "Prova diversi valori nonce, facendo hash SHA256",
-    miningStep3: "Quando un hash inizia con abbastanza zeri, hai vinto!",
-    miningStep4: "Il blocco viene inviato e ricevi la ricompensa",
-    miningStep5: "La difficoltà si regola ogni 2016 blocchi",
+    miningWarning: "⚠️ Richiede hardware ASIC. Smartphone e CPU/GPU non possono minare.",
+    miningStep1: "Collega il tuo miner ASIC al pool Stratum",
+    miningStep2: "Il miner riceve job di lavoro dal server",
+    miningStep3: "Quando trova un hash valido, invia la soluzione",
+    miningStep4: "Se il blocco è valido, ricevi 50 BRICS di ricompensa",
+    miningStep5: "La difficoltà si regola automaticamente ogni 2016 blocchi",
     
     // Stratum
     stratumTitle: "Mining con Hardware (ASIC)",
