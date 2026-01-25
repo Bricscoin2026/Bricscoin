@@ -1,0 +1,228 @@
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { 
+  FileText, 
+  Github, 
+  User, 
+  Target, 
+  Shield, 
+  Zap,
+  CheckCircle,
+  Clock,
+  ExternalLink
+} from "lucide-react";
+
+export default function About() {
+  const roadmapItems = [
+    { phase: "Q1 2026", status: "done", items: ["Mainnet launch", "Web wallet", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet"] },
+    { phase: "Q2 2026", status: "current", items: ["Exchange listings", "Mobile wallet", "Additional mining pools", "Community governance"] },
+    { phase: "Q3 2026", status: "upcoming", items: ["P2P node network", "Smart contracts", "Cross-chain bridges"] },
+    { phase: "Q4 2026", status: "upcoming", items: ["Full decentralization", "Lightning Network", "Enterprise partnerships"] },
+  ];
+
+  return (
+    <div className="space-y-8 pb-12">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl sm:text-5xl font-heading font-bold">
+          About <span className="gold-text">BricsCoin</span>
+        </h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          A decentralized SHA256 Proof-of-Work cryptocurrency. Open source, transparent, and community-driven.
+        </p>
+      </div>
+
+      {/* Mission */}
+      <Card className="bg-card/50 border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="w-5 h-5 text-primary" />
+            Our Mission
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            BricsCoin aims to create a truly decentralized currency that remains accessible to hardware miners worldwide, 
+            maintains zero transaction fees, and operates with full transparency as an open-source project.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+              <Shield className="w-8 h-8 text-primary mb-2" />
+              <h4 className="font-bold">Secure</h4>
+              <p className="text-sm text-muted-foreground">SHA256 PoW, the same proven algorithm as Bitcoin</p>
+            </div>
+            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+              <Zap className="w-8 h-8 text-primary mb-2" />
+              <h4 className="font-bold">Fast & Free</h4>
+              <p className="text-sm text-muted-foreground">Instant transactions with zero fees</p>
+            </div>
+            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+              <Github className="w-8 h-8 text-primary mb-2" />
+              <h4 className="font-bold">Open Source</h4>
+              <p className="text-sm text-muted-foreground">100% transparent, MIT licensed code</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Whitepaper & GitHub */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="bg-card/50 border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Whitepaper
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+              Read our technical whitepaper for detailed information about BricsCoin's architecture, 
+              tokenomics, and roadmap.
+            </p>
+            <Button 
+              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/blob/main/WHITEPAPER.md', '_blank')}
+              className="w-full"
+              data-testid="whitepaper-btn"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Read Whitepaper
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/50 border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Github className="w-5 h-5 text-primary" />
+              Source Code
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+              BricsCoin is fully open source. Review the code, submit improvements, or run your own node.
+            </p>
+            <Button 
+              variant="outline"
+              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}
+              className="w-full border-white/20"
+              data-testid="github-btn"
+            >
+              <Github className="w-4 h-4 mr-2" />
+              View on GitHub
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Team */}
+      <Card className="bg-card/50 border-white/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" />
+            Team
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+              <User className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">Jabo86</h3>
+              <p className="text-muted-foreground">Founder & Lead Developer</p>
+              <div className="flex gap-2 mt-2">
+                <Badge variant="outline" className="text-xs">SHA256 Expert</Badge>
+                <Badge variant="outline" className="text-xs">Blockchain Developer</Badge>
+              </div>
+            </div>
+          </div>
+          <p className="text-muted-foreground text-sm mt-4">
+            Passionate about decentralization and cryptocurrency. Building BricsCoin as a community-driven, 
+            open-source project to bring the power of SHA256 mining to everyone.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Roadmap */}
+      <Card className="bg-card/50 border-white/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="w-5 h-5 text-primary" />
+            Roadmap
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {roadmapItems.map((phase, idx) => (
+              <div key={idx} className="relative pl-8 border-l-2 border-white/10 pb-6 last:pb-0">
+                <div className={`absolute -left-[9px] w-4 h-4 rounded-full ${
+                  phase.status === 'done' ? 'bg-green-500' : 
+                  phase.status === 'current' ? 'bg-primary animate-pulse' : 'bg-white/20'
+                }`} />
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="font-bold">{phase.phase}</h4>
+                  {phase.status === 'done' && <Badge className="bg-green-500/20 text-green-400 text-xs">Completed</Badge>}
+                  {phase.status === 'current' && <Badge className="bg-primary/20 text-primary text-xs">In Progress</Badge>}
+                  {phase.status === 'upcoming' && <Badge variant="outline" className="text-xs">Upcoming</Badge>}
+                </div>
+                <ul className="space-y-1">
+                  {phase.items.map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {phase.status === 'done' ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-white/30" />
+                      )}
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tech Specs */}
+      <Card className="bg-card/50 border-white/10">
+        <CardHeader>
+          <CardTitle>Technical Specifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Algorithm", value: "SHA256" },
+              { label: "Max Supply", value: "21M BRICS" },
+              { label: "Block Reward", value: "50 BRICS" },
+              { label: "Halving", value: "210,000 blocks" },
+              { label: "Block Time", value: "~10 min" },
+              { label: "Difficulty", value: "Dynamic" },
+              { label: "TX Fees", value: "0 (Free)" },
+              { label: "License", value: "MIT" },
+            ].map((spec, i) => (
+              <div key={i} className="p-3 bg-white/5 rounded-lg text-center">
+                <p className="text-xs text-muted-foreground">{spec.label}</p>
+                <p className="font-bold text-primary">{spec.value}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* CTA */}
+      <div className="text-center space-y-4 pt-8">
+        <h2 className="text-2xl font-bold">Ready to join the BricsCoin community?</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button onClick={() => window.location.href = '/wallet'} data-testid="get-started-btn">
+            Get Started
+          </Button>
+          <Button variant="outline" className="border-white/20" onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}>
+            <Github className="w-4 h-4 mr-2" />
+            Contribute
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
