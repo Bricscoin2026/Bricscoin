@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BricsCoin Core</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:#111;color:#fff;padding:20px}
+h1{color:#fc0;margin-bottom:15px}
+h3{color:#fc0;margin:15px 0 8px}
+.row{display:flex;gap:15px;margin-bottom:15px}
+.box{flex:1;background:#222;padding:15px;border-radius:8px;text-align:center}
+.box .n{font-size:22px;color:#fc0;font-weight:bold}
+.box .l{font-size:11px;color:#888}
+input,select{width:100%;padding:10px;margin:5px 0;background:#333;border:1px solid #555;border-radius:4px;color:#fff}
+button{padding:10px 20px;background:#fc0;color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:bold;margin:5px 0}
+button:hover{background:#fd0}
+button.red{background:#c00;color:#fff}
+.card{background:#1a1a1a;border:1px solid #333;padding:15px;border-radius:8px;margin-bottom:15px}
+.w{background:#252525;padding:12px;margin:8px 0;border-radius:6px}
+.w .a{font-family:monospace;font-size:11px;color:#fc0;word-break:break-all}
+.w .s{font-family:monospace;font-size:10px;color:#f88;margin-top:8px;background:#311;padding:8px;border-radius:4px}
+.w .b{font-size:18px;font-weight:bold;margin-top:8px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;text-align:left;border-bottom:1px solid #333;font-size:12px}
+th{color:#888}
+td{font-family:monospace}
+#toast{position:fixed;bottom:20px;right:20px;background:#fc0;color:#000;padding:12px 20px;border-radius:6px;display:none}
+.tabs{display:flex;gap:8px;margin-bottom:15px}
+.tab{padding:8px 16px;background:#333;border-radius:4px;cursor:pointer}
+.tab.on{background:#fc0;color:#000}
+.pg{display:none}.pg.on{display:block}
+</style>
+</head>
+<body>
+
+<h1>BRICSCOIN CORE</h1>
+
+<div class="row">
+<div class="box"><div class="n" id="circ">-</div><div class="l">Circulating</div></div>
+<div class="box"><div class="n" id="blks">-</div><div class="l">Blocks</div></div>
+<div class="box"><div class="n" id="diff">-</div><div class="l">Difficulty</div></div>
+<div class="box"><div class="n" id="rew">50</div><div class="l">Reward</div></div>
+</div>
+
+<div class="tabs">
+<div class="tab on" onclick="tab(0)">Wallet</div>
+<div class="tab" onclick="tab(1)">Mining</div>
+<div class="tab" onclick="tab(2)">Blocks</div>
+</div>
+
+<div id="p0" class="pg on">
+<div class="card">
+<h3>New Wallet</h3>
+<input id="wname" placeholder="Wallet name">
+<button onclick="newW()">Create Wallet</button>
+</div>
+<div class="card">
+<h3>Your Wallets</h3>
+<div id="wlist"></div>
+</div>
+<div class="card">
+<h3>Send</h3>
+<select id="sfrom"></select>
+<input id="sto" placeholder="To address">
+<input id="samt" type="number" placeholder="Amount">
+<button onclick="doSend()">Send</button>
+</div>
+</div>
+
+<div id="p1" class="pg">
+<div class="card">
+<h3>Mining</h3>
+<select id="mwallet"></select>
+<div class="row" style="margin:15px 0">
+<div class="box"><div class="n" id="hr">0</div><div class="l">H/s</div></div>
+<div class="box"><div class="n" id="nc">0</div><div class="l">Nonce</div></div>
+<div class="box"><div class="n" id="fd">0</div><div class="l">Found</div></div>
+</div>
+<p id="mst" style="color:#888;margin-bottom:10px">Ready</p>
+<button id="mbtn" onclick="toggleM()">Start</button>
+</div>
+</div>
+
+<div id="p2" class="pg">
+<div class="card">
+<h3>Blocks</h3>
+<table><thead><tr><th>#</th><th>Hash</th><th>Miner</th><th>Time</th></tr></thead><tbody id="btbl"></tbody></table>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let mOn=false,fnd=0;
+
+function tab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  document.querySelectorAll('.pg').forEach((p,j)=>p.classList.toggle('on',i===j));
+}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',3000)}
+
+async function loadStats(){
+  const s=await window.bc.stats();
+  if(s){
+    document.getElementById('circ').textContent=(s.circulating_supply||0).toLocaleString();
+    document.getElementById('blks').textContent=s.total_blocks||0;
+    document.getElementById('diff').textContent=s.current_difficulty||0;
+    document.getElementById('rew').textContent=s.current_reward||50;
+  }
+}
+
+async function loadBlocks(){
+  const b=await window.bc.blocks();
+  document.getElementById('btbl').innerHTML=b.map(x=>'<tr><td>'+x.index+'</td><td>'+(x.hash||'').slice(0,14)+'...</td><td>'+(x.miner||'').slice(0,12)+'...</td><td>'+new Date(x.timestamp).toLocaleString()+'</td></tr>').join('');
+}
+
+async function loadW(){
+  const w=await window.bc.wallets();
+  const d=document.getElementById('wlist');
+  const s1=document.getElementById('sfrom');
+  const s2=document.getElementById('mwallet');
+  s1.innerHTML='<option value="">Select</option>';
+  s2.innerHTML='<option value="">Select</option>';
+  if(!w.length){d.innerHTML='<p style="color:#888">No wallets yet</p>';return}
+  d.innerHTML=w.map(x=>'<div class="w"><b>'+x.name+'</b><div class="a">'+x.address+'</div><div class="s">Seed: '+x.seedPhrase+'</div><div class="b">'+(x.balance||0)+' BRICS</div></div>').join('');
+  w.forEach(x=>{s1.innerHTML+='<option value="'+x.address+'">'+x.name+'</option>';s2.innerHTML+='<option value="'+x.address+'">'+x.name+'</option>'});
+}
+
+async function newW(){
+  const n=document.getElementById('wname').value||'Wallet';
+  const w=await window.bc.newwallet(n);
+  toast('Created: '+w.address.slice(0,15)+'...');
+  document.getElementById('wname').value='';
+  loadW();
+}
+
+async function doSend(){
+  const f=document.getElementById('sfrom').value;
+  const t=document.getElementById('sto').value;
+  const a=document.getElementById('samt').value;
+  if(!f||!t||!a){toast('Fill all');return}
+  try{await window.bc.send(f,t,a);toast('Sent!');document.getElementById('sto').value='';document.getElementById('samt').value='';loadW()}
+  catch(e){toast('Error: '+e.message)}
+}
+
+async function toggleM(){
+  const b=document.getElementById('mbtn');
+  const a=document.getElementById('mwallet').value;
+  if(!mOn){
+    if(!a){toast('Select wallet');return}
+    await window.bc.mine(a);
+    mOn=true;b.textContent='Stop';b.classList.add('red');
+    document.getElementById('mst').textContent='Mining...';
+  }else{
+    await window.bc.stopmine();
+    mOn=false;b.textContent='Start';b.classList.remove('red');
+    document.getElementById('mst').textContent='Stopped';
+  }
+}
+
+window.bc.on('minfo',d=>{document.getElementById('mst').textContent='Block #'+d.block+' (diff '+d.diff+')'});
+window.bc.on('mprog',d=>{document.getElementById('hr').textContent=d.hr.toLocaleString();document.getElementById('nc').textContent=d.n.toLocaleString()});
+window.bc.on('found',d=>{fnd++;document.getElementById('fd').textContent=fnd;toast('Block #'+d.block+' found!');loadStats();loadBlocks();loadW()});
+
+loadStats();loadBlocks();loadW();
+setInterval(loadStats,10000);
+</script>
+</body>
+</html>
