@@ -619,8 +619,8 @@ async def get_network_stats():
     halvings_done = current_height // HALVING_INTERVAL
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
-    # Estimate hashrate (very rough estimate based on difficulty)
-    hashrate_estimate = (2 ** current_difficulty) / TARGET_BLOCK_TIME
+    # Estimate hashrate (Bitcoin-style: hashrate = difficulty * 2^32 / block_time)
+    hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
     
     return NetworkStats(
         total_supply=MAX_SUPPLY,
