@@ -776,6 +776,7 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
         "sender": tx_request.sender_address,
         "recipient": tx_request.recipient_address,
         "amount": tx_request.amount,
+        "fee": TRANSACTION_FEE,
         "timestamp": tx_request.timestamp,
         "signature": tx_request.signature,
         "public_key": tx_request.public_key,
