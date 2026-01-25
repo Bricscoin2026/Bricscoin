@@ -1,6 +1,7 @@
 """
-BricsCoin Stratum Mining Server v5.0
+BricsCoin Stratum Mining Server v5.1
 100% Bitcoin-Compatible Implementation for ASIC Miners (Bitaxe, NerdMiner)
+FIXED: Each miner gets personalized jobs with their own reward address
 """
 
 import asyncio
@@ -10,6 +11,7 @@ import struct
 import time
 import os
 import logging
+import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from motor.motor_asyncio import AsyncIOMotorClient
