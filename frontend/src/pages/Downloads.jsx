@@ -27,47 +27,65 @@ function formatFileSize(bytes) {
 function getOSInfo(filename) {
   const lower = filename.toLowerCase();
   
-  // BricsCoin Core - Full Node (high priority)
-  if (lower.includes('core')) {
-    return { 
-      os: 'BricsCoin Core', 
-      icon: HardDrive, 
-      color: 'text-primary',
-      bgColor: 'bg-primary/20',
-      description: 'Full Node Desktop Wallet - Professional UI with Matrix theme. Requires Node.js.',
-      priority: 1
-    };
-  }
-  
-  // Generic source code
-  if (lower.includes('source') && !lower.includes('core')) {
+  // Source code (check first, before core)
+  if (lower.includes('source') || (lower.includes('.tar.gz') && !lower.includes('appimage'))) {
     return { 
       os: 'Source Code', 
       icon: FileArchive, 
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/20',
-      description: 'Complete BricsCoin project source code',
+      description: 'Build from source - Requires Node.js 18+',
       priority: 3
     };
   }
   
+  // Linux AppImage
   if (lower.includes('linux') || lower.includes('appimage')) {
     return { 
       os: 'Linux', 
       icon: HardDrive, 
       color: 'text-orange-500',
       bgColor: 'bg-orange-500/20',
-      description: 'AppImage - Universal executable for Linux',
-      priority: 2
+      description: 'Ready to run - Make executable with chmod +x',
+      priority: 1
     };
   }
-  if (lower.includes('windows') || lower.includes('win')) {
+  
+  // Windows
+  if (lower.includes('windows') || lower.includes('win') || lower.includes('.exe')) {
     return { 
       os: 'Windows', 
       icon: Monitor, 
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/20',
-      description: 'Compressed folder - Extract and run',
+      description: 'Portable executable - No installation needed',
+      priority: 1
+    };
+  }
+  
+  // macOS
+  if (lower.includes('mac') || lower.includes('darwin')) {
+    return { 
+      os: 'macOS', 
+      icon: Apple, 
+      color: 'text-gray-300',
+      bgColor: 'bg-gray-500/20',
+      description: 'Extract and run - May require security approval',
+      priority: 1
+    };
+  }
+  
+  // BricsCoin Core generic
+  if (lower.includes('core')) {
+    return { 
+      os: 'BricsCoin Core', 
+      icon: HardDrive, 
+      color: 'text-primary',
+      bgColor: 'bg-primary/20',
+      description: 'Desktop Wallet with Matrix theme',
+      priority: 2
+    };
+  }
       priority: 2
     };
   }
