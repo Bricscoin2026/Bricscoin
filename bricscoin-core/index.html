@@ -5,1042 +5,227 @@
 <title>BricsCoin Core</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-  background:#000;
-  color:#fff;
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* Matrix Canvas Background */
-#matrix-bg{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  z-index:0;
-  opacity:0.5;
-}
-
-/* Mining Particles Canvas */
-#mining-particles{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  z-index:1;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity 0.5s ease;
-}
-#mining-particles.active{opacity:1}
-
-/* Main container */
-.app{
-  position:relative;
-  z-index:2;
-  min-height:100vh;
-  background:radial-gradient(ellipse at top, rgba(0,30,0,0.3) 0%, transparent 50%),
-              radial-gradient(ellipse at bottom, rgba(0,20,0,0.2) 0%, transparent 50%);
-}
-
-.container{max-width:1200px;margin:0 auto;padding:20px 30px}
-
-/* Header */
-.header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:20px 0;
-  border-bottom:1px solid rgba(0,255,0,0.15);
-  margin-bottom:25px;
-}
-.logo-section{display:flex;align-items:center;gap:18px}
-.logo-img{
-  width:65px;height:65px;
-  border-radius:50%;
-  border:2px solid rgba(0,255,0,0.4);
-  box-shadow:0 0 25px rgba(0,255,0,0.3), 0 0 50px rgba(0,255,0,0.15);
-  animation:logoPulse 3s ease-in-out infinite;
-}
-@keyframes logoPulse{
-  0%,100%{box-shadow:0 0 25px rgba(0,255,0,0.3), 0 0 50px rgba(0,255,0,0.15)}
-  50%{box-shadow:0 0 35px rgba(0,255,0,0.5), 0 0 70px rgba(0,255,0,0.25)}
-}
-.logo-text h1{
-  font-size:28px;
-  font-weight:700;
-  background:linear-gradient(135deg,#00ff00 0%,#00cc00 50%,#00ff44 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  letter-spacing:1px;
-}
-.logo-text span{color:rgba(255,255,255,0.4);font-size:12px;letter-spacing:2px}
-
-.connection-status{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 20px;
-  background:rgba(0,255,0,0.08);
-  border:1px solid rgba(0,255,0,0.2);
-  border-radius:30px;
-}
-.status-dot{
-  width:10px;height:10px;
-  border-radius:50%;
-  background:#00ff00;
-  box-shadow:0 0 10px #00ff00, 0 0 20px #00ff00;
-  animation:blink 2s infinite;
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.5}}
-.connection-status span{color:#00ff00;font-size:13px;font-weight:500}
-
-/* Network Stats Grid */
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:18px;
-  margin-bottom:25px;
-}
-.stat-card{
-  background:linear-gradient(135deg,rgba(0,50,0,0.4) 0%,rgba(0,30,0,0.2) 100%);
-  border:1px solid rgba(0,255,0,0.15);
-  border-radius:16px;
-  padding:22px;
-  text-align:center;
-  transition:all 0.3s ease;
-}
-.stat-card:hover{transform:translateY(-3px);border-color:rgba(0,255,0,0.3);box-shadow:0 10px 40px rgba(0,255,0,0.1)}
-.stat-value{font-size:28px;font-weight:bold;color:#00ff00;text-shadow:0 0 20px rgba(0,255,0,0.4);font-family:'Courier New',monospace}
-.stat-label{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;margin-top:8px}
-
-/* Navigation Tabs */
-.nav-tabs{
-  display:flex;
-  gap:8px;
-  margin-bottom:25px;
-  background:rgba(0,20,0,0.4);
-  padding:8px;
-  border-radius:16px;
-  border:1px solid rgba(0,255,0,0.1);
-}
-.nav-tab{
-  flex:1;
-  padding:14px 20px;
-  background:transparent;
-  border:none;
-  border-radius:10px;
-  color:rgba(255,255,255,0.6);
-  cursor:pointer;
-  transition:all 0.3s ease;
-  font-size:13px;
-  font-weight:600;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-}
-.nav-tab:hover{background:rgba(0,255,0,0.08);color:rgba(255,255,255,0.9)}
-.nav-tab.active{
-  background:linear-gradient(135deg,rgba(0,255,0,0.2) 0%,rgba(0,180,0,0.15) 100%);
-  color:#00ff00;
-  box-shadow:0 0 20px rgba(0,255,0,0.15);
-  border:1px solid rgba(0,255,0,0.3);
-}
-.nav-tab svg{width:18px;height:18px}
-
-/* Cards */
-.card{
-  background:linear-gradient(180deg,rgba(0,40,0,0.35) 0%,rgba(0,20,0,0.25) 100%);
-  border:1px solid rgba(0,255,0,0.12);
-  border-radius:20px;
-  padding:25px;
-  margin-bottom:20px;
-  backdrop-filter:blur(10px);
-}
-.card-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:20px;
-  padding-bottom:15px;
-  border-bottom:1px solid rgba(0,255,0,0.1);
-}
-.card-header-left{display:flex;align-items:center;gap:12px}
-.card-icon{
-  width:40px;height:40px;
-  background:linear-gradient(135deg,rgba(0,255,0,0.2),rgba(0,180,0,0.1));
-  border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  color:#00ff00;
-  font-size:18px;
-}
-.card-title{font-size:18px;font-weight:600;color:#fff}
-
-/* Forms */
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:12px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-input,select,textarea{
-  width:100%;
-  padding:14px 18px;
-  background:rgba(0,0,0,0.4);
-  border:1px solid rgba(0,255,0,0.15);
-  border-radius:12px;
-  color:#fff;
-  font-size:14px;
-  transition:all 0.3s ease;
-  font-family:inherit;
-}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#00ff00;box-shadow:0 0 20px rgba(0,255,0,0.15)}
-input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.3)}
-select{cursor:pointer}
-select option{background:#0a0a0a;color:#fff}
-textarea{resize:vertical;min-height:80px}
-
-/* Buttons */
-.btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  padding:14px 28px;
-  border:none;
-  border-radius:12px;
-  font-size:14px;
-  font-weight:600;
-  cursor:pointer;
-  transition:all 0.3s ease;
-  font-family:inherit;
-}
-.btn-primary{background:linear-gradient(135deg,#00ff00 0%,#00cc00 100%);color:#000;box-shadow:0 4px 20px rgba(0,255,0,0.3)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,255,0,0.4)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#000;color:#fff;min-height:100vh;overflow-x:hidden}
+#matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.4}
+.app{position:relative;z-index:1;min-height:100vh;background:radial-gradient(ellipse at top,rgba(0,30,0,0.3) 0%,transparent 50%)}
+.container{max-width:1100px;margin:0 auto;padding:20px 25px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid rgba(0,255,0,0.15);margin-bottom:20px}
+.logo-section{display:flex;align-items:center;gap:15px}
+.logo-img{width:55px;height:55px;border-radius:50%;border:2px solid rgba(0,255,0,0.4);box-shadow:0 0 20px rgba(0,255,0,0.3)}
+.logo-text h1{font-size:24px;background:linear-gradient(135deg,#00ff00,#00cc00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-text span{color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px}
+.connection-status{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(0,255,0,0.08);border:1px solid rgba(0,255,0,0.2);border-radius:20px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#00ff00;box-shadow:0 0 8px #00ff00}
+.connection-status span{color:#00ff00;font-size:12px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+.stat-card{background:linear-gradient(135deg,rgba(0,50,0,0.4),rgba(0,30,0,0.2));border:1px solid rgba(0,255,0,0.15);border-radius:14px;padding:18px;text-align:center}
+.stat-value{font-size:24px;font-weight:bold;color:#00ff00;font-family:monospace}
+.stat-label{font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-top:6px}
+.nav-tabs{display:flex;gap:6px;margin-bottom:20px;background:rgba(0,20,0,0.4);padding:6px;border-radius:14px;border:1px solid rgba(0,255,0,0.1)}
+.nav-tab{flex:1;padding:12px 18px;background:transparent;border:none;border-radius:8px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:13px;font-weight:600;transition:all 0.3s}
+.nav-tab:hover{background:rgba(0,255,0,0.08);color:#fff}
+.nav-tab.active{background:linear-gradient(135deg,rgba(0,255,0,0.2),rgba(0,180,0,0.15));color:#00ff00;border:1px solid rgba(0,255,0,0.3)}
+.card{background:linear-gradient(180deg,rgba(0,40,0,0.35),rgba(0,20,0,0.25));border:1px solid rgba(0,255,0,0.12);border-radius:16px;padding:22px;margin-bottom:18px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid rgba(0,255,0,0.1)}
+.card-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
+.card-icon{width:32px;height:32px;background:linear-gradient(135deg,rgba(0,255,0,0.2),rgba(0,180,0,0.1));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#00ff00}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid rgba(0,255,0,0.15);border-radius:10px;color:#fff;font-size:13px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#00ff00;box-shadow:0 0 15px rgba(0,255,0,0.1)}
+textarea{resize:vertical;min-height:70px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.3s}
+.btn-primary{background:linear-gradient(135deg,#00ff00,#00cc00);color:#000}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,255,0,0.3)}
 .btn-secondary{background:rgba(0,255,0,0.1);color:#00ff00;border:1px solid rgba(0,255,0,0.3)}
 .btn-secondary:hover{background:rgba(0,255,0,0.2)}
-.btn-danger{background:linear-gradient(135deg,#ff3333 0%,#cc0000 100%);color:#fff;box-shadow:0 4px 20px rgba(255,0,0,0.3)}
-.btn-danger:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,0,0,0.4)}
-.btn-sm{padding:10px 18px;font-size:12px}
-.btn-group{display:flex;gap:10px;flex-wrap:wrap}
-
-/* Wallet Cards */
-.wallet-list{display:flex;flex-direction:column;gap:15px}
-.wallet-card{
-  background:linear-gradient(135deg,rgba(0,50,0,0.3) 0%,rgba(0,30,0,0.2) 100%);
-  border:1px solid rgba(0,255,0,0.15);
-  border-radius:16px;
-  padding:20px;
-  transition:all 0.3s ease;
-}
-.wallet-card:hover{border-color:rgba(0,255,0,0.35);box-shadow:0 0 30px rgba(0,255,0,0.1)}
-.wallet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.wallet-name{font-size:18px;font-weight:600;color:#fff}
-.wallet-balance{font-size:22px;font-weight:bold;color:#00ff00;text-shadow:0 0 15px rgba(0,255,0,0.4)}
-.wallet-balance span{font-size:14px;color:rgba(0,255,0,0.7)}
-.wallet-address-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.wallet-address{
-  flex:1;
-  font-family:'Courier New',monospace;
-  font-size:11px;
-  color:#00ff00;
-  background:rgba(0,0,0,0.4);
-  padding:10px 14px;
-  border-radius:8px;
-  word-break:break-all;
-  border:1px solid rgba(0,255,0,0.1);
-}
-.wallet-seed{
-  font-family:'Courier New',monospace;
-  font-size:10px;
-  color:#ff6666;
-  background:rgba(255,0,0,0.08);
-  padding:10px 14px;
-  border-radius:8px;
-  border:1px solid rgba(255,0,0,0.2);
-  margin-bottom:12px;
-}
+.btn-danger{background:linear-gradient(135deg,#ff3333,#cc0000);color:#fff}
+.btn-sm{padding:8px 14px;font-size:11px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+.wallet-list{display:flex;flex-direction:column;gap:12px}
+.wallet-card{background:linear-gradient(135deg,rgba(0,50,0,0.3),rgba(0,30,0,0.2));border:1px solid rgba(0,255,0,0.15);border-radius:14px;padding:18px}
+.wallet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.wallet-name{font-size:16px;font-weight:600}
+.wallet-balance{font-size:20px;font-weight:bold;color:#00ff00}
+.wallet-balance span{font-size:12px;color:rgba(0,255,0,0.7)}
+.wallet-address{font-family:monospace;font-size:10px;color:#00ff00;background:rgba(0,0,0,0.4);padding:10px 12px;border-radius:8px;word-break:break-all;margin-bottom:8px}
+.wallet-seed{font-family:monospace;font-size:9px;color:#ff6666;background:rgba(255,0,0,0.08);padding:10px 12px;border-radius:8px;border:1px solid rgba(255,0,0,0.2);margin-bottom:10px}
 .wallet-seed::before{content:'⚠️ SEED: ';font-weight:bold}
-.wallet-actions{display:flex;gap:8px;flex-wrap:wrap}
-.empty-state{text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4)}
-.empty-state svg{width:50px;height:50px;margin-bottom:15px;opacity:0.3}
-
-/* Mining Section */
-.mining-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:20px 0}
-.mining-stat{
-  background:rgba(0,0,0,0.4);
-  border:1px solid rgba(0,255,0,0.1);
-  border-radius:14px;
-  padding:20px;
-  text-align:center;
-  transition:all 0.3s ease;
-}
-.mining-stat.active{border-color:rgba(0,255,0,0.4);box-shadow:0 0 20px rgba(0,255,0,0.1)}
-.mining-stat-value{font-size:26px;font-weight:bold;color:#00ff00;font-family:'Courier New',monospace}
-.mining-stat-label{font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-top:6px}
-
-.mining-animation{
-  position:relative;
-  height:100px;
-  background:rgba(0,0,0,0.4);
-  border:1px solid rgba(0,255,0,0.15);
-  border-radius:16px;
-  margin:20px 0;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.mining-animation.active{border-color:rgba(0,255,0,0.4)}
-.mining-animation canvas{position:absolute;top:0;left:0;width:100%;height:100%}
-.mining-status-text{
-  position:relative;
-  z-index:1;
-  font-family:'Courier New',monospace;
-  font-size:14px;
-  color:rgba(255,255,255,0.5);
-  text-align:center;
-}
-.mining-status-text.active{color:#00ff00;text-shadow:0 0 10px rgba(0,255,0,0.5)}
-.mining-status-text .icon{font-size:28px;display:block;margin-bottom:8px}
-.mining-buttons{display:flex;gap:12px;margin-top:20px}
-
-/* Blocks Table */
+.wallet-actions{display:flex;gap:6px;flex-wrap:wrap}
+.empty-state{text-align:center;padding:40px;color:rgba(255,255,255,0.4)}
 .blocks-table{width:100%;border-collapse:collapse}
-.blocks-table th{padding:12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);border-bottom:1px solid rgba(0,255,0,0.1)}
-.blocks-table td{padding:14px 12px;border-bottom:1px solid rgba(0,255,0,0.05);font-family:'Courier New',monospace;font-size:12px}
-.blocks-table tr:hover td{background:rgba(0,255,0,0.03)}
+.blocks-table th{padding:10px;text-align:left;font-size:10px;text-transform:uppercase;color:rgba(255,255,255,0.4);border-bottom:1px solid rgba(0,255,0,0.1)}
+.blocks-table td{padding:12px 10px;font-family:monospace;font-size:11px;border-bottom:1px solid rgba(0,255,0,0.05)}
 .block-height{color:#00ff00;font-weight:bold}
-.block-hash{color:rgba(255,255,255,0.6)}
-.block-miner{color:rgba(0,255,0,0.7)}
-.block-time{color:rgba(255,255,255,0.4)}
-
-/* Transactions */
-.tx-list{max-height:300px;overflow-y:auto}
-.tx-item{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px;
-  border-bottom:1px solid rgba(0,255,0,0.05);
-}
-.tx-item:last-child{border-bottom:none}
-.tx-type{font-size:20px;margin-right:12px}
-.tx-details{flex:1}
-.tx-addr{font-family:monospace;font-size:11px;color:rgba(255,255,255,0.6)}
-.tx-amount{font-weight:bold;font-family:monospace}
-.tx-amount.incoming{color:#00ff00}
-.tx-amount.outgoing{color:#ff6666}
-
-/* Modal */
-.modal{
-  display:none;
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.8);
-  z-index:1000;
-  align-items:center;
-  justify-content:center;
-}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center}
 .modal.show{display:flex}
-.modal-content{
-  background:linear-gradient(180deg,rgba(0,40,0,0.95) 0%,rgba(0,20,0,0.95) 100%);
-  border:1px solid rgba(0,255,0,0.2);
-  border-radius:20px;
-  padding:30px;
-  max-width:500px;
-  width:90%;
-  max-height:80vh;
-  overflow-y:auto;
-}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-title{font-size:20px;font-weight:bold;color:#00ff00}
-.modal-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;opacity:0.6}
-.modal-close:hover{opacity:1}
-
-/* QR Code */
-.qr-container{
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  display:inline-block;
-  margin:15px 0;
-}
-
-/* Toast Notifications */
-#toast{
-  position:fixed;
-  bottom:30px;
-  right:30px;
-  background:linear-gradient(135deg,#00ff00,#00cc00);
-  color:#000;
-  padding:16px 28px;
-  border-radius:14px;
-  font-weight:600;
-  display:none;
-  box-shadow:0 10px 50px rgba(0,255,0,0.4);
-  animation:slideInToast 0.4s ease;
-  z-index:1001;
-}
-@keyframes slideInToast{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
-#toast.error{background:linear-gradient(135deg,#ff4444,#cc0000);color:#fff;box-shadow:0 10px 50px rgba(255,0,0,0.4)}
-#toast.success{background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;box-shadow:0 10px 50px rgba(255,215,0,0.5)}
-
-/* Page visibility */
+.modal-content{background:linear-gradient(180deg,rgba(0,40,0,0.95),rgba(0,20,0,0.95));border:1px solid rgba(0,255,0,0.2);border-radius:16px;padding:25px;max-width:450px;width:90%}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:18px;font-weight:bold;color:#00ff00}
+.modal-close{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+.qr-container{background:#fff;padding:15px;border-radius:10px;display:inline-block;margin:12px 0}
+.tx-list{max-height:250px;overflow-y:auto}
+.tx-item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid rgba(0,255,0,0.05)}
+.tx-amount{font-family:monospace;font-weight:bold}
+.tx-amount.in{color:#00ff00}
+.tx-amount.out{color:#ff6666}
+#toast{position:fixed;bottom:25px;right:25px;background:linear-gradient(135deg,#00ff00,#00cc00);color:#000;padding:14px 24px;border-radius:12px;font-weight:600;display:none;z-index:200}
+#toast.error{background:linear-gradient(135deg,#ff4444,#cc0000);color:#fff}
 .page{display:none}
 .page.active{display:block}
-
-/* Version footer */
-.version-footer{text-align:center;padding:20px;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:1px}
-
-/* Grid layouts */
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+.version{text-align:center;padding:15px;color:rgba(255,255,255,0.2);font-size:10px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.grid-2,.stats-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <canvas id="matrix-bg"></canvas>
-<canvas id="mining-particles"></canvas>
-
 <div class="app">
 <div class="container">
 
-<!-- Header -->
 <header class="header">
   <div class="logo-section">
-    <img src="https://bricscoin26.org/bricscoin-logo.png" alt="BricsCoin" class="logo-img" onerror="this.style.display='none'">
+    <img src="https://bricscoin26.org/bricscoin-logo.png" class="logo-img" onerror="this.style.display='none'">
     <div class="logo-text">
       <h1>BRICSCOIN CORE</h1>
-      <span>FULL NODE WALLET v1.3</span>
+      <span>DESKTOP WALLET v2.0</span>
     </div>
   </div>
   <div class="connection-status">
     <div class="status-dot"></div>
-    <span>Connected to Network</span>
+    <span>Connected</span>
   </div>
 </header>
 
-<!-- Network Stats -->
 <div class="stats-grid">
-  <div class="stat-card">
-    <div class="stat-value" id="stat-supply">-</div>
-    <div class="stat-label">Circulating Supply</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value" id="stat-blocks">-</div>
-    <div class="stat-label">Block Height</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value" id="stat-difficulty">-</div>
-    <div class="stat-label">Difficulty</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value" id="stat-reward">50</div>
-    <div class="stat-label">Block Reward</div>
-  </div>
+  <div class="stat-card"><div class="stat-value" id="s-supply">-</div><div class="stat-label">Circulating</div></div>
+  <div class="stat-card"><div class="stat-value" id="s-blocks">-</div><div class="stat-label">Block Height</div></div>
+  <div class="stat-card"><div class="stat-value" id="s-diff">-</div><div class="stat-label">Difficulty</div></div>
+  <div class="stat-card"><div class="stat-value" id="s-reward">50</div><div class="stat-label">Block Reward</div></div>
 </div>
 
-<!-- Navigation -->
 <nav class="nav-tabs">
-  <button class="nav-tab active" onclick="switchTab(0)" data-testid="tab-wallet">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
-    Wallet
-  </button>
-  <button class="nav-tab" onclick="switchTab(1)" data-testid="tab-send">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-    Send
-  </button>
-  <button class="nav-tab" onclick="switchTab(2)" data-testid="tab-receive">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-    Receive
-  </button>
-  <button class="nav-tab" onclick="switchTab(3)" data-testid="tab-mining">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-    Mining
-  </button>
-  <button class="nav-tab" onclick="switchTab(4)" data-testid="tab-blocks">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    Blocks
-  </button>
+  <button class="nav-tab active" onclick="tab(0)">💼 Wallet</button>
+  <button class="nav-tab" onclick="tab(1)">📤 Send</button>
+  <button class="nav-tab" onclick="tab(2)">📥 Receive</button>
+  <button class="nav-tab" onclick="tab(3)">🔗 Blocks</button>
 </nav>
 
-<!-- WALLET PAGE -->
-<div id="page-0" class="page active">
+<!-- WALLET -->
+<div id="p0" class="page active">
   <div class="grid-2">
-    <!-- Create Wallet -->
     <div class="card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <div class="card-icon">+</div>
-          <div class="card-title">Create New Wallet</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Wallet Name</label>
-        <input type="text" id="new-wallet-name" placeholder="Enter wallet name..." data-testid="input-wallet-name">
-      </div>
-      <button class="btn btn-primary" onclick="createWallet()" data-testid="btn-create-wallet">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-        Create Wallet
-      </button>
+      <div class="card-header"><div class="card-title"><div class="card-icon">+</div>Create Wallet</div></div>
+      <div class="form-group"><label class="form-label">Name</label><input id="new-name" placeholder="My Wallet"></div>
+      <button class="btn btn-primary" onclick="createWallet()">Create New Wallet</button>
     </div>
-
-    <!-- Import Wallet -->
     <div class="card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <div class="card-icon">↓</div>
-          <div class="card-title">Import Wallet</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Wallet Name</label>
-        <input type="text" id="import-wallet-name" placeholder="Enter wallet name...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Seed Phrase (12 words)</label>
-        <textarea id="import-seed" placeholder="Enter your 12-word seed phrase..."></textarea>
-      </div>
-      <button class="btn btn-secondary" onclick="importWallet()" data-testid="btn-import-wallet">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        Import Wallet
-      </button>
+      <div class="card-header"><div class="card-title"><div class="card-icon">↓</div>Import Wallet</div></div>
+      <div class="form-group"><label class="form-label">Name</label><input id="imp-name" placeholder="Imported Wallet"></div>
+      <div class="form-group"><label class="form-label">Seed Phrase (12 words)</label><textarea id="imp-seed" placeholder="word1 word2 word3..."></textarea></div>
+      <button class="btn btn-secondary" onclick="importWallet()">Import Wallet</button>
     </div>
   </div>
-
-  <!-- Wallet List -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-header-left">
-        <div class="card-icon">◆</div>
-        <div class="card-title">Your Wallets</div>
-      </div>
-      <button class="btn btn-sm btn-secondary" onclick="loadWallets()">↻ Refresh</button>
-    </div>
-    <div id="wallet-list" class="wallet-list">
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
-        <p>No wallets yet. Create or import a wallet above!</p>
-      </div>
-    </div>
+    <div class="card-header"><div class="card-title"><div class="card-icon">◆</div>Your Wallets</div><button class="btn btn-sm btn-secondary" onclick="loadWallets()">↻</button></div>
+    <div id="wallet-list" class="wallet-list"><div class="empty-state">No wallets. Create one above!</div></div>
   </div>
 </div>
 
-<!-- SEND PAGE -->
-<div id="page-1" class="page">
+<!-- SEND -->
+<div id="p1" class="page">
   <div class="card">
-    <div class="card-header">
-      <div class="card-header-left">
-        <div class="card-icon">→</div>
-        <div class="card-title">Send BRICS</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">From Wallet</label>
-      <select id="send-from" data-testid="select-send-from">
-        <option value="">Select wallet...</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Available Balance</label>
-      <div id="send-balance" style="font-size:24px;color:#00ff00;font-weight:bold;padding:10px 0">- BRICS</div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Recipient Address</label>
-      <input type="text" id="send-to" placeholder="BRICS..." data-testid="input-send-to">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Amount</label>
-      <input type="number" id="send-amount" placeholder="0.00" step="0.01" data-testid="input-send-amount">
-    </div>
-    <button class="btn btn-primary" onclick="sendTransaction()" data-testid="btn-send">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-      Send Transaction
-    </button>
+    <div class="card-header"><div class="card-title"><div class="card-icon">→</div>Send BRICS</div></div>
+    <div class="form-group"><label class="form-label">From</label><select id="send-from"><option value="">Select wallet...</option></select></div>
+    <div class="form-group"><label class="form-label">Balance</label><div id="send-bal" style="font-size:20px;color:#00ff00;font-weight:bold">- BRICS</div></div>
+    <div class="form-group"><label class="form-label">To Address</label><input id="send-to" placeholder="BRICS..."></div>
+    <div class="form-group"><label class="form-label">Amount</label><input type="number" id="send-amt" placeholder="0.00" step="0.01"></div>
+    <button class="btn btn-primary" onclick="sendTx()">Send Transaction</button>
   </div>
 </div>
 
-<!-- RECEIVE PAGE -->
-<div id="page-2" class="page">
+<!-- RECEIVE -->
+<div id="p2" class="page">
   <div class="card">
-    <div class="card-header">
-      <div class="card-header-left">
-        <div class="card-icon">↓</div>
-        <div class="card-title">Receive BRICS</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Select Wallet</label>
-      <select id="receive-wallet" onchange="updateReceiveAddress()">
-        <option value="">Select wallet...</option>
-      </select>
-    </div>
-    <div id="receive-info" style="display:none;text-align:center;padding:20px">
-      <p style="margin-bottom:15px;color:rgba(255,255,255,0.6)">Share this address to receive BRICS:</p>
-      <div class="qr-container">
-        <canvas id="qr-canvas" width="180" height="180"></canvas>
-      </div>
-      <div style="margin-top:15px">
-        <input type="text" id="receive-address" readonly style="text-align:center;font-family:monospace;font-size:12px">
-        <div class="btn-group" style="justify-content:center;margin-top:15px">
-          <button class="btn btn-secondary btn-sm" onclick="copyReceiveAddress()">📋 Copy Address</button>
-        </div>
-      </div>
+    <div class="card-header"><div class="card-title"><div class="card-icon">↓</div>Receive BRICS</div></div>
+    <div class="form-group"><label class="form-label">Select Wallet</label><select id="recv-sel" onchange="showRecv()"><option value="">Select...</option></select></div>
+    <div id="recv-info" style="display:none;text-align:center;padding:20px">
+      <p style="color:rgba(255,255,255,0.6);margin-bottom:12px">Share this address:</p>
+      <div class="qr-container"><canvas id="qr" width="150" height="150"></canvas></div>
+      <div style="margin-top:12px"><input id="recv-addr" readonly style="text-align:center;font-family:monospace;font-size:11px"></div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="copyRecv()">📋 Copy Address</button>
     </div>
   </div>
-  
-  <!-- Recent Transactions -->
   <div class="card" id="tx-card" style="display:none">
-    <div class="card-header">
-      <div class="card-header-left">
-        <div class="card-icon">↔</div>
-        <div class="card-title">Recent Transactions</div>
-      </div>
-    </div>
+    <div class="card-header"><div class="card-title"><div class="card-icon">↔</div>Transactions</div></div>
     <div id="tx-list" class="tx-list"></div>
   </div>
 </div>
 
-<!-- MINING PAGE -->
-<div id="page-3" class="page">
+<!-- BLOCKS -->
+<div id="p3" class="page">
   <div class="card">
-    <div class="card-header">
-      <div class="card-header-left">
-        <div class="card-icon">⛏</div>
-        <div class="card-title">Mining Control</div>
-      </div>
-    </div>
-    
-    <div class="form-group">
-      <label class="form-label">Mining Reward Address</label>
-      <select id="mining-wallet" data-testid="select-mining-wallet">
-        <option value="">Select wallet for mining rewards...</option>
-      </select>
-    </div>
-
-    <div class="mining-stats">
-      <div class="mining-stat" id="stat-hashrate-card">
-        <div class="mining-stat-value" id="mining-hashrate">0</div>
-        <div class="mining-stat-label">Hashrate (H/s)</div>
-      </div>
-      <div class="mining-stat" id="stat-nonce-card">
-        <div class="mining-stat-value" id="mining-nonce">0</div>
-        <div class="mining-stat-label">Current Nonce</div>
-      </div>
-      <div class="mining-stat" id="stat-found-card">
-        <div class="mining-stat-value" id="mining-found">0</div>
-        <div class="mining-stat-label">Blocks Found</div>
-      </div>
-    </div>
-
-    <div class="mining-animation" id="mining-animation">
-      <canvas id="particle-canvas"></canvas>
-      <div class="mining-status-text" id="mining-status">
-        <span class="icon">⛏️</span>
-        Ready to mine. Select a wallet and click Start.
-      </div>
-    </div>
-
-    <div class="mining-buttons">
-      <button class="btn btn-primary" id="btn-start-mining" onclick="startMining()" data-testid="btn-start-mining">▶ Start Mining</button>
-      <button class="btn btn-danger" id="btn-stop-mining" onclick="stopMining()" style="display:none" data-testid="btn-stop-mining">⏹ Stop Mining</button>
-    </div>
+    <div class="card-header"><div class="card-title"><div class="card-icon">▣</div>Recent Blocks</div><button class="btn btn-sm btn-secondary" onclick="loadBlocks()">↻</button></div>
+    <table class="blocks-table"><thead><tr><th>Height</th><th>Hash</th><th>Miner</th><th>Time</th></tr></thead><tbody id="blocks-body"><tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3)">Loading...</td></tr></tbody></table>
   </div>
 </div>
 
-<!-- BLOCKS PAGE -->
-<div id="page-4" class="page">
-  <div class="card">
-    <div class="card-header">
-      <div class="card-header-left">
-        <div class="card-icon">▣</div>
-        <div class="card-title">Recent Blocks</div>
-      </div>
-      <button class="btn btn-sm btn-secondary" onclick="loadBlocks()">↻ Refresh</button>
-    </div>
-    <table class="blocks-table">
-      <thead>
-        <tr><th>Height</th><th>Hash</th><th>Miner</th><th>Time</th></tr>
-      </thead>
-      <tbody id="blocks-table-body">
-        <tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:30px">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="version-footer">BRICSCOIN CORE v1.3 • Powered by BricsCoin Network</div>
-
+<div class="version">BRICSCOIN CORE v2.0 • Desktop Wallet</div>
 </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal" id="delete-modal">
+<div class="modal" id="del-modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">⚠️ Delete Wallet</div>
-      <button class="modal-close" onclick="closeModal('delete-modal')">&times;</button>
-    </div>
-    <p style="margin-bottom:20px;color:rgba(255,255,255,0.7)">Are you sure you want to delete this wallet? Make sure you have backed up your seed phrase!</p>
-    <p style="margin-bottom:20px;color:#ff6666;font-weight:bold" id="delete-wallet-name"></p>
-    <div class="btn-group">
-      <button class="btn btn-danger" onclick="confirmDelete()">Yes, Delete Wallet</button>
-      <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">⚠️ Delete Wallet</div><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <p style="margin-bottom:15px;color:rgba(255,255,255,0.7)">Delete this wallet? Make sure you saved the seed!</p>
+    <p style="color:#ff6666;font-weight:bold;margin-bottom:15px" id="del-name"></p>
+    <div class="btn-group"><button class="btn btn-danger" onclick="confirmDel()">Delete</button><button class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ==================== MATRIX BACKGROUND ====================
-(function initMatrix() {
-  const canvas = document.getElementById('matrix-bg');
-  const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize();
-  window.addEventListener('resize', resize);
-  const chars = '0123456789ABCDEFabcdef₿ΣΔΩ◆▣'.split('');
-  const fontSize = 14;
-  let columns = Math.floor(canvas.width / fontSize);
-  let drops = Array(columns).fill(0).map(() => Math.random() * -100);
-  function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = fontSize + 'px monospace';
-    for (let i = 0; i < drops.length; i++) {
-      const char = chars[Math.floor(Math.random() * chars.length)];
-      ctx.fillStyle = Math.random() > 0.98 ? '#FFD700' : `rgba(0,${150+Math.random()*105},0,${0.3+Math.random()*0.5})`;
-      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
-    }
-  }
-  setInterval(draw, 50);
-  window.addEventListener('resize', () => { columns = Math.floor(canvas.width / fontSize); drops = Array(columns).fill(0).map(() => Math.random() * -100); });
-})();
+// Matrix background
+(function(){const c=document.getElementById('matrix-bg'),x=c.getContext('2d');function r(){c.width=innerWidth;c.height=innerHeight}r();addEventListener('resize',r);const ch='0123456789ABCDEFabcdef₿◆'.split(''),fs=14;let cols=Math.floor(c.width/fs),d=Array(cols).fill(0).map(()=>Math.random()*-100);setInterval(()=>{x.fillStyle='rgba(0,0,0,0.05)';x.fillRect(0,0,c.width,c.height);x.font=fs+'px monospace';for(let i=0;i<d.length;i++){x.fillStyle=`rgba(0,${150+Math.random()*100},0,${0.3+Math.random()*0.5})`;x.fillText(ch[Math.floor(Math.random()*ch.length)],i*fs,d[i]*fs);if(d[i]*fs>c.height&&Math.random()>0.975)d[i]=0;d[i]++}},50)})();
 
-// ==================== MINING PARTICLES ====================
-const MiningParticles = (function() {
-  const canvas = document.getElementById('particle-canvas');
-  const ctx = canvas.getContext('2d');
-  let particles = [], animationId = null, isActive = false;
-  function resize() { const c = canvas.parentElement; canvas.width = c.offsetWidth; canvas.height = c.offsetHeight; }
-  class Particle {
-    constructor() { this.reset(); }
-    reset() {
-      this.x = Math.random() * canvas.width;
-      this.y = canvas.height + 10;
-      this.size = Math.random() * 4 + 2;
-      this.speedY = -(Math.random() * 2 + 1);
-      this.speedX = (Math.random() - 0.5) * 2;
-      this.opacity = Math.random() * 0.8 + 0.2;
-      this.color = Math.random() > 0.3 ? '#00ff00' : '#FFD700';
-      this.life = 1;
-      this.decay = Math.random() * 0.01 + 0.005;
-    }
-    update() {
-      this.y += this.speedY; this.x += this.speedX + Math.sin(this.y * 0.02) * 0.5; this.life -= this.decay;
-      if (this.life <= 0 || this.y < -10) this.reset();
-    }
-    draw() {
-      ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = this.color; ctx.globalAlpha = this.opacity * this.life; ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-  }
-  function init() { resize(); particles = []; for (let i = 0; i < 40; i++) { const p = new Particle(); p.y = Math.random() * canvas.height; particles.push(p); } }
-  function animate() {
-    if (!isActive) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => { p.update(); p.draw(); });
-    animationId = requestAnimationFrame(animate);
-  }
-  return {
-    start() { if (isActive) return; isActive = true; init(); animate(); document.getElementById('mining-animation').classList.add('active'); },
-    stop() { isActive = false; if (animationId) cancelAnimationFrame(animationId); ctx.clearRect(0, 0, canvas.width, canvas.height); document.getElementById('mining-animation').classList.remove('active'); }
-  };
-})();
+// Simple QR
+function drawQR(t){const c=document.getElementById('qr'),x=c.getContext('2d'),s=150,cs=s/25;x.fillStyle='#fff';x.fillRect(0,0,s,s);x.fillStyle='#000';for(let i=0;i<25;i++)for(let j=0;j<25;j++){const cc=t.charCodeAt((i*25+j)%t.length);if((i<7&&j<7)||(i<7&&j>17)||(i>17&&j<7)){const pi=i<7?i:(i>17?i-18:0),pj=j<7?j:(j>17?j-18:0);if(pi===0||pi===6||pj===0||pj===6||(pi>=2&&pi<=4&&pj>=2&&pj<=4))x.fillRect(j*cs,i*cs,cs,cs)}else if((cc+i*j)%2===0)x.fillRect(j*cs,i*cs,cs,cs)}}
 
-// ==================== SIMPLE QR CODE ====================
-function drawQR(text) {
-  const canvas = document.getElementById('qr-canvas');
-  const ctx = canvas.getContext('2d');
-  const size = 180, cellSize = size / 25;
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = '#000';
-  // Simple pattern based on address hash
-  for (let i = 0; i < 25; i++) {
-    for (let j = 0; j < 25; j++) {
-      const charCode = text.charCodeAt((i * 25 + j) % text.length);
-      if ((i < 7 && j < 7) || (i < 7 && j > 17) || (i > 17 && j < 7)) {
-        // Position patterns
-        const inOuter = (i < 7 && j < 7) || (i < 7 && j > 17) || (i > 17 && j < 7);
-        const pi = i < 7 ? i : (i > 17 ? i - 18 : 0);
-        const pj = j < 7 ? j : (j > 17 ? j - 18 : 0);
-        if (pi === 0 || pi === 6 || pj === 0 || pj === 6 || (pi >= 2 && pi <= 4 && pj >= 2 && pj <= 4)) {
-          ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
-        }
-      } else if ((charCode + i * j) % 2 === 0) {
-        ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
-      }
-    }
-  }
-}
+let wallets=[],delAddr=null;
 
-// ==================== APP STATE ====================
-let blocksFound = 0, isMining = false, walletToDelete = null, walletsCache = [];
+function tab(i){document.querySelectorAll('.nav-tab').forEach((t,n)=>t.classList.toggle('active',n===i));document.querySelectorAll('.page').forEach((p,n)=>p.classList.toggle('active',n===i))}
+function toast(m,e){const t=document.getElementById('toast');t.textContent=m;t.className=e?'error':'';t.style.display='block';setTimeout(()=>t.style.display='none',3500)}
+function closeModal(){document.getElementById('del-modal').classList.remove('show')}
 
-// ==================== UI FUNCTIONS ====================
-function switchTab(index) {
-  document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === index));
-  document.querySelectorAll('.page').forEach((p, i) => p.classList.toggle('active', i === index));
-}
+async function loadStats(){try{const s=await bc.stats();if(s){document.getElementById('s-supply').textContent=(s.circulating_supply||0).toLocaleString();document.getElementById('s-blocks').textContent=(s.total_blocks||0).toLocaleString();document.getElementById('s-diff').textContent=s.current_difficulty||0;document.getElementById('s-reward').textContent=s.current_reward||50}}catch{}}
 
-function showToast(msg, type = 'normal') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = type; t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', type === 'success' ? 6000 : 4000);
-}
+async function loadBlocks(){try{const b=await bc.blocks();document.getElementById('blocks-body').innerHTML=b.length?b.map(x=>`<tr><td class="block-height">#${x.index}</td><td>${(x.hash||'').slice(0,16)}...</td><td style="color:rgba(0,255,0,0.7)">${(x.miner||'?').slice(0,14)}...</td><td style="color:rgba(255,255,255,0.4)">${new Date(x.timestamp).toLocaleString()}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3)">No blocks</td></tr>'}catch{}}
 
-function openModal(id) { document.getElementById(id).classList.add('show'); }
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+async function loadWallets(){try{wallets=await bc.wallets()||[];const l=document.getElementById('wallet-list'),sf=document.getElementById('send-from'),rs=document.getElementById('recv-sel');sf.innerHTML='<option value="">Select...</option>';rs.innerHTML='<option value="">Select...</option>';if(!wallets.length){l.innerHTML='<div class="empty-state">No wallets. Create one above!</div>';return}l.innerHTML=wallets.map(w=>`<div class="wallet-card"><div class="wallet-header"><div class="wallet-name">${w.name}</div><div class="wallet-balance">${(w.balance||0).toLocaleString()} <span>BRICS</span></div></div><div class="wallet-address">${w.address}</div><div class="wallet-seed">${w.seedPhrase}</div><div class="wallet-actions"><button class="btn btn-sm btn-secondary" onclick="goSend('${w.address}')">Send</button><button class="btn btn-sm btn-secondary" onclick="goRecv('${w.address}')">Receive</button><button class="btn btn-sm btn-danger" onclick="delWallet('${w.address}','${w.name}')">Delete</button></div></div>`).join('');wallets.forEach(w=>{sf.innerHTML+=`<option value="${w.address}">${w.name} (${w.balance||0})</option>`;rs.innerHTML+=`<option value="${w.address}">${w.name}</option>`})}catch(e){console.error(e)}}
 
-// ==================== DATA LOADING ====================
-async function loadStats() {
-  try {
-    const s = await window.bc.stats();
-    if (s) {
-      document.getElementById('stat-supply').textContent = (s.circulating_supply || 0).toLocaleString();
-      document.getElementById('stat-blocks').textContent = (s.total_blocks || 0).toLocaleString();
-      document.getElementById('stat-difficulty').textContent = s.current_difficulty || 0;
-      document.getElementById('stat-reward').textContent = s.current_reward || 50;
-    }
-  } catch (e) { console.error(e); }
-}
+async function createWallet(){const n=document.getElementById('new-name').value.trim()||'My Wallet';try{await bc.newwallet(n);toast('✅ Wallet created!');document.getElementById('new-name').value='';loadWallets()}catch(e){toast('❌ '+e.message,1)}}
 
-async function loadBlocks() {
-  try {
-    const blocks = await window.bc.blocks();
-    const tbody = document.getElementById('blocks-table-body');
-    if (!blocks || !blocks.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:30px">No blocks</td></tr>';
-      return;
-    }
-    tbody.innerHTML = blocks.map(b => `<tr><td class="block-height">#${b.index}</td><td class="block-hash">${(b.hash||'').slice(0,16)}...</td><td class="block-miner">${(b.miner||'?').slice(0,12)}...</td><td class="block-time">${new Date(b.timestamp).toLocaleString()}</td></tr>`).join('');
-  } catch (e) { console.error(e); }
-}
+async function importWallet(){const n=document.getElementById('imp-name').value.trim()||'Imported',s=document.getElementById('imp-seed').value.trim();if(!s||s.split(/\s+/).length<12){toast('⚠️ Enter 12 words',1);return}try{await bc.importwallet(n,s);toast('✅ Wallet imported!');document.getElementById('imp-name').value='';document.getElementById('imp-seed').value='';loadWallets()}catch(e){toast('❌ '+e.message,1)}}
 
-async function loadWallets() {
-  try {
-    const wallets = await window.bc.wallets();
-    walletsCache = wallets;
-    const list = document.getElementById('wallet-list');
-    const sendSel = document.getElementById('send-from');
-    const recvSel = document.getElementById('receive-wallet');
-    const mineSel = document.getElementById('mining-wallet');
-    
-    sendSel.innerHTML = '<option value="">Select wallet...</option>';
-    recvSel.innerHTML = '<option value="">Select wallet...</option>';
-    mineSel.innerHTML = '<option value="">Select wallet for rewards...</option>';
-    
-    if (!wallets || !wallets.length) {
-      list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg><p>No wallets yet. Create or import a wallet above!</p></div>';
-      return;
-    }
-    
-    list.innerHTML = wallets.map(w => `
-      <div class="wallet-card">
-        <div class="wallet-header">
-          <div class="wallet-name">${w.name}</div>
-          <div class="wallet-balance">${(w.balance||0).toLocaleString()} <span>BRICS</span></div>
-        </div>
-        <div class="wallet-address-row">
-          <div class="wallet-address">${w.address}</div>
-          <button class="btn btn-sm btn-secondary" onclick="copyAddress('${w.address}')">📋</button>
-        </div>
-        <div class="wallet-seed">${w.seedPhrase}</div>
-        <div class="wallet-actions">
-          <button class="btn btn-sm btn-secondary" onclick="selectSend('${w.address}')">→ Send</button>
-          <button class="btn btn-sm btn-secondary" onclick="selectReceive('${w.address}')">↓ Receive</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteWallet('${w.address}','${w.name}')">🗑 Delete</button>
-        </div>
-      </div>
-    `).join('');
-    
-    wallets.forEach(w => {
-      sendSel.innerHTML += `<option value="${w.address}">${w.name} (${w.balance||0} BRICS)</option>`;
-      recvSel.innerHTML += `<option value="${w.address}">${w.name}</option>`;
-      mineSel.innerHTML += `<option value="${w.address}">${w.name}</option>`;
-    });
-  } catch (e) { console.error(e); }
-}
+function delWallet(a,n){delAddr=a;document.getElementById('del-name').textContent=n;document.getElementById('del-modal').classList.add('show')}
+async function confirmDel(){if(!delAddr)return;try{await bc.deletewallet(delAddr);toast('✅ Deleted');closeModal();delAddr=null;loadWallets()}catch(e){toast('❌ '+e.message,1)}}
 
-// ==================== WALLET FUNCTIONS ====================
-async function createWallet() {
-  const name = document.getElementById('new-wallet-name').value.trim() || 'My Wallet';
-  try {
-    await window.bc.newwallet(name);
-    showToast('✅ Wallet "' + name + '" created!');
-    document.getElementById('new-wallet-name').value = '';
-    loadWallets();
-  } catch (e) { showToast('❌ ' + e.message, 'error'); }
-}
+function goSend(a){document.getElementById('send-from').value=a;updBal();tab(1)}
+function goRecv(a){document.getElementById('recv-sel').value=a;showRecv();tab(2)}
 
-async function importWallet() {
-  const name = document.getElementById('import-wallet-name').value.trim() || 'Imported Wallet';
-  const seed = document.getElementById('import-seed').value.trim();
-  if (!seed || seed.split(/\s+/).length < 12) {
-    showToast('⚠️ Please enter a valid 12-word seed phrase', 'error');
-    return;
-  }
-  try {
-    await window.bc.importwallet(name, seed);
-    showToast('✅ Wallet imported successfully!');
-    document.getElementById('import-wallet-name').value = '';
-    document.getElementById('import-seed').value = '';
-    loadWallets();
-  } catch (e) { showToast('❌ ' + e.message, 'error'); }
-}
+document.getElementById('send-from').onchange=updBal;
+function updBal(){const a=document.getElementById('send-from').value,w=wallets.find(x=>x.address===a);document.getElementById('send-bal').textContent=w?(w.balance||0)+' BRICS':'- BRICS'}
 
-function deleteWallet(addr, name) {
-  walletToDelete = addr;
-  document.getElementById('delete-wallet-name').textContent = name + ' (' + addr.slice(0, 20) + '...)';
-  openModal('delete-modal');
-}
+async function sendTx(){const f=document.getElementById('send-from').value,t=document.getElementById('send-to').value,a=document.getElementById('send-amt').value;if(!f||!t||!a){toast('⚠️ Fill all fields',1);return}try{await bc.send(f,t,a);toast('✅ Sent!');document.getElementById('send-to').value='';document.getElementById('send-amt').value='';loadWallets()}catch(e){toast('❌ '+e.message,1)}}
 
-async function confirmDelete() {
-  if (!walletToDelete) return;
-  try {
-    await window.bc.deletewallet(walletToDelete);
-    showToast('✅ Wallet deleted');
-    closeModal('delete-modal');
-    walletToDelete = null;
-    loadWallets();
-  } catch (e) { showToast('❌ ' + e.message, 'error'); }
-}
+async function showRecv(){const a=document.getElementById('recv-sel').value,info=document.getElementById('recv-info'),tc=document.getElementById('tx-card');if(!a){info.style.display='none';tc.style.display='none';return}document.getElementById('recv-addr').value=a;drawQR(a);info.style.display='block';try{const tx=await bc.transactions(a);if(tx&&tx.length){tc.style.display='block';document.getElementById('tx-list').innerHTML=tx.slice(0,10).map(x=>{const inc=x.recipient===a;return`<div class="tx-item"><span style="font-size:18px">${inc?'↓':'↑'}</span><span style="font-size:10px;color:rgba(255,255,255,0.5)">${inc?'From':'To'}: ${(inc?x.sender:x.recipient||'').slice(0,18)}...</span><span class="tx-amount ${inc?'in':'out'}">${inc?'+':'-'}${x.amount}</span></div>`}).join('')}else tc.style.display='none'}catch{tc.style.display='none'}}
 
-function copyAddress(addr) {
-  window.bc.copy(addr);
-  showToast('📋 Address copied!');
-}
+function copyRecv(){const a=document.getElementById('recv-addr').value;if(a){bc.copy(a);toast('📋 Copied!')}}
 
-function selectSend(addr) {
-  document.getElementById('send-from').value = addr;
-  updateSendBalance();
-  switchTab(1);
-}
-
-function selectReceive(addr) {
-  document.getElementById('receive-wallet').value = addr;
-  updateReceiveAddress();
-  switchTab(2);
-}
-
-// ==================== SEND FUNCTIONS ====================
-document.getElementById('send-from').addEventListener('change', updateSendBalance);
-
-function updateSendBalance() {
-  const addr = document.getElementById('send-from').value;
-  const w = walletsCache.find(x => x.address === addr);
-  document.getElementById('send-balance').textContent = w ? (w.balance || 0) + ' BRICS' : '- BRICS';
-}
-
-async function sendTransaction() {
-  const from = document.getElementById('send-from').value;
-  const to = document.getElementById('send-to').value;
-  const amt = document.getElementById('send-amount').value;
-  if (!from || !to || !amt) { showToast('⚠️ Fill all fields', 'error'); return; }
-  try {
-    await window.bc.send(from, to, amt);
-    showToast('✅ Transaction sent!');
-    document.getElementById('send-to').value = '';
-    document.getElementById('send-amount').value = '';
-    loadWallets();
-  } catch (e) { showToast('❌ ' + e.message, 'error'); }
-}
-
-// ==================== RECEIVE FUNCTIONS ====================
-async function updateReceiveAddress() {
-  const addr = document.getElementById('receive-wallet').value;
-  const info = document.getElementById('receive-info');
-  const txCard = document.getElementById('tx-card');
-  
-  if (!addr) { info.style.display = 'none'; txCard.style.display = 'none'; return; }
-  
-  document.getElementById('receive-address').value = addr;
-  drawQR(addr);
-  info.style.display = 'block';
-  
-  // Load transactions
-  try {
-    const txs = await window.bc.transactions(addr);
-    if (txs && txs.length) {
-      txCard.style.display = 'block';
-      document.getElementById('tx-list').innerHTML = txs.slice(0, 10).map(tx => {
-        const isIncoming = tx.recipient === addr;
-        return `<div class="tx-item">
-          <span class="tx-type">${isIncoming ? '↓' : '↑'}</span>
-          <div class="tx-details">
-            <div class="tx-addr">${isIncoming ? 'From: ' + (tx.sender||'').slice(0,20) : 'To: ' + (tx.recipient||'').slice(0,20)}...</div>
-          </div>
-          <div class="tx-amount ${isIncoming ? 'incoming' : 'outgoing'}">${isIncoming ? '+' : '-'}${tx.amount} BRICS</div>
-        </div>`;
-      }).join('');
-    } else { txCard.style.display = 'none'; }
-  } catch (e) { txCard.style.display = 'none'; }
-}
-
-function copyReceiveAddress() {
-  const addr = document.getElementById('receive-address').value;
-  if (addr) { window.bc.copy(addr); showToast('📋 Address copied!'); }
-}
-
-// ==================== MINING FUNCTIONS ====================
-async function startMining() {
-  const wallet = document.getElementById('mining-wallet').value;
-  if (!wallet) { showToast('⚠️ Select a wallet first', 'error'); return; }
-  isMining = true;
-  await window.bc.mine(wallet);
-  document.getElementById('btn-start-mining').style.display = 'none';
-  document.getElementById('btn-stop-mining').style.display = 'inline-flex';
-  MiningParticles.start();
-  document.querySelectorAll('.mining-stat').forEach(el => el.classList.add('active'));
-  document.getElementById('mining-status').className = 'mining-status-text active';
-  document.getElementById('mining-status').innerHTML = '<span class="icon">⛏️</span>Mining in progress...';
-}
-
-async function stopMining() {
-  isMining = false;
-  await window.bc.stopmine();
-  document.getElementById('btn-start-mining').style.display = 'inline-flex';
-  document.getElementById('btn-stop-mining').style.display = 'none';
-  MiningParticles.stop();
-  document.querySelectorAll('.mining-stat').forEach(el => el.classList.remove('active'));
-  document.getElementById('mining-status').className = 'mining-status-text';
-  document.getElementById('mining-status').innerHTML = '<span class="icon">⏹️</span>Mining stopped.';
-}
-
-window.bc.on('minfo', () => {});
-window.bc.on('mprog', d => {
-  document.getElementById('mining-hashrate').textContent = d.hr.toLocaleString();
-  document.getElementById('mining-nonce').textContent = d.n.toLocaleString();
-});
-window.bc.on('found', d => {
-  // Only update if we have a valid block number
-  if (d && d.block !== undefined) {
-    blocksFound++;
-    document.getElementById('mining-found').textContent = blocksFound;
-    document.getElementById('mining-status').innerHTML = '<span class="icon">🎉</span>Block #' + d.block + ' found!';
-    loadStats(); loadBlocks(); loadWallets();
-  }
-});
-
-// ==================== INIT ====================
-document.getElementById('new-wallet-name').addEventListener('keypress', e => { if (e.key === 'Enter') createWallet(); });
-loadStats(); loadBlocks(); loadWallets();
-setInterval(loadStats, 10000);
-setInterval(loadBlocks, 30000);
+document.getElementById('new-name').onkeypress=e=>{if(e.key==='Enter')createWallet()};
+loadStats();loadBlocks();loadWallets();
+setInterval(loadStats,10000);setInterval(loadBlocks,30000);
 </script>
 </body>
 </html>
