@@ -135,6 +135,13 @@ class WalletImportSeed(BaseModel):
 class WalletImportPrivateKey(BaseModel):
     private_key: str
     name: Optional[str] = "Imported Wallet"
+    
+    @field_validator('private_key')
+    @classmethod
+    def validate_private_key(cls, v):
+        if not re.match(r'^[a-fA-F0-9]{64}$', v):
+            raise ValueError('Invalid private key format')
+        return v.lower()
 
 class WalletResponse(BaseModel):
     address: str
@@ -144,7 +151,58 @@ class WalletResponse(BaseModel):
     created_at: str
     seed_phrase: Optional[str] = None
 
+# SECURE Transaction Request - NO private key sent over network!
+# Transaction is signed CLIENT-SIDE and only signature is sent
+class SecureTransactionRequest(BaseModel):
+    """
+    Secure transaction model - private key NEVER leaves the client.
+    Client signs the transaction locally and sends only the signature.
+    """
+    sender_address: str
+    recipient_address: str
+    amount: float
+    timestamp: str
+    signature: str  # Transaction signed client-side
+    public_key: str  # Sender's public key for verification
+    
+    @field_validator('sender_address', 'recipient_address')
+    @classmethod
+    def validate_address(cls, v):
+        if not v.startswith('BRICS') or len(v) < 40:
+            raise ValueError('Invalid BRICS address format')
+        if not re.match(r'^BRICS[a-fA-F0-9]{40}$', v):
+            raise ValueError('Address must be BRICS followed by 40 hex characters')
+        return v
+    
+    @field_validator('amount')
+    @classmethod
+    def validate_amount(cls, v):
+        if v <= 0:
+            raise ValueError('Amount must be positive')
+        if v > 21_000_000:
+            raise ValueError('Amount exceeds maximum supply')
+        # Check for reasonable precision (8 decimal places like Bitcoin)
+        if len(str(v).split('.')[-1]) > 8 if '.' in str(v) else False:
+            raise ValueError('Amount has too many decimal places (max 8)')
+        return v
+    
+    @field_validator('signature')
+    @classmethod
+    def validate_signature(cls, v):
+        if not re.match(r'^[a-fA-F0-9]+$', v) or len(v) < 64:
+            raise ValueError('Invalid signature format')
+        return v.lower()
+    
+    @field_validator('public_key')
+    @classmethod
+    def validate_public_key(cls, v):
+        if not re.match(r'^[a-fA-F0-9]{128}$', v):
+            raise ValueError('Invalid public key format (expected 128 hex chars)')
+        return v.lower()
+
+# Legacy model - DEPRECATED, kept for backward compatibility but will be removed
 class TransactionRequest(BaseModel):
+    """DEPRECATED: Use SecureTransactionRequest instead"""
     sender_private_key: str
     sender_address: str
     recipient_address: str
