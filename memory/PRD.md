@@ -1,96 +1,125 @@
 # BricsCoin - Product Requirements Document
 
-## 🌐 Sito Live
-| Servizio | URL |
+## 🌐 Live Site
+| Service | URL |
 |----------|-----|
-| **Sito Web** | https://bricscoin26.org |
+| **Website** | https://bricscoin26.org |
 | **Run a Node** | https://bricscoin26.org/node |
 | **Downloads** | https://bricscoin26.org/downloads |
 | **Mining** | https://bricscoin26.org/mining |
 | **API** | https://bricscoin26.org/api |
-| **NerdMiner/Stratum** | 5.161.254.163:3333 (usa IP!) |
+| **NerdMiner/Stratum** | 5.161.254.163:3333 (use IP!) |
 
-## ✅ Funzionalità Complete
+## ✅ Completed Features
 
 ### Blockchain (Bitcoin-like)
 - [x] Proof of Work SHA256
-- [x] Supply max: 21,000,000 BRICS
-- [x] **Premine: 1,000,000 BRICS** (incluso nel calcolo supply)
-- [x] Halving ogni 210,000 blocchi (~4 anni)
-- [x] Difficoltà: 4 (regolazione ogni 2016 blocchi)
-- [x] Target: 10 min/blocco
+- [x] Max supply: 21,000,000 BRICS
+- [x] **Premine: 1,000,000 BRICS** (included in supply calculation)
+- [x] Halving every 210,000 blocks (~4 years)
+- [x] Difficulty: 4 (adjustment every 2016 blocks)
+- [x] Target: 10 min/block
 
 ### Dashboard
-- [x] Mostra BRICS in circolazione (premine + minati)
-- [x] Mostra BRICS rimanenti da minare
-- [x] Aggiornamento automatico ogni 10 secondi
+- [x] Shows circulating BRICS (premine + mined)
+- [x] Shows remaining BRICS to mine
+- [x] Auto-update every 10 seconds
 
 ### Wallet
-- [x] Seed phrase 12 parole (BIP39)
-- [x] Importa da seed/chiave privata
-- [x] Invio/Ricezione BRICS
+- [x] 12-word seed phrase (BIP39)
+- [x] Import from seed/private key
+- [x] Send/Receive BRICS
 - [x] QR code
 
 ### Mining
-- [x] Mining browser ~27 KH/s
+- [x] Browser mining ~27 KH/s
 - [x] Web Worker (background)
-- [x] Server Stratum porta 3333
+- [x] Stratum server port 3333
 
 ### Downloads
-- [x] Linux AppImage (100 MB)
-- [x] Windows ZIP (103 MB)
-- [x] macOS Source (580 KB)
-- [x] Source Code ZIP (680 KB)
+- [x] BricsCoin Core v1.1 (Matrix UI) - 8.4 KB
+- [x] Source Code ZIP - 680 KB
 
-### Decentralizzazione
-- [x] Pagina "Run a Node" con guida completa
-- [x] docker-compose.node.yml per nuovi nodi
-- [x] Sincronizzazione P2P automatica
-- [x] Download codice sorgente
+### Decentralization
+- [x] "Run a Node" page with complete guide
+- [x] docker-compose.node.yml for new nodes
+- [x] Automatic P2P sync
+- [x] Source code download
 
-### BricsCoin Core (Desktop Wallet)
-- [x] Struttura progetto Electron completa
-- [x] Blockchain locale con SQLite (better-sqlite3)
-- [x] Wallet creation/import con BIP39
-- [x] UI dashboard, wallet, mining, network
-- [x] Sincronizzazione P2P con seed nodes
-- [ ] Test su ambiente desktop (richiede display)
-- [ ] Build per Windows/Mac/Linux (richiede GitHub Actions)
+### BricsCoin Core Desktop Wallet
+- [x] **v1.1 Released (Jan 25, 2026)**
+  - Professional Matrix-style animated background
+  - BricsCoin logo integration
+  - Dark theme with green accent
+  - Wallet creation/management
+  - Mining functionality with Start/Stop buttons
+  - Network stats display
+  - Block explorer
+  - Transaction sending
 
-### UI/UX
-- [x] Sfondo Matrix verde
-- [x] Logo moneta rotonda
-- [x] Multilingue: IT, EN, ES, FR, DE, ZH, JA, RU, TR
-- [x] HTTPS con Cloudflare
+## 🔄 In Progress / Known Issues
 
-## 🔧 Per Eseguire un Nuovo Nodo
-```bash
-git clone https://github.com/Bricscoin2026/Bricscoin.git
-cd Bricscoin
-docker compose -f docker-compose.node.yml up -d
+### P1 - Medium Priority
+- [ ] NerdMiner mining shows hashrate 0 (needs investigation)
+- [ ] GitHub account suspended (blocks automated builds)
+- [ ] Web miner block submission may fail (400 error)
+
+### P2 - Lower Priority
+- [ ] Configure stratum subdomain (stratum.bricscoin26.org)
+- [ ] Native Mac/Windows installers (.dmg, .exe) - blocked by GitHub
+
+## 📋 Future Tasks
+
+### P1
+- [ ] True P2P sync between Core wallets
+- [ ] GitHub Actions for automated builds (when account restored)
+
+### P2
+- [ ] Landing page design
+- [ ] Mobile app (PWA improvements)
+
+## 🏗️ Architecture
+
+```
+/app/
+├── backend/
+│   ├── server.py             # Main FastAPI app
+│   └── stratum_server.py     # Stratum for ASIC mining
+├── frontend/
+│   ├── public/
+│   │   └── miningWorker.js   # Web worker for browser mining
+│   └── src/
+│       ├── App.js            # Main router
+│       ├── pages/            # React pages (English-only)
+│       └── components/
+├── bricscoin-core/           # Desktop wallet (Electron)
+│   ├── main.js               # Electron main process
+│   ├── preload.js            # IPC bridge
+│   ├── index.html            # UI with Matrix background
+│   └── package.json          # electron, electron-store
 ```
 
-## Known Issues
-- GitHub account sospeso (Bricscoin2026)
-- NerdMiner: usare IP 5.161.254.163:3333 (Cloudflare non supporta porta 3333)
-- Web miner: possibile errore 400 Bad Request all'invio blocchi (da investigare)
-- NerdMiner: hashrate potrebbe mostrare 0 (da investigare log stratum)
+## 🔐 Server Credentials
+- **Hetzner Server IP:** 5.161.254.163
+- **SSH User:** root
+- **SSH Password:** Fabio@katia2021
+- **Note:** Server has limited RAM (2GB), careful with Docker builds
 
-## API Endpoints
-| Endpoint | Descrizione |
-|----------|-------------|
-| `GET /api/network/stats` | Statistiche rete (supply, blocchi, difficoltà) |
-| `GET /api/blocks` | Lista blocchi |
-| `POST /api/wallet/create` | Crea wallet con seed phrase |
-| `POST /api/wallet/import/seed` | Importa da seed |
-| `GET /api/wallet/{address}/balance` | Saldo wallet |
-| `POST /api/mining/submit` | Invia blocco minato |
+## 📝 Changelog
 
-## Changelog
-- 2026-01-25 01:00: Fix calcolo supply circolante (include premine 1M BRICS)
-- 2026-01-25 01:00: Aggiunta card "Rimanenti da Minare" in Dashboard
-- 2026-01-25 00:52: BricsCoin Core - progetto completo per test
-- 2026-01-25 00:20: Pagina "Run a Node" con guida decentralizzazione
-- 2026-01-25 00:00: Dominio bricscoin26.org configurato
-- 2026-01-24 23:08: Mining 27 KH/s funzionante
-- 2026-01-24 23:00: Multilingue 9 lingue
+### Jan 25, 2026
+- **BricsCoin Core v1.1 Released**
+  - Added professional Matrix-style animated canvas background
+  - Integrated BricsCoin logo from main site
+  - Improved dark theme with green accents
+  - Added Stop Mining button functionality
+  - Enhanced card styling and hover effects
+  - Updated Downloads page to English
+  - Deployed to https://bricscoin26.org/downloads
+
+### Jan 24, 2026
+- Fixed circulating supply calculation
+- Made website English-only
+- Fixed broken Mining and RunNode pages
+- Added wallet balance to Send dialog
+- Created initial BricsCoin Core wallet
