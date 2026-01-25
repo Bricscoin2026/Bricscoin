@@ -570,6 +570,14 @@ export default function Wallet() {
     }
   }, []);
 
+  // Auto-refresh balances every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey((k) => k + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch transactions when wallet selected
   useEffect(() => {
     async function fetchTransactions() {
