@@ -73,7 +73,7 @@ export default function Mining() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{stats?.current_difficulty || 4}</p>
+            <p className="text-2xl font-bold text-primary">{stats?.current_difficulty?.toLocaleString() || "-"}</p>
             <p className="text-xs text-muted-foreground">Difficulty</p>
           </CardContent>
         </Card>
