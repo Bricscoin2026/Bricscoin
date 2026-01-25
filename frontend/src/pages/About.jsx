@@ -198,7 +198,7 @@ export default function About() {
               { label: "Halving", value: "210,000 blocks" },
               { label: "Block Time", value: "~10 min" },
               { label: "Difficulty", value: "Dynamic" },
-              { label: "TX Fees", value: "0 (Free)" },
+              { label: "TX Fees", value: "0.05 BRICS" },
               { label: "License", value: "MIT" },
             ].map((spec, i) => (
               <div key={i} className="p-3 bg-white/5 rounded-lg text-center">
