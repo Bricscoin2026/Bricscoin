@@ -46,22 +46,25 @@ import {
 import { prepareSecureTransaction, isValidAddress } from "../lib/crypto";
 import { QRCodeSVG } from "qrcode.react";
 
-function WalletCard({ wallet, onRefresh, onSelect, isSelected, onShowSeed }) {
+function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed }) {
   const [balance, setBalance] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchBalance() {
+      setLoading(true);
       try {
         const res = await getWalletBalance(wallet.address);
         setBalance(res.data.balance);
       } catch (error) {
         console.error("Error fetching balance:", error);
+      } finally {
+        setLoading(false);
       }
     }
     fetchBalance();
-  }, [wallet.address, onRefresh]);
+  }, [wallet.address, refreshKey]);
 
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text);
