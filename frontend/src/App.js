@@ -10,6 +10,7 @@ import Mining from "./pages/Mining";
 import Network from "./pages/Network";
 import TransactionDetail from "./pages/TransactionDetail";
 import Downloads from "./pages/Downloads";
+import RunNode from "./pages/RunNode";
 import "./App.css";
 
 function App() {
