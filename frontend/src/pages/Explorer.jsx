@@ -16,7 +16,7 @@ function truncateHash(hash, length = 16) {
   return `${hash.slice(0, length)}...${hash.slice(-length)}`;
 }
 
-function BlocksTable({ blocks, loading }) {
+function BlocksTable({ blocks, loading, t }) {
   if (loading) {
     return (
       <div className="space-y-2">
@@ -32,11 +32,11 @@ function BlocksTable({ blocks, loading }) {
       <table className="w-full" data-testid="blocks-table">
         <thead>
           <tr className="border-b border-white/10 text-left">
-            <th className="p-4 text-sm font-medium text-muted-foreground">Height</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">Hash</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">Miner</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">Txs</th>
-            <th className="p-4 text-sm font-medium text-muted-foreground">Time</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">{t('height')}</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">{t('hash')}</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">{t('miner')}</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">{t('txs')}</th>
+            <th className="p-4 text-sm font-medium text-muted-foreground">{t('time')}</th>
           </tr>
         </thead>
         <tbody>
