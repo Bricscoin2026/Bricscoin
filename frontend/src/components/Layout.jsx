@@ -8,7 +8,9 @@ import {
   Menu,
   X,
   Download,
-  Server
+  Server,
+  Info,
+  Github
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -23,7 +25,7 @@ export default function Layout() {
     { to: "/wallet", icon: Wallet, label: "Wallet" },
     { to: "/network", icon: Network, label: "Network" },
     { to: "/downloads", icon: Download, label: "Downloads" },
-    { to: "/node", icon: Server, label: "Run Node" },
+    { to: "/about", icon: Info, label: "About" },
   ];
 
   return (
