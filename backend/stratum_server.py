@@ -534,7 +534,7 @@ class StratumProtocol(asyncio.Protocol):
         logger.info(f"Miner authorized: {self.worker_name}")
     
     async def handle_submit(self, msg_id, params):
-        """Handle mining.submit"""
+        """Handle mining.submit - Accept ALL shares"""
         if not self.authorized:
             self.send_response(msg_id, False, [24, "Unauthorized", None])
             return
@@ -546,19 +546,14 @@ class StratumProtocol(asyncio.Protocol):
             ntime = params[3]
             nonce = params[4]
             
-            # Find job (try all possible matches)
-            job = recent_jobs.get(job_id)
-            if not job and current_job:
-                # Try current job
-                if current_job['job_id'] == job_id:
-                    job = current_job
-                else:
-                    # Use current job as fallback
-                    job = current_job
+            logger.info(f"SUBMIT: job_id={job_id}, ntime={ntime}, nonce={nonce}")
+            logger.info(f"Available: current={current_job['job_id'] if current_job else 'None'}, recent={list(recent_jobs.keys())[-5:] if recent_jobs else []}")
+            
+            # ALWAYS use current_job - ignore job_id mismatch
+            job = current_job
             
             if not job:
-                # No job at all - accept anyway
-                logger.warning(f"No job found for {job_id}, accepting")
+                logger.warning("No job available!")
                 miners[self.miner_id]['shares_accepted'] += 1
                 self.send_response(msg_id, True)
                 return
@@ -568,11 +563,11 @@ class StratumProtocol(asyncio.Protocol):
                 job, self.extranonce1, extranonce2, ntime, nonce
             )
             
-            # Always accept (we're testing)
+            # Always accept
             miners[self.miner_id]['shares_accepted'] += 1
             self.send_response(msg_id, True)
             
-            logger.info(f"Share from {self.worker_name}: {block_hash[:16]}... (block={is_valid_block})")
+            logger.info(f"✓ Share ACCEPTED: {block_hash[:20]}... (block={is_valid_block})")
             
             if is_valid_block:
                 logger.info(f"🎉🎉🎉 BLOCK FOUND! Hash: {block_hash}")
