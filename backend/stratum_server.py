@@ -46,6 +46,8 @@ INITIAL_REWARD = 50
 miners: Dict[str, dict] = {}
 job_counter = 0
 current_job = None
+recent_jobs: Dict[str, dict] = {}  # Cache of recent jobs by job_id
+MAX_RECENT_JOBS = 10  # Keep last 10 jobs
 
 def sha256(data: str) -> str:
     """Calculate SHA256 hash"""
