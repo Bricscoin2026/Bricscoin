@@ -44,6 +44,7 @@ HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
 INITIAL_DIFFICULTY = 4  # Number of leading zeros
+PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 
 # P2P Network Configuration
 NODE_ID = os.environ.get('NODE_ID', str(uuid.uuid4())[:8])
@@ -211,9 +212,9 @@ async def get_current_difficulty() -> int:
     return current_difficulty
 
 async def get_circulating_supply() -> float:
-    """Calculate total circulating supply"""
+    """Calculate total circulating supply (premine + mining rewards)"""
     blocks_count = await db.blocks.count_documents({})
-    supply = 0
+    supply = PREMINE_AMOUNT  # Start with premine
     for i in range(blocks_count):
         supply += get_mining_reward(i)
     return min(supply, MAX_SUPPLY)
