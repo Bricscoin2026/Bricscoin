@@ -1027,11 +1027,13 @@ window.bc.on('mprog', d => {
   document.getElementById('mining-nonce').textContent = d.n.toLocaleString();
 });
 window.bc.on('found', d => {
-  blocksFound++;
-  document.getElementById('mining-found').textContent = blocksFound;
-  showToast('🎉 BLOCK #' + d.block + ' FOUND! +50 BRICS!', 'success');
-  document.getElementById('mining-status').innerHTML = '<span class="icon">🎉</span>Block #' + d.block + ' found!';
-  loadStats(); loadBlocks(); loadWallets();
+  // Only update if we have a valid block number
+  if (d && d.block !== undefined) {
+    blocksFound++;
+    document.getElementById('mining-found').textContent = blocksFound;
+    document.getElementById('mining-status').innerHTML = '<span class="icon">🎉</span>Block #' + d.block + ' found!';
+    loadStats(); loadBlocks(); loadWallets();
+  }
 });
 
 // ==================== INIT ====================
