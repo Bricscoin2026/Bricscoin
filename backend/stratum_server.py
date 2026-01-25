@@ -609,7 +609,7 @@ class StratumMiner:
             self.respond(msg_id, True)
     
     async def save_block(self, job: dict, nonce: str, block_hash: str):
-        """Save a found block to the database"""
+        """Save a found block to the database and confirm transactions"""
         try:
             template = job['template']
             
@@ -632,6 +632,15 @@ class StratumMiner:
                 return
             
             await db.blocks.insert_one(block)
+            
+            # Confirm all transactions included in this block
+            pending_tx_ids = template.get('pending_tx_ids', [])
+            if pending_tx_ids:
+                result = await db.transactions.update_many(
+                    {"id": {"$in": pending_tx_ids}},
+                    {"$set": {"confirmed": True, "block_index": template['index']}}
+                )
+                logger.info(f"✅ Confirmed {result.modified_count} transactions in block #{template['index']}")
             
             self.blocks += 1
             if self.miner_id in miners:
