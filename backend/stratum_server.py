@@ -347,6 +347,8 @@ class StratumProtocol(asyncio.Protocol):
             ntime = params[3]
             nonce = params[4]
             
+            logger.info(f"Share submit from {worker_name}: job={job_id}, nonce={nonce}")
+            
             # Verify the share
             job = current_job
             if not job or job['job_id'] != job_id:
