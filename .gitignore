@@ -4,64 +4,92 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+.Python
+pip-log.txt
 
-# Environment files (keep templates)
+# Environment files (NEVER commit these!)
 .env
 .env.local
 .env.production
-!.env.example
+.env.development
+backend/.env
+frontend/.env
+!*.env.example
 
 # Build outputs
 build/
 dist/
 *.egg-info/
+*.tar.gz
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-*
 
 # OS
 .DS_Store
 Thumbs.db
+*.DS_Store
 
 # Logs
 *.log
 logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Docker volumes (local)
+# Docker volumes (local data)
 mongo-data/
+data/
 
-# SSL certificates
+# SSL certificates and keys (NEVER commit!)
 ssl/
 *.pem
 *.key
 *.crt
+*.p12
 
 # Test reports
 test_reports/
 coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Cache
+.cache/
+*.cache
+frontend/node_modules/.cache/
+
+# Electron builds
+bricscoin-core/dist/
+bricscoin-core/out/
+wallet-app/dist/
+wallet-app/out/
 
 # Misc
 *.bak
 *.tmp
-frontend/node_modules/.cache/default-development/3.pack
-wallet-app/node_modules/electron/dist/electron
+*.temp
+*.orig
+
+# Memory/docs (internal)
+memory/
+
+# Sensitive scripts
+setup-hetzner.sh
+
+# Package locks (optional - uncomment if you want to include them)
+# package-lock.json
+# yarn.lock
 wallet-app/dist/linux-arm64-unpacked/bricscoin-wallet
-wallet-app/dist/BricsCoin
-Wallet-1.0.0-arm64.AppImage
 wallet-app/dist/win-arm64-unpacked/BricsCoin
 Wallet.exe
--e 
-# Environment files
-*.env
-*.env.*
-frontend/node_modules/.cache/default-development/0.pack
-frontend/node_modules/.cache/default-development/1.pack
+wallet-app/dist/BricsCoin
+Wallet-1.0.0-arm64.AppImage
+wallet-app/node_modules/electron/dist/electron
 frontend/node_modules/.cache/default-development/4.pack
-frontend/node_modules/.cache/default-development/6.pack
-frontend/node_modules/.cache/default-development/8.pack
-bricscoin-core/node_modules/electron/dist/electron
 frontend/node_modules/.cache/default-development/2.pack
-frontend/node_modules/.cache/default-development/5.pack
