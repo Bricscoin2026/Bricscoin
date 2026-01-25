@@ -15,7 +15,8 @@ import {
   Upload,
   Key,
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  Shield
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -39,9 +40,10 @@ import {
   getWalletBalance, 
   importWalletSeed,
   importWalletKey,
-  createTransaction,
+  createSecureTransaction,
   getAddressTransactions 
 } from "../lib/api";
+import { prepareSecureTransaction, isValidAddress } from "../lib/crypto";
 import { QRCodeSVG } from "qrcode.react";
 
 function WalletCard({ wallet, onRefresh, onSelect, isSelected, onShowSeed }) {
