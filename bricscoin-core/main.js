@@ -1,23 +1,14 @@
 // BricsCoin Core - Main Process
 const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
 const path = require('path');
-const Database = require('better-sqlite3');
 const Store = require('electron-store');
 const { Blockchain, generateWallet, importWalletFromSeed, CONSTANTS } = require('./src/blockchain');
 
-// Configurazione
 const store = new Store();
 let mainWindow;
 let blockchain;
-let db;
-let miningInterval = null;
 let isMining = false;
 
-// Percorso dati
-const userDataPath = app.getPath('userData');
-const dbPath = path.join(userDataPath, 'bricscoin.db');
-
-// Crea finestra principale
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -30,236 +21,145 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, 'icons', 'icon.png'),
-    titleBarStyle: 'default',
     title: 'BricsCoin Core'
   });
 
   mainWindow.loadFile('index.html');
   
-  // Menu
   const template = [
     {
       label: 'File',
       submenu: [
-        { label: 'Nuovo Wallet', click: () => mainWindow.webContents.send('menu-action', 'new-wallet') },
-        { label: 'Importa Wallet', click: () => mainWindow.webContents.send('menu-action', 'import-wallet') },
+        { label: 'New Wallet', click: () => mainWindow.webContents.send('menu-action', 'new-wallet') },
+        { label: 'Import Wallet', click: () => mainWindow.webContents.send('menu-action', 'import-wallet') },
         { type: 'separator' },
-        { label: 'Esci', role: 'quit' }
+        { label: 'Quit', role: 'quit' }
       ]
     },
     {
       label: 'Blockchain',
       submenu: [
-        { label: 'Sincronizza', click: () => syncBlockchain() },
-        { label: 'Info Rete', click: () => mainWindow.webContents.send('menu-action', 'network-info') },
-        { type: 'separator' },
-        { label: 'Esporta Blockchain', click: () => mainWindow.webContents.send('menu-action', 'export-chain') }
+        { label: 'Sync Now', click: () => syncBlockchain() },
+        { label: 'Network Info', click: () => mainWindow.webContents.send('menu-action', 'network-info') }
       ]
     },
     {
       label: 'Mining',
       submenu: [
-        { label: 'Avvia Mining', click: () => mainWindow.webContents.send('menu-action', 'start-mining') },
-        { label: 'Ferma Mining', click: () => mainWindow.webContents.send('menu-action', 'stop-mining') }
+        { label: 'Start Mining', click: () => mainWindow.webContents.send('menu-action', 'start-mining') },
+        { label: 'Stop Mining', click: () => mainWindow.webContents.send('menu-action', 'stop-mining') }
       ]
     },
     {
-      label: 'Aiuto',
+      label: 'Help',
       submenu: [
-        { label: 'Documentazione', click: () => shell.openExternal('https://bricscoin26.org/node') },
-        { label: 'Sito Web', click: () => shell.openExternal('https://bricscoin26.org') },
-        { type: 'separator' },
-        { label: 'Info', click: () => mainWindow.webContents.send('menu-action', 'about') }
+        { label: 'Documentation', click: () => shell.openExternal('https://bricscoin26.org/node') },
+        { label: 'Website', click: () => shell.openExternal('https://bricscoin26.org') }
       ]
     }
   ];
   
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+  mainWindow.on('closed', () => { mainWindow = null; });
 }
 
-// Inizializza blockchain
 async function initBlockchain() {
-  console.log('Initializing blockchain...');
-  console.log('Database path:', dbPath);
+  const userDataPath = app.getPath('userData');
+  console.log('Database path:', userDataPath);
   
-  db = new Database(dbPath);
-  blockchain = new Blockchain(db);
+  blockchain = new Blockchain(userDataPath);
   
-  // Eventi blockchain
   blockchain.on('block', (block) => {
-    if (mainWindow) {
-      mainWindow.webContents.send('new-block', block);
-    }
+    if (mainWindow) mainWindow.webContents.send('new-block', block);
   });
   
-  blockchain.on('transaction', (tx) => {
-    if (mainWindow) {
-      mainWindow.webContents.send('new-transaction', tx);
-    }
+  blockchain.on('sync-started', () => {
+    if (mainWindow) mainWindow.webContents.send('sync-started');
   });
   
   blockchain.on('sync-progress', (progress) => {
-    if (mainWindow) {
-      mainWindow.webContents.send('sync-progress', progress);
-    }
+    if (mainWindow) mainWindow.webContents.send('sync-progress', progress);
   });
   
   blockchain.on('sync-complete', (data) => {
-    if (mainWindow) {
-      mainWindow.webContents.send('sync-complete', data);
-    }
+    if (mainWindow) mainWindow.webContents.send('sync-complete', data);
+  });
+  
+  blockchain.on('sync-error', (data) => {
+    if (mainWindow) mainWindow.webContents.send('sync-error', data);
   });
   
   await blockchain.initialize();
-  
-  // Auto-sync all'avvio
-  setTimeout(() => syncBlockchain(), 3000);
 }
 
-// Sincronizza blockchain
 async function syncBlockchain() {
-  if (mainWindow) {
-    mainWindow.webContents.send('sync-started');
-  }
-  await blockchain.syncWithNetwork();
-  if (mainWindow) {
-    mainWindow.webContents.send('sync-complete', { height: blockchain.getHeight() });
-  }
+  if (mainWindow) mainWindow.webContents.send('sync-started');
+  await blockchain.syncWithMainNetwork();
 }
 
 // IPC Handlers
-
-// Ottieni statistiche
 ipcMain.handle('get-stats', async () => {
   const localStats = blockchain.getStats();
   const networkStats = await blockchain.getNetworkStats();
+  const height = await blockchain.getHeight();
   
   return {
     ...localStats,
     ...networkStats,
-    localHeight: localStats.height,
+    localHeight: height,
     networkHeight: networkStats.total_blocks - 1
   };
 });
 
-// Ottieni blocchi
 ipcMain.handle('get-blocks', async (event, { limit = 10, offset = 0 }) => {
-  const blocks = db.prepare(`
-    SELECT * FROM blocks ORDER BY height DESC LIMIT ? OFFSET ?
-  `).all(limit, offset);
-  return blocks;
+  return await blockchain.getBlocks(limit, offset);
 });
 
-// Ottieni blocco
 ipcMain.handle('get-block', async (event, height) => {
-  return blockchain.getBlock(height);
+  return await blockchain.getBlock(height);
 });
 
-// Crea wallet
 ipcMain.handle('create-wallet', async (event, name) => {
-  const wallet = generateWallet();
-  
-  db.prepare(`
-    INSERT INTO wallets (address, public_key, private_key_encrypted, seed_phrase_encrypted, name, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(
-    wallet.address,
-    wallet.publicKey,
-    wallet.privateKey, // TODO: Encrypt
-    wallet.seedPhrase, // TODO: Encrypt
-    name || 'My Wallet',
-    new Date().toISOString()
-  );
-  
-  return wallet;
+  return await blockchain.createWallet(name);
 });
 
-// Importa wallet
 ipcMain.handle('import-wallet', async (event, { seedPhrase, name }) => {
-  const wallet = importWalletFromSeed(seedPhrase);
-  
-  // Controlla se esiste già
-  const existing = db.prepare('SELECT * FROM wallets WHERE address = ?').get(wallet.address);
-  if (existing) {
-    throw new Error('Wallet already exists');
-  }
-  
-  db.prepare(`
-    INSERT INTO wallets (address, public_key, private_key_encrypted, seed_phrase_encrypted, name, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(
-    wallet.address,
-    wallet.publicKey,
-    wallet.privateKey,
-    wallet.seedPhrase,
-    name || 'Imported Wallet',
-    new Date().toISOString()
-  );
-  
-  return wallet;
+  return await blockchain.importWallet(seedPhrase, name);
 });
 
-// Lista wallet
 ipcMain.handle('get-wallets', async () => {
-  const wallets = db.prepare('SELECT address, name, created_at, seed_phrase_encrypted FROM wallets').all();
-  
-  // Aggiungi saldi dal network
+  const wallets = await blockchain.getWallets();
   const walletsWithBalance = [];
+  
   for (const w of wallets) {
     const balance = await blockchain.getBalance(w.address);
-    walletsWithBalance.push({
-      ...w,
-      balance,
-      seed_phrase: w.seed_phrase_encrypted // Per mostrare nell'UI
-    });
+    walletsWithBalance.push({ ...w, balance });
   }
   return walletsWithBalance;
 });
 
-// Ottieni wallet completo
 ipcMain.handle('get-wallet', async (event, address) => {
-  const wallet = db.prepare('SELECT * FROM wallets WHERE address = ?').get(address);
+  const wallet = await blockchain.getWallet(address);
   if (wallet) {
     wallet.balance = await blockchain.getBalance(address);
-    wallet.seed_phrase = wallet.seed_phrase_encrypted;
   }
   return wallet;
 });
 
-// Ottieni saldo
 ipcMain.handle('get-balance', async (event, address) => {
   return await blockchain.getBalance(address);
 });
 
-// Invia transazione
 ipcMain.handle('send-transaction', async (event, { fromAddress, toAddress, amount }) => {
-  const wallet = db.prepare('SELECT * FROM wallets WHERE address = ?').get(fromAddress);
-  if (!wallet) {
-    throw new Error('Wallet not found');
-  }
+  const wallet = await blockchain.getWallet(fromAddress);
+  if (!wallet) throw new Error('Wallet not found');
   
   const balance = await blockchain.getBalance(fromAddress);
-  if (balance < amount) {
-    throw new Error('Insufficient balance');
-  }
+  if (balance < amount) throw new Error('Insufficient balance');
   
-  // Invia al network principale
-  const result = await blockchain.sendTransaction(
-    wallet.private_key_encrypted,
-    fromAddress,
-    toAddress,
-    amount
-  );
-  
-  return result;
+  return await blockchain.sendTransaction(wallet.privateKey, fromAddress, toAddress, amount);
 });
 
-// Avvia mining
 ipcMain.handle('start-mining', async (event, minerAddress) => {
   if (isMining) return { success: false, message: 'Already mining' };
   
@@ -275,31 +175,20 @@ ipcMain.handle('start-mining', async (event, minerAddress) => {
       });
       
       if (result.success) {
-        mainWindow.webContents.send('block-mined', {
-          block: result.block,
-          reward: result.reward
-        });
-      } else if (result.aborted) {
-        console.log('Mining aborted');
-        return;
+        mainWindow.webContents.send('block-mined', { block: result.block, reward: result.reward });
       }
-      
     } catch (e) {
       console.error('Mining error:', e.message);
       mainWindow.webContents.send('mining-error', { error: e.message });
     }
     
-    // Continua mining
-    if (isMining) {
-      setTimeout(mine, 100);
-    }
+    if (isMining) setTimeout(mine, 100);
   };
   
   mine();
   return { success: true };
 });
 
-// Ferma mining
 ipcMain.handle('stop-mining', async () => {
   isMining = false;
   blockchain.stopMining();
@@ -307,63 +196,25 @@ ipcMain.handle('stop-mining', async () => {
   return { success: true };
 });
 
-// Broadcast blocco ai peer
-async function broadcastBlock(block) {
-  for (const peer of blockchain.peers) {
-    try {
-      await fetch(`${peer}/api/blocks/new`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(block)
-      });
-    } catch (e) {
-      console.error(`Failed to broadcast block to ${peer}:`, e.message);
-    }
-  }
-}
-
-// Sincronizza
-ipcMain.handle('sync', async () => {
+ipcMain.handle('sync-blockchain', async () => {
   await syncBlockchain();
-  return blockchain.getStats();
-});
-
-// Aggiungi peer
-ipcMain.handle('add-peer', async (event, url) => {
-  blockchain.addPeer(url);
   return { success: true };
 });
 
-// Ottieni peer
-ipcMain.handle('get-peers', async () => {
-  return Array.from(blockchain.peers);
+ipcMain.handle('get-network-stats', async () => {
+  return await blockchain.getNetworkStats();
 });
 
-// Ottieni transazioni mempool
-ipcMain.handle('get-mempool', async () => {
-  return Array.from(blockchain.mempool.values());
-});
-
-// App events
+// App lifecycle
 app.whenReady().then(async () => {
   await initBlockchain();
   createWindow();
-
+  
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('before-quit', () => {
-  if (db) {
-    db.close();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
