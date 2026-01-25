@@ -983,7 +983,7 @@
         const seedPhrase = document.getElementById('import-seed').value.trim();
         const name = document.getElementById('import-name').value || 'Imported Wallet';
         
-        await window.bricscoin.importWallet({ seedPhrase, name });
+        await window.bricscoin.importWallet(seedPhrase, name);
         
         closeModal('modal-import-wallet');
         showToast('Wallet importato!', 'success');
