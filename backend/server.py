@@ -80,7 +80,7 @@ INITIAL_REWARD = 50
 HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
-INITIAL_DIFFICULTY = 5  # Number of leading zeros (increased from 4)
+INITIAL_DIFFICULTY = 2  # Number of leading zeros (lowered for Bitaxe)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 
 # P2P Network Configuration
