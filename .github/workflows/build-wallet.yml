@@ -1,0 +1,75 @@
+name: Build Desktop Wallet
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build Linux
+        working-directory: ./bricscoin-core
+        run: |
+          yarn install
+          yarn build:linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: bricscoin-core/dist/*.AppImage
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build Windows
+        working-directory: ./bricscoin-core
+        run: |
+          yarn install
+          yarn build:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: bricscoin-core/dist/*.exe
+
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build macOS
+        working-directory: ./bricscoin-core
+        run: |
+          yarn install
+          yarn build:mac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-build
+          path: bricscoin-core/dist/*.zip
+
+  release:
+    needs: [build-linux, build-windows, build-mac]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            linux-build/*
+            windows-build/*
+            mac-build/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
