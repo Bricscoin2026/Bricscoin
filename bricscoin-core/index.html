@@ -381,13 +381,17 @@
     
     // Create wallet
     async function createWallet() {
-      const name = prompt('Wallet name:') || 'My Wallet';
+      const nameInput = document.getElementById('new-wallet-name');
+      const name = nameInput.value.trim() || 'My Wallet';
+      
       try {
         const wallet = await window.bricscoin.createWallet(name);
-        showToast('Wallet created!');
+        showToast('Wallet created: ' + wallet.address.substring(0, 15) + '...');
+        nameInput.value = '';
         loadWallets();
       } catch (e) {
-        alert('Error: ' + e.message);
+        showToast('Error: ' + e.message);
+        console.error(e);
       }
     }
     
