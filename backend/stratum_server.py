@@ -268,10 +268,12 @@ async def get_block_template() -> Optional[dict]:
         logger.error(f"Template error: {e}")
         return None
 
-def create_stratum_job(template: dict, extranonce1: str = "00000000", extranonce2_size: int = 4) -> dict:
+def create_stratum_job(template: dict, miner_address: str, extranonce1: str = "00000000", extranonce2_size: int = 4) -> dict:
     """
     Create a Stratum mining job from block template.
     This follows the exact Bitcoin Stratum V1 specification.
+    
+    IMPORTANT: miner_address is the address that will receive the block reward!
     """
     global job_counter, job_cache
     job_counter += 1
@@ -279,11 +281,11 @@ def create_stratum_job(template: dict, extranonce1: str = "00000000", extranonce
     # Job ID (simple incrementing number as hex)
     job_id = format(job_counter, 'x')
     
-    # Create coinbase transaction
+    # Create coinbase transaction with MINER'S ADDRESS for reward
     coinb1, coinb2 = create_coinbase_tx(
         template['index'],
         template['reward'],
-        "BRICS_POOL_REWARD",
+        miner_address,  # FIXED: Use actual miner's address!
         extranonce1,
         extranonce2_size
     )
