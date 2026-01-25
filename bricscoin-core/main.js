@@ -8,32 +8,18 @@ const MAIN_NODE = 'https://bricscoin26.org';
 
 let mainWindow;
 let isMining = false;
-let miningAborted = false;
 
-// SHA256 hash
 function sha256(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
-// Generate wallet (simplified - no external dependencies)
 function generateWallet() {
   const privateKey = crypto.randomBytes(32).toString('hex');
   const publicKey = sha256(privateKey);
   const address = 'BRICS' + sha256(publicKey).substring(0, 40);
-  
-  // Generate 12 random words as seed phrase
-  const words = [];
-  const wordList = ['apple', 'banana', 'cherry', 'dragon', 'eagle', 'flower', 'garden', 'honey', 'island', 'jungle', 'knight', 'lemon', 'mountain', 'night', 'ocean', 'planet', 'queen', 'river', 'sunset', 'tiger', 'umbrella', 'valley', 'winter', 'yellow'];
-  for (let i = 0; i < 12; i++) {
-    words.push(wordList[Math.floor(Math.random() * wordList.length)]);
-  }
-  
-  return {
-    address,
-    privateKey,
-    publicKey,
-    seedPhrase: words.join(' ')
-  };
+  const words = ['apple', 'banana', 'cherry', 'dragon', 'eagle', 'flower', 'garden', 'honey', 'island', 'jungle', 'knight', 'lemon', 'mountain', 'night', 'ocean', 'planet', 'queen', 'river', 'sunset', 'tiger', 'umbrella', 'valley', 'winter', 'yellow'];
+  const seedPhrase = Array(12).fill(0).map(() => words[Math.floor(Math.random() * words.length)]).join(' ');
+  return { address, privateKey, publicKey, seedPhrase };
 }
 
 function createWindow() {
@@ -47,163 +33,131 @@ function createWindow() {
     },
     title: 'BricsCoin Core'
   });
-
   mainWindow.loadFile('index.html');
 }
 
-// ==================== IPC HANDLERS ====================
-
-// Get network stats from real server
-ipcMain.handle('get-network-stats', async () => {
+// IPC: Get stats
+ipcMain.handle('get-stats', async () => {
   try {
-    const response = await fetch(`${MAIN_NODE}/api/network/stats`);
-    return await response.json();
+    const res = await fetch(`${MAIN_NODE}/api/network/stats`);
+    return await res.json();
   } catch (e) {
-    console.error('Error fetching stats:', e);
     return null;
   }
 });
 
-// Get blocks from real server
-ipcMain.handle('get-blocks', async (event, limit = 10) => {
+// IPC: Get blocks
+ipcMain.handle('get-blocks', async () => {
   try {
-    const response = await fetch(`${MAIN_NODE}/api/blocks?limit=${limit}`);
-    const data = await response.json();
+    const res = await fetch(`${MAIN_NODE}/api/blocks?limit=10`);
+    const data = await res.json();
     return data.blocks || [];
   } catch (e) {
-    console.error('Error fetching blocks:', e);
     return [];
   }
 });
 
-// Get balance from real server
-ipcMain.handle('get-balance', async (event, address) => {
+// IPC: Create wallet
+ipcMain.handle('create-wallet', async (event, name) => {
+  console.log('Creating wallet with name:', name);
   try {
-    const response = await fetch(`${MAIN_NODE}/api/wallet/${address}/balance`);
-    const data = await response.json();
-    return data.balance || 0;
+    const wallet = generateWallet();
+    wallet.name = name || 'My Wallet';
+    wallet.createdAt = new Date().toISOString();
+    wallet.balance = 0;
+    
+    const wallets = store.get('wallets', []);
+    wallets.push(wallet);
+    store.set('wallets', wallets);
+    
+    console.log('Wallet created:', wallet.address);
+    return wallet;
   } catch (e) {
-    console.error('Error fetching balance:', e);
-    return 0;
+    console.error('Error creating wallet:', e);
+    throw e;
   }
 });
 
-// Create wallet (stored locally)
-ipcMain.handle('create-wallet', async (event, name) => {
-  const wallet = generateWallet();
-  wallet.name = name || 'My Wallet';
-  wallet.createdAt = new Date().toISOString();
-  
-  const wallets = store.get('wallets', []);
-  wallets.push(wallet);
-  store.set('wallets', wallets);
-  
-  return wallet;
-});
-
-// Get wallets (from local storage)
+// IPC: Get wallets
 ipcMain.handle('get-wallets', async () => {
   const wallets = store.get('wallets', []);
   
-  // Fetch real balances
-  for (const wallet of wallets) {
+  // Fetch balances
+  for (const w of wallets) {
     try {
-      const response = await fetch(`${MAIN_NODE}/api/wallet/${wallet.address}/balance`);
-      const data = await response.json();
-      wallet.balance = data.balance || 0;
+      const res = await fetch(`${MAIN_NODE}/api/wallet/${w.address}/balance`);
+      const data = await res.json();
+      w.balance = data.balance || 0;
     } catch (e) {
-      wallet.balance = 0;
+      w.balance = 0;
     }
   }
   
   return wallets;
 });
 
-// Send transaction to real server
-ipcMain.handle('send-transaction', async (event, { fromAddress, toAddress, amount }) => {
+// IPC: Send transaction
+ipcMain.handle('send-tx', async (event, from, to, amount) => {
   const wallets = store.get('wallets', []);
-  const wallet = wallets.find(w => w.address === fromAddress);
-  
+  const wallet = wallets.find(w => w.address === from);
   if (!wallet) throw new Error('Wallet not found');
   
-  try {
-    const response = await fetch(`${MAIN_NODE}/api/transactions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sender_address: fromAddress,
-        sender_private_key: wallet.privateKey,
-        recipient_address: toAddress,
-        amount: parseFloat(amount)
-      })
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Transaction failed');
-    }
-    
-    return await response.json();
-  } catch (e) {
-    throw new Error(e.message);
+  const res = await fetch(`${MAIN_NODE}/api/transactions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender_address: from,
+      sender_private_key: wallet.privateKey,
+      recipient_address: to,
+      amount: parseFloat(amount)
+    })
+  });
+  
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || 'Failed');
   }
+  return await res.json();
 });
 
-// Start mining on real server
-ipcMain.handle('start-mining', async (event, minerAddress) => {
-  if (isMining) return { success: false, message: 'Already mining' };
-  
+// IPC: Start mining
+ipcMain.handle('start-mining', async (event, address) => {
+  if (isMining) return;
   isMining = true;
-  miningAborted = false;
-  mainWindow.webContents.send('mining-status', { status: 'started' });
-  
-  mineLoop(minerAddress);
-  
-  return { success: true };
+  mine(address);
 });
 
-// Mining loop
-async function mineLoop(minerAddress) {
-  while (isMining && !miningAborted) {
+// IPC: Stop mining
+ipcMain.handle('stop-mining', async () => {
+  isMining = false;
+});
+
+async function mine(address) {
+  while (isMining) {
     try {
-      // Get template from real server
-      const templateRes = await fetch(`${MAIN_NODE}/api/mining/template`);
-      if (!templateRes.ok) {
-        await sleep(5000);
-        continue;
-      }
-      const template = await templateRes.json();
+      const res = await fetch(`${MAIN_NODE}/api/mining/template`);
+      if (!res.ok) { await sleep(5000); continue; }
+      const template = await res.json();
       
-      mainWindow.webContents.send('mining-status', { 
-        status: 'mining', 
-        block: template.index,
-        difficulty: template.difficulty
-      });
+      mainWindow.webContents.send('mining-info', { block: template.index, difficulty: template.difficulty });
       
       const target = '0'.repeat(template.difficulty);
       let nonce = 0;
-      let found = false;
-      let startTime = Date.now();
+      const start = Date.now();
       
-      // Mine
-      while (!found && !miningAborted && isMining) {
-        const blockData = {
+      while (isMining) {
+        const data = JSON.stringify({
           index: template.index,
           previous_hash: template.previous_hash,
           timestamp: template.timestamp,
           transactions: template.transactions || [],
-          miner: minerAddress,
-          nonce: nonce
-        };
+          miner: address,
+          nonce
+        });
         
-        const hash = sha256(JSON.stringify(blockData));
+        const hash = sha256(data);
         
         if (hash.startsWith(target)) {
-          found = true;
-          
-          // Submit to real server
-          mainWindow.webContents.send('mining-status', { status: 'submitting' });
-          
           const submitRes = await fetch(`${MAIN_NODE}/api/mining/submit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -212,66 +166,34 @@ async function mineLoop(minerAddress) {
               previous_hash: template.previous_hash,
               timestamp: template.timestamp,
               transactions: template.transactions || [],
-              miner: minerAddress,
-              nonce: nonce,
-              hash: hash,
+              miner: address,
+              nonce, hash,
               difficulty: template.difficulty,
               proof: nonce
             })
           });
           
           if (submitRes.ok) {
-            const result = await submitRes.json();
-            mainWindow.webContents.send('block-found', {
-              block: template.index,
-              hash: hash,
-              reward: template.reward || 50
-            });
+            mainWindow.webContents.send('block-found', { block: template.index, reward: 50 });
           }
+          break;
         }
         
         nonce++;
-        
-        // Send progress every 10000 hashes
         if (nonce % 10000 === 0) {
-          const elapsed = (Date.now() - startTime) / 1000;
-          const hashrate = Math.round(nonce / elapsed);
-          mainWindow.webContents.send('mining-progress', {
-            nonce,
-            hashrate,
-            hash: hash.substring(0, 16)
-          });
-          
-          // Yield to not block
+          const elapsed = (Date.now() - start) / 1000;
+          mainWindow.webContents.send('mining-progress', { hashrate: Math.round(nonce/elapsed), nonce });
           await sleep(1);
         }
       }
-      
     } catch (e) {
       console.error('Mining error:', e);
       await sleep(5000);
     }
   }
-  
-  mainWindow.webContents.send('mining-status', { status: 'stopped' });
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Stop mining
-ipcMain.handle('stop-mining', async () => {
-  isMining = false;
-  miningAborted = true;
-  return { success: true };
-});
-
-// App lifecycle
 app.whenReady().then(createWindow);
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
-});
+app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
