@@ -204,8 +204,11 @@ export default function Downloads() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files.map((file, index) => {
-              const osInfo = getOSInfo(file.name);
+            {files
+              .map(file => ({ ...file, osInfo: getOSInfo(file.name) }))
+              .sort((a, b) => (a.osInfo.priority || 99) - (b.osInfo.priority || 99))
+              .map((file, index) => {
+              const osInfo = file.osInfo;
               const Icon = osInfo.icon;
               
               return (
