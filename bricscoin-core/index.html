@@ -15,7 +15,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#000;color:#fff;min-
 .logo-text h1{font-size:24px;background:linear-gradient(135deg,#00ff00,#00cc00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .logo-text span{color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px}
 .connection-status{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(0,255,0,0.08);border:1px solid rgba(0,255,0,0.2);border-radius:20px}
-.status-dot{width:8px;height:8px;border-radius:50%;background:#00ff00;box-shadow:0 0 8px #00ff00}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#00ff00;box-shadow:0 0 8px #00ff00;animation:pulse 2s infinite}
+.status-dot.offline{background:#ff3333;box-shadow:0 0 8px #ff3333}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 .connection-status span{color:#00ff00;font-size:12px}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
 .stat-card{background:linear-gradient(135deg,rgba(0,50,0,0.4),rgba(0,30,0,0.2));border:1px solid rgba(0,255,0,0.15);border-radius:14px;padding:18px;text-align:center}
@@ -75,6 +77,11 @@ textarea{resize:vertical;min-height:70px}
 .page.active{display:block}
 .version{text-align:center;padding:15px;color:rgba(255,255,255,0.2);font-size:10px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.security-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(0,200,0,0.1);border:1px solid rgba(0,200,0,0.3);border-radius:6px;font-size:10px;color:#00ff00;margin-left:10px}
+.peer-list{max-height:200px;overflow-y:auto}
+.peer-item{display:flex;align-items:center;justify-content:space-between;padding:10px;background:rgba(0,0,0,0.2);border-radius:8px;margin-bottom:8px}
+.peer-status{width:8px;height:8px;border-radius:50%;background:#00ff00}
+.node-info{font-family:monospace;font-size:11px;color:rgba(255,255,255,0.6);word-break:break-all}
 @media(max-width:700px){.grid-2,.stats-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -88,12 +95,12 @@ textarea{resize:vertical;min-height:70px}
     <img src="https://bricscoin26.org/bricscoin-logo.png" class="logo-img" onerror="this.style.display='none'">
     <div class="logo-text">
       <h1>BRICSCOIN CORE</h1>
-      <span>DESKTOP WALLET v2.0</span>
+      <span>DESKTOP WALLET v2.1</span>
     </div>
   </div>
-  <div class="connection-status">
-    <div class="status-dot"></div>
-    <span>Connected</span>
+  <div class="connection-status" id="conn-status">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="conn-text">Connecting...</span>
   </div>
 </header>
 
@@ -109,6 +116,7 @@ textarea{resize:vertical;min-height:70px}
   <button class="nav-tab" onclick="tab(1)">📤 Send</button>
   <button class="nav-tab" onclick="tab(2)">📥 Receive</button>
   <button class="nav-tab" onclick="tab(3)">🔗 Blocks</button>
+  <button class="nav-tab" onclick="tab(4)">🌐 Network</button>
 </nav>
 
 <!-- WALLET -->
@@ -135,12 +143,18 @@ textarea{resize:vertical;min-height:70px}
 <!-- SEND -->
 <div id="p1" class="page">
   <div class="card">
-    <div class="card-header"><div class="card-title"><div class="card-icon">→</div>Send BRICS</div></div>
+    <div class="card-header">
+      <div class="card-title"><div class="card-icon">→</div>Send BRICS</div>
+      <span class="security-badge">🔒 Secure Signing</span>
+    </div>
+    <p style="font-size:11px;color:rgba(0,255,0,0.7);margin-bottom:15px;padding:10px;background:rgba(0,100,0,0.1);border-radius:8px">
+      ✅ Your private key never leaves this device. Transactions are signed locally.
+    </p>
     <div class="form-group"><label class="form-label">From</label><select id="send-from"><option value="">Select wallet...</option></select></div>
     <div class="form-group"><label class="form-label">Balance</label><div id="send-bal" style="font-size:20px;color:#00ff00;font-weight:bold">- BRICS</div></div>
     <div class="form-group"><label class="form-label">To Address</label><input id="send-to" placeholder="BRICS..."></div>
     <div class="form-group"><label class="form-label">Amount</label><input type="number" id="send-amt" placeholder="0.00" step="0.01"></div>
-    <button class="btn btn-primary" onclick="sendTx()">Send Transaction</button>
+    <button class="btn btn-primary" onclick="sendTx()">🔐 Sign & Send Transaction</button>
   </div>
 </div>
 
@@ -170,7 +184,41 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<div class="version">BRICSCOIN CORE v2.0 • Desktop Wallet</div>
+<!-- NETWORK P2P -->
+<div id="p4" class="page">
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-icon">🌐</div>Network Status</div></div>
+      <div style="margin-bottom:15px">
+        <div class="form-label">Node ID</div>
+        <div class="node-info" id="node-id">Loading...</div>
+      </div>
+      <div style="margin-bottom:15px">
+        <div class="form-label">Sync Status</div>
+        <div id="sync-status" style="color:#00ff00">Checking...</div>
+      </div>
+      <div style="margin-bottom:15px">
+        <div class="form-label">Connected Server</div>
+        <div class="node-info" id="server-url">Loading...</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="refreshNetwork()">↻ Refresh</button>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="card-icon">⚙️</div>Settings</div></div>
+      <div class="form-group">
+        <label class="form-label">Server URL</label>
+        <input id="server-input" placeholder="https://bricscoin26.org">
+      </div>
+      <button class="btn btn-secondary" onclick="changeServer()">Update Server</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title"><div class="card-icon">👥</div>Network Peers</div><button class="btn btn-sm btn-secondary" onclick="loadPeers()">↻</button></div>
+    <div id="peer-list" class="peer-list"><div class="empty-state">Discovering peers...</div></div>
+  </div>
+</div>
+
+<div class="version">BRICSCOIN CORE v2.1 • Secure Desktop Wallet with P2P Sync</div>
 </div>
 </div>
 
@@ -192,13 +240,32 @@ textarea{resize:vertical;min-height:70px}
 // Simple QR
 function drawQR(t){const c=document.getElementById('qr'),x=c.getContext('2d'),s=150,cs=s/25;x.fillStyle='#fff';x.fillRect(0,0,s,s);x.fillStyle='#000';for(let i=0;i<25;i++)for(let j=0;j<25;j++){const cc=t.charCodeAt((i*25+j)%t.length);if((i<7&&j<7)||(i<7&&j>17)||(i>17&&j<7)){const pi=i<7?i:(i>17?i-18:0),pj=j<7?j:(j>17?j-18:0);if(pi===0||pi===6||pj===0||pj===6||(pi>=2&&pi<=4&&pj>=2&&pj<=4))x.fillRect(j*cs,i*cs,cs,cs)}else if((cc+i*j)%2===0)x.fillRect(j*cs,i*cs,cs,cs)}}
 
-let wallets=[],delAddr=null;
+let wallets=[],delAddr=null,isConnected=false;
 
-function tab(i){document.querySelectorAll('.nav-tab').forEach((t,n)=>t.classList.toggle('active',n===i));document.querySelectorAll('.page').forEach((p,n)=>p.classList.toggle('active',n===i))}
+function tab(i){document.querySelectorAll('.nav-tab').forEach((t,n)=>t.classList.toggle('active',n===i));document.querySelectorAll('.page').forEach((p,n)=>p.classList.toggle('active',n===i));if(i===4)refreshNetwork()}
 function toast(m,e){const t=document.getElementById('toast');t.textContent=m;t.className=e?'error':'';t.style.display='block';setTimeout(()=>t.style.display='none',3500)}
 function closeModal(){document.getElementById('del-modal').classList.remove('show')}
 
-async function loadStats(){try{const s=await bc.stats();if(s){document.getElementById('s-supply').textContent=(s.circulating_supply||0).toLocaleString();document.getElementById('s-blocks').textContent=(s.total_blocks||0).toLocaleString();document.getElementById('s-diff').textContent=s.current_difficulty||0;document.getElementById('s-reward').textContent=s.current_reward||50}}catch{}}
+function updateConnectionStatus(connected){
+  isConnected=connected;
+  const dot=document.getElementById('status-dot');
+  const text=document.getElementById('conn-text');
+  if(connected){dot.classList.remove('offline');text.textContent='Connected';text.style.color='#00ff00'}
+  else{dot.classList.add('offline');text.textContent='Offline';text.style.color='#ff3333'}
+}
+
+async function loadStats(){
+  try{
+    const s=await bc.stats();
+    if(s){
+      document.getElementById('s-supply').textContent=(s.circulating_supply||0).toLocaleString();
+      document.getElementById('s-blocks').textContent=(s.total_blocks||0).toLocaleString();
+      document.getElementById('s-diff').textContent=s.current_difficulty||0;
+      document.getElementById('s-reward').textContent=s.current_reward||50;
+      updateConnectionStatus(true);
+    }else{updateConnectionStatus(false)}
+  }catch{updateConnectionStatus(false)}
+}
 
 async function loadBlocks(){try{const b=await bc.blocks();document.getElementById('blocks-body').innerHTML=b.length?b.map(x=>`<tr><td class="block-height">#${x.index}</td><td>${(x.hash||'').slice(0,16)}...</td><td style="color:rgba(0,255,0,0.7)">${(x.miner||'?').slice(0,14)}...</td><td style="color:rgba(255,255,255,0.4)">${new Date(x.timestamp).toLocaleString()}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3)">No blocks</td></tr>'}catch{}}
 
@@ -217,15 +284,74 @@ function goRecv(a){document.getElementById('recv-sel').value=a;showRecv();tab(2)
 document.getElementById('send-from').onchange=updBal;
 function updBal(){const a=document.getElementById('send-from').value,w=wallets.find(x=>x.address===a);document.getElementById('send-bal').textContent=w?(w.balance||0)+' BRICS':'- BRICS'}
 
-async function sendTx(){const f=document.getElementById('send-from').value,t=document.getElementById('send-to').value,a=document.getElementById('send-amt').value;if(!f||!t||!a){toast('⚠️ Fill all fields',1);return}try{await bc.send(f,t,a);toast('✅ Sent!');document.getElementById('send-to').value='';document.getElementById('send-amt').value='';loadWallets()}catch(e){toast('❌ '+e.message,1)}}
+async function sendTx(){
+  const f=document.getElementById('send-from').value;
+  const t=document.getElementById('send-to').value;
+  const a=document.getElementById('send-amt').value;
+  if(!f||!t||!a){toast('⚠️ Fill all fields',1);return}
+  if(!t.startsWith('BRICS')||t.length<45){toast('⚠️ Invalid address',1);return}
+  try{
+    await bc.send(f,t,a);
+    toast('✅ Transaction signed & sent!');
+    document.getElementById('send-to').value='';
+    document.getElementById('send-amt').value='';
+    loadWallets();
+  }catch(e){toast('❌ '+e.message,1)}
+}
 
 async function showRecv(){const a=document.getElementById('recv-sel').value,info=document.getElementById('recv-info'),tc=document.getElementById('tx-card');if(!a){info.style.display='none';tc.style.display='none';return}document.getElementById('recv-addr').value=a;drawQR(a);info.style.display='block';try{const tx=await bc.transactions(a);if(tx&&tx.length){tc.style.display='block';document.getElementById('tx-list').innerHTML=tx.slice(0,10).map(x=>{const inc=x.recipient===a;return`<div class="tx-item"><span style="font-size:18px">${inc?'↓':'↑'}</span><span style="font-size:10px;color:rgba(255,255,255,0.5)">${inc?'From':'To'}: ${(inc?x.sender:x.recipient||'').slice(0,18)}...</span><span class="tx-amount ${inc?'in':'out'}">${inc?'+':'-'}${x.amount}</span></div>`}).join('')}else tc.style.display='none'}catch{tc.style.display='none'}}
 
 function copyRecv(){const a=document.getElementById('recv-addr').value;if(a){bc.copy(a);toast('📋 Copied!')}}
 
+// P2P Network functions
+async function refreshNetwork(){
+  try{
+    const nodeId=await bc.getNodeId();
+    const server=await bc.getServer();
+    const sync=await bc.syncStatus();
+    
+    document.getElementById('node-id').textContent=nodeId||'Unknown';
+    document.getElementById('server-url').textContent=server;
+    document.getElementById('server-input').value=server;
+    
+    if(sync.synced){
+      document.getElementById('sync-status').innerHTML=`✅ Synced (Height: ${sync.height}, Difficulty: ${sync.difficulty})`;
+      document.getElementById('sync-status').style.color='#00ff00';
+    }else{
+      document.getElementById('sync-status').innerHTML='⚠️ Not synced';
+      document.getElementById('sync-status').style.color='#ffaa00';
+    }
+    
+    loadPeers();
+  }catch(e){console.error(e)}
+}
+
+async function loadPeers(){
+  try{
+    const peers=await bc.getPeers();
+    const list=document.getElementById('peer-list');
+    if(!peers||!peers.length){
+      list.innerHTML='<div class="empty-state">No peers discovered</div>';
+      return;
+    }
+    list.innerHTML=peers.map(p=>`<div class="peer-item"><div><div style="font-weight:bold;font-size:12px">${p.node_id||'Unknown'}</div><div style="font-size:10px;color:rgba(255,255,255,0.5)">${p.url||'Desktop Node'}</div></div><div class="peer-status"></div></div>`).join('');
+  }catch{document.getElementById('peer-list').innerHTML='<div class="empty-state">Failed to load peers</div>'}
+}
+
+async function changeServer(){
+  const url=document.getElementById('server-input').value.trim();
+  if(!url){toast('⚠️ Enter server URL',1);return}
+  try{
+    await bc.setServer(url);
+    toast('✅ Server updated!');
+    refreshNetwork();
+    loadStats();
+  }catch(e){toast('❌ '+e.message,1)}
+}
+
 document.getElementById('new-name').onkeypress=e=>{if(e.key==='Enter')createWallet()};
 loadStats();loadBlocks();loadWallets();
-setInterval(loadStats,10000);setInterval(loadBlocks,30000);
+setInterval(loadStats,10000);setInterval(loadBlocks,30000);setInterval(loadWallets,60000);
 </script>
 </body>
 </html>
