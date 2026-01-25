@@ -22,10 +22,24 @@ body{
   opacity:0.5;
 }
 
+/* Mining Particles Canvas */
+#mining-particles{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  z-index:1;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+#mining-particles.active{
+  opacity:1;
+}
+
 /* Main container */
 .app{
   position:relative;
-  z-index:1;
+  z-index:2;
   min-height:100vh;
   background:radial-gradient(ellipse at top, rgba(0,30,0,0.3) 0%, transparent 50%),
               radial-gradient(ellipse at bottom, rgba(0,20,0,0.2) 0%, transparent 50%);
@@ -356,6 +370,11 @@ select option{background:#0a0a0a;color:#fff}
   border-radius:14px;
   padding:22px;
   text-align:center;
+  transition:all 0.3s ease;
+}
+.mining-stat.active{
+  border-color:rgba(0,255,0,0.4);
+  box-shadow:0 0 20px rgba(0,255,0,0.1);
 }
 .mining-stat-value{
   font-size:28px;
@@ -371,22 +390,52 @@ select option{background:#0a0a0a;color:#fff}
   letter-spacing:1px;
   margin-top:8px;
 }
-.mining-console{
-  background:rgba(0,0,0,0.5);
+
+/* Mining Animation Container */
+.mining-animation{
+  position:relative;
+  height:120px;
+  background:rgba(0,0,0,0.4);
   border:1px solid rgba(0,255,0,0.15);
-  border-radius:12px;
-  padding:18px 22px;
-  font-family:'Courier New',monospace;
-  font-size:13px;
-  color:#00ff00;
+  border-radius:16px;
   margin:20px 0;
-  min-height:50px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.mining-console.idle{color:rgba(255,255,255,0.4)}
-.mining-console.active{
-  border-color:rgba(0,255,0,0.3);
-  box-shadow:inset 0 0 30px rgba(0,255,0,0.05);
+.mining-animation.active{
+  border-color:rgba(0,255,0,0.4);
 }
+.mining-animation canvas{
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:100%;
+}
+.mining-status-text{
+  position:relative;
+  z-index:1;
+  font-family:'Courier New',monospace;
+  font-size:14px;
+  color:rgba(255,255,255,0.5);
+  text-align:center;
+  padding:20px;
+}
+.mining-status-text.active{
+  color:#00ff00;
+  text-shadow:0 0 10px rgba(0,255,0,0.5);
+}
+.mining-status-text .icon{
+  font-size:32px;
+  display:block;
+  margin-bottom:10px;
+  animation:bounce 1s ease-in-out infinite;
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-5px)}
+}
+
 .mining-buttons{display:flex;gap:12px;margin-top:20px}
 
 /* Blocks Table */
@@ -440,6 +489,12 @@ select option{background:#0a0a0a;color:#fff}
   color:#fff;
   box-shadow:0 10px 50px rgba(255,0,0,0.4);
 }
+#toast.success{
+  background:linear-gradient(135deg,#FFD700,#FFA500);
+  color:#000;
+  box-shadow:0 10px 50px rgba(255,215,0,0.5);
+  font-size:16px;
+}
 
 /* Page visibility */
 .page{display:none}
@@ -458,6 +513,7 @@ select option{background:#0a0a0a;color:#fff}
 <body>
 
 <canvas id="matrix-bg"></canvas>
+<canvas id="mining-particles"></canvas>
 
 <div class="app">
 <div class="container">
@@ -468,7 +524,7 @@ select option{background:#0a0a0a;color:#fff}
     <img src="https://bricscoin26.org/bricscoin-logo.png" alt="BricsCoin" class="logo-img" onerror="this.style.display='none'">
     <div class="logo-text">
       <h1>BRICSCOIN CORE</h1>
-      <span>FULL NODE WALLET v1.0</span>
+      <span>FULL NODE WALLET v1.2</span>
     </div>
   </div>
   <div class="connection-status">
@@ -589,22 +645,27 @@ select option{background:#0a0a0a;color:#fff}
     </div>
 
     <div class="mining-stats">
-      <div class="mining-stat">
+      <div class="mining-stat" id="stat-hashrate-card">
         <div class="mining-stat-value" id="mining-hashrate">0</div>
         <div class="mining-stat-label">Hashrate (H/s)</div>
       </div>
-      <div class="mining-stat">
+      <div class="mining-stat" id="stat-nonce-card">
         <div class="mining-stat-value" id="mining-nonce">0</div>
         <div class="mining-stat-label">Current Nonce</div>
       </div>
-      <div class="mining-stat">
+      <div class="mining-stat" id="stat-found-card">
         <div class="mining-stat-value" id="mining-found">0</div>
         <div class="mining-stat-label">Blocks Found</div>
       </div>
     </div>
 
-    <div class="mining-console idle" id="mining-status">
-      > Ready to mine. Select a wallet and click Start Mining.
+    <!-- Mining Animation Area -->
+    <div class="mining-animation" id="mining-animation">
+      <canvas id="particle-canvas"></canvas>
+      <div class="mining-status-text" id="mining-status">
+        <span class="icon">⛏️</span>
+        Ready to mine. Select a wallet and click Start Mining.
+      </div>
     </div>
 
     <div class="mining-buttons">
@@ -644,7 +705,7 @@ select option{background:#0a0a0a;color:#fff}
 </div>
 
 <div class="version-footer">
-  BRICSCOIN CORE v1.0 • Powered by BricsCoin Network
+  BRICSCOIN CORE v1.2 • Powered by BricsCoin Network
 </div>
 
 </div>
@@ -653,7 +714,7 @@ select option{background:#0a0a0a;color:#fff}
 <div id="toast"></div>
 
 <script>
-// Matrix Rain Background
+// ==================== MATRIX BACKGROUND ====================
 (function initMatrix() {
   const canvas = document.getElementById('matrix-bg');
   const ctx = canvas.getContext('2d');
@@ -685,7 +746,6 @@ select option{background:#0a0a0a;color:#fff}
       const x = i * fontSize;
       const y = drops[i] * fontSize;
 
-      // Random gold highlight
       if (Math.random() > 0.98) {
         ctx.fillStyle = '#FFD700';
       } else {
@@ -712,10 +772,147 @@ select option{background:#0a0a0a;color:#fff}
   });
 })();
 
-// App State
-let blocksFound = 0;
+// ==================== MINING PARTICLE ANIMATION ====================
+const MiningParticles = (function() {
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animationId = null;
+  let isActive = false;
 
-// Tab Navigation
+  function resize() {
+    const container = canvas.parentElement;
+    canvas.width = container.offsetWidth;
+    canvas.height = container.offsetHeight;
+  }
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = canvas.height + 10;
+      this.size = Math.random() * 4 + 2;
+      this.speedY = -(Math.random() * 2 + 1);
+      this.speedX = (Math.random() - 0.5) * 2;
+      this.opacity = Math.random() * 0.8 + 0.2;
+      this.color = Math.random() > 0.3 ? '#00ff00' : '#FFD700';
+      this.life = 1;
+      this.decay = Math.random() * 0.01 + 0.005;
+    }
+
+    update() {
+      this.y += this.speedY;
+      this.x += this.speedX;
+      this.life -= this.decay;
+      
+      // Add some waviness
+      this.x += Math.sin(this.y * 0.02) * 0.5;
+
+      if (this.life <= 0 || this.y < -10) {
+        this.reset();
+      }
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.globalAlpha = this.opacity * this.life;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Glow effect
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
+      gradient.addColorStop(0, this.color + '40');
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.globalAlpha = this.opacity * this.life * 0.5;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function init() {
+    resize();
+    particles = [];
+    for (let i = 0; i < 50; i++) {
+      const p = new Particle();
+      p.y = Math.random() * canvas.height;
+      particles.push(p);
+    }
+  }
+
+  function animate() {
+    if (!isActive) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+
+    // Draw connecting lines between close particles
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 80) {
+          ctx.globalAlpha = (1 - dist / 80) * 0.3;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    animationId = requestAnimationFrame(animate);
+  }
+
+  function start() {
+    if (isActive) return;
+    isActive = true;
+    init();
+    animate();
+    document.getElementById('mining-animation').classList.add('active');
+    document.getElementById('mining-particles').classList.add('active');
+  }
+
+  function stop() {
+    isActive = false;
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('mining-animation').classList.remove('active');
+    document.getElementById('mining-particles').classList.remove('active');
+  }
+
+  window.addEventListener('resize', () => {
+    if (isActive) {
+      resize();
+    }
+  });
+
+  return { start, stop };
+})();
+
+// ==================== APP STATE ====================
+let blocksFound = 0;
+let isMining = false;
+
+// ==================== TAB NAVIGATION ====================
 function switchTab(index) {
   document.querySelectorAll('.nav-tab').forEach((tab, i) => {
     tab.classList.toggle('active', i === index);
@@ -725,16 +922,16 @@ function switchTab(index) {
   });
 }
 
-// Toast Notifications
-function showToast(message, isError = false) {
+// ==================== TOAST NOTIFICATIONS ====================
+function showToast(message, type = 'normal') {
   const toast = document.getElementById('toast');
   toast.textContent = message;
-  toast.className = isError ? 'error' : '';
+  toast.className = type;
   toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 4000);
+  setTimeout(() => { toast.style.display = 'none'; }, type === 'success' ? 6000 : 4000);
 }
 
-// Load Network Stats
+// ==================== NETWORK FUNCTIONS ====================
 async function loadStats() {
   try {
     const stats = await window.bc.stats();
@@ -749,7 +946,6 @@ async function loadStats() {
   }
 }
 
-// Load Blocks
 async function loadBlocks() {
   try {
     const blocks = await window.bc.blocks();
@@ -773,7 +969,6 @@ async function loadBlocks() {
   }
 }
 
-// Load Wallets
 async function loadWallets() {
   try {
     const wallets = await window.bc.wallets();
@@ -781,7 +976,6 @@ async function loadWallets() {
     const sendSelect = document.getElementById('send-from');
     const miningSelect = document.getElementById('mining-wallet');
     
-    // Reset selects
     sendSelect.innerHTML = '<option value="">Select wallet...</option>';
     miningSelect.innerHTML = '<option value="">Select wallet for mining rewards...</option>';
     
@@ -815,7 +1009,7 @@ async function loadWallets() {
   }
 }
 
-// Create Wallet
+// ==================== WALLET FUNCTIONS ====================
 async function createWallet() {
   const nameInput = document.getElementById('new-wallet-name');
   const name = nameInput.value.trim() || 'My Wallet';
@@ -826,18 +1020,17 @@ async function createWallet() {
     nameInput.value = '';
     loadWallets();
   } catch (e) {
-    showToast('❌ Error: ' + e.message, true);
+    showToast('❌ Error: ' + e.message, 'error');
   }
 }
 
-// Send Transaction
 async function sendTransaction() {
   const from = document.getElementById('send-from').value;
   const to = document.getElementById('send-to').value;
   const amount = document.getElementById('send-amount').value;
   
   if (!from || !to || !amount) {
-    showToast('⚠️ Please fill all fields', true);
+    showToast('⚠️ Please fill all fields', 'error');
     return;
   }
   
@@ -848,63 +1041,86 @@ async function sendTransaction() {
     document.getElementById('send-amount').value = '';
     loadWallets();
   } catch (e) {
-    showToast('❌ Error: ' + e.message, true);
+    showToast('❌ Error: ' + e.message, 'error');
   }
 }
 
-// Mining Controls
+// ==================== MINING FUNCTIONS ====================
 async function startMining() {
   const wallet = document.getElementById('mining-wallet').value;
   if (!wallet) {
-    showToast('⚠️ Please select a wallet for mining rewards', true);
+    showToast('⚠️ Please select a wallet for mining rewards', 'error');
     return;
   }
   
+  isMining = true;
   await window.bc.mine(wallet);
   
   document.getElementById('btn-start-mining').style.display = 'none';
   document.getElementById('btn-stop-mining').style.display = 'inline-flex';
   
+  // Activate mining animation
+  MiningParticles.start();
+  
+  // Update UI
+  document.querySelectorAll('.mining-stat').forEach(el => el.classList.add('active'));
+  
   const status = document.getElementById('mining-status');
-  status.className = 'mining-console active';
-  status.textContent = '> ⛏️ Mining started... Searching for blocks...';
+  status.className = 'mining-status-text active';
+  status.innerHTML = '<span class="icon">⛏️</span>Mining in progress...';
 }
 
 async function stopMining() {
+  isMining = false;
   await window.bc.stopmine();
   
   document.getElementById('btn-start-mining').style.display = 'inline-flex';
   document.getElementById('btn-stop-mining').style.display = 'none';
   
+  // Stop animation
+  MiningParticles.stop();
+  
+  // Update UI
+  document.querySelectorAll('.mining-stat').forEach(el => el.classList.remove('active'));
+  
   const status = document.getElementById('mining-status');
-  status.className = 'mining-console idle';
-  status.textContent = '> Mining stopped.';
+  status.className = 'mining-status-text';
+  status.innerHTML = '<span class="icon">⏹️</span>Mining stopped.';
 }
 
-// Mining Events from Main Process
+// ==================== MINING EVENTS ====================
+// Only update stats silently - no console messages
 window.bc.on('minfo', data => {
-  const status = document.getElementById('mining-status');
-  status.textContent = '> ⛏️ Mining Block #' + data.block + ' | Difficulty: ' + data.diff;
+  // Silent - no message displayed
 });
 
 window.bc.on('mprog', data => {
+  // Update stats only
   document.getElementById('mining-hashrate').textContent = data.hr.toLocaleString();
   document.getElementById('mining-nonce').textContent = data.n.toLocaleString();
 });
 
+// ONLY show message when block is FOUND!
 window.bc.on('found', data => {
   blocksFound++;
   document.getElementById('mining-found').textContent = blocksFound;
-  showToast('🎉 Block #' + data.block + ' found! +50 BRICS reward!');
+  
+  // Big celebration toast
+  showToast('🎉 BLOCK #' + data.block + ' FOUND! +50 BRICS reward!', 'success');
+  
+  // Update status text
+  const status = document.getElementById('mining-status');
+  status.innerHTML = '<span class="icon">🎉</span>Block #' + data.block + ' found! Mining next block...';
+  
+  // Refresh data
   loadStats();
   loadBlocks();
   loadWallets();
 });
 
-// Initialize
+// ==================== INITIALIZATION ====================
 document.getElementById('btn-create-wallet').addEventListener('click', createWallet);
 
-// Handle Enter key for wallet creation
 document.getElementById('new-wallet-name').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') createWallet();
 });
