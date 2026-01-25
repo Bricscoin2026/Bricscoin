@@ -571,10 +571,17 @@ class StratumMiner:
             
             # FIXED: First check miner's PERSONAL job cache (has correct reward address)
             job = self.personal_jobs.get(job_id)
+            job_source = "personal"
             
             if not job:
-                # Fallback to global cache
+                # Fallback to global cache - BUT this might have wrong miner address!
                 job = job_cache.get(job_id)
+                job_source = "global"
+                if job:
+                    logger.warning(f"Using GLOBAL job cache for {self.worker_name} - job may have wrong miner address!")
+                    # CRITICAL FIX: Override the miner_address with THIS miner's address
+                    job = job.copy()  # Don't modify the cached job
+                    job['miner_address'] = self.worker_name
             
             if not job:
                 # Job not found - this is the "Job not found" error
@@ -585,6 +592,10 @@ class StratumMiner:
                 if self.miner_id in miners:
                     miners[self.miner_id]['shares'] += 1
                 return
+            
+            # Log which job source and miner address
+            job_miner = job.get('miner_address', 'UNKNOWN')
+            logger.debug(f"Job {job_id} from {job_source} cache, miner_address={job_miner[:20]}...")
             
             # Verify the share
             is_share, is_block, block_hash = verify_share(
