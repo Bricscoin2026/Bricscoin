@@ -5,7 +5,6 @@ const crypto = require('crypto');
 const EventEmitter = require('events');
 const Datastore = require('nedb-promises');
 const path = require('path');
-const { app } = require('electron');
 
 // Costanti BricsCoin
 const CONSTANTS = {
