@@ -178,6 +178,31 @@ export default function Downloads() {
       <div>
         <h2 className="font-heading font-bold text-xl mb-4">Desktop Wallets</h2>
         
+        {/* GitHub Releases Link */}
+        <Card className="bg-card/50 border-white/10 mb-4">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-sm bg-white/10 flex items-center justify-center">
+                  <ExternalLink className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold">All Platforms (Windows, Mac, Linux)</h3>
+                  <p className="text-sm text-muted-foreground">Download from GitHub Releases</p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/releases/latest', '_blank')}
+                className="gold-button rounded-sm"
+                data-testid="github-releases-btn"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                GitHub Releases
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
