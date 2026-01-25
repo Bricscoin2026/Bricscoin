@@ -4,7 +4,11 @@ contextBridge.exposeInMainWorld('bc', {
   blocks: () => ipcRenderer.invoke('blocks'),
   wallets: () => ipcRenderer.invoke('wallets'),
   newwallet: n => ipcRenderer.invoke('newwallet', n),
+  importwallet: (n, s) => ipcRenderer.invoke('importwallet', n, s),
+  deletewallet: a => ipcRenderer.invoke('deletewallet', a),
+  copy: t => ipcRenderer.invoke('copy', t),
   send: (f, t, a) => ipcRenderer.invoke('send', f, t, a),
+  transactions: a => ipcRenderer.invoke('transactions', a),
   mine: a => ipcRenderer.invoke('mine', a),
   stopmine: () => ipcRenderer.invoke('stopmine'),
   on: (ch, cb) => ipcRenderer.on(ch, (e, d) => cb(d))
