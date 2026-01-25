@@ -37,7 +37,7 @@
 - [x] Stratum server port 3333
 
 ### Downloads
-- [x] BricsCoin Core v1.1 (Matrix UI) - 8.4 KB
+- [x] BricsCoin Core v1.2 (Matrix UI + Particle Animation) - 9.5 KB
 - [x] Source Code ZIP - 680 KB
 
 ### Decentralization
@@ -47,12 +47,14 @@
 - [x] Source code download
 
 ### BricsCoin Core Desktop Wallet
-- [x] **v1.1 Released (Jan 25, 2026)**
+- [x] **v1.2 Released (Jan 25, 2026)**
   - Professional Matrix-style animated background
   - BricsCoin logo integration
   - Dark theme with green accent
   - Wallet creation/management
   - Mining functionality with Start/Stop buttons
+  - **NEW: Mining particle animation** (particles rise when mining active)
+  - **NEW: Silent mining** (no spam messages, only shows when block found)
   - Network stats display
   - Block explorer
   - Transaction sending
@@ -108,12 +110,14 @@
 ## 📝 Changelog
 
 ### Jan 25, 2026
-- **BricsCoin Core v1.1 Released**
+- **BricsCoin Core v1.2 Released**
   - Added professional Matrix-style animated canvas background
   - Integrated BricsCoin logo from main site
   - Improved dark theme with green accents
   - Added Stop Mining button functionality
   - Enhanced card styling and hover effects
+  - **NEW: Mining particle animation** - particles rise and connect when mining
+  - **NEW: Silent mining mode** - removed spam messages, only shows when block found
   - Updated Downloads page to English
   - Deployed to https://bricscoin26.org/downloads
 
