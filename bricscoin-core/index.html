@@ -32,9 +32,7 @@ body{
   opacity:0;
   transition:opacity 0.5s ease;
 }
-#mining-particles.active{
-  opacity:1;
-}
+#mining-particles.active{opacity:1}
 
 /* Main container */
 .app{
@@ -74,7 +72,6 @@ body{
   background:linear-gradient(135deg,#00ff00 0%,#00cc00 50%,#00ff44 100%);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  text-shadow:0 0 40px rgba(0,255,0,0.4);
   letter-spacing:1px;
 }
 .logo-text span{color:rgba(255,255,255,0.4);font-size:12px;letter-spacing:2px}
@@ -112,37 +109,10 @@ body{
   padding:22px;
   text-align:center;
   transition:all 0.3s ease;
-  position:relative;
-  overflow:hidden;
 }
-.stat-card::before{
-  content:'';
-  position:absolute;
-  top:0;left:-100%;
-  width:100%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(0,255,0,0.05),transparent);
-  transition:0.5s;
-}
-.stat-card:hover::before{left:100%}
-.stat-card:hover{
-  transform:translateY(-3px);
-  border-color:rgba(0,255,0,0.3);
-  box-shadow:0 10px 40px rgba(0,255,0,0.1);
-}
-.stat-value{
-  font-size:30px;
-  font-weight:bold;
-  color:#00ff00;
-  text-shadow:0 0 20px rgba(0,255,0,0.4);
-  font-family:'Courier New',monospace;
-}
-.stat-label{
-  font-size:11px;
-  color:rgba(255,255,255,0.5);
-  text-transform:uppercase;
-  letter-spacing:2px;
-  margin-top:8px;
-}
+.stat-card:hover{transform:translateY(-3px);border-color:rgba(0,255,0,0.3);box-shadow:0 10px 40px rgba(0,255,0,0.1)}
+.stat-value{font-size:28px;font-weight:bold;color:#00ff00;text-shadow:0 0 20px rgba(0,255,0,0.4);font-family:'Courier New',monospace}
+.stat-label{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;margin-top:8px}
 
 /* Navigation Tabs */
 .nav-tabs{
@@ -156,14 +126,14 @@ body{
 }
 .nav-tab{
   flex:1;
-  padding:14px 24px;
+  padding:14px 20px;
   background:transparent;
   border:none;
   border-radius:10px;
   color:rgba(255,255,255,0.6);
   cursor:pointer;
   transition:all 0.3s ease;
-  font-size:14px;
+  font-size:13px;
   font-weight:600;
   display:flex;
   align-items:center;
@@ -184,27 +154,19 @@ body{
   background:linear-gradient(180deg,rgba(0,40,0,0.35) 0%,rgba(0,20,0,0.25) 100%);
   border:1px solid rgba(0,255,0,0.12);
   border-radius:20px;
-  padding:28px;
+  padding:25px;
   margin-bottom:20px;
   backdrop-filter:blur(10px);
-  position:relative;
-  overflow:hidden;
-}
-.card::after{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;
-  height:1px;
-  background:linear-gradient(90deg,transparent,rgba(0,255,0,0.3),transparent);
 }
 .card-header{
   display:flex;
   align-items:center;
-  gap:12px;
-  margin-bottom:22px;
+  justify-content:space-between;
+  margin-bottom:20px;
   padding-bottom:15px;
   border-bottom:1px solid rgba(0,255,0,0.1);
 }
+.card-header-left{display:flex;align-items:center;gap:12px}
 .card-icon{
   width:40px;height:40px;
   background:linear-gradient(135deg,rgba(0,255,0,0.2),rgba(0,180,0,0.1));
@@ -213,25 +175,14 @@ body{
   color:#00ff00;
   font-size:18px;
 }
-.card-title{
-  font-size:18px;
-  font-weight:600;
-  color:#fff;
-}
+.card-title{font-size:18px;font-weight:600;color:#fff}
 
 /* Forms */
 .form-group{margin-bottom:16px}
-.form-label{
-  display:block;
-  font-size:12px;
-  color:rgba(255,255,255,0.5);
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:8px;
-}
-input,select{
+.form-label{display:block;font-size:12px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+input,select,textarea{
   width:100%;
-  padding:16px 20px;
+  padding:14px 18px;
   background:rgba(0,0,0,0.4);
   border:1px solid rgba(0,255,0,0.15);
   border-radius:12px;
@@ -240,22 +191,19 @@ input,select{
   transition:all 0.3s ease;
   font-family:inherit;
 }
-input:focus,select:focus{
-  outline:none;
-  border-color:#00ff00;
-  box-shadow:0 0 20px rgba(0,255,0,0.15), inset 0 0 20px rgba(0,255,0,0.05);
-}
-input::placeholder{color:rgba(255,255,255,0.3)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#00ff00;box-shadow:0 0 20px rgba(0,255,0,0.15)}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.3)}
 select{cursor:pointer}
 select option{background:#0a0a0a;color:#fff}
+textarea{resize:vertical;min-height:80px}
 
 /* Buttons */
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
-  padding:16px 32px;
+  gap:8px;
+  padding:14px 28px;
   border:none;
   border-radius:12px;
   font-size:14px;
@@ -264,32 +212,14 @@ select option{background:#0a0a0a;color:#fff}
   transition:all 0.3s ease;
   font-family:inherit;
 }
-.btn-primary{
-  background:linear-gradient(135deg,#00ff00 0%,#00cc00 100%);
-  color:#000;
-  box-shadow:0 4px 20px rgba(0,255,0,0.3);
-}
-.btn-primary:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 30px rgba(0,255,0,0.4);
-}
-.btn-secondary{
-  background:rgba(0,255,0,0.1);
-  color:#00ff00;
-  border:1px solid rgba(0,255,0,0.3);
-}
-.btn-secondary:hover{
-  background:rgba(0,255,0,0.2);
-}
-.btn-danger{
-  background:linear-gradient(135deg,#ff3333 0%,#cc0000 100%);
-  color:#fff;
-  box-shadow:0 4px 20px rgba(255,0,0,0.3);
-}
-.btn-danger:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 30px rgba(255,0,0,0.4);
-}
+.btn-primary{background:linear-gradient(135deg,#00ff00 0%,#00cc00 100%);color:#000;box-shadow:0 4px 20px rgba(0,255,0,0.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,255,0,0.4)}
+.btn-secondary{background:rgba(0,255,0,0.1);color:#00ff00;border:1px solid rgba(0,255,0,0.3)}
+.btn-secondary:hover{background:rgba(0,255,0,0.2)}
+.btn-danger{background:linear-gradient(135deg,#ff3333 0%,#cc0000 100%);color:#fff;box-shadow:0 4px 20px rgba(255,0,0,0.3)}
+.btn-danger:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,0,0,0.4)}
+.btn-sm{padding:10px 18px;font-size:12px}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap}
 
 /* Wallet Cards */
 .wallet-list{display:flex;flex-direction:column;gap:15px}
@@ -297,104 +227,58 @@ select option{background:#0a0a0a;color:#fff}
   background:linear-gradient(135deg,rgba(0,50,0,0.3) 0%,rgba(0,30,0,0.2) 100%);
   border:1px solid rgba(0,255,0,0.15);
   border-radius:16px;
-  padding:22px;
+  padding:20px;
   transition:all 0.3s ease;
 }
-.wallet-card:hover{
-  border-color:rgba(0,255,0,0.35);
-  box-shadow:0 0 30px rgba(0,255,0,0.1);
-}
-.wallet-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-.wallet-name{
-  font-size:18px;
-  font-weight:600;
-  color:#fff;
-}
-.wallet-balance{
-  font-size:24px;
-  font-weight:bold;
-  color:#00ff00;
-  text-shadow:0 0 15px rgba(0,255,0,0.4);
-}
+.wallet-card:hover{border-color:rgba(0,255,0,0.35);box-shadow:0 0 30px rgba(0,255,0,0.1)}
+.wallet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.wallet-name{font-size:18px;font-weight:600;color:#fff}
+.wallet-balance{font-size:22px;font-weight:bold;color:#00ff00;text-shadow:0 0 15px rgba(0,255,0,0.4)}
 .wallet-balance span{font-size:14px;color:rgba(0,255,0,0.7)}
+.wallet-address-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .wallet-address{
+  flex:1;
   font-family:'Courier New',monospace;
-  font-size:12px;
+  font-size:11px;
   color:#00ff00;
   background:rgba(0,0,0,0.4);
-  padding:12px 16px;
-  border-radius:10px;
+  padding:10px 14px;
+  border-radius:8px;
   word-break:break-all;
   border:1px solid rgba(0,255,0,0.1);
 }
 .wallet-seed{
-  margin-top:12px;
   font-family:'Courier New',monospace;
-  font-size:11px;
+  font-size:10px;
   color:#ff6666;
   background:rgba(255,0,0,0.08);
-  padding:12px 16px;
-  border-radius:10px;
+  padding:10px 14px;
+  border-radius:8px;
   border:1px solid rgba(255,0,0,0.2);
+  margin-bottom:12px;
 }
-.wallet-seed::before{
-  content:'⚠️ SEED PHRASE: ';
-  font-weight:bold;
-}
-.empty-state{
-  text-align:center;
-  padding:50px 20px;
-  color:rgba(255,255,255,0.4);
-}
-.empty-state svg{
-  width:60px;height:60px;
-  margin-bottom:15px;
-  opacity:0.3;
-}
+.wallet-seed::before{content:'⚠️ SEED: ';font-weight:bold}
+.wallet-actions{display:flex;gap:8px;flex-wrap:wrap}
+.empty-state{text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4)}
+.empty-state svg{width:50px;height:50px;margin-bottom:15px;opacity:0.3}
 
 /* Mining Section */
-.mining-stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-  margin:20px 0;
-}
+.mining-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:20px 0}
 .mining-stat{
   background:rgba(0,0,0,0.4);
   border:1px solid rgba(0,255,0,0.1);
   border-radius:14px;
-  padding:22px;
+  padding:20px;
   text-align:center;
   transition:all 0.3s ease;
 }
-.mining-stat.active{
-  border-color:rgba(0,255,0,0.4);
-  box-shadow:0 0 20px rgba(0,255,0,0.1);
-}
-.mining-stat-value{
-  font-size:28px;
-  font-weight:bold;
-  color:#00ff00;
-  font-family:'Courier New',monospace;
-  text-shadow:0 0 15px rgba(0,255,0,0.4);
-}
-.mining-stat-label{
-  font-size:11px;
-  color:rgba(255,255,255,0.4);
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-top:8px;
-}
+.mining-stat.active{border-color:rgba(0,255,0,0.4);box-shadow:0 0 20px rgba(0,255,0,0.1)}
+.mining-stat-value{font-size:26px;font-weight:bold;color:#00ff00;font-family:'Courier New',monospace}
+.mining-stat-label{font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-top:6px}
 
-/* Mining Animation Container */
 .mining-animation{
   position:relative;
-  height:120px;
+  height:100px;
   background:rgba(0,0,0,0.4);
   border:1px solid rgba(0,255,0,0.15);
   border-radius:16px;
@@ -404,14 +288,8 @@ select option{background:#0a0a0a;color:#fff}
   align-items:center;
   justify-content:center;
 }
-.mining-animation.active{
-  border-color:rgba(0,255,0,0.4);
-}
-.mining-animation canvas{
-  position:absolute;
-  top:0;left:0;
-  width:100%;height:100%;
-}
+.mining-animation.active{border-color:rgba(0,255,0,0.4)}
+.mining-animation canvas{position:absolute;top:0;left:0;width:100%;height:100%}
 .mining-status-text{
   position:relative;
   z-index:1;
@@ -419,51 +297,73 @@ select option{background:#0a0a0a;color:#fff}
   font-size:14px;
   color:rgba(255,255,255,0.5);
   text-align:center;
-  padding:20px;
 }
-.mining-status-text.active{
-  color:#00ff00;
-  text-shadow:0 0 10px rgba(0,255,0,0.5);
-}
-.mining-status-text .icon{
-  font-size:32px;
-  display:block;
-  margin-bottom:10px;
-  animation:bounce 1s ease-in-out infinite;
-}
-@keyframes bounce{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-5px)}
-}
-
+.mining-status-text.active{color:#00ff00;text-shadow:0 0 10px rgba(0,255,0,0.5)}
+.mining-status-text .icon{font-size:28px;display:block;margin-bottom:8px}
 .mining-buttons{display:flex;gap:12px;margin-top:20px}
 
 /* Blocks Table */
 .blocks-table{width:100%;border-collapse:collapse}
-.blocks-table th{
-  padding:14px 16px;
-  text-align:left;
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  color:rgba(255,255,255,0.4);
-  border-bottom:1px solid rgba(0,255,0,0.1);
-}
-.blocks-table td{
-  padding:16px;
-  border-bottom:1px solid rgba(0,255,0,0.05);
-  font-family:'Courier New',monospace;
-  font-size:13px;
-}
+.blocks-table th{padding:12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);border-bottom:1px solid rgba(0,255,0,0.1)}
+.blocks-table td{padding:14px 12px;border-bottom:1px solid rgba(0,255,0,0.05);font-family:'Courier New',monospace;font-size:12px}
 .blocks-table tr:hover td{background:rgba(0,255,0,0.03)}
-.block-height{
-  color:#00ff00;
-  font-weight:bold;
-  text-shadow:0 0 10px rgba(0,255,0,0.3);
-}
+.block-height{color:#00ff00;font-weight:bold}
 .block-hash{color:rgba(255,255,255,0.6)}
 .block-miner{color:rgba(0,255,0,0.7)}
 .block-time{color:rgba(255,255,255,0.4)}
+
+/* Transactions */
+.tx-list{max-height:300px;overflow-y:auto}
+.tx-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px;
+  border-bottom:1px solid rgba(0,255,0,0.05);
+}
+.tx-item:last-child{border-bottom:none}
+.tx-type{font-size:20px;margin-right:12px}
+.tx-details{flex:1}
+.tx-addr{font-family:monospace;font-size:11px;color:rgba(255,255,255,0.6)}
+.tx-amount{font-weight:bold;font-family:monospace}
+.tx-amount.incoming{color:#00ff00}
+.tx-amount.outgoing{color:#ff6666}
+
+/* Modal */
+.modal{
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.8);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+}
+.modal.show{display:flex}
+.modal-content{
+  background:linear-gradient(180deg,rgba(0,40,0,0.95) 0%,rgba(0,20,0,0.95) 100%);
+  border:1px solid rgba(0,255,0,0.2);
+  border-radius:20px;
+  padding:30px;
+  max-width:500px;
+  width:90%;
+  max-height:80vh;
+  overflow-y:auto;
+}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-title{font-size:20px;font-weight:bold;color:#00ff00}
+.modal-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;opacity:0.6}
+.modal-close:hover{opacity:1}
+
+/* QR Code */
+.qr-container{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  display:inline-block;
+  margin:15px 0;
+}
 
 /* Toast Notifications */
 #toast{
@@ -472,42 +372,28 @@ select option{background:#0a0a0a;color:#fff}
   right:30px;
   background:linear-gradient(135deg,#00ff00,#00cc00);
   color:#000;
-  padding:18px 30px;
+  padding:16px 28px;
   border-radius:14px;
   font-weight:600;
   display:none;
   box-shadow:0 10px 50px rgba(0,255,0,0.4);
   animation:slideInToast 0.4s ease;
-  z-index:1000;
+  z-index:1001;
 }
-@keyframes slideInToast{
-  from{transform:translateX(120%);opacity:0}
-  to{transform:translateX(0);opacity:1}
-}
-#toast.error{
-  background:linear-gradient(135deg,#ff4444,#cc0000);
-  color:#fff;
-  box-shadow:0 10px 50px rgba(255,0,0,0.4);
-}
-#toast.success{
-  background:linear-gradient(135deg,#FFD700,#FFA500);
-  color:#000;
-  box-shadow:0 10px 50px rgba(255,215,0,0.5);
-  font-size:16px;
-}
+@keyframes slideInToast{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+#toast.error{background:linear-gradient(135deg,#ff4444,#cc0000);color:#fff;box-shadow:0 10px 50px rgba(255,0,0,0.4)}
+#toast.success{background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;box-shadow:0 10px 50px rgba(255,215,0,0.5)}
 
 /* Page visibility */
 .page{display:none}
 .page.active{display:block}
 
 /* Version footer */
-.version-footer{
-  text-align:center;
-  padding:20px;
-  color:rgba(255,255,255,0.2);
-  font-size:11px;
-  letter-spacing:1px;
-}
+.version-footer{text-align:center;padding:20px;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:1px}
+
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -524,7 +410,7 @@ select option{background:#0a0a0a;color:#fff}
     <img src="https://bricscoin26.org/bricscoin-logo.png" alt="BricsCoin" class="logo-img" onerror="this.style.display='none'">
     <div class="logo-text">
       <h1>BRICSCOIN CORE</h1>
-      <span>FULL NODE WALLET v1.2</span>
+      <span>FULL NODE WALLET v1.3</span>
     </div>
   </div>
   <div class="connection-status">
@@ -556,14 +442,22 @@ select option{background:#0a0a0a;color:#fff}
 <!-- Navigation -->
 <nav class="nav-tabs">
   <button class="nav-tab active" onclick="switchTab(0)" data-testid="tab-wallet">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/><path d="M6 16h4"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
     Wallet
   </button>
-  <button class="nav-tab" onclick="switchTab(1)" data-testid="tab-mining">
+  <button class="nav-tab" onclick="switchTab(1)" data-testid="tab-send">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    Send
+  </button>
+  <button class="nav-tab" onclick="switchTab(2)" data-testid="tab-receive">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    Receive
+  </button>
+  <button class="nav-tab" onclick="switchTab(3)" data-testid="tab-mining">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
     Mining
   </button>
-  <button class="nav-tab" onclick="switchTab(2)" data-testid="tab-blocks">
+  <button class="nav-tab" onclick="switchTab(4)" data-testid="tab-blocks">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     Blocks
   </button>
@@ -571,48 +465,84 @@ select option{background:#0a0a0a;color:#fff}
 
 <!-- WALLET PAGE -->
 <div id="page-0" class="page active">
-  
-  <!-- Create Wallet -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-icon">+</div>
-      <div class="card-title">Create New Wallet</div>
+  <div class="grid-2">
+    <!-- Create Wallet -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon">+</div>
+          <div class="card-title">Create New Wallet</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Wallet Name</label>
+        <input type="text" id="new-wallet-name" placeholder="Enter wallet name..." data-testid="input-wallet-name">
+      </div>
+      <button class="btn btn-primary" onclick="createWallet()" data-testid="btn-create-wallet">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Create Wallet
+      </button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Wallet Name</label>
-      <input type="text" id="new-wallet-name" placeholder="Enter a name for your wallet..." data-testid="input-wallet-name">
+
+    <!-- Import Wallet -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon">↓</div>
+          <div class="card-title">Import Wallet</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Wallet Name</label>
+        <input type="text" id="import-wallet-name" placeholder="Enter wallet name...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Seed Phrase (12 words)</label>
+        <textarea id="import-seed" placeholder="Enter your 12-word seed phrase..."></textarea>
+      </div>
+      <button class="btn btn-secondary" onclick="importWallet()" data-testid="btn-import-wallet">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Import Wallet
+      </button>
     </div>
-    <button class="btn btn-primary" id="btn-create-wallet" data-testid="btn-create-wallet">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-      Create Wallet
-    </button>
   </div>
 
   <!-- Wallet List -->
   <div class="card">
     <div class="card-header">
-      <div class="card-icon">◆</div>
-      <div class="card-title">Your Wallets</div>
+      <div class="card-header-left">
+        <div class="card-icon">◆</div>
+        <div class="card-title">Your Wallets</div>
+      </div>
+      <button class="btn btn-sm btn-secondary" onclick="loadWallets()">↻ Refresh</button>
     </div>
     <div id="wallet-list" class="wallet-list">
       <div class="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
-        <p>No wallets yet. Create your first wallet above!</p>
+        <p>No wallets yet. Create or import a wallet above!</p>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Send Transaction -->
+<!-- SEND PAGE -->
+<div id="page-1" class="page">
   <div class="card">
     <div class="card-header">
-      <div class="card-icon">→</div>
-      <div class="card-title">Send BRICS</div>
+      <div class="card-header-left">
+        <div class="card-icon">→</div>
+        <div class="card-title">Send BRICS</div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">From Wallet</label>
       <select id="send-from" data-testid="select-send-from">
         <option value="">Select wallet...</option>
       </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Available Balance</label>
+      <div id="send-balance" style="font-size:24px;color:#00ff00;font-weight:bold;padding:10px 0">- BRICS</div>
     </div>
     <div class="form-group">
       <label class="form-label">Recipient Address</label>
@@ -623,18 +553,61 @@ select option{background:#0a0a0a;color:#fff}
       <input type="number" id="send-amount" placeholder="0.00" step="0.01" data-testid="input-send-amount">
     </div>
     <button class="btn btn-primary" onclick="sendTransaction()" data-testid="btn-send">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
       Send Transaction
     </button>
   </div>
 </div>
 
-<!-- MINING PAGE -->
-<div id="page-1" class="page">
+<!-- RECEIVE PAGE -->
+<div id="page-2" class="page">
   <div class="card">
     <div class="card-header">
-      <div class="card-icon">⛏</div>
-      <div class="card-title">Mining Control</div>
+      <div class="card-header-left">
+        <div class="card-icon">↓</div>
+        <div class="card-title">Receive BRICS</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Select Wallet</label>
+      <select id="receive-wallet" onchange="updateReceiveAddress()">
+        <option value="">Select wallet...</option>
+      </select>
+    </div>
+    <div id="receive-info" style="display:none;text-align:center;padding:20px">
+      <p style="margin-bottom:15px;color:rgba(255,255,255,0.6)">Share this address to receive BRICS:</p>
+      <div class="qr-container">
+        <canvas id="qr-canvas" width="180" height="180"></canvas>
+      </div>
+      <div style="margin-top:15px">
+        <input type="text" id="receive-address" readonly style="text-align:center;font-family:monospace;font-size:12px">
+        <div class="btn-group" style="justify-content:center;margin-top:15px">
+          <button class="btn btn-secondary btn-sm" onclick="copyReceiveAddress()">📋 Copy Address</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recent Transactions -->
+  <div class="card" id="tx-card" style="display:none">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="card-icon">↔</div>
+        <div class="card-title">Recent Transactions</div>
+      </div>
+    </div>
+    <div id="tx-list" class="tx-list"></div>
+  </div>
+</div>
+
+<!-- MINING PAGE -->
+<div id="page-3" class="page">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="card-icon">⛏</div>
+        <div class="card-title">Mining Control</div>
+      </div>
     </div>
     
     <div class="form-group">
@@ -659,56 +632,61 @@ select option{background:#0a0a0a;color:#fff}
       </div>
     </div>
 
-    <!-- Mining Animation Area -->
     <div class="mining-animation" id="mining-animation">
       <canvas id="particle-canvas"></canvas>
       <div class="mining-status-text" id="mining-status">
         <span class="icon">⛏️</span>
-        Ready to mine. Select a wallet and click Start Mining.
+        Ready to mine. Select a wallet and click Start.
       </div>
     </div>
 
     <div class="mining-buttons">
-      <button class="btn btn-primary" id="btn-start-mining" onclick="startMining()" data-testid="btn-start-mining">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Start Mining
-      </button>
-      <button class="btn btn-danger" id="btn-stop-mining" onclick="stopMining()" style="display:none" data-testid="btn-stop-mining">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
-        Stop Mining
-      </button>
+      <button class="btn btn-primary" id="btn-start-mining" onclick="startMining()" data-testid="btn-start-mining">▶ Start Mining</button>
+      <button class="btn btn-danger" id="btn-stop-mining" onclick="stopMining()" style="display:none" data-testid="btn-stop-mining">⏹ Stop Mining</button>
     </div>
   </div>
 </div>
 
 <!-- BLOCKS PAGE -->
-<div id="page-2" class="page">
+<div id="page-4" class="page">
   <div class="card">
     <div class="card-header">
-      <div class="card-icon">▣</div>
-      <div class="card-title">Recent Blocks</div>
+      <div class="card-header-left">
+        <div class="card-icon">▣</div>
+        <div class="card-title">Recent Blocks</div>
+      </div>
+      <button class="btn btn-sm btn-secondary" onclick="loadBlocks()">↻ Refresh</button>
     </div>
     <table class="blocks-table">
       <thead>
-        <tr>
-          <th>Height</th>
-          <th>Hash</th>
-          <th>Miner</th>
-          <th>Time</th>
-        </tr>
+        <tr><th>Height</th><th>Hash</th><th>Miner</th><th>Time</th></tr>
       </thead>
       <tbody id="blocks-table-body">
-        <tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:30px">Loading blocks...</td></tr>
+        <tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:30px">Loading...</td></tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<div class="version-footer">
-  BRICSCOIN CORE v1.2 • Powered by BricsCoin Network
-</div>
+<div class="version-footer">BRICSCOIN CORE v1.3 • Powered by BricsCoin Network</div>
 
 </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="delete-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">⚠️ Delete Wallet</div>
+      <button class="modal-close" onclick="closeModal('delete-modal')">&times;</button>
+    </div>
+    <p style="margin-bottom:20px;color:rgba(255,255,255,0.7)">Are you sure you want to delete this wallet? Make sure you have backed up your seed phrase!</p>
+    <p style="margin-bottom:20px;color:#ff6666;font-weight:bold" id="delete-wallet-name"></p>
+    <div class="btn-group">
+      <button class="btn btn-danger" onclick="confirmDelete()">Yes, Delete Wallet</button>
+      <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -718,79 +696,37 @@ select option{background:#0a0a0a;color:#fff}
 (function initMatrix() {
   const canvas = document.getElementById('matrix-bg');
   const ctx = canvas.getContext('2d');
-  
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
   window.addEventListener('resize', resize);
-
-  const chars = '0123456789ABCDEFabcdef₿ΣΔΩ◆▣';
-  const charArray = chars.split('');
+  const chars = '0123456789ABCDEFabcdef₿ΣΔΩ◆▣'.split('');
   const fontSize = 14;
   let columns = Math.floor(canvas.width / fontSize);
-  let drops = [];
-  
-  for (let i = 0; i < columns; i++) {
-    drops[i] = Math.random() * -100;
-  }
-
+  let drops = Array(columns).fill(0).map(() => Math.random() * -100);
   function draw() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = fontSize + 'px monospace';
-
     for (let i = 0; i < drops.length; i++) {
-      const char = charArray[Math.floor(Math.random() * charArray.length)];
-      const x = i * fontSize;
-      const y = drops[i] * fontSize;
-
-      if (Math.random() > 0.98) {
-        ctx.fillStyle = '#FFD700';
-      } else {
-        ctx.fillStyle = 'rgba(0, ' + (150 + Math.random() * 105) + ', 0, ' + (0.3 + Math.random() * 0.5) + ')';
-      }
-      
-      ctx.fillText(char, x, y);
-
-      if (y > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillStyle = Math.random() > 0.98 ? '#FFD700' : `rgba(0,${150+Math.random()*105},0,${0.3+Math.random()*0.5})`;
+      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
       drops[i]++;
     }
   }
-
   setInterval(draw, 50);
-
-  window.addEventListener('resize', () => {
-    columns = Math.floor(canvas.width / fontSize);
-    drops = [];
-    for (let i = 0; i < columns; i++) {
-      drops[i] = Math.random() * -100;
-    }
-  });
+  window.addEventListener('resize', () => { columns = Math.floor(canvas.width / fontSize); drops = Array(columns).fill(0).map(() => Math.random() * -100); });
 })();
 
-// ==================== MINING PARTICLE ANIMATION ====================
+// ==================== MINING PARTICLES ====================
 const MiningParticles = (function() {
   const canvas = document.getElementById('particle-canvas');
   const ctx = canvas.getContext('2d');
-  let particles = [];
-  let animationId = null;
-  let isActive = false;
-
-  function resize() {
-    const container = canvas.parentElement;
-    canvas.width = container.offsetWidth;
-    canvas.height = container.offsetHeight;
-  }
-
+  let particles = [], animationId = null, isActive = false;
+  function resize() { const c = canvas.parentElement; canvas.width = c.offsetWidth; canvas.height = c.offsetHeight; }
   class Particle {
-    constructor() {
-      this.reset();
-    }
-
+    constructor() { this.reset(); }
     reset() {
       this.x = Math.random() * canvas.width;
       this.y = canvas.height + 10;
@@ -802,338 +738,307 @@ const MiningParticles = (function() {
       this.life = 1;
       this.decay = Math.random() * 0.01 + 0.005;
     }
-
     update() {
-      this.y += this.speedY;
-      this.x += this.speedX;
-      this.life -= this.decay;
-      
-      // Add some waviness
-      this.x += Math.sin(this.y * 0.02) * 0.5;
-
-      if (this.life <= 0 || this.y < -10) {
-        this.reset();
-      }
+      this.y += this.speedY; this.x += this.speedX + Math.sin(this.y * 0.02) * 0.5; this.life -= this.decay;
+      if (this.life <= 0 || this.y < -10) this.reset();
     }
-
     draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
-      ctx.globalAlpha = this.opacity * this.life;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-
-      // Glow effect
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
-      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
-      gradient.addColorStop(0, this.color + '40');
-      gradient.addColorStop(1, 'transparent');
-      ctx.fillStyle = gradient;
-      ctx.globalAlpha = this.opacity * this.life * 0.5;
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color; ctx.globalAlpha = this.opacity * this.life; ctx.fill();
       ctx.globalAlpha = 1;
     }
   }
-
-  function init() {
-    resize();
-    particles = [];
-    for (let i = 0; i < 50; i++) {
-      const p = new Particle();
-      p.y = Math.random() * canvas.height;
-      particles.push(p);
-    }
-  }
-
+  function init() { resize(); particles = []; for (let i = 0; i < 40; i++) { const p = new Particle(); p.y = Math.random() * canvas.height; particles.push(p); } }
   function animate() {
     if (!isActive) return;
-    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    particles.forEach(p => {
-      p.update();
-      p.draw();
-    });
-
-    // Draw connecting lines between close particles
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.1)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 80) {
-          ctx.globalAlpha = (1 - dist / 80) * 0.3;
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-    ctx.globalAlpha = 1;
-
+    particles.forEach(p => { p.update(); p.draw(); });
     animationId = requestAnimationFrame(animate);
   }
-
-  function start() {
-    if (isActive) return;
-    isActive = true;
-    init();
-    animate();
-    document.getElementById('mining-animation').classList.add('active');
-    document.getElementById('mining-particles').classList.add('active');
-  }
-
-  function stop() {
-    isActive = false;
-    if (animationId) {
-      cancelAnimationFrame(animationId);
-      animationId = null;
-    }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    document.getElementById('mining-animation').classList.remove('active');
-    document.getElementById('mining-particles').classList.remove('active');
-  }
-
-  window.addEventListener('resize', () => {
-    if (isActive) {
-      resize();
-    }
-  });
-
-  return { start, stop };
+  return {
+    start() { if (isActive) return; isActive = true; init(); animate(); document.getElementById('mining-animation').classList.add('active'); },
+    stop() { isActive = false; if (animationId) cancelAnimationFrame(animationId); ctx.clearRect(0, 0, canvas.width, canvas.height); document.getElementById('mining-animation').classList.remove('active'); }
+  };
 })();
 
+// ==================== SIMPLE QR CODE ====================
+function drawQR(text) {
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const size = 180, cellSize = size / 25;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000';
+  // Simple pattern based on address hash
+  for (let i = 0; i < 25; i++) {
+    for (let j = 0; j < 25; j++) {
+      const charCode = text.charCodeAt((i * 25 + j) % text.length);
+      if ((i < 7 && j < 7) || (i < 7 && j > 17) || (i > 17 && j < 7)) {
+        // Position patterns
+        const inOuter = (i < 7 && j < 7) || (i < 7 && j > 17) || (i > 17 && j < 7);
+        const pi = i < 7 ? i : (i > 17 ? i - 18 : 0);
+        const pj = j < 7 ? j : (j > 17 ? j - 18 : 0);
+        if (pi === 0 || pi === 6 || pj === 0 || pj === 6 || (pi >= 2 && pi <= 4 && pj >= 2 && pj <= 4)) {
+          ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+        }
+      } else if ((charCode + i * j) % 2 === 0) {
+        ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+}
+
 // ==================== APP STATE ====================
-let blocksFound = 0;
-let isMining = false;
+let blocksFound = 0, isMining = false, walletToDelete = null, walletsCache = [];
 
-// ==================== TAB NAVIGATION ====================
+// ==================== UI FUNCTIONS ====================
 function switchTab(index) {
-  document.querySelectorAll('.nav-tab').forEach((tab, i) => {
-    tab.classList.toggle('active', i === index);
-  });
-  document.querySelectorAll('.page').forEach((page, i) => {
-    page.classList.toggle('active', i === index);
-  });
+  document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === index));
+  document.querySelectorAll('.page').forEach((p, i) => p.classList.toggle('active', i === index));
 }
 
-// ==================== TOAST NOTIFICATIONS ====================
-function showToast(message, type = 'normal') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = type;
-  toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, type === 'success' ? 6000 : 4000);
+function showToast(msg, type = 'normal') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = type; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', type === 'success' ? 6000 : 4000);
 }
 
-// ==================== NETWORK FUNCTIONS ====================
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ==================== DATA LOADING ====================
 async function loadStats() {
   try {
-    const stats = await window.bc.stats();
-    if (stats) {
-      document.getElementById('stat-supply').textContent = (stats.circulating_supply || 0).toLocaleString();
-      document.getElementById('stat-blocks').textContent = (stats.total_blocks || 0).toLocaleString();
-      document.getElementById('stat-difficulty').textContent = stats.current_difficulty || 0;
-      document.getElementById('stat-reward').textContent = stats.current_reward || 50;
+    const s = await window.bc.stats();
+    if (s) {
+      document.getElementById('stat-supply').textContent = (s.circulating_supply || 0).toLocaleString();
+      document.getElementById('stat-blocks').textContent = (s.total_blocks || 0).toLocaleString();
+      document.getElementById('stat-difficulty').textContent = s.current_difficulty || 0;
+      document.getElementById('stat-reward').textContent = s.current_reward || 50;
     }
-  } catch (e) {
-    console.error('Error loading stats:', e);
-  }
+  } catch (e) { console.error(e); }
 }
 
 async function loadBlocks() {
   try {
     const blocks = await window.bc.blocks();
     const tbody = document.getElementById('blocks-table-body');
-    
-    if (!blocks || blocks.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:30px">No blocks found</td></tr>';
+    if (!blocks || !blocks.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:30px">No blocks</td></tr>';
       return;
     }
-    
-    tbody.innerHTML = blocks.map(block => `
-      <tr>
-        <td class="block-height">#${block.index}</td>
-        <td class="block-hash">${(block.hash || '').slice(0, 20)}...</td>
-        <td class="block-miner">${(block.miner || 'Unknown').slice(0, 16)}...</td>
-        <td class="block-time">${new Date(block.timestamp).toLocaleString()}</td>
-      </tr>
-    `).join('');
-  } catch (e) {
-    console.error('Error loading blocks:', e);
-  }
+    tbody.innerHTML = blocks.map(b => `<tr><td class="block-height">#${b.index}</td><td class="block-hash">${(b.hash||'').slice(0,16)}...</td><td class="block-miner">${(b.miner||'?').slice(0,12)}...</td><td class="block-time">${new Date(b.timestamp).toLocaleString()}</td></tr>`).join('');
+  } catch (e) { console.error(e); }
 }
 
 async function loadWallets() {
   try {
     const wallets = await window.bc.wallets();
-    const listEl = document.getElementById('wallet-list');
-    const sendSelect = document.getElementById('send-from');
-    const miningSelect = document.getElementById('mining-wallet');
+    walletsCache = wallets;
+    const list = document.getElementById('wallet-list');
+    const sendSel = document.getElementById('send-from');
+    const recvSel = document.getElementById('receive-wallet');
+    const mineSel = document.getElementById('mining-wallet');
     
-    sendSelect.innerHTML = '<option value="">Select wallet...</option>';
-    miningSelect.innerHTML = '<option value="">Select wallet for mining rewards...</option>';
+    sendSel.innerHTML = '<option value="">Select wallet...</option>';
+    recvSel.innerHTML = '<option value="">Select wallet...</option>';
+    mineSel.innerHTML = '<option value="">Select wallet for rewards...</option>';
     
-    if (!wallets || wallets.length === 0) {
-      listEl.innerHTML = `
-        <div class="empty-state">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
-          <p>No wallets yet. Create your first wallet above!</p>
-        </div>
-      `;
+    if (!wallets || !wallets.length) {
+      list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg><p>No wallets yet. Create or import a wallet above!</p></div>';
       return;
     }
     
-    listEl.innerHTML = wallets.map(w => `
+    list.innerHTML = wallets.map(w => `
       <div class="wallet-card">
         <div class="wallet-header">
           <div class="wallet-name">${w.name}</div>
-          <div class="wallet-balance">${(w.balance || 0).toLocaleString()} <span>BRICS</span></div>
+          <div class="wallet-balance">${(w.balance||0).toLocaleString()} <span>BRICS</span></div>
         </div>
-        <div class="wallet-address">${w.address}</div>
+        <div class="wallet-address-row">
+          <div class="wallet-address">${w.address}</div>
+          <button class="btn btn-sm btn-secondary" onclick="copyAddress('${w.address}')">📋</button>
+        </div>
         <div class="wallet-seed">${w.seedPhrase}</div>
+        <div class="wallet-actions">
+          <button class="btn btn-sm btn-secondary" onclick="selectSend('${w.address}')">→ Send</button>
+          <button class="btn btn-sm btn-secondary" onclick="selectReceive('${w.address}')">↓ Receive</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteWallet('${w.address}','${w.name}')">🗑 Delete</button>
+        </div>
       </div>
     `).join('');
     
     wallets.forEach(w => {
-      sendSelect.innerHTML += `<option value="${w.address}">${w.name} (${(w.balance || 0)} BRICS)</option>`;
-      miningSelect.innerHTML += `<option value="${w.address}">${w.name}</option>`;
+      sendSel.innerHTML += `<option value="${w.address}">${w.name} (${w.balance||0} BRICS)</option>`;
+      recvSel.innerHTML += `<option value="${w.address}">${w.name}</option>`;
+      mineSel.innerHTML += `<option value="${w.address}">${w.name}</option>`;
     });
-  } catch (e) {
-    console.error('Error loading wallets:', e);
-  }
+  } catch (e) { console.error(e); }
 }
 
 // ==================== WALLET FUNCTIONS ====================
 async function createWallet() {
-  const nameInput = document.getElementById('new-wallet-name');
-  const name = nameInput.value.trim() || 'My Wallet';
-  
+  const name = document.getElementById('new-wallet-name').value.trim() || 'My Wallet';
   try {
     await window.bc.newwallet(name);
-    showToast('✅ Wallet "' + name + '" created successfully!');
-    nameInput.value = '';
+    showToast('✅ Wallet "' + name + '" created!');
+    document.getElementById('new-wallet-name').value = '';
     loadWallets();
-  } catch (e) {
-    showToast('❌ Error: ' + e.message, 'error');
+  } catch (e) { showToast('❌ ' + e.message, 'error'); }
+}
+
+async function importWallet() {
+  const name = document.getElementById('import-wallet-name').value.trim() || 'Imported Wallet';
+  const seed = document.getElementById('import-seed').value.trim();
+  if (!seed || seed.split(/\s+/).length < 12) {
+    showToast('⚠️ Please enter a valid 12-word seed phrase', 'error');
+    return;
   }
+  try {
+    await window.bc.importwallet(name, seed);
+    showToast('✅ Wallet imported successfully!');
+    document.getElementById('import-wallet-name').value = '';
+    document.getElementById('import-seed').value = '';
+    loadWallets();
+  } catch (e) { showToast('❌ ' + e.message, 'error'); }
+}
+
+function deleteWallet(addr, name) {
+  walletToDelete = addr;
+  document.getElementById('delete-wallet-name').textContent = name + ' (' + addr.slice(0, 20) + '...)';
+  openModal('delete-modal');
+}
+
+async function confirmDelete() {
+  if (!walletToDelete) return;
+  try {
+    await window.bc.deletewallet(walletToDelete);
+    showToast('✅ Wallet deleted');
+    closeModal('delete-modal');
+    walletToDelete = null;
+    loadWallets();
+  } catch (e) { showToast('❌ ' + e.message, 'error'); }
+}
+
+function copyAddress(addr) {
+  window.bc.copy(addr);
+  showToast('📋 Address copied!');
+}
+
+function selectSend(addr) {
+  document.getElementById('send-from').value = addr;
+  updateSendBalance();
+  switchTab(1);
+}
+
+function selectReceive(addr) {
+  document.getElementById('receive-wallet').value = addr;
+  updateReceiveAddress();
+  switchTab(2);
+}
+
+// ==================== SEND FUNCTIONS ====================
+document.getElementById('send-from').addEventListener('change', updateSendBalance);
+
+function updateSendBalance() {
+  const addr = document.getElementById('send-from').value;
+  const w = walletsCache.find(x => x.address === addr);
+  document.getElementById('send-balance').textContent = w ? (w.balance || 0) + ' BRICS' : '- BRICS';
 }
 
 async function sendTransaction() {
   const from = document.getElementById('send-from').value;
   const to = document.getElementById('send-to').value;
-  const amount = document.getElementById('send-amount').value;
-  
-  if (!from || !to || !amount) {
-    showToast('⚠️ Please fill all fields', 'error');
-    return;
-  }
-  
+  const amt = document.getElementById('send-amount').value;
+  if (!from || !to || !amt) { showToast('⚠️ Fill all fields', 'error'); return; }
   try {
-    await window.bc.send(from, to, amount);
-    showToast('✅ Transaction sent successfully!');
+    await window.bc.send(from, to, amt);
+    showToast('✅ Transaction sent!');
     document.getElementById('send-to').value = '';
     document.getElementById('send-amount').value = '';
     loadWallets();
-  } catch (e) {
-    showToast('❌ Error: ' + e.message, 'error');
-  }
+  } catch (e) { showToast('❌ ' + e.message, 'error'); }
+}
+
+// ==================== RECEIVE FUNCTIONS ====================
+async function updateReceiveAddress() {
+  const addr = document.getElementById('receive-wallet').value;
+  const info = document.getElementById('receive-info');
+  const txCard = document.getElementById('tx-card');
+  
+  if (!addr) { info.style.display = 'none'; txCard.style.display = 'none'; return; }
+  
+  document.getElementById('receive-address').value = addr;
+  drawQR(addr);
+  info.style.display = 'block';
+  
+  // Load transactions
+  try {
+    const txs = await window.bc.transactions(addr);
+    if (txs && txs.length) {
+      txCard.style.display = 'block';
+      document.getElementById('tx-list').innerHTML = txs.slice(0, 10).map(tx => {
+        const isIncoming = tx.recipient === addr;
+        return `<div class="tx-item">
+          <span class="tx-type">${isIncoming ? '↓' : '↑'}</span>
+          <div class="tx-details">
+            <div class="tx-addr">${isIncoming ? 'From: ' + (tx.sender||'').slice(0,20) : 'To: ' + (tx.recipient||'').slice(0,20)}...</div>
+          </div>
+          <div class="tx-amount ${isIncoming ? 'incoming' : 'outgoing'}">${isIncoming ? '+' : '-'}${tx.amount} BRICS</div>
+        </div>`;
+      }).join('');
+    } else { txCard.style.display = 'none'; }
+  } catch (e) { txCard.style.display = 'none'; }
+}
+
+function copyReceiveAddress() {
+  const addr = document.getElementById('receive-address').value;
+  if (addr) { window.bc.copy(addr); showToast('📋 Address copied!'); }
 }
 
 // ==================== MINING FUNCTIONS ====================
 async function startMining() {
   const wallet = document.getElementById('mining-wallet').value;
-  if (!wallet) {
-    showToast('⚠️ Please select a wallet for mining rewards', 'error');
-    return;
-  }
-  
+  if (!wallet) { showToast('⚠️ Select a wallet first', 'error'); return; }
   isMining = true;
   await window.bc.mine(wallet);
-  
   document.getElementById('btn-start-mining').style.display = 'none';
   document.getElementById('btn-stop-mining').style.display = 'inline-flex';
-  
-  // Activate mining animation
   MiningParticles.start();
-  
-  // Update UI
   document.querySelectorAll('.mining-stat').forEach(el => el.classList.add('active'));
-  
-  const status = document.getElementById('mining-status');
-  status.className = 'mining-status-text active';
-  status.innerHTML = '<span class="icon">⛏️</span>Mining in progress...';
+  document.getElementById('mining-status').className = 'mining-status-text active';
+  document.getElementById('mining-status').innerHTML = '<span class="icon">⛏️</span>Mining in progress...';
 }
 
 async function stopMining() {
   isMining = false;
   await window.bc.stopmine();
-  
   document.getElementById('btn-start-mining').style.display = 'inline-flex';
   document.getElementById('btn-stop-mining').style.display = 'none';
-  
-  // Stop animation
   MiningParticles.stop();
-  
-  // Update UI
   document.querySelectorAll('.mining-stat').forEach(el => el.classList.remove('active'));
-  
-  const status = document.getElementById('mining-status');
-  status.className = 'mining-status-text';
-  status.innerHTML = '<span class="icon">⏹️</span>Mining stopped.';
+  document.getElementById('mining-status').className = 'mining-status-text';
+  document.getElementById('mining-status').innerHTML = '<span class="icon">⏹️</span>Mining stopped.';
 }
 
-// ==================== MINING EVENTS ====================
-// Only update stats silently - no console messages
-window.bc.on('minfo', data => {
-  // Silent - no message displayed
+window.bc.on('minfo', () => {});
+window.bc.on('mprog', d => {
+  document.getElementById('mining-hashrate').textContent = d.hr.toLocaleString();
+  document.getElementById('mining-nonce').textContent = d.n.toLocaleString();
 });
-
-window.bc.on('mprog', data => {
-  // Update stats only
-  document.getElementById('mining-hashrate').textContent = data.hr.toLocaleString();
-  document.getElementById('mining-nonce').textContent = data.n.toLocaleString();
-});
-
-// ONLY show message when block is FOUND!
-window.bc.on('found', data => {
+window.bc.on('found', d => {
   blocksFound++;
   document.getElementById('mining-found').textContent = blocksFound;
-  
-  // Big celebration toast
-  showToast('🎉 BLOCK #' + data.block + ' FOUND! +50 BRICS reward!', 'success');
-  
-  // Update status text
-  const status = document.getElementById('mining-status');
-  status.innerHTML = '<span class="icon">🎉</span>Block #' + data.block + ' found! Mining next block...';
-  
-  // Refresh data
-  loadStats();
-  loadBlocks();
-  loadWallets();
+  showToast('🎉 BLOCK #' + d.block + ' FOUND! +50 BRICS!', 'success');
+  document.getElementById('mining-status').innerHTML = '<span class="icon">🎉</span>Block #' + d.block + ' found!';
+  loadStats(); loadBlocks(); loadWallets();
 });
 
-// ==================== INITIALIZATION ====================
-document.getElementById('btn-create-wallet').addEventListener('click', createWallet);
-
-document.getElementById('new-wallet-name').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') createWallet();
-});
-
-// Initial data load
-loadStats();
-loadBlocks();
-loadWallets();
-
-// Refresh intervals
+// ==================== INIT ====================
+document.getElementById('new-wallet-name').addEventListener('keypress', e => { if (e.key === 'Enter') createWallet(); });
+loadStats(); loadBlocks(); loadWallets();
 setInterval(loadStats, 10000);
 setInterval(loadBlocks, 30000);
 </script>
-
 </body>
 </html>
