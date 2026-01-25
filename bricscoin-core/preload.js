@@ -1,5 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
+
 contextBridge.exposeInMainWorld('bc', {
+  // Core functions
   stats: () => ipcRenderer.invoke('stats'),
   blocks: () => ipcRenderer.invoke('blocks'),
   wallets: () => ipcRenderer.invoke('wallets'),
@@ -8,5 +10,12 @@ contextBridge.exposeInMainWorld('bc', {
   deletewallet: a => ipcRenderer.invoke('deletewallet', a),
   copy: t => ipcRenderer.invoke('copy', t),
   send: (f, t, a) => ipcRenderer.invoke('send', f, t, a),
-  transactions: a => ipcRenderer.invoke('transactions', a)
+  transactions: a => ipcRenderer.invoke('transactions', a),
+  
+  // P2P functions
+  getPeers: () => ipcRenderer.invoke('getpeers'),
+  syncStatus: () => ipcRenderer.invoke('syncstatus'),
+  getNodeId: () => ipcRenderer.invoke('getnodeid'),
+  setServer: url => ipcRenderer.invoke('setserver', url),
+  getServer: () => ipcRenderer.invoke('getserver')
 });
