@@ -5,88 +5,310 @@
 <title>BricsCoin Core</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui;background:#111;color:#fff;padding:20px}
-h1{color:#fc0;margin-bottom:15px}
-h3{color:#fc0;margin:15px 0 8px}
-.row{display:flex;gap:15px;margin-bottom:15px}
-.box{flex:1;background:#222;padding:15px;border-radius:8px;text-align:center}
-.box .n{font-size:22px;color:#fc0;font-weight:bold}
-.box .l{font-size:11px;color:#888}
-input,select{width:100%;padding:10px;margin:5px 0;background:#333;border:1px solid #555;border-radius:4px;color:#fff}
-button{padding:10px 20px;background:#fc0;color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:bold;margin:5px 0}
-button:hover{background:#fd0}
-button.red{background:#c00;color:#fff}
-.card{background:#1a1a1a;border:1px solid #333;padding:15px;border-radius:8px;margin-bottom:15px}
-.w{background:#252525;padding:12px;margin:8px 0;border-radius:6px}
-.w .a{font-family:monospace;font-size:11px;color:#fc0;word-break:break-all}
-.w .s{font-family:monospace;font-size:10px;color:#f88;margin-top:8px;background:#311;padding:8px;border-radius:4px}
-.w .b{font-size:18px;font-weight:bold;margin-top:8px}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:linear-gradient(135deg,#0a0f1a 0%,#1a1f2e 50%,#0d1117 100%);
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* Animated background */
+body::before{
+  content:'';
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffd700' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+}
+
+.container{max-width:1100px;margin:0 auto;padding:25px;position:relative;z-index:1}
+
+/* Header */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 0;
+  border-bottom:1px solid rgba(255,215,0,0.2);
+  margin-bottom:25px;
+}
+.logo-section{display:flex;align-items:center;gap:15px}
+.logo{
+  width:60px;height:60px;
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:bold;color:#000;
+  box-shadow:0 0 30px rgba(255,215,0,0.4);
+  animation:glow 2s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  from{box-shadow:0 0 20px rgba(255,215,0,0.4)}
+  to{box-shadow:0 0 40px rgba(255,215,0,0.7)}
+}
+.logo-text h1{
+  font-size:26px;
+  background:linear-gradient(90deg,#ffd700,#ffed4a);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:0 0 30px rgba(255,215,0,0.3);
+}
+.logo-text span{color:#666;font-size:12px}
+.status{display:flex;align-items:center;gap:8px;color:#888}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#00ff88;box-shadow:0 0 10px #00ff88}
+
+/* Stats */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
+  margin-bottom:25px;
+}
+.stat{
+  background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,140,0,0.05));
+  border:1px solid rgba(255,215,0,0.2);
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
+  transition:all 0.3s;
+}
+.stat:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(255,215,0,0.1)}
+.stat .n{font-size:28px;font-weight:bold;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.3)}
+.stat .l{font-size:12px;color:#888;margin-top:5px;text-transform:uppercase;letter-spacing:1px}
+
+/* Tabs */
+.tabs{display:flex;gap:10px;margin-bottom:25px}
+.tab{
+  padding:12px 28px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;
+  cursor:pointer;
+  transition:all 0.3s;
+  font-weight:500;
+}
+.tab:hover{background:rgba(255,255,255,0.1)}
+.tab.on{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#000;
+  border-color:transparent;
+  box-shadow:0 5px 20px rgba(255,215,0,0.3);
+}
+
+/* Cards */
+.card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  padding:25px;
+  margin-bottom:20px;
+  backdrop-filter:blur(10px);
+}
+.card h3{
+  color:#ffd700;
+  margin-bottom:20px;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.card h3::before{content:'◆';font-size:12px}
+
+/* Forms */
+input,select{
+  width:100%;
+  padding:14px 18px;
+  margin:8px 0;
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;
+  color:#fff;
+  font-size:14px;
+  transition:all 0.3s;
+}
+input:focus,select:focus{
+  outline:none;
+  border-color:#ffd700;
+  box-shadow:0 0 20px rgba(255,215,0,0.1);
+}
+input::placeholder{color:#555}
+
+button{
+  padding:14px 30px;
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  border:none;
+  border-radius:10px;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+  transition:all 0.3s;
+  font-size:14px;
+  margin:8px 0;
+}
+button:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,215,0,0.3)}
+button.secondary{background:rgba(255,255,255,0.1);color:#fff}
+button.secondary:hover{background:rgba(255,255,255,0.2)}
+button.danger{background:linear-gradient(135deg,#ff4444,#cc0000);color:#fff}
+button.danger:hover{box-shadow:0 10px 30px rgba(255,0,0,0.3)}
+
+/* Wallets */
+.wallet{
+  background:linear-gradient(135deg,rgba(255,215,0,0.05),rgba(0,0,0,0.2));
+  border:1px solid rgba(255,215,0,0.15);
+  padding:20px;
+  margin:12px 0;
+  border-radius:12px;
+  transition:all 0.3s;
+}
+.wallet:hover{border-color:rgba(255,215,0,0.4)}
+.wallet .name{font-size:16px;font-weight:bold;color:#fff;margin-bottom:8px}
+.wallet .addr{font-family:'Courier New',monospace;font-size:11px;color:#ffd700;word-break:break-all;background:rgba(0,0,0,0.3);padding:10px;border-radius:6px}
+.wallet .seed{
+  font-family:'Courier New',monospace;
+  font-size:10px;
+  color:#ff8888;
+  margin-top:12px;
+  background:rgba(255,0,0,0.1);
+  border:1px solid rgba(255,0,0,0.2);
+  padding:12px;
+  border-radius:6px;
+}
+.wallet .seed::before{content:'⚠️ SEED: '}
+.wallet .bal{font-size:24px;font-weight:bold;color:#ffd700;margin-top:12px;text-shadow:0 0 20px rgba(255,215,0,0.3)}
+
+/* Mining */
+.mining-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:20px 0}
+.mining-stat{
+  background:rgba(0,0,0,0.3);
+  padding:20px;
+  border-radius:12px;
+  text-align:center;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.mining-stat .v{font-size:26px;color:#00ff88;font-family:'Courier New',monospace;font-weight:bold}
+.mining-stat .l{font-size:11px;color:#666;margin-top:5px;text-transform:uppercase}
+.mining-status{
+  padding:15px;
+  background:rgba(0,255,136,0.1);
+  border:1px solid rgba(0,255,136,0.2);
+  border-radius:10px;
+  color:#00ff88;
+  margin:15px 0;
+  font-family:monospace;
+}
+.mining-buttons{display:flex;gap:10px}
+
+/* Table */
 table{width:100%;border-collapse:collapse}
-th,td{padding:8px;text-align:left;border-bottom:1px solid #333;font-size:12px}
-th{color:#888}
-td{font-family:monospace}
-#toast{position:fixed;bottom:20px;right:20px;background:#fc0;color:#000;padding:12px 20px;border-radius:6px;display:none}
-.tabs{display:flex;gap:8px;margin-bottom:15px}
-.tab{padding:8px 16px;background:#333;border-radius:4px;cursor:pointer}
-.tab.on{background:#fc0;color:#000}
+th,td{padding:14px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.05)}
+th{color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+td{font-family:'Courier New',monospace;font-size:12px}
+
+/* Toast */
+#toast{
+  position:fixed;
+  bottom:30px;
+  right:30px;
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#000;
+  padding:16px 28px;
+  border-radius:12px;
+  font-weight:bold;
+  display:none;
+  box-shadow:0 10px 40px rgba(255,215,0,0.4);
+  animation:slideIn 0.3s ease;
+}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
 .pg{display:none}.pg.on{display:block}
 </style>
 </head>
 <body>
+<div class="container">
 
-<h1>BRICSCOIN CORE</h1>
+<div class="header">
+  <div class="logo-section">
+    <div class="logo">₿</div>
+    <div class="logo-text">
+      <h1>BRICSCOIN CORE</h1>
+      <span>Full Node Wallet v1.0</span>
+    </div>
+  </div>
+  <div class="status">
+    <div class="status-dot"></div>
+    <span>Connected to Network</span>
+  </div>
+</div>
 
-<div class="row">
-<div class="box"><div class="n" id="circ">-</div><div class="l">Circulating</div></div>
-<div class="box"><div class="n" id="blks">-</div><div class="l">Blocks</div></div>
-<div class="box"><div class="n" id="diff">-</div><div class="l">Difficulty</div></div>
-<div class="box"><div class="n" id="rew">50</div><div class="l">Reward</div></div>
+<div class="stats">
+  <div class="stat"><div class="n" id="circ">-</div><div class="l">Circulating</div></div>
+  <div class="stat"><div class="n" id="blks">-</div><div class="l">Blocks</div></div>
+  <div class="stat"><div class="n" id="diff">-</div><div class="l">Difficulty</div></div>
+  <div class="stat"><div class="n" id="rew">50</div><div class="l">Reward</div></div>
 </div>
 
 <div class="tabs">
-<div class="tab on" onclick="tab(0)">Wallet</div>
-<div class="tab" onclick="tab(1)">Mining</div>
-<div class="tab" onclick="tab(2)">Blocks</div>
+  <div class="tab on" onclick="tab(0)">💰 Wallet</div>
+  <div class="tab" onclick="tab(1)">⛏️ Mining</div>
+  <div class="tab" onclick="tab(2)">📦 Blocks</div>
 </div>
 
+<!-- WALLET -->
 <div id="p0" class="pg on">
-<div class="card">
-<h3>New Wallet</h3>
-<input id="wname" placeholder="Wallet name">
-<button id="createBtn">Create Wallet</button>
-</div>
-<div class="card">
-<h3>Your Wallets</h3>
-<div id="wlist"></div>
-</div>
-<div class="card">
-<h3>Send</h3>
-<select id="sfrom"></select>
-<input id="sto" placeholder="To address">
-<input id="samt" type="number" placeholder="Amount">
-<button onclick="doSend()">Send</button>
-</div>
+  <div class="card">
+    <h3>Create New Wallet</h3>
+    <input id="wname" placeholder="Enter wallet name...">
+    <button id="createBtn">✨ Create Wallet</button>
+  </div>
+  
+  <div class="card">
+    <h3>Your Wallets</h3>
+    <div id="wlist"></div>
+  </div>
+  
+  <div class="card">
+    <h3>Send BRICS</h3>
+    <select id="sfrom"><option value="">Select wallet...</option></select>
+    <input id="sto" placeholder="Recipient address (BRICS...)">
+    <input id="samt" type="number" placeholder="Amount">
+    <button onclick="doSend()">🚀 Send Transaction</button>
+  </div>
 </div>
 
+<!-- MINING -->
 <div id="p1" class="pg">
-<div class="card">
-<h3>Mining</h3>
-<select id="mwallet"></select>
-<div class="row" style="margin:15px 0">
-<div class="box"><div class="n" id="hr">0</div><div class="l">H/s</div></div>
-<div class="box"><div class="n" id="nc">0</div><div class="l">Nonce</div></div>
-<div class="box"><div class="n" id="fd">0</div><div class="l">Found</div></div>
-</div>
-<p id="mst" style="color:#888;margin-bottom:10px">Ready</p>
-<button id="mbtn" onclick="toggleM()">Start</button>
-</div>
+  <div class="card">
+    <h3>Mining Control</h3>
+    <select id="mwallet"><option value="">Select wallet for rewards...</option></select>
+    
+    <div class="mining-grid">
+      <div class="mining-stat"><div class="v" id="hr">0</div><div class="l">Hashrate (H/s)</div></div>
+      <div class="mining-stat"><div class="v" id="nc">0</div><div class="l">Current Nonce</div></div>
+      <div class="mining-stat"><div class="v" id="fd">0</div><div class="l">Blocks Found</div></div>
+    </div>
+    
+    <div class="mining-status" id="mst">Ready to mine. Select a wallet and click Start.</div>
+    
+    <div class="mining-buttons">
+      <button id="startBtn" onclick="startMining()">▶️ Start Mining</button>
+      <button id="stopBtn" class="danger" onclick="stopMining()" style="display:none">⏹️ Stop Mining</button>
+    </div>
+  </div>
 </div>
 
+<!-- BLOCKS -->
 <div id="p2" class="pg">
-<div class="card">
-<h3>Blocks</h3>
-<table><thead><tr><th>#</th><th>Hash</th><th>Miner</th><th>Time</th></tr></thead><tbody id="btbl"></tbody></table>
+  <div class="card">
+    <h3>Recent Blocks</h3>
+    <table>
+      <thead><tr><th>Height</th><th>Hash</th><th>Miner</th><th>Time</th></tr></thead>
+      <tbody id="btbl"></tbody>
+    </table>
+  </div>
 </div>
+
 </div>
 
 <div id="toast"></div>
@@ -99,7 +321,12 @@ function tab(i){
   document.querySelectorAll('.pg').forEach((p,j)=>p.classList.toggle('on',i===j));
 }
 
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',3000)}
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
 
 async function loadStats(){
   const s=await window.bc.stats();
@@ -113,7 +340,9 @@ async function loadStats(){
 
 async function loadBlocks(){
   const b=await window.bc.blocks();
-  document.getElementById('btbl').innerHTML=b.map(x=>'<tr><td>'+x.index+'</td><td>'+(x.hash||'').slice(0,14)+'...</td><td>'+(x.miner||'').slice(0,12)+'...</td><td>'+new Date(x.timestamp).toLocaleString()+'</td></tr>').join('');
+  document.getElementById('btbl').innerHTML=b.map(x=>
+    '<tr><td style="color:#ffd700">#'+x.index+'</td><td>'+(x.hash||'').slice(0,16)+'...</td><td>'+(x.miner||'').slice(0,14)+'...</td><td>'+new Date(x.timestamp).toLocaleString()+'</td></tr>'
+  ).join('');
 }
 
 async function loadW(){
@@ -121,27 +350,38 @@ async function loadW(){
   const d=document.getElementById('wlist');
   const s1=document.getElementById('sfrom');
   const s2=document.getElementById('mwallet');
-  s1.innerHTML='<option value="">Select</option>';
-  s2.innerHTML='<option value="">Select</option>';
-  if(!w.length){d.innerHTML='<p style="color:#888">No wallets yet</p>';return}
-  d.innerHTML=w.map(x=>'<div class="w"><b>'+x.name+'</b><div class="a">'+x.address+'</div><div class="s">Seed: '+x.seedPhrase+'</div><div class="b">'+(x.balance||0)+' BRICS</div></div>').join('');
-  w.forEach(x=>{s1.innerHTML+='<option value="'+x.address+'">'+x.name+'</option>';s2.innerHTML+='<option value="'+x.address+'">'+x.name+'</option>'});
+  s1.innerHTML='<option value="">Select wallet...</option>';
+  s2.innerHTML='<option value="">Select wallet for rewards...</option>';
+  
+  if(!w.length){
+    d.innerHTML='<p style="color:#666;text-align:center;padding:30px">No wallets yet. Create your first wallet above!</p>';
+    return;
+  }
+  
+  d.innerHTML=w.map(x=>
+    '<div class="wallet">'+
+    '<div class="name">'+x.name+'</div>'+
+    '<div class="addr">'+x.address+'</div>'+
+    '<div class="seed">'+x.seedPhrase+'</div>'+
+    '<div class="bal">'+(x.balance||0)+' BRICS</div>'+
+    '</div>'
+  ).join('');
+  
+  w.forEach(x=>{
+    s1.innerHTML+='<option value="'+x.address+'">'+x.name+' ('+(x.balance||0)+' BRICS)</option>';
+    s2.innerHTML+='<option value="'+x.address+'">'+x.name+'</option>';
+  });
 }
 
 async function newW(){
-  console.log('newW called');
-  const n=document.getElementById('wname').value||'Wallet';
-  console.log('Name:', n);
-  try {
-    console.log('Calling bc.newwallet...');
+  const n=document.getElementById('wname').value||'My Wallet';
+  try{
     const w=await window.bc.newwallet(n);
-    console.log('Result:', w);
-    toast('Created: '+w.address.slice(0,15)+'...');
+    toast('✅ Wallet created successfully!');
     document.getElementById('wname').value='';
     loadW();
-  } catch(e) {
-    console.error('Error:', e);
-    toast('Error: '+e.message);
+  }catch(e){
+    toast('❌ Error: '+e.message);
   }
 }
 
@@ -149,37 +389,66 @@ async function doSend(){
   const f=document.getElementById('sfrom').value;
   const t=document.getElementById('sto').value;
   const a=document.getElementById('samt').value;
-  if(!f||!t||!a){toast('Fill all');return}
-  try{await window.bc.send(f,t,a);toast('Sent!');document.getElementById('sto').value='';document.getElementById('samt').value='';loadW()}
-  catch(e){toast('Error: '+e.message)}
-}
-
-async function toggleM(){
-  const b=document.getElementById('mbtn');
-  const a=document.getElementById('mwallet').value;
-  if(!mOn){
-    if(!a){toast('Select wallet');return}
-    await window.bc.mine(a);
-    mOn=true;b.textContent='Stop';b.classList.add('red');
-    document.getElementById('mst').textContent='Mining...';
-  }else{
-    await window.bc.stopmine();
-    mOn=false;b.textContent='Start';b.classList.remove('red');
-    document.getElementById('mst').textContent='Stopped';
+  if(!f||!t||!a){toast('⚠️ Please fill all fields');return}
+  try{
+    await window.bc.send(f,t,a);
+    toast('✅ Transaction sent!');
+    document.getElementById('sto').value='';
+    document.getElementById('samt').value='';
+    loadW();
+  }catch(e){
+    toast('❌ Error: '+e.message);
   }
 }
 
-window.bc.on('minfo',d=>{document.getElementById('mst').textContent='Block #'+d.block+' (diff '+d.diff+')'});
-window.bc.on('mprog',d=>{document.getElementById('hr').textContent=d.hr.toLocaleString();document.getElementById('nc').textContent=d.n.toLocaleString()});
-window.bc.on('found',d=>{fnd++;document.getElementById('fd').textContent=fnd;toast('Block #'+d.block+' found!');loadStats();loadBlocks();loadW()});
+async function startMining(){
+  const a=document.getElementById('mwallet').value;
+  if(!a){toast('⚠️ Select a wallet first');return}
+  
+  await window.bc.mine(a);
+  mOn=true;
+  document.getElementById('startBtn').style.display='none';
+  document.getElementById('stopBtn').style.display='inline-block';
+  document.getElementById('mst').textContent='⛏️ Mining started... Looking for blocks...';
+  document.getElementById('mst').style.background='rgba(0,255,136,0.1)';
+  document.getElementById('mst').style.borderColor='rgba(0,255,136,0.3)';
+}
 
-loadStats();loadBlocks();loadW();
-setInterval(loadStats,10000);
+async function stopMining(){
+  await window.bc.stopmine();
+  mOn=false;
+  document.getElementById('startBtn').style.display='inline-block';
+  document.getElementById('stopBtn').style.display='none';
+  document.getElementById('mst').textContent='⏹️ Mining stopped.';
+  document.getElementById('mst').style.background='rgba(255,255,255,0.05)';
+  document.getElementById('mst').style.borderColor='rgba(255,255,255,0.1)';
+}
 
-document.getElementById('createBtn').addEventListener('click', function() {
-  console.log('Button clicked!');
-  newW();
+window.bc.on('minfo',d=>{
+  document.getElementById('mst').textContent='⛏️ Mining Block #'+d.block+' | Difficulty: '+d.diff;
 });
+
+window.bc.on('mprog',d=>{
+  document.getElementById('hr').textContent=d.hr.toLocaleString();
+  document.getElementById('nc').textContent=d.n.toLocaleString();
+});
+
+window.bc.on('found',d=>{
+  fnd++;
+  document.getElementById('fd').textContent=fnd;
+  toast('🎉 Block #'+d.block+' found! +50 BRICS');
+  loadStats();
+  loadBlocks();
+  loadW();
+});
+
+document.getElementById('createBtn').addEventListener('click',()=>newW());
+
+loadStats();
+loadBlocks();
+loadW();
+setInterval(loadStats,10000);
+setInterval(loadBlocks,30000);
 </script>
 </body>
 </html>
