@@ -28,6 +28,7 @@ function App() {
               <Route path="mining" element={<Mining />} />
               <Route path="network" element={<Network />} />
               <Route path="downloads" element={<Downloads />} />
+              <Route path="node" element={<RunNode />} />
             </Route>
           </Routes>
         </BrowserRouter>
