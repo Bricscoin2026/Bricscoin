@@ -42,8 +42,8 @@ export default function RunNode() {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const commands = {
-    clone: `git clone https://github.com/Bricscoin2026/Bricscoin.git
-cd Bricscoin`,
+    clone: `git clone https://github.com/bricscoin26/Bricscoin26.git
+cd Bricscoin26`,
     start: `docker compose -f docker-compose.node.yml up -d`,
     startWithMining: `docker compose -f docker-compose.node.yml --profile with-mining up -d`,
     checkStatus: `docker compose -f docker-compose.node.yml ps`,

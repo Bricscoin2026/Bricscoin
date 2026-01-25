@@ -105,3 +105,4 @@ bricscoin-core/dist/linux-arm64-unpacked/bricscoin-core
 # Environment files
 *.env
 *.env.*
+frontend/node_modules/.cache/default-development/3.pack
