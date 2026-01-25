@@ -566,23 +566,22 @@ class StratumMiner:
             
             logger.info(f"[{self.worker_name}] Submit: job={job_id}, en2={extranonce2}, ntime={ntime}, nonce={nonce}")
             
-            # Find the job
-            job = job_cache.get(job_id)
+            # FIXED: First check miner's PERSONAL job cache (has correct reward address)
+            job = self.personal_jobs.get(job_id)
+            
+            if not job:
+                # Fallback to global cache
+                job = job_cache.get(job_id)
             
             if not job:
                 # Job not found - this is the "Job not found" error
-                # Try to use current job as fallback
-                logger.warning(f"Job {job_id} not found in cache ({len(job_cache)} jobs cached)")
-                if current_job:
-                    job = current_job
-                    logger.info(f"Using current job {current_job['job_id']} as fallback")
-                else:
-                    # Accept anyway to keep miner happy
-                    self.respond(msg_id, True)
-                    self.shares += 1
-                    if self.miner_id in miners:
-                        miners[self.miner_id]['shares'] += 1
-                    return
+                logger.warning(f"Job {job_id} not found for miner {self.worker_name}")
+                # Accept anyway to keep miner happy but don't count as valid block
+                self.respond(msg_id, True)
+                self.shares += 1
+                if self.miner_id in miners:
+                    miners[self.miner_id]['shares'] += 1
+                return
             
             # Verify the share
             is_share, is_block, block_hash = verify_share(
@@ -602,6 +601,7 @@ class StratumMiner:
             
             if is_block:
                 logger.info(f"🎉 BLOCK FOUND by {self.worker_name}! Hash: {block_hash}")
+                # FIXED: save_block now uses job which has THIS miner's address
                 await self.save_block(job, nonce, block_hash)
             else:
                 logger.info(f"Share accepted from {self.worker_name}: {block_hash[:16]}... (share={is_share})")
