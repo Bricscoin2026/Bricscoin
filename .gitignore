@@ -94,3 +94,6 @@ wallet-app/node_modules/electron/dist/electron
 frontend/node_modules/.cache/default-development/4.pack
 frontend/node_modules/.cache/default-development/2.pack
 bricscoin-core/node_modules/electron/dist/electron
+bricscoin-core/dist/BricsCoin
+Core-2.1.0-arm64.AppImage
+bricscoin-core/dist/linux-arm64-unpacked/bricscoin-core

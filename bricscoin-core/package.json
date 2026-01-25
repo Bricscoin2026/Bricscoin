@@ -3,8 +3,16 @@
   "version": "2.1.0",
   "description": "BricsCoin Core Desktop Wallet with P2P Sync",
   "main": "main.js",
-  "author": "BricsCoin Team",
+  "homepage": "https://bricscoin26.org",
+  "author": {
+    "name": "BricsCoin Team",
+    "email": "info@bricscoin26.org"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bricscoin26/bricscoin"
+  },
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
@@ -30,14 +38,15 @@
       "!**/node_modules/*/{CHANGELOG.md,README.md,readme.md,test,__tests__,tests,spec,*.ts}"
     ],
     "linux": {
-      "target": ["AppImage", "deb"],
-      "category": "Finance"
+      "target": ["AppImage"],
+      "category": "Finance",
+      "maintainer": "info@bricscoin26.org"
     },
     "win": {
-      "target": ["nsis", "portable"]
+      "target": ["portable"]
     },
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": ["zip"],
       "category": "public.app-category.finance"
     }
   }
