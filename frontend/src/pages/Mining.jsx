@@ -54,15 +54,22 @@ export default function Mining() {
       </div>
 
       {/* Important Notice */}
-      <Card className="bg-yellow-500/10 border-yellow-500/30">
+      <Card className="bg-red-500/10 border-red-500/30">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
+            <AlertCircle className="w-6 h-6 text-red-500 mt-0.5" />
             <div>
-              <h4 className="font-bold text-yellow-500">Hardware Required</h4>
-              <p className="text-sm text-muted-foreground">
-                BricsCoin uses SHA256 Proof-of-Work. Mining requires <strong>ASIC hardware</strong> (Bitaxe, Antminer, Whatsminer, etc.). 
-                CPU/GPU mining is not profitable due to difficulty. Mobile phones cannot mine.
+              <h4 className="font-bold text-red-500 text-lg">⚠️ ASIC Hardware Required</h4>
+              <p className="text-sm text-muted-foreground mt-2">
+                BricsCoin uses <strong>SHA256 Proof-of-Work</strong> (same as Bitcoin). Mining is <strong>NOT possible</strong> with:
+              </p>
+              <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                <li><strong className="text-red-400">Smartphones</strong> - No mining apps will work</li>
+                <li><strong className="text-red-400">CPU/GPU</strong> - Not profitable, difficulty too high</li>
+                <li><strong className="text-red-400">Browser mining</strong> - Not supported</li>
+              </ul>
+              <p className="text-sm text-muted-foreground mt-3">
+                <strong className="text-green-500">✓ Supported:</strong> ASIC miners (Bitaxe, Antminer S19/S21, Whatsminer M50/M60, etc.)
               </p>
             </div>
           </div>
