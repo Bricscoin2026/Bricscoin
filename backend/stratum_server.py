@@ -594,6 +594,8 @@ class StratumProtocol(asyncio.Protocol):
             job['clean_jobs']
         ]
         
+        logger.debug(f"Sending job to {self.miner_id}: job_id={job['job_id']}, prevhash={job['prevhash'][:16]}..., nbits={job['nbits']}, ntime={job['ntime']}")
+        
         self.send_notification("mining.notify", params)
 
 class StratumServer:
