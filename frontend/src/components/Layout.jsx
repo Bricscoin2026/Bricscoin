@@ -8,36 +8,24 @@ import {
   Menu,
   X,
   Download,
-  Globe,
-  ChevronDown,
   Server
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 import HashStreamBackground from "./HashStreamBackground";
-import { useLanguage } from "../context/LanguageContext";
 
 export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { t, language, setLanguage, availableLanguages } = useLanguage();
 
   const navItems = [
-    { to: "/", icon: LayoutDashboard, labelKey: "dashboard" },
-    { to: "/explorer", icon: Search, labelKey: "explorer" },
-    { to: "/wallet", icon: Wallet, labelKey: "wallet" },
-    { to: "/mining", icon: Pickaxe, labelKey: "mining" },
-    { to: "/network", icon: Network, labelKey: "network" },
-    { to: "/downloads", icon: Download, labelKey: "downloads" },
-    { to: "/node", icon: Server, labelKey: "runNode" },
+    { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { to: "/explorer", icon: Search, label: "Explorer" },
+    { to: "/wallet", icon: Wallet, label: "Wallet" },
+    { to: "/mining", icon: Pickaxe, label: "Mining" },
+    { to: "/network", icon: Network, label: "Network" },
+    { to: "/downloads", icon: Download, label: "Downloads" },
+    { to: "/node", icon: Server, label: "Run Node" },
   ];
-
-  const currentLang = availableLanguages.find(l => l.code === language);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -66,7 +54,7 @@ export default function Layout() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  data-testid={`nav-${item.labelKey}`}
+                  data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
                   className={({ isActive }) =>
                     `flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium transition-colors ${
                       isActive
@@ -76,48 +64,21 @@ export default function Layout() {
                   }
                 >
                   <item.icon className="w-4 h-4" />
-                  {t(item.labelKey)}
+                  {item.label}
                 </NavLink>
               ))}
             </nav>
 
-            {/* Language Selector & Mobile Menu */}
-            <div className="flex items-center gap-2">
-              {/* Language Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2" data-testid="language-selector">
-                    <Globe className="w-4 h-4" />
-                    <span className="hidden sm:inline">{currentLang?.flag}</span>
-                    <ChevronDown className="w-3 h-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-card border-white/10">
-                  {availableLanguages.map((lang) => (
-                    <DropdownMenuItem
-                      key={lang.code}
-                      onClick={() => setLanguage(lang.code)}
-                      className={`cursor-pointer ${language === lang.code ? 'bg-primary/20' : ''}`}
-                      data-testid={`lang-${lang.code}`}
-                    >
-                      <span className="mr-2">{lang.flag}</span>
-                      {lang.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Mobile menu button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                data-testid="mobile-menu-button"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </Button>
-            </div>
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              data-testid="mobile-menu-button"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
           </div>
         </div>
 
@@ -129,7 +90,7 @@ export default function Layout() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMobileMenuOpen(false)}
-                data-testid={`mobile-nav-${item.labelKey}`}
+                data-testid={`mobile-nav-${item.label.toLowerCase().replace(' ', '-')}`}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-6 py-4 text-sm font-medium border-b border-white/5 ${
                     isActive
@@ -139,7 +100,7 @@ export default function Layout() {
                 }
               >
                 <item.icon className="w-5 h-5" />
-                {t(item.labelKey)}
+                {item.label}
               </NavLink>
             ))}
           </nav>
@@ -159,9 +120,13 @@ export default function Layout() {
               BricsCoin &copy; {new Date().getFullYear()} - Decentralized SHA256 Blockchain
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>Max Supply: 21,000,000 BRICS</span>
-              <span className="w-1 h-1 bg-muted-foreground rounded-full" />
-              <span>PoW: SHA256</span>
+              <a href="https://bricscoin26.org" className="hover:text-foreground transition-colors">
+                Website
+              </a>
+              <span>•</span>
+              <a href="/node" className="hover:text-foreground transition-colors">
+                Run a Node
+              </a>
             </div>
           </div>
         </div>
