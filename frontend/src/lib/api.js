@@ -39,7 +39,21 @@ export const getTransactions = (limit = 20, offset = 0, confirmed = null) => {
 
 export const getTransaction = (txId) => api.get(`/transactions/${txId}`);
 
-export const createTransaction = (data) => api.post("/transactions", data);
+/**
+ * Create a SECURE transaction - signs locally, private key NEVER sent to server
+ * @param {object} transactionData - Pre-signed transaction from crypto.prepareSecureTransaction()
+ */
+export const createSecureTransaction = (transactionData) => 
+  api.post("/transactions/secure", transactionData);
+
+/**
+ * @deprecated Use createSecureTransaction instead
+ * This function sends private keys over the network and is INSECURE
+ */
+export const createTransaction = (data) => {
+  console.warn('WARNING: createTransaction is deprecated and insecure. Use createSecureTransaction instead.');
+  return api.post("/transactions", data);
+};
 
 export const getAddressTransactions = (address, limit = 50) => 
   api.get(`/transactions/address/${address}?limit=${limit}`);
