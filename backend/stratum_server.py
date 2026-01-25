@@ -40,7 +40,7 @@ STRATUM_PORT = int(os.environ.get('STRATUM_PORT', 3333))
 STRATUM_HOST = os.environ.get('STRATUM_HOST', '0.0.0.0')
 
 # BricsCoin constants
-NETWORK_DIFFICULTY = 4  # Number of leading zeros (4 = "0000" prefix required)
+NETWORK_DIFFICULTY = 1000  # Bitcoin-style difficulty (higher = harder)
 HALVING_INTERVAL = 210_000
 INITIAL_REWARD = 50
 COIN = 100_000_000  # satoshis
