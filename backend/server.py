@@ -555,6 +555,11 @@ def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: 
     except BadSignatureError:
         return False
 
+def generate_address_from_public_key(public_key_hex: str) -> str:
+    """Generate BRICS address from public key - used to verify sender owns the address"""
+    address_hash = sha256_hash(public_key_hex)
+    return "BRICS" + address_hash[:40]
+
 async def get_balance(address: str) -> float:
     """Calculate balance for an address"""
     balance = 0.0
