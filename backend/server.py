@@ -82,7 +82,6 @@ DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
 INITIAL_DIFFICULTY = 2  # Number of leading zeros (lowered for Bitaxe)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
-TRANSACTION_FEE = 0.0005  # Fee per transaction in BRICS
 
 # P2P Network Configuration
 NODE_ID = os.environ.get('NODE_ID', str(uuid.uuid4())[:8])
