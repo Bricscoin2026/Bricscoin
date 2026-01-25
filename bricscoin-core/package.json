@@ -1,13 +1,9 @@
 {
   "name": "bricscoin-core",
   "version": "1.0.0",
-  "description": "BricsCoin Core - Full Node Wallet",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
-  },
-  "dependencies": {
-    "electron-store": "^8.1.0"
   },
   "devDependencies": {
     "electron": "^28.0.0"
