@@ -502,6 +502,64 @@ export default function Mining() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Stratum / ASIC Mining Section */}
+      <Card className="bg-card border-white/10" data-testid="stratum-card">
+        <CardHeader className="border-b border-white/10">
+          <CardTitle className="font-heading flex items-center gap-2">
+            <Cpu className="w-5 h-5 text-primary" />
+            {t('stratumTitle')}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">{t('stratumSubtitle')}</p>
+        </CardHeader>
+        <CardContent className="p-6 space-y-4">
+          <div className="bg-black/30 rounded-sm p-4 border border-white/10">
+            <h4 className="font-bold mb-3">{t('stratumConfig')}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">{t('stratumPool')}</p>
+                <p className="font-mono text-primary">5.161.254.163</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">{t('stratumPort')}</p>
+                <p className="font-mono text-primary">3333</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">{t('stratumUser')}</p>
+                <p className="font-mono text-sm">YOUR_BRICS_ADDRESS.worker</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">{t('stratumPass')}</p>
+                <p className="font-mono">x</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-black/30 rounded-sm p-4 border border-white/10">
+            <p className="text-xs text-muted-foreground mb-2">URL Stratum:</p>
+            <code className="text-primary font-mono text-sm">stratum+tcp://5.161.254.163:3333</code>
+          </div>
+          
+          <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-sm">
+            <AlertCircle className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-yellow-500">{t('stratumNote')}</p>
+          </div>
+          
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              className="border-white/20"
+              onClick={() => {
+                navigator.clipboard.writeText('stratum+tcp://5.161.254.163:3333');
+                toast.success(t('copied'));
+              }}
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              {t('copyConfig')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
