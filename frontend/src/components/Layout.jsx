@@ -9,7 +9,8 @@ import {
   X,
   Download,
   Globe,
-  ChevronDown
+  ChevronDown,
+  Server
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -33,6 +34,7 @@ export default function Layout() {
     { to: "/mining", icon: Pickaxe, labelKey: "mining" },
     { to: "/network", icon: Network, labelKey: "network" },
     { to: "/downloads", icon: Download, labelKey: "downloads" },
+    { to: "/node", icon: Server, labelKey: "runNode" },
   ];
 
   const currentLang = availableLanguages.find(l => l.code === language);
