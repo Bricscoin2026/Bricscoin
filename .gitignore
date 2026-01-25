@@ -93,3 +93,4 @@ Wallet-1.0.0-arm64.AppImage
 wallet-app/node_modules/electron/dist/electron
 frontend/node_modules/.cache/default-development/4.pack
 frontend/node_modules/.cache/default-development/2.pack
+bricscoin-core/node_modules/electron/dist/electron
