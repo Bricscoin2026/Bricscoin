@@ -129,11 +129,20 @@ async function loadW(){
 }
 
 async function newW(){
+  console.log('newW called');
   const n=document.getElementById('wname').value||'Wallet';
-  const w=await window.bc.newwallet(n);
-  toast('Created: '+w.address.slice(0,15)+'...');
-  document.getElementById('wname').value='';
-  loadW();
+  console.log('Name:', n);
+  try {
+    console.log('Calling bc.newwallet...');
+    const w=await window.bc.newwallet(n);
+    console.log('Result:', w);
+    toast('Created: '+w.address.slice(0,15)+'...');
+    document.getElementById('wname').value='';
+    loadW();
+  } catch(e) {
+    console.error('Error:', e);
+    toast('Error: '+e.message);
+  }
 }
 
 async function doSend(){
