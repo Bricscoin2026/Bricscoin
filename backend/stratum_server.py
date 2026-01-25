@@ -321,13 +321,14 @@ def create_stratum_job(template: dict, miner_address: str, extranonce1: str = "0
         "ntime": ntime,
         "clean_jobs": False,
         "template": template,
+        "miner_address": miner_address,  # IMPORTANT: Track which miner this job belongs to
         "created_at": time.time()
     }
     
     # Cache the job (never delete, keeps growing but that's OK for dev)
     job_cache[job_id] = job
     
-    logger.info(f"Job {job_id}: block #{template['index']}, prevhash={prevhash_stratum[:16]}...")
+    logger.info(f"Job {job_id}: block #{template['index']}, miner={miner_address[:20]}...")
     
     return job
 
