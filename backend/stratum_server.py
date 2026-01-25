@@ -614,18 +614,43 @@ class StratumMiner:
             self.respond(msg_id, True)
     
     async def save_block(self, job: dict, nonce: str, block_hash: str):
-        """Save a found block to the database and confirm transactions"""
+        """Save a found block to the database, confirm transactions, and create mining reward"""
         try:
             template = job['template']
+            miner_address = job.get('miner_address', self.worker_name)  # Use job's miner address
+            
+            # Create mining reward transaction
+            reward_amount = template['reward'] / COIN  # Convert from satoshis to BRICS
+            reward_tx = {
+                "id": str(uuid.uuid4()),
+                "sender": "COINBASE",
+                "recipient": miner_address,
+                "amount": reward_amount,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "signature": "COINBASE_REWARD",
+                "type": "mining_reward",
+                "confirmed": True,
+                "block_index": template['index']
+            }
+            
+            # Add reward tx to block transactions
+            block_transactions = template.get('transactions', []).copy()
+            block_transactions.insert(0, {
+                "id": reward_tx["id"],
+                "sender": "COINBASE",
+                "recipient": miner_address,
+                "amount": reward_amount,
+                "type": "mining_reward"
+            })
             
             block = {
                 "index": template['index'],
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "transactions": template.get('transactions', []),
+                "transactions": block_transactions,
                 "proof": int(nonce, 16),
                 "previous_hash": template['previous_hash'],
                 "hash": block_hash,
-                "miner": self.worker_name,
+                "miner": miner_address,  # FIXED: Use miner address from job
                 "difficulty": template['difficulty'],
                 "nonce": int(nonce, 16)
             }
@@ -636,9 +661,13 @@ class StratumMiner:
                 logger.warning(f"Block #{template['index']} already exists")
                 return
             
+            # Insert block
             await db.blocks.insert_one(block)
             
-            # Confirm all transactions included in this block
+            # Insert mining reward transaction
+            await db.transactions.insert_one(reward_tx)
+            
+            # Confirm all pending transactions included in this block
             pending_tx_ids = template.get('pending_tx_ids', [])
             if pending_tx_ids:
                 result = await db.transactions.update_many(
@@ -651,13 +680,15 @@ class StratumMiner:
             if self.miner_id in miners:
                 miners[self.miner_id]['blocks'] += 1
             
-            logger.info(f"✅ Block #{template['index']} saved! Miner: {self.worker_name}")
+            logger.info(f"✅ Block #{template['index']} saved! Miner: {miner_address}, Reward: {reward_amount} BRICS")
             
-            # Notify server to create new job
+            # Notify server to create new jobs for all miners
             await self.server.on_new_block()
             
         except Exception as e:
             logger.error(f"Error saving block: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
     
     async def send_job(self, job: dict):
         """Send a mining job to this miner"""
