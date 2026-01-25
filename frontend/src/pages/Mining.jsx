@@ -344,37 +344,77 @@ export default function Mining() {
         <CardHeader className="border-b border-white/10">
           <CardTitle className="font-heading flex items-center gap-2">
             <Pickaxe className="w-5 h-5" />
-            Hardware Mining (ASIC)
+            Hardware Mining (ASIC / NerdMiner / Bitaxe)
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <p className="text-muted-foreground mb-4">
-            Connect NerdMiner, Bitaxe or other ASIC miners using Stratum protocol:
+            Connect your hardware miner using Stratum protocol. Supported devices: NerdMiner, Bitaxe, Antminer, and any SHA256 ASIC miner.
           </p>
-          <div className="bg-background/50 p-4 rounded-sm font-mono text-sm space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Pool:</span>
-              <div className="flex items-center gap-2">
-                <span>stratum+tcp://5.161.254.163:3333</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard("stratum+tcp://5.161.254.163:3333")}>
-                  <Copy className="w-3 h-3" />
-                </Button>
+          
+          <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-5 rounded-lg mb-6">
+            <h4 className="font-bold text-primary mb-4">⚡ Stratum Configuration</h4>
+            <div className="space-y-3 font-mono text-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-black/30 rounded">
+                <span className="text-muted-foreground">Pool URL:</span>
+                <div className="flex items-center gap-2">
+                  <code className="text-primary">stratum+tcp://5.161.254.163:3333</code>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyToClipboard("stratum+tcp://5.161.254.163:3333")}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-black/30 rounded">
+                <span className="text-muted-foreground">Port:</span>
+                <code className="text-white">3333</code>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-black/30 rounded">
+                <span className="text-muted-foreground">Username/Worker:</span>
+                <code className="text-green-400">{minerAddress || "YOUR_BRICS_WALLET_ADDRESS"}</code>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-black/30 rounded">
+                <span className="text-muted-foreground">Password:</span>
+                <code className="text-white">x</code>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">User:</span>
-              <span>{minerAddress || "YOUR_BRICS_ADDRESS"}</span>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <div className="p-4 bg-card border border-white/10 rounded-lg">
+              <h5 className="font-bold mb-2">🔧 NerdMiner Setup</h5>
+              <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Access NerdMiner web interface</li>
+                <li>Go to Settings → Mining</li>
+                <li>Set Pool: <code className="text-xs bg-white/10 px-1 rounded">5.161.254.163</code></li>
+                <li>Set Port: <code className="text-xs bg-white/10 px-1 rounded">3333</code></li>
+                <li>Set Address: Your BRICS wallet</li>
+                <li>Save and restart</li>
+              </ol>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Password:</span>
-              <span>x</span>
+            <div className="p-4 bg-card border border-white/10 rounded-lg">
+              <h5 className="font-bold mb-2">⚡ Bitaxe Setup</h5>
+              <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Open Bitaxe web dashboard</li>
+                <li>Navigate to Pool Settings</li>
+                <li>URL: <code className="text-xs bg-white/10 px-1 rounded">5.161.254.163:3333</code></li>
+                <li>User: Your BRICS wallet address</li>
+                <li>Pass: <code className="text-xs bg-white/10 px-1 rounded">x</code></li>
+                <li>Apply and reboot</li>
+              </ol>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-sm flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-yellow-200">
-              Note: Use direct IP for Stratum (5.161.254.163:3333). Cloudflare doesn't support port 3333.
-            </p>
+
+          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-yellow-200 mb-1">Important Notes:</p>
+              <ul className="text-xs text-yellow-200/80 space-y-1 list-disc list-inside">
+                <li>Use the direct IP address (5.161.254.163), not the domain name</li>
+                <li>Cloudflare proxy doesn't support port 3333</li>
+                <li>Make sure your BRICS wallet address starts with "BRICS"</li>
+                <li>Mining reward: {stats?.current_reward || 50} BRICS per block</li>
+              </ul>
+            </div>
           </div>
         </CardContent>
       </Card>
