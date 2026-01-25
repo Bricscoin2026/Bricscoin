@@ -49,9 +49,25 @@ export default function Mining() {
       <div>
         <h1 className="text-3xl font-heading font-bold">Hardware Mining</h1>
         <p className="text-muted-foreground">
-          Mine BricsCoin with your ASIC miner using Stratum protocol
+          Mine BricsCoin with SHA256 ASIC hardware using Stratum protocol
         </p>
       </div>
+
+      {/* Important Notice */}
+      <Card className="bg-yellow-500/10 border-yellow-500/30">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
+            <div>
+              <h4 className="font-bold text-yellow-500">Hardware Required</h4>
+              <p className="text-sm text-muted-foreground">
+                BricsCoin uses SHA256 Proof-of-Work. Mining requires <strong>ASIC hardware</strong> (Bitaxe, Antminer, Whatsminer, etc.). 
+                CPU/GPU mining is not profitable due to difficulty. Mobile phones cannot mine.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Network Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
