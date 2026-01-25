@@ -129,6 +129,11 @@ POST /api/transactions
 
 ## Changelog
 
+### v2.2.0 (2026-01-25) - Wallet Refresh Fix
+- ✅ Fixed wallet balance refresh bug
+- ✅ Added loading state indicator
+- ✅ Added auto-refresh every 30 seconds
+
 ### v2.1.0 (2026-01-25) - No Fees Release
 - ✅ Removed transaction fees - transfers are FREE
 - ✅ Instant transactions (processed immediately)
