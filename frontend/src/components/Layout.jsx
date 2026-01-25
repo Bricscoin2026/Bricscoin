@@ -121,12 +121,27 @@ export default function Layout() {
               BricsCoin &copy; {new Date().getFullYear()} - Decentralized SHA256 Blockchain
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <a href="https://bricscoin26.org" className="hover:text-foreground transition-colors">
-                Website
+              <a 
+                href="https://github.com/bricscoin26/Bricscoin26" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <Github className="w-4 h-4" />
+                GitHub
               </a>
               <span>•</span>
-              <a href="/node" className="hover:text-foreground transition-colors">
-                Run a Node
+              <a href="/about" className="hover:text-foreground transition-colors">
+                About
+              </a>
+              <span>•</span>
+              <a 
+                href="https://github.com/bricscoin26/Bricscoin26/blob/main/WHITEPAPER.md" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors"
+              >
+                Whitepaper
               </a>
             </div>
           </div>
