@@ -734,7 +734,7 @@ export default function Wallet() {
               <WalletCard
                 key={wallet.address}
                 wallet={wallet}
-                onRefresh={refreshKey}
+                refreshKey={refreshKey}
                 onSelect={setSelectedWallet}
                 isSelected={selectedWallet?.address === wallet.address}
                 onShowSeed={handleShowSeed}
