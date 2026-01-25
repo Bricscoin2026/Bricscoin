@@ -280,43 +280,54 @@ def check_difficulty(hash_value: str, difficulty: int) -> bool:
     return hash_int <= target
 
 async def get_current_difficulty() -> int:
-    """Calculate current difficulty based on block times"""
+    """
+    Calculate current difficulty based on block times (Bitcoin-style).
+    Adjusts every DIFFICULTY_ADJUSTMENT_INTERVAL blocks (2016).
+    Target: 10 minutes per block.
+    """
     blocks_count = await db.blocks.count_documents({})
     
+    # Before first adjustment, use initial difficulty
     if blocks_count < DIFFICULTY_ADJUSTMENT_INTERVAL:
         return INITIAL_DIFFICULTY
     
-    # Get the last DIFFICULTY_ADJUSTMENT_INTERVAL blocks
+    # Only adjust at specific intervals
+    if blocks_count % DIFFICULTY_ADJUSTMENT_INTERVAL != 0:
+        # Return the difficulty from the last block
+        last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+        return last_block.get('difficulty', INITIAL_DIFFICULTY)
+    
+    # Get the last DIFFICULTY_ADJUSTMENT_INTERVAL blocks for adjustment
     last_blocks = await db.blocks.find({}, {"_id": 0}).sort("index", -1).limit(DIFFICULTY_ADJUSTMENT_INTERVAL).to_list(DIFFICULTY_ADJUSTMENT_INTERVAL)
     
     if len(last_blocks) < DIFFICULTY_ADJUSTMENT_INTERVAL:
         return INITIAL_DIFFICULTY
     
-    # Calculate actual time taken
+    # Calculate actual time taken for these blocks
     first_block = last_blocks[-1]
     last_block = last_blocks[0]
     
-    first_time = datetime.fromisoformat(first_block['timestamp'])
-    last_time = datetime.fromisoformat(last_block['timestamp'])
+    first_time = datetime.fromisoformat(first_block['timestamp'].replace('Z', '+00:00'))
+    last_time = datetime.fromisoformat(last_block['timestamp'].replace('Z', '+00:00'))
     
     actual_time = (last_time - first_time).total_seconds()
-    expected_time = TARGET_BLOCK_TIME * DIFFICULTY_ADJUSTMENT_INTERVAL
+    expected_time = TARGET_BLOCK_TIME * DIFFICULTY_ADJUSTMENT_INTERVAL  # 2016 * 600 = ~2 weeks
     
     current_difficulty = last_block.get('difficulty', INITIAL_DIFFICULTY)
     
-    # Adjust difficulty
-    if actual_time < expected_time / 4:
-        return min(current_difficulty + 1, 32)
-    elif actual_time > expected_time * 4:
-        return max(current_difficulty - 1, 1)
-    elif actual_time < expected_time:
-        ratio = expected_time / actual_time
-        if ratio > 1.1:
-            return min(current_difficulty + 1, 32)
-    elif actual_time > expected_time:
-        ratio = actual_time / expected_time
-        if ratio > 1.1:
-            return max(current_difficulty - 1, 1)
+    # Bitcoin-style adjustment: new_difficulty = old_difficulty * (expected_time / actual_time)
+    # With limits: max 4x increase or 4x decrease per adjustment
+    ratio = expected_time / actual_time
+    
+    # Clamp ratio to prevent extreme adjustments (Bitcoin uses 4x limit)
+    ratio = max(0.25, min(4.0, ratio))
+    
+    new_difficulty = int(current_difficulty * ratio)
+    
+    # Minimum difficulty of 1
+    new_difficulty = max(1, new_difficulty)
+    
+    return new_difficulty
     
     return current_difficulty
 
