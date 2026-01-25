@@ -33,13 +33,43 @@ import ipaddress
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# ==================== SECURITY CONFIGURATION ====================
+# Rate Limiting
+limiter = Limiter(key_func=get_remote_address)
+
+# Security logging
+security_logger = logging.getLogger("security")
+security_logger.setLevel(logging.WARNING)
+
+# IP blacklist for detected attacks
+ip_blacklist: Dict[str, datetime] = {}
+failed_attempts: Dict[str, int] = defaultdict(int)
+MAX_FAILED_ATTEMPTS = 10
+BLACKLIST_DURATION = 3600  # 1 hour in seconds
+
+# Allowed domains for CORS (production)
+ALLOWED_ORIGINS = [
+    "https://bricscoin26.org",
+    "https://www.bricscoin26.org",
+    "http://localhost:3000",  # Development only
+]
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app
-app = FastAPI(title="BricsCoin API", version="1.0.0")
+# Create the main app with security settings
+app = FastAPI(
+    title="BricsCoin API", 
+    version="2.0.0",
+    docs_url=None if os.environ.get('PRODUCTION') == 'true' else "/docs",  # Disable docs in production
+    redoc_url=None if os.environ.get('PRODUCTION') == 'true' else "/redoc"
+)
+
+# Add rate limiter to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
