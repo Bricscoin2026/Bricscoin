@@ -263,7 +263,28 @@ export default function Downloads() {
           <CardTitle className="font-heading">Istruzioni di Installazione</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* BricsCoin Core */}
+            <div className="md:col-span-2 p-4 bg-primary/10 border border-primary/20 rounded-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <HardDrive className="w-5 h-5 text-primary" />
+                <h4 className="font-bold text-primary">BricsCoin Core (Consigliato)</h4>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Il wallet Full Node ufficiale. Scarica l'intera blockchain e contribuisce alla decentralizzazione della rete.
+              </p>
+              <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+                <li>Scarica <code className="bg-white/10 px-1 rounded">BricsCoin-Core-Source.tar.gz</code></li>
+                <li>Estrai: <code className="bg-white/10 px-1 rounded">tar -xzf BricsCoin-Core-Source.tar.gz</code></li>
+                <li>Entra nella cartella: <code className="bg-white/10 px-1 rounded">cd bricscoin-core</code></li>
+                <li>Installa dipendenze: <code className="bg-white/10 px-1 rounded">yarn install</code></li>
+                <li>Avvia: <code className="bg-white/10 px-1 rounded">yarn start</code></li>
+              </ol>
+              <p className="text-xs text-muted-foreground mt-3">
+                Requisiti: Node.js 18+, Yarn, Python (per compilazione)
+              </p>
+            </div>
+
             {/* Windows */}
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -271,23 +292,9 @@ export default function Downloads() {
                 <h4 className="font-bold">Windows</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Scarica il file ZIP</li>
-                <li>Estrai la cartella</li>
-                <li>Esegui BricsCoin-Wallet.exe</li>
-                <li>Windows Defender potrebbe mostrare un avviso - clicca "Ulteriori informazioni" → "Esegui comunque"</li>
-              </ol>
-            </div>
-
-            {/* Linux */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <HardDrive className="w-5 h-5 text-orange-500" />
-                <h4 className="font-bold">Linux</h4>
-              </div>
-              <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Scarica il file AppImage</li>
-                <li>Rendi eseguibile: <code className="bg-white/10 px-1 rounded">chmod +x BricsCoin*.AppImage</code></li>
-                <li>Esegui il file</li>
+                <li>Scarica BricsCoin Core</li>
+                <li>Installa <a href="https://nodejs.org" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Node.js</a> e <a href="https://yarnpkg.com" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Yarn</a></li>
+                <li>Segui le istruzioni sopra</li>
               </ol>
             </div>
 
@@ -298,10 +305,9 @@ export default function Downloads() {
                 <h4 className="font-bold">macOS</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Scarica il codice sorgente ZIP</li>
-                <li>Estrai e apri il terminale nella cartella</li>
-                <li>Esegui: <code className="bg-white/10 px-1 rounded">npm install</code></li>
-                <li>Esegui: <code className="bg-white/10 px-1 rounded">npm start</code></li>
+                <li>Installa Xcode CLI: <code className="bg-white/10 px-1 rounded">xcode-select --install</code></li>
+                <li>Installa Node.js via <a href="https://brew.sh" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Homebrew</a>: <code className="bg-white/10 px-1 rounded">brew install node</code></li>
+                <li>Segui le istruzioni BricsCoin Core sopra</li>
               </ol>
             </div>
           </div>
