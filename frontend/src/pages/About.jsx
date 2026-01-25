@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -10,10 +11,26 @@ import {
   Zap,
   CheckCircle,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Coins
 } from "lucide-react";
+import { getTokenomics } from "../lib/api";
 
 export default function About() {
+  const [tokenomics, setTokenomics] = useState(null);
+
+  useEffect(() => {
+    async function fetchTokenomics() {
+      try {
+        const res = await getTokenomics();
+        setTokenomics(res.data);
+      } catch (error) {
+        console.error("Error fetching tokenomics:", error);
+      }
+    }
+    fetchTokenomics();
+  }, []);
+
   const roadmapItems = [
     { phase: "Q1 2026", status: "done", items: ["Mainnet launch", "Web wallet", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet"] },
     { phase: "Q2 2026", status: "current", items: ["Exchange listings", "Mobile wallet", "Additional mining pools", "Community governance"] },
