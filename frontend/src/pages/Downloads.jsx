@@ -26,13 +26,39 @@ function formatFileSize(bytes) {
 
 function getOSInfo(filename) {
   const lower = filename.toLowerCase();
+  
+  // BricsCoin Core - Full Node (priorità alta)
+  if (lower.includes('core')) {
+    return { 
+      os: 'BricsCoin Core', 
+      icon: HardDrive, 
+      color: 'text-primary',
+      bgColor: 'bg-primary/20',
+      description: 'Full Node Wallet - Supporta tutta la blockchain localmente. Richiede Node.js.',
+      priority: 1
+    };
+  }
+  
+  // Source code generico
+  if (lower.includes('source') && !lower.includes('core')) {
+    return { 
+      os: 'Codice Sorgente', 
+      icon: FileArchive, 
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/20',
+      description: 'Codice sorgente completo del progetto BricsCoin',
+      priority: 3
+    };
+  }
+  
   if (lower.includes('linux') || lower.includes('appimage')) {
     return { 
       os: 'Linux', 
       icon: HardDrive, 
       color: 'text-orange-500',
       bgColor: 'bg-orange-500/20',
-      description: 'AppImage - Eseguibile universale per Linux'
+      description: 'AppImage - Eseguibile universale per Linux',
+      priority: 2
     };
   }
   if (lower.includes('windows') || lower.includes('win')) {
@@ -41,7 +67,8 @@ function getOSInfo(filename) {
       icon: Monitor, 
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/20',
-      description: 'Cartella compressa - Estrai ed esegui'
+      description: 'Cartella compressa - Estrai ed esegui',
+      priority: 2
     };
   }
   if (lower.includes('mac') || lower.includes('darwin')) {
@@ -50,7 +77,8 @@ function getOSInfo(filename) {
       icon: Apple, 
       color: 'text-gray-400',
       bgColor: 'bg-gray-500/20',
-      description: 'Codice sorgente - Build manuale richiesta'
+      description: 'Codice sorgente - Build manuale richiesta',
+      priority: 2
     };
   }
   if (lower.includes('android') || lower.includes('apk')) {
@@ -59,15 +87,17 @@ function getOSInfo(filename) {
       icon: Smartphone, 
       color: 'text-green-500',
       bgColor: 'bg-green-500/20',
-      description: 'APK per dispositivi Android'
+      description: 'APK per dispositivi Android',
+      priority: 2
     };
   }
   return { 
-    os: 'Unknown', 
+    os: 'Download', 
     icon: FileArchive, 
     color: 'text-gray-500',
     bgColor: 'bg-gray-500/20',
-    description: 'File di download'
+    description: 'File di download',
+    priority: 4
   };
 }
 
