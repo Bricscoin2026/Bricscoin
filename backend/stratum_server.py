@@ -758,46 +758,60 @@ class StratumServer:
             logger.info(f"Disconnected: {miner.miner_id}")
     
     async def job_updater(self):
-        """Periodically create and broadcast new jobs"""
-        global current_job
-        
+        """Periodically create and send personalized jobs to each miner"""
         while self.running:
             try:
                 template = await get_block_template()
                 if template:
-                    current_job = create_stratum_job(template)
-                    await self.broadcast_job(current_job)
+                    # Send personalized job to EACH miner with THEIR address
+                    await self.broadcast_personalized_jobs(template)
             except Exception as e:
                 logger.error(f"Job updater error: {e}")
             
             # Update every 30 seconds (not too frequent to reduce "job not found")
             await asyncio.sleep(30)
     
-    async def broadcast_job(self, job: dict):
-        """Send job to all connected miners"""
+    async def broadcast_personalized_jobs(self, template: dict, clean_jobs: bool = False):
+        """Send personalized job to each miner with their own address for rewards"""
         count = 0
         for miner in self.miners[:]:  # Copy list to avoid modification during iteration
             try:
-                if miner.subscribed:
+                if miner.subscribed and miner.worker_name:
+                    # Create a job specifically for THIS miner with THEIR address
+                    job = create_stratum_job(
+                        template, 
+                        miner.worker_name,  # Miner's address for reward!
+                        miner.extranonce1,
+                        miner.extranonce2_size
+                    )
+                    if clean_jobs:
+                        job['clean_jobs'] = True
+                    
+                    # Store job in miner's personal cache
+                    miner.personal_jobs[job['job_id']] = job
+                    
                     await miner.send_job(job)
                     count += 1
             except Exception as e:
                 logger.error(f"Error sending job to {miner.miner_id}: {e}")
         
         if count > 0:
-            logger.info(f"Job {job['job_id']} broadcast to {count} miners")
+            logger.info(f"Personalized jobs sent to {count} miners")
+    
+    async def broadcast_job(self, job: dict):
+        """DEPRECATED: Use broadcast_personalized_jobs instead"""
+        # Keep for backward compatibility but redirect to personalized
+        template = await get_block_template()
+        if template:
+            await self.broadcast_personalized_jobs(template)
     
     async def on_new_block(self):
         """Called when a new block is found"""
-        global current_job
-        
-        logger.info("New block found! Creating fresh job...")
+        logger.info("New block found! Creating fresh personalized jobs...")
         
         template = await get_block_template()
         if template:
-            current_job = create_stratum_job(template)
-            current_job['clean_jobs'] = True  # Tell miners to abandon old work
-            await self.broadcast_job(current_job)
+            await self.broadcast_personalized_jobs(template, clean_jobs=True)
 
 async def main():
     """Main entry point"""
