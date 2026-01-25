@@ -27,26 +27,26 @@ function formatFileSize(bytes) {
 function getOSInfo(filename) {
   const lower = filename.toLowerCase();
   
-  // BricsCoin Core - Full Node (priorità alta)
+  // BricsCoin Core - Full Node (high priority)
   if (lower.includes('core')) {
     return { 
       os: 'BricsCoin Core', 
       icon: HardDrive, 
       color: 'text-primary',
       bgColor: 'bg-primary/20',
-      description: 'Full Node Wallet - Supporta tutta la blockchain localmente. Richiede Node.js.',
+      description: 'Full Node Desktop Wallet - Professional UI with Matrix theme. Requires Node.js.',
       priority: 1
     };
   }
   
-  // Source code generico
+  // Generic source code
   if (lower.includes('source') && !lower.includes('core')) {
     return { 
-      os: 'Codice Sorgente', 
+      os: 'Source Code', 
       icon: FileArchive, 
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/20',
-      description: 'Codice sorgente completo del progetto BricsCoin',
+      description: 'Complete BricsCoin project source code',
       priority: 3
     };
   }
@@ -57,7 +57,7 @@ function getOSInfo(filename) {
       icon: HardDrive, 
       color: 'text-orange-500',
       bgColor: 'bg-orange-500/20',
-      description: 'AppImage - Eseguibile universale per Linux',
+      description: 'AppImage - Universal executable for Linux',
       priority: 2
     };
   }
@@ -67,7 +67,7 @@ function getOSInfo(filename) {
       icon: Monitor, 
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/20',
-      description: 'Cartella compressa - Estrai ed esegui',
+      description: 'Compressed folder - Extract and run',
       priority: 2
     };
   }
@@ -77,7 +77,7 @@ function getOSInfo(filename) {
       icon: Apple, 
       color: 'text-gray-400',
       bgColor: 'bg-gray-500/20',
-      description: 'Codice sorgente - Build manuale richiesta',
+      description: 'Source code - Manual build required',
       priority: 2
     };
   }
@@ -87,7 +87,7 @@ function getOSInfo(filename) {
       icon: Smartphone, 
       color: 'text-green-500',
       bgColor: 'bg-green-500/20',
-      description: 'APK per dispositivi Android',
+      description: 'APK for Android devices',
       priority: 2
     };
   }
@@ -96,7 +96,7 @@ function getOSInfo(filename) {
     icon: FileArchive, 
     color: 'text-gray-500',
     bgColor: 'bg-gray-500/20',
-    description: 'File di download',
+    description: 'Download file',
     priority: 4
   };
 }
@@ -115,7 +115,7 @@ export default function Downloads() {
       }
     } catch (error) {
       console.error("Error fetching downloads:", error);
-      toast.error("Errore nel caricamento dei download");
+      toast.error("Error loading downloads");
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function Downloads() {
   const handleDownload = (file) => {
     const downloadUrl = `${BACKEND_URL}${file.url}`;
     window.open(downloadUrl, '_blank');
-    toast.success(`Download avviato: ${file.name}`);
+    toast.success(`Download started: ${file.name}`);
   };
 
   return (
@@ -138,7 +138,7 @@ export default function Downloads() {
         <div>
           <h1 className="text-3xl font-heading font-bold">Download Wallet</h1>
           <p className="text-muted-foreground">
-            Scarica il wallet BricsCoin per il tuo dispositivo
+            Download the BricsCoin wallet for your device
           </p>
         </div>
         <Button
@@ -149,7 +149,7 @@ export default function Downloads() {
           data-testid="refresh-downloads-btn"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Aggiorna
+          Refresh
         </Button>
       </div>
 
@@ -163,8 +163,8 @@ export default function Downloads() {
             <div className="flex-1">
               <h3 className="font-heading font-bold text-lg">Web Wallet (PWA)</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Puoi usare il wallet direttamente dal browser! Su dispositivi mobili, 
-                aggiungi questa pagina alla schermata home per un'esperienza simile ad un'app nativa.
+                You can use the wallet directly from your browser! On mobile devices, 
+                add this page to your home screen for a native app-like experience.
               </p>
             </div>
             <Button 
@@ -172,7 +172,7 @@ export default function Downloads() {
               onClick={() => window.location.href = '/wallet'}
               data-testid="open-web-wallet-btn"
             >
-              Apri Web Wallet
+              Open Web Wallet
             </Button>
           </div>
         </CardContent>
@@ -180,7 +180,7 @@ export default function Downloads() {
 
       {/* Desktop Wallets */}
       <div>
-        <h2 className="font-heading font-bold text-xl mb-4">Wallet Desktop</h2>
+        <h2 className="font-heading font-bold text-xl mb-4">Desktop Wallets</h2>
         
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -196,9 +196,9 @@ export default function Downloads() {
           <Card className="bg-card border-white/10 text-center py-12">
             <CardContent>
               <Download className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-heading font-bold mb-2">Nessun download disponibile</h3>
+              <h3 className="text-lg font-heading font-bold mb-2">No downloads available</h3>
               <p className="text-muted-foreground">
-                I wallet saranno disponibili presto.
+                Wallets will be available soon.
               </p>
             </CardContent>
           </Card>
@@ -263,7 +263,7 @@ export default function Downloads() {
       {/* Instructions */}
       <Card className="bg-card border-white/10">
         <CardHeader className="border-b border-white/10">
-          <CardTitle className="font-heading">Istruzioni di Installazione</CardTitle>
+          <CardTitle className="font-heading">Installation Instructions</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -271,20 +271,20 @@ export default function Downloads() {
             <div className="md:col-span-2 p-4 bg-primary/10 border border-primary/20 rounded-sm">
               <div className="flex items-center gap-2 mb-3">
                 <HardDrive className="w-5 h-5 text-primary" />
-                <h4 className="font-bold text-primary">BricsCoin Core (Consigliato)</h4>
+                <h4 className="font-bold text-primary">BricsCoin Core v1.1 (Recommended)</h4>
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                Il wallet Full Node ufficiale. Scarica l'intera blockchain e contribuisce alla decentralizzazione della rete.
+                The official Full Node wallet with professional Matrix-style UI. Connects to the BricsCoin network and supports mining.
               </p>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Scarica <code className="bg-white/10 px-1 rounded">BricsCoin-Core-Source.tar.gz</code></li>
-                <li>Estrai: <code className="bg-white/10 px-1 rounded">tar -xzf BricsCoin-Core-Source.tar.gz</code></li>
-                <li>Entra nella cartella: <code className="bg-white/10 px-1 rounded">cd bricscoin-core</code></li>
-                <li>Installa dipendenze: <code className="bg-white/10 px-1 rounded">yarn install</code></li>
-                <li>Avvia: <code className="bg-white/10 px-1 rounded">yarn start</code></li>
+                <li>Download <code className="bg-white/10 px-1 rounded">bricscoin-core-v1.1.tar.gz</code></li>
+                <li>Extract: <code className="bg-white/10 px-1 rounded">tar -xzf bricscoin-core-v1.1.tar.gz</code></li>
+                <li>Enter the folder: <code className="bg-white/10 px-1 rounded">cd bricscoin-core</code></li>
+                <li>Install dependencies: <code className="bg-white/10 px-1 rounded">npm install</code></li>
+                <li>Start: <code className="bg-white/10 px-1 rounded">npm start</code></li>
               </ol>
               <p className="text-xs text-muted-foreground mt-3">
-                Requisiti: Node.js 18+, Yarn, Python (per compilazione)
+                Requirements: Node.js 18+, npm or yarn
               </p>
             </div>
 
@@ -295,9 +295,9 @@ export default function Downloads() {
                 <h4 className="font-bold">Windows</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Scarica BricsCoin Core</li>
-                <li>Installa <a href="https://nodejs.org" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Node.js</a> e <a href="https://yarnpkg.com" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Yarn</a></li>
-                <li>Segui le istruzioni sopra</li>
+                <li>Download BricsCoin Core</li>
+                <li>Install <a href="https://nodejs.org" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Node.js</a></li>
+                <li>Follow the instructions above</li>
               </ol>
             </div>
 
@@ -308,9 +308,9 @@ export default function Downloads() {
                 <h4 className="font-bold">macOS</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Installa Xcode CLI: <code className="bg-white/10 px-1 rounded">xcode-select --install</code></li>
-                <li>Installa Node.js via <a href="https://brew.sh" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Homebrew</a>: <code className="bg-white/10 px-1 rounded">brew install node</code></li>
-                <li>Segui le istruzioni BricsCoin Core sopra</li>
+                <li>Install Xcode CLI: <code className="bg-white/10 px-1 rounded">xcode-select --install</code></li>
+                <li>Install Node.js via <a href="https://brew.sh" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Homebrew</a>: <code className="bg-white/10 px-1 rounded">brew install node</code></li>
+                <li>Follow the BricsCoin Core instructions above</li>
               </ol>
             </div>
           </div>
@@ -320,11 +320,11 @@ export default function Downloads() {
       {/* Source Code */}
       <Card className="bg-card border-white/10">
         <CardHeader className="border-b border-white/10">
-          <CardTitle className="font-heading">Codice Sorgente</CardTitle>
+          <CardTitle className="font-heading">Source Code</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <p className="text-muted-foreground mb-4">
-            BricsCoin è open source! Puoi visualizzare, modificare e contribuire al codice.
+            BricsCoin is open source! You can view, modify and contribute to the code.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button
@@ -334,7 +334,7 @@ export default function Downloads() {
               data-testid="github-link-btn"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              Visualizza su GitHub
+              View on GitHub
             </Button>
             <Button
               variant="outline"
@@ -343,7 +343,7 @@ export default function Downloads() {
               data-testid="docs-link-btn"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              Documentazione
+              Documentation
             </Button>
           </div>
         </CardContent>
