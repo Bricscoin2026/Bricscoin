@@ -135,10 +135,31 @@ function SendDialog({ wallet, onSuccess }) {
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [sending, setSending] = useState(false);
+  const [balance, setBalance] = useState(null);
+
+  // Fetch balance when dialog opens
+  useEffect(() => {
+    async function fetchBalance() {
+      if (open && wallet?.address) {
+        try {
+          const res = await getWalletBalance(wallet.address);
+          setBalance(res.data.balance);
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+        }
+      }
+    }
+    fetchBalance();
+  }, [open, wallet?.address]);
 
   const handleSend = async () => {
     if (!recipient || !amount) {
       toast.error("Compila tutti i campi");
+      return;
+    }
+
+    if (balance !== null && parseFloat(amount) > balance) {
+      toast.error(`Saldo insufficiente! Disponibile: ${balance} BRICS`);
       return;
     }
 
@@ -162,6 +183,12 @@ function SendDialog({ wallet, onSuccess }) {
     }
   };
 
+  const handleMaxAmount = () => {
+    if (balance !== null) {
+      setAmount(balance.toString());
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -175,6 +202,13 @@ function SendDialog({ wallet, onSuccess }) {
           <DialogTitle className="font-heading">Invia BRICS</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          {/* Available Balance */}
+          <div className="p-3 bg-primary/10 border border-primary/20 rounded-sm">
+            <p className="text-sm text-muted-foreground">Saldo Disponibile</p>
+            <p className="text-xl font-bold gold-text" data-testid="send-available-balance">
+              {balance !== null ? `${balance.toLocaleString()} BRICS` : "Caricamento..."}
+            </p>
+          </div>
           <div>
             <Label>Da</Label>
             <Input 
@@ -194,7 +228,18 @@ function SendDialog({ wallet, onSuccess }) {
             />
           </div>
           <div>
-            <Label>Importo (BRICS)</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>Importo (BRICS)</Label>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs text-primary h-auto p-1"
+                onClick={handleMaxAmount}
+                data-testid="max-amount-btn"
+              >
+                MAX
+              </Button>
+            </div>
             <Input
               type="number"
               placeholder="0.00"
