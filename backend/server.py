@@ -697,6 +697,7 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
     
     The transaction must be signed CLIENT-SIDE before submission.
     This endpoint only verifies the signature and processes the transaction.
+    Transaction fee: 0.05 BRICS
     """
     client_ip = get_remote_address(request)
     
@@ -708,10 +709,16 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
         else:
             del ip_blacklist[client_ip]
     
-    # Validate sender has enough balance
+    # Calculate total cost (amount + fee)
+    total_cost = tx_request.amount + TRANSACTION_FEE
+    
+    # Validate sender has enough balance (amount + fee)
     sender_balance = await get_balance(tx_request.sender_address)
-    if sender_balance < tx_request.amount:
-        raise HTTPException(status_code=400, detail=f"Insufficient balance. Available: {sender_balance}")
+    if sender_balance < total_cost:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Insufficient balance. Need: {total_cost} BRICS (amount: {tx_request.amount} + fee: {TRANSACTION_FEE}). Available: {sender_balance}"
+        )
     
     # Verify that the public key matches the sender address
     expected_address = generate_address_from_public_key(tx_request.public_key)
