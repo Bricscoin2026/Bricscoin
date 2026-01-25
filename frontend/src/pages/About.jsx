@@ -229,7 +229,24 @@ export default function About() {
             <h4 className="font-bold text-green-500 mb-2">Mining Rewards (95.24%)</h4>
             <p className="text-2xl font-bold">{tokenomics?.mining_rewards?.total_available?.toLocaleString() || "20,000,000"} BRICS</p>
             <p className="text-sm text-muted-foreground">
-              Distributed to miners over time. Block reward: 50 BRICS, halving every 210,000 blocks.
+              Block reward: {tokenomics?.mining_rewards?.current_block_reward || 50} BRICS, halving every {tokenomics?.mining_rewards?.halving_interval?.toLocaleString() || "210,000"} blocks.
+            </p>
+            {tokenomics?.mining_rewards?.mined_so_far > 0 && (
+              <div className="mt-2 pt-2 border-t border-green-500/20">
+                <p className="text-xs text-muted-foreground">
+                  Mined so far: <span className="text-green-400 font-mono">{tokenomics.mining_rewards.mined_so_far?.toLocaleString()} BRICS</span>
+                  ({tokenomics.mining_rewards.percentage_mined}%)
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Transaction Fee */}
+          <div className="p-4 bg-blue-500/5 rounded-lg border border-blue-500/20">
+            <h4 className="font-bold text-blue-500 mb-2">Transaction Fee</h4>
+            <p className="text-2xl font-bold">{tokenomics?.fees?.transaction_fee || 0.05} BRICS</p>
+            <p className="text-sm text-muted-foreground">
+              {tokenomics?.fees?.note || "Fees are collected by miners who include transactions in blocks."}
             </p>
           </div>
         </CardContent>
