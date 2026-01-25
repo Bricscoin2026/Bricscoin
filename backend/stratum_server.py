@@ -456,6 +456,9 @@ class StratumMiner:
         self.shares = 0
         self.blocks = 0
         
+        # Personal job cache for this miner (key = job_id)
+        self.personal_jobs: Dict[str, dict] = {}
+        
         # Track sent jobs for this miner
         self.sent_jobs = set()
     
