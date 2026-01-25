@@ -155,26 +155,43 @@ export default function Dashboard() {
           delay={0}
         />
         <StatCard
+          icon={TrendingUp}
+          title={t('remainingSupply')}
+          value={`${stats?.remaining_supply?.toLocaleString() || 0} BRICS`}
+          subtitle={`${t('ofMax').replace('{max}', (21000000).toLocaleString())}`}
+          delay={1}
+        />
+        <StatCard
           icon={Blocks}
           title={t('totalBlocks')}
           value={stats?.total_blocks?.toLocaleString() || 0}
           subtitle={`${t('difficulty')}: ${stats?.current_difficulty || 0}`}
-          delay={1}
+          delay={2}
         />
         <StatCard
           icon={Activity}
           title={t('pendingTransactions')}
           value={stats?.pending_transactions || 0}
           subtitle={t('inMempool')}
-          delay={2}
-        />
-        <StatCard
-          icon={TrendingUp}
-          title={t('blockReward')}
-          value={`${stats?.current_reward || 50} BRICS`}
-          subtitle={`${t('nextHalving')} ${stats?.next_halving_block?.toLocaleString() || 210000}`}
           delay={3}
         />
+      </div>
+
+      {/* Block Reward Card */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <StatCard
+            icon={Pickaxe}
+            title={t('blockReward')}
+            value={`${stats?.current_reward || 50} BRICS`}
+            subtitle={`${t('nextHalving')} ${stats?.next_halving_block?.toLocaleString() || 210000}`}
+            delay={0}
+          />
+        </motion.div>
       </div>
 
       {/* Recent Blocks */}
