@@ -744,7 +744,7 @@ async def get_genesis_wallet_info():
         raise HTTPException(status_code=404, detail="Genesis wallet not found")
     
     # Get balance
-    balance = await calculate_balance(genesis_wallet['address'])
+    balance = await get_balance(genesis_wallet['address'])
     
     return {
         "address": genesis_wallet['address'],
