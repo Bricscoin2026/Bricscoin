@@ -102,7 +102,7 @@ const translations = {
     stratumPort: "Porta",
     stratumUser: "Utente",
     stratumPass: "Password",
-    stratumNote: "Nota: Usa l'IP diretto per Stratum, non il dominio (Cloudflare non supporta la porta 3333)",
+    stratumNote: "Connetti il tuo miner ASIC a bricscoin26.org:3333",
     copyConfig: "Copia Configurazione",
     
     // Wallet
