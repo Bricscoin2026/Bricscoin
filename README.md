@@ -95,7 +95,7 @@ Connect your ASIC miner (Bitaxe, NerdMiner, etc.) to the Stratum server:
 ### Example Configuration (Bitaxe)
 
 ```
-Stratum URL: YOUR_SERVER_IP
+Stratum URL: bricscoin26.org
 Port: 3333
 Username: BRICSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Password: x
