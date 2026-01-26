@@ -715,12 +715,9 @@ async def get_tokenomics():
             "percentage": round((PREMINE_AMOUNT / MAX_SUPPLY) * 100, 2),
             "wallet_address": genesis_address,
             "allocation": {
-                "development": {"amount": 400000, "percentage": 40, "description": "Protocol improvements and maintenance"},
-                "marketing": {"amount": 300000, "percentage": 30, "description": "Community growth and adoption"},
-                "liquidity": {"amount": 200000, "percentage": 20, "description": "Exchange listings and market making"},
-                "team": {"amount": 100000, "percentage": 10, "description": "Core contributor compensation"}
+                "team": {"amount": 1000000, "percentage": 100, "description": "Founder and core team"}
             },
-            "note": "Premine is held by the development team and will be used transparently for project growth."
+            "note": "Premine is held by the founder (Jabo86) for project development and growth."
         },
         "mining_rewards": {
             "total_available": MAX_SUPPLY - PREMINE_AMOUNT,
