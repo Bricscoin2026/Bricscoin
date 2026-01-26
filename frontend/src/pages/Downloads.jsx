@@ -1,152 +1,25 @@
-import { useState, useEffect } from "react";
 import { 
   Download, 
   Monitor, 
   Apple, 
   Smartphone,
   HardDrive,
-  FileArchive,
   ExternalLink,
-  RefreshCw
+  Github
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
-function formatFileSize(bytes) {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function getOSInfo(filename) {
-  const lower = filename.toLowerCase();
-  
-  // Source code (check first, before core)
-  if (lower.includes('source') || (lower.includes('.tar.gz') && !lower.includes('appimage'))) {
-    return { 
-      os: 'Source Code', 
-      icon: FileArchive, 
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-500/20',
-      description: 'Build from source - Requires Node.js 18+',
-      priority: 3
-    };
-  }
-  
-  // Linux AppImage
-  if (lower.includes('linux') || lower.includes('appimage')) {
-    return { 
-      os: 'Linux', 
-      icon: HardDrive, 
-      color: 'text-orange-500',
-      bgColor: 'bg-orange-500/20',
-      description: 'Ready to run - Make executable with chmod +x',
-      priority: 1
-    };
-  }
-  
-  // Windows
-  if (lower.includes('windows') || lower.includes('win') || lower.includes('.exe')) {
-    return { 
-      os: 'Windows', 
-      icon: Monitor, 
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/20',
-      description: 'Portable executable - No installation needed',
-      priority: 1
-    };
-  }
-  
-  // macOS
-  if (lower.includes('mac') || lower.includes('darwin')) {
-    return { 
-      os: 'macOS', 
-      icon: Apple, 
-      color: 'text-gray-300',
-      bgColor: 'bg-gray-500/20',
-      description: 'Extract and run - May require security approval',
-      priority: 1
-    };
-  }
-  
-  // BricsCoin Core generic
-  if (lower.includes('core')) {
-    return { 
-      os: 'BricsCoin Core', 
-      icon: HardDrive, 
-      color: 'text-primary',
-      bgColor: 'bg-primary/20',
-      description: 'Desktop Wallet with Matrix theme',
-      priority: 2
-    };
-  }
-  
-  return { 
-    os: 'Download', 
-    icon: FileArchive, 
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-500/20',
-    description: 'Download file',
-    priority: 4
-  };
-}
 
 export default function Downloads() {
-  const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchDownloads = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/downloads`);
-      if (response.ok) {
-        const data = await response.json();
-        setFiles(data.files || []);
-      }
-    } catch (error) {
-      console.error("Error fetching downloads:", error);
-      toast.error("Error loading downloads");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDownloads();
-  }, []);
-
-  const handleDownload = (file) => {
-    const downloadUrl = `${BACKEND_URL}${file.url}`;
-    window.open(downloadUrl, '_blank');
-    toast.success(`Download started: ${file.name}`);
-  };
-
   return (
     <div className="space-y-6" data-testid="downloads-page">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold">Download Wallet</h1>
-          <p className="text-muted-foreground">
-            Download the BricsCoin wallet for your device
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          className="border-white/20"
-          onClick={fetchDownloads}
-          disabled={loading}
-          data-testid="refresh-downloads-btn"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+      <div>
+        <h1 className="text-3xl font-heading font-bold">Download Wallet</h1>
+        <p className="text-muted-foreground">
+          Download the BricsCoin wallet for your device
+        </p>
       </div>
 
       {/* PWA Info */}
@@ -174,111 +47,96 @@ export default function Downloads() {
         </CardContent>
       </Card>
 
-      {/* Desktop Wallets */}
+      {/* Desktop Wallets from GitHub */}
       <div>
         <h2 className="font-heading font-bold text-xl mb-4">Desktop Wallets</h2>
         
-        {/* GitHub Releases Link */}
-        <Card className="bg-card/50 border-white/10 mb-4">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-sm bg-white/10 flex items-center justify-center">
-                  <ExternalLink className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold">All Platforms (Windows, Mac, Linux)</h3>
-                  <p className="text-sm text-muted-foreground">Download from GitHub Releases</p>
-                </div>
+        {/* GitHub Releases Main Card */}
+        <Card className="bg-gradient-to-br from-white/10 to-white/5 border-white/20 mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                <Github className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="font-bold text-xl mb-2">BricsCoin Core Wallet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Download the official desktop wallet from GitHub Releases.<br />
+                  Available for Windows, macOS and Linux.
+                </p>
               </div>
               <Button 
-                onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/releases/latest', '_blank')}
+                onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/releases', '_blank')}
                 className="gold-button rounded-sm"
+                size="lg"
                 data-testid="github-releases-btn"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                GitHub Releases
+                <Github className="w-5 h-5 mr-2" />
+                Download from GitHub
               </Button>
             </div>
           </CardContent>
         </Card>
-        
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-card border-white/10 animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-32 bg-white/5 rounded-sm" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : files.length === 0 ? (
-          <Card className="bg-card border-white/10 text-center py-12">
-            <CardContent>
-              <Download className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-heading font-bold mb-2">No downloads available</h3>
-              <p className="text-muted-foreground">
-                Wallets will be available soon.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files
-              .map(file => ({ ...file, osInfo: getOSInfo(file.name) }))
-              .sort((a, b) => (a.osInfo.priority || 99) - (b.osInfo.priority || 99))
-              .map((file, index) => {
-              const osInfo = file.osInfo;
-              const Icon = osInfo.icon;
-              
-              return (
-                <motion.div
-                  key={file.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card 
-                    className="bg-card border-white/10 hover:border-primary/50 transition-all cursor-pointer group"
-                    onClick={() => handleDownload(file)}
-                    data-testid={`download-card-${osInfo.os.toLowerCase()}`}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className={`w-12 h-12 rounded-sm ${osInfo.bgColor} flex items-center justify-center shrink-0`}>
-                          <Icon className={`w-6 h-6 ${osInfo.color}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-heading font-bold truncate">{osInfo.os}</h3>
-                          <p className="text-xs text-muted-foreground truncate">{file.name}</p>
-                        </div>
-                      </div>
-                      
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {osInfo.description}
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          {formatFileSize(file.size)}
-                        </span>
-                        <Button 
-                          size="sm" 
-                          className="gold-button rounded-sm group-hover:scale-105 transition-transform"
-                          data-testid={`download-btn-${osInfo.os.toLowerCase()}`}
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          Download
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
+
+        {/* Platform Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="bg-card border-white/10 h-full">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-sm bg-blue-500/20 flex items-center justify-center mb-4">
+                  <Monitor className="w-6 h-6 text-blue-500" />
+                </div>
+                <h4 className="font-bold mb-2">Windows</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Portable .exe - No installation needed
+                </p>
+                <code className="text-xs bg-white/10 px-2 py-1 rounded">BricsCoin-Core-Setup.exe</code>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="bg-card border-white/10 h-full">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-sm bg-gray-500/20 flex items-center justify-center mb-4">
+                  <Apple className="w-6 h-6 text-gray-300" />
+                </div>
+                <h4 className="font-bold mb-2">macOS</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Extract and run - May require security approval
+                </p>
+                <code className="text-xs bg-white/10 px-2 py-1 rounded">BricsCoin-Core.zip</code>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="bg-card border-white/10 h-full">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-sm bg-orange-500/20 flex items-center justify-center mb-4">
+                  <HardDrive className="w-6 h-6 text-orange-500" />
+                </div>
+                <h4 className="font-bold mb-2">Linux</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  AppImage - Make executable with chmod +x
+                </p>
+                <code className="text-xs bg-white/10 px-2 py-1 rounded">BricsCoin-Core.AppImage</code>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
 
       {/* Instructions */}
@@ -287,26 +145,7 @@ export default function Downloads() {
           <CardTitle className="font-heading">Installation Instructions</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* BricsCoin Core */}
-            <div className="md:col-span-2 p-4 bg-primary/10 border border-primary/20 rounded-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <HardDrive className="w-5 h-5 text-primary" />
-                <h4 className="font-bold text-primary">BricsCoin Core v2.1 (Recommended)</h4>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                The official Desktop Wallet with professional Matrix-style UI, P2P sync, and secure client-side signing. Create wallets, send/receive BRICS, view blocks and transactions.
-              </p>
-              <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download <code className="bg-white/10 px-1 rounded">BricsCoin-Core-2.1.0-Linux.AppImage</code> for Linux</li>
-                <li>Make executable: <code className="bg-white/10 px-1 rounded">chmod +x BricsCoin-Core-*.AppImage</code></li>
-                <li>Run: <code className="bg-white/10 px-1 rounded">./BricsCoin-Core-*.AppImage</code></li>
-              </ol>
-              <p className="text-xs text-muted-foreground mt-3">
-                Or build from source: Download tar.gz, extract, run <code className="bg-white/10 px-1 rounded">yarn install && yarn start</code>
-              </p>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Windows */}
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -314,9 +153,9 @@ export default function Downloads() {
                 <h4 className="font-bold">Windows</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download BricsCoin Core</li>
-                <li>Install <a href="https://nodejs.org" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Node.js</a></li>
-                <li>Follow the instructions above</li>
+                <li>Download the .exe file from GitHub</li>
+                <li>Run the installer</li>
+                <li>Launch BricsCoin Core</li>
               </ol>
             </div>
 
@@ -327,9 +166,23 @@ export default function Downloads() {
                 <h4 className="font-bold">macOS</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Install Xcode CLI: <code className="bg-white/10 px-1 rounded">xcode-select --install</code></li>
-                <li>Install Node.js via <a href="https://brew.sh" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Homebrew</a>: <code className="bg-white/10 px-1 rounded">brew install node</code></li>
-                <li>Follow the BricsCoin Core instructions above</li>
+                <li>Download the .zip file from GitHub</li>
+                <li>Extract the archive</li>
+                <li>Move to Applications folder</li>
+                <li>Right-click → Open (first time)</li>
+              </ol>
+            </div>
+
+            {/* Linux */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <HardDrive className="w-5 h-5 text-orange-500" />
+                <h4 className="font-bold">Linux</h4>
+              </div>
+              <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+                <li>Download the .AppImage from GitHub</li>
+                <li><code className="bg-white/10 px-1 rounded">chmod +x BricsCoin*.AppImage</code></li>
+                <li><code className="bg-white/10 px-1 rounded">./BricsCoin*.AppImage</code></li>
               </ol>
             </div>
           </div>
@@ -352,17 +205,8 @@ export default function Downloads() {
               onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}
               data-testid="github-link-btn"
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
+              <Github className="w-4 h-4 mr-2" />
               View on GitHub
-            </Button>
-            <Button
-              variant="outline"
-              className="border-white/20"
-              onClick={() => window.open(`${BACKEND_URL}/api/docs/info`, '_blank')}
-              data-testid="docs-link-btn"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Documentation
             </Button>
           </div>
         </CardContent>
