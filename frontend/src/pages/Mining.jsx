@@ -121,8 +121,8 @@ export default function Mining() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-primary/20">
               <span className="text-muted-foreground">Pool URL:</span>
               <div className="flex items-center gap-2">
-                <code className="text-primary font-bold">stratum+tcp://5.161.254.163:3333</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://5.161.254.163:3333")}>
+                <code className="text-primary font-bold">stratum+tcp://bricscoin26.org:3333</code>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://bricscoin26.org:3333")}>
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
