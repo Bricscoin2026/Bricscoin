@@ -80,7 +80,7 @@ INITIAL_REWARD = 50
 HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
-INITIAL_DIFFICULTY = 1000  # Bitcoin-style difficulty (higher = harder)
+INITIAL_DIFFICULTY = 10  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 TRANSACTION_FEE = 0.05  # Fee per transaction in BRICS
 
