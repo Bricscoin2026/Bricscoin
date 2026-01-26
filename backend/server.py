@@ -814,7 +814,7 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
     # Reset failed attempts on successful validation
     failed_attempts[client_ip] = 0
     
-    # Create transaction
+    # Create transaction - INSTANTLY CONFIRMED
     tx_id = str(uuid.uuid4())
     transaction = {
         "id": tx_id,
@@ -825,7 +825,7 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
         "timestamp": tx_request.timestamp,
         "signature": tx_request.signature,
         "public_key": tx_request.public_key,
-        "confirmed": False,
+        "confirmed": True,  # Instantly confirmed!
         "block_index": None,
         "ip_hash": hashlib.sha256(client_ip.encode()).hexdigest()[:16]  # Anonymized IP for audit
     }
