@@ -59,7 +59,7 @@ export default function About() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             BricsCoin aims to create a truly decentralized currency that remains accessible to hardware miners worldwide, 
-            maintains zero transaction fees, and operates with full transparency as an open-source project.
+            with minimal transaction fees (0.05 BRICS), and operates with full transparency as an open-source project.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
@@ -69,8 +69,8 @@ export default function About() {
             </div>
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
               <Zap className="w-8 h-8 text-primary mb-2" />
-              <h4 className="font-bold">Fast & Free</h4>
-              <p className="text-sm text-muted-foreground">Instant transactions with zero fees</p>
+              <h4 className="font-bold">Fast & Low Cost</h4>
+              <p className="text-sm text-muted-foreground">Instant transactions with only 0.05 BRICS fee</p>
             </div>
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
               <Github className="w-8 h-8 text-primary mb-2" />
