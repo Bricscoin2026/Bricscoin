@@ -196,18 +196,24 @@ All wallets use:
 
 ---
 
-## 8. Roadmap
+## 8. Status: LAUNCHED ✅
 
-### Q1 2026 ✅
+### Completed (January 2026)
 - [x] Mainnet launch
-- [x] Web wallet
+- [x] Web wallet with instant transactions
 - [x] Block explorer
-- [x] Hardware mining support (Stratum)
-- [x] Desktop wallet (BricsCoin Core)
+- [x] Hardware mining support (Stratum protocol)
+- [x] Desktop wallet (BricsCoin Core) - Linux, Windows, macOS
+- [x] Open source code on GitHub
+- [x] Security audit completed
+- [x] Transaction fee: 0.05 BRICS
+- [x] Bitcoin-style difficulty (1000)
 
-### Q2 2026
+### Future Enhancements
 - [ ] Exchange listings
 - [ ] Mobile wallet (iOS/Android)
+- [ ] Additional mining pools
+- [ ] P2P node network
 - [ ] Additional mining pools
 - [ ] Community governance
 
