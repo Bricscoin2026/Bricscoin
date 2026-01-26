@@ -131,8 +131,8 @@ export default function Mining() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-white/10">
               <span className="text-muted-foreground">Server IP:</span>
               <div className="flex items-center gap-2">
-                <code className="text-white">5.161.254.163</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("5.161.254.163")}>
+                <code className="text-white">bricscoin26.org</code>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("bricscoin26.org")}>
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
