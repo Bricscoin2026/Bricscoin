@@ -10,7 +10,8 @@ import {
   Download,
   Server,
   Info,
-  Github
+  Github,
+  Twitter
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
