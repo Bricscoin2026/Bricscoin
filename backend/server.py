@@ -704,11 +704,16 @@ async def get_tokenomics():
     blocks_count = await db.blocks.count_documents({})
     mining_rewards = sum(get_mining_reward(i) for i in range(1, blocks_count))
     
+    # Get genesis wallet address
+    genesis_wallet = await db.genesis_wallet.find_one({}, {"_id": 0, "private_key": 0, "seed_phrase": 0})
+    genesis_address = genesis_wallet.get('address') if genesis_wallet else None
+    
     return {
         "total_supply": MAX_SUPPLY,
         "premine": {
             "amount": PREMINE_AMOUNT,
             "percentage": round((PREMINE_AMOUNT / MAX_SUPPLY) * 100, 2),
+            "wallet_address": genesis_address,
             "allocation": {
                 "development": {"amount": 400000, "percentage": 40, "description": "Protocol improvements and maintenance"},
                 "marketing": {"amount": 300000, "percentage": 30, "description": "Community growth and adoption"},
@@ -728,6 +733,55 @@ async def get_tokenomics():
         "fees": {
             "transaction_fee": TRANSACTION_FEE,
             "note": "Fees are collected by miners who include transactions in blocks."
+        }
+    }
+
+@api_router.get("/genesis-wallet")
+async def get_genesis_wallet_info():
+    """Get genesis wallet public info (for transparency)"""
+    genesis_wallet = await db.genesis_wallet.find_one({}, {"_id": 0, "private_key": 0, "seed_phrase": 0})
+    if not genesis_wallet:
+        raise HTTPException(status_code=404, detail="Genesis wallet not found")
+    
+    # Get balance
+    balance = await calculate_balance(genesis_wallet['address'])
+    
+    return {
+        "address": genesis_wallet['address'],
+        "name": genesis_wallet.get('name', 'Genesis Wallet'),
+        "balance": balance,
+        "premine_amount": PREMINE_AMOUNT,
+        "created_at": genesis_wallet.get('created_at')
+    }
+
+@api_router.post("/admin/reset-blockchain")
+async def reset_blockchain(admin_key: str):
+    """Reset blockchain completely - DANGEROUS! Requires admin key"""
+    # Simple admin key check (in production, use proper authentication)
+    expected_key = os.environ.get('ADMIN_KEY', 'bricscoin-admin-2026')
+    if admin_key != expected_key:
+        raise HTTPException(status_code=403, detail="Invalid admin key")
+    
+    # Clear all blockchain data
+    await db.blocks.delete_many({})
+    await db.transactions.delete_many({})
+    await db.genesis_wallet.delete_many({})
+    await db.pending_transactions.delete_many({})
+    
+    # Recreate genesis block with new wallet
+    await create_genesis_block()
+    
+    # Get new genesis wallet info
+    genesis_wallet = await db.genesis_wallet.find_one({}, {"_id": 0})
+    
+    return {
+        "success": True,
+        "message": "Blockchain reset successfully",
+        "genesis_wallet": {
+            "address": genesis_wallet['address'],
+            "seed_phrase": genesis_wallet['seed_phrase'],
+            "private_key": genesis_wallet['private_key'],
+            "IMPORTANT": "SAVE THIS SEED PHRASE SECURELY! It controls the 1,000,000 BRICS premine!"
         }
     }
 
