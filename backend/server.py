@@ -344,15 +344,59 @@ async def get_circulating_supply() -> float:
     return min(supply, MAX_SUPPLY)
 
 async def create_genesis_block():
-    """Create genesis block if it doesn't exist"""
+    """Create genesis block with premine transaction if it doesn't exist"""
+    global GENESIS_WALLET_ADDRESS
+    
     existing = await db.blocks.find_one({"index": 0})
     if existing:
+        # Load genesis wallet from existing genesis block
+        if existing.get('transactions') and len(existing['transactions']) > 0:
+            GENESIS_WALLET_ADDRESS = existing['transactions'][0].get('recipient')
         return
+    
+    # Create genesis wallet
+    mnemo = Mnemonic("english")
+    seed_phrase = mnemo.generate(strength=128)
+    seed = mnemo.to_seed(seed_phrase)
+    private_key = SigningKey.from_string(seed[:32], curve=SECP256k1)
+    public_key = private_key.get_verifying_key()
+    
+    # Generate address
+    public_key_hex = public_key.to_string().hex()
+    address_hash = hashlib.sha256(public_key_hex.encode()).hexdigest()[:40]
+    genesis_address = f"BRICS{address_hash}"
+    GENESIS_WALLET_ADDRESS = genesis_address
+    
+    # Store genesis wallet in database
+    genesis_wallet = {
+        "address": genesis_address,
+        "public_key": public_key_hex,
+        "private_key": private_key.to_string().hex(),
+        "seed_phrase": seed_phrase,
+        "name": "Genesis Wallet (Premine)",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "is_genesis": True
+    }
+    await db.genesis_wallet.delete_many({})  # Clear old genesis wallet
+    await db.genesis_wallet.insert_one(genesis_wallet)
+    
+    # Create premine transaction
+    premine_tx = {
+        "id": "genesis-premine-tx",
+        "sender": "COINBASE",
+        "recipient": genesis_address,
+        "amount": PREMINE_AMOUNT,
+        "fee": 0,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "signature": "genesis",
+        "confirmed": True,
+        "block_index": 0
+    }
     
     genesis_block = {
         "index": 0,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "transactions": [],
+        "transactions": [premine_tx],
         "proof": 0,
         "previous_hash": "0" * 64,
         "nonce": 0,
@@ -369,7 +413,11 @@ async def create_genesis_block():
     )
     
     await db.blocks.insert_one(genesis_block)
-    logging.info("Genesis block created")
+    await db.transactions.insert_one(premine_tx)
+    
+    logging.info(f"Genesis block created with premine to {genesis_address}")
+    logging.info(f"Genesis wallet seed phrase: {seed_phrase}")
+    logging.info(f"IMPORTANT: Save this seed phrase securely!")
 
 # ==================== P2P NETWORK FUNCTIONS ====================
 async def register_with_peer(peer_url: str) -> bool:
