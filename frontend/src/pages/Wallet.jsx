@@ -376,7 +376,7 @@ function ReceiveDialog({ wallet }) {
             <QRCodeSVG value={wallet?.address || ""} size={200} />
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            Scansiona il QR code o copia l'indirizzo
+            Scansiona il QR code o copia l&apos;indirizzo
           </p>
           <div className="w-full">
             <div className="flex items-center gap-2 p-3 bg-background rounded-sm border border-white/10">
