@@ -197,20 +197,11 @@ export default function About() {
               ) : (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Development (40%)</span>
-                    <span className="font-mono">400,000 BRICS</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Marketing (30%)</span>
-                    <span className="font-mono">300,000 BRICS</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Liquidity (20%)</span>
-                    <span className="font-mono">200,000 BRICS</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Team (10%)</span>
-                    <span className="font-mono">100,000 BRICS</span>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Team (100%)</span>
+                      <p className="text-xs text-muted-foreground/60">Founder and core team</p>
+                    </div>
+                    <span className="font-mono">1,000,000 BRICS</span>
                   </div>
                 </>
               )}
