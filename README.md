@@ -88,7 +88,7 @@ python stratum_server.py
 
 Connect your ASIC miner (Bitaxe, NerdMiner, etc.) to the Stratum server:
 
-- **Pool URL**: `stratum+tcp://YOUR_SERVER_IP:3333`
+- **Pool URL**: `stratum+tcp://bricscoin26.org:3333`
 - **Username**: Your BRICS wallet address
 - **Password**: `x` (or any value)
 
