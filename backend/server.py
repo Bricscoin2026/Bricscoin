@@ -578,8 +578,8 @@ def generate_wallet_from_seed(seed_phrase: str = None):
         seed_phrase = mnemo.generate(strength=128)  # 128 bits = 12 words
         seed = mnemo.to_seed(seed_phrase)
     
-    # Derive private key from seed (first 32 bytes)
-    private_key_bytes = hashlib.sha256(seed).digest()
+    # Derive private key from seed (first 32 bytes) - MUST match genesis wallet generation
+    private_key_bytes = seed[:32]
     private_key = SigningKey.from_string(private_key_bytes, curve=SECP256k1)
     public_key = private_key.get_verifying_key()
     
