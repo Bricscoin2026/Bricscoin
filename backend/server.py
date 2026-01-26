@@ -586,7 +586,7 @@ def generate_address_from_public_key(public_key_hex: str) -> str:
     return "BRICS" + address_hash[:40]
 
 async def get_balance(address: str) -> float:
-    """Calculate balance for an address"""
+    """Calculate balance for an address (includes pending transactions)"""
     balance = 0.0
     
     # Add mining rewards
@@ -594,15 +594,16 @@ async def get_balance(address: str) -> float:
     for block in blocks:
         balance += get_mining_reward(block['index'])
     
-    # Add received transactions
-    received = await db.transactions.find({"recipient": address, "confirmed": True}, {"_id": 0}).to_list(10000)
+    # Add ALL received transactions (confirmed + pending)
+    received = await db.transactions.find({"recipient": address}, {"_id": 0}).to_list(10000)
     for tx in received:
         balance += tx['amount']
     
-    # Subtract sent transactions
-    sent = await db.transactions.find({"sender": address, "confirmed": True}, {"_id": 0}).to_list(10000)
+    # Subtract ALL sent transactions (confirmed + pending) including fees
+    sent = await db.transactions.find({"sender": address}, {"_id": 0}).to_list(10000)
     for tx in sent:
         balance -= tx['amount']
+        balance -= tx.get('fee', 0)  # Subtract fee too
     
     return balance
 
