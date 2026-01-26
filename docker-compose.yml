@@ -26,7 +26,7 @@ services:
       # Your node's public URL (required for P2P)
       - NODE_URL=${NODE_URL:-}
       # Comma-separated list of seed nodes to connect to
-      - SEED_NODES=${SEED_NODES:-https://crypto-brics.preview.emergentagent.com}
+      - SEED_NODES=${SEED_NODES:-https://bricscoin-deploy.preview.emergentagent.com}
       - CORS_ORIGINS=*
     depends_on:
       - mongo
