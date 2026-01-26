@@ -141,3 +141,7 @@ downloads/BricsCoin-Core-2.1.1-Linux.AppImage
 *.env
 *.env.*
 frontend/node_modules/.cache/default-development/8.pack
+-e 
+# Environment files
+*.env
+*.env.*
