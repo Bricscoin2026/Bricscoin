@@ -144,6 +144,16 @@ export default function Layout() {
               >
                 Whitepaper
               </a>
+              <span>•</span>
+              <a 
+                href="https://x.com/Bricscoin26" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <Twitter className="w-4 h-4" />
+                Twitter
+              </a>
             </div>
           </div>
         </div>
