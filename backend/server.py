@@ -84,6 +84,9 @@ INITIAL_DIFFICULTY = 1000  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 TRANSACTION_FEE = 0.05  # Fee per transaction in BRICS
 
+# Genesis wallet for premine (will be created on first run)
+GENESIS_WALLET_ADDRESS = None  # Set dynamically when genesis block is created
+
 # P2P Network Configuration
 NODE_ID = os.environ.get('NODE_ID', str(uuid.uuid4())[:8])
 NODE_URL = os.environ.get('NODE_URL', '')
