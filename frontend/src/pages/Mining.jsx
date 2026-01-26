@@ -243,11 +243,11 @@ export default function Mining() {
           <ul className="text-sm text-muted-foreground space-y-3">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Use the <strong>direct IP address</strong> (5.161.254.163), not the domain name</span>
+              <span>Use <strong>stratum.bricscoin26.org</strong> or the direct IP <strong>5.161.254.163</strong></span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Cloudflare proxy does not support Stratum protocol on port 3333</span>
+              <span>If the domain doesn't work, use the <strong>direct IP address</strong> as fallback</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
