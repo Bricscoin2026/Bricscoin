@@ -640,12 +640,7 @@ async def get_balance(address: str) -> float:
     """Calculate balance for an address (includes pending transactions)"""
     balance = 0.0
     
-    # Add mining rewards
-    blocks = await db.blocks.find({"miner": address}, {"_id": 0}).to_list(10000)
-    for block in blocks:
-        balance += get_mining_reward(block['index'])
-    
-    # Add ALL received transactions (confirmed + pending)
+    # Add ALL received transactions (confirmed + pending) - includes mining rewards
     received = await db.transactions.find({"recipient": address}, {"_id": 0}).to_list(10000)
     for tx in received:
         balance += tx['amount']
