@@ -889,6 +889,46 @@ export default function Wallet() {
           )}
         </div>
       )}
+
+      {/* Delete Wallet Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="bg-card border-white/10" data-testid="delete-wallet-dialog">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-red-500">Elimina Wallet</DialogTitle>
+            <DialogDescription>
+              Sei sicuro di voler eliminare questo wallet? Questa azione non può essere annullata.
+            </DialogDescription>
+          </DialogHeader>
+          {walletToDelete && (
+            <div className="py-4 space-y-2">
+              <p className="text-sm"><strong>Nome:</strong> {walletToDelete.name}</p>
+              <p className="text-sm font-mono truncate"><strong>Indirizzo:</strong> {walletToDelete.address}</p>
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-sm mt-4">
+                <p className="text-sm text-red-400 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  Assicurati di aver salvato la seed phrase prima di eliminare!
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              className="border-white/20"
+            >
+              Annulla
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteWallet}
+              data-testid="confirm-delete-btn"
+            >
+              Elimina Wallet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
