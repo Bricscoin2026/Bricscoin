@@ -136,6 +136,20 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
             Mostra Seed Phrase
           </Button>
         )}
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full border-red-500/50 text-red-500 hover:bg-red-500/10"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(wallet);
+          }}
+          data-testid="delete-wallet-btn"
+        >
+          <AlertTriangle className="w-3 h-3 mr-2" />
+          Elimina Wallet
+        </Button>
       </div>
     </motion.div>
   );
