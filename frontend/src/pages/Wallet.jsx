@@ -801,6 +801,7 @@ export default function Wallet() {
                 onSelect={setSelectedWallet}
                 isSelected={selectedWallet?.address === wallet.address}
                 onShowSeed={handleShowSeed}
+                onDelete={handleDeleteWallet}
               />
             ))}
           </div>
