@@ -46,7 +46,7 @@ import {
 import { prepareSecureTransaction, isValidAddress } from "../lib/crypto";
 import { QRCodeSVG } from "qrcode.react";
 
-function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed }) {
+function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDelete }) {
   const [balance, setBalance] = useState(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
