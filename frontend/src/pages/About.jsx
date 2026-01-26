@@ -32,10 +32,8 @@ export default function About() {
   }, []);
 
   const roadmapItems = [
-    { phase: "Q1 2026", status: "done", items: ["Mainnet launch", "Web wallet", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet"] },
-    { phase: "Q2 2026", status: "current", items: ["Exchange listings", "Mobile wallet", "Additional mining pools", "Community governance"] },
-    { phase: "Q3 2026", status: "upcoming", items: ["P2P node network", "Smart contracts", "Cross-chain bridges"] },
-    { phase: "Q4 2026", status: "upcoming", items: ["Full decentralization", "Lightning Network", "Enterprise partnerships"] },
+    { phase: "January 2026", status: "done", items: ["Mainnet launch", "Web wallet with instant transactions", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet (Linux, Windows, Mac)", "Open source on GitHub", "Security audit completed"] },
+    { phase: "Future Updates", status: "upcoming", items: ["Exchange listings", "Mobile wallet (iOS/Android)", "Additional mining pools", "P2P node network", "Community governance"] },
   ];
 
   return (
