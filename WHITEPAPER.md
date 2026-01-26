@@ -214,18 +214,7 @@ All wallets use:
 - [ ] Mobile wallet (iOS/Android)
 - [ ] Additional mining pools
 - [ ] P2P node network
-- [ ] Additional mining pools
 - [ ] Community governance
-
-### Q3 2026
-- [ ] P2P node network
-- [ ] Smart contract exploration
-- [ ] Cross-chain bridges
-
-### Q4 2026
-- [ ] Full decentralization
-- [ ] Lightning Network compatibility
-- [ ] Enterprise partnerships
 
 ---
 
@@ -235,7 +224,9 @@ All wallets use:
 
 Anonymous developer passionate about decentralization and cryptocurrency. Building BricsCoin as a community-driven, open-source project.
 
-**Contact**: GitHub [@bricscoin26](https://github.com/bricscoin26)
+**Contact**: 
+- GitHub: [@bricscoin26](https://github.com/bricscoin26)
+- Twitter: [@Bricscoin26](https://x.com/Bricscoin26)
 
 ---
 
