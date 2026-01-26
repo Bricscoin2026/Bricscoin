@@ -302,7 +302,7 @@ const translations = {
     stratumPort: "Port",
     stratumUser: "User",
     stratumPass: "Password",
-    stratumNote: "Note: Use direct IP for Stratum, not domain (Cloudflare doesn't support port 3333)",
+    stratumNote: "Connect your ASIC miner to bricscoin26.org:3333",
     copyConfig: "Copy Configuration",
     
     // Wallet
