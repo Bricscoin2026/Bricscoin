@@ -670,6 +670,26 @@ export default function Wallet() {
     setSeedDialogOpen(true);
   };
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [walletToDelete, setWalletToDelete] = useState(null);
+
+  const handleDeleteWallet = (wallet) => {
+    setWalletToDelete(wallet);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteWallet = () => {
+    if (!walletToDelete) return;
+    const updated = wallets.filter(w => w.address !== walletToDelete.address);
+    saveWallets(updated);
+    if (selectedWallet?.address === walletToDelete.address) {
+      setSelectedWallet(updated.length > 0 ? updated[0] : null);
+    }
+    setDeleteDialogOpen(false);
+    setWalletToDelete(null);
+    toast.success("Wallet eliminato");
+  };
+
   const exportWallet = () => {
     if (!selectedWallet) return;
     const data = JSON.stringify(selectedWallet, null, 2);
