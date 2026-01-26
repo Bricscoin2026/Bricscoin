@@ -327,7 +327,11 @@ export default function About() {
           </Button>
           <Button variant="outline" className="border-white/20" onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}>
             <Github className="w-4 h-4 mr-2" />
-            Contribute
+            GitHub
+          </Button>
+          <Button variant="outline" className="border-white/20" onClick={() => window.open('https://x.com/Bricscoin26', '_blank')}>
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Twitter/X
           </Button>
         </div>
       </div>
