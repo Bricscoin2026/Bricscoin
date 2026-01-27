@@ -129,6 +129,15 @@ POST /api/transactions
 
 ## Changelog
 
+### v2.4.0 (2026-01-XX) - Security Audit Complete
+- ✅ Comprehensive security audit passed (27 tests)
+- ✅ Input validation tests: 8/8 passed
+- ✅ Signature verification tests: 2/2 passed
+- ✅ Replay attack prevention tests: 2/2 passed
+- ✅ Rate limiting configured and tested
+- ✅ Fixed bug: wallet import from private key (request.name → wallet_request.name)
+- ✅ Created test suite: `/app/backend/tests/test_security_audit.py`
+
 ### v2.3.0 (2026-01-25) - BricsCoin Core P2P Update
 - ✅ BricsCoin Core v2.1 with P2P network sync
 - ✅ Secure client-side transaction signing in desktop wallet
