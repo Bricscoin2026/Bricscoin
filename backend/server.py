@@ -17,6 +17,7 @@ import json
 import time
 import secrets
 from ecdsa import SigningKey, VerifyingKey, SECP256k1, BadSignatureError
+from ecdsa.util import sigdecode_der
 import io
 import qrcode
 import base64
@@ -80,7 +81,7 @@ INITIAL_REWARD = 50
 HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
-INITIAL_DIFFICULTY = 1  # Bitcoin-style difficulty (higher = harder)
+INITIAL_DIFFICULTY = 1000  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 TRANSACTION_FEE = 0.05  # Fee per transaction in BRICS
 
@@ -624,12 +625,49 @@ def sign_transaction(private_key_hex: str, transaction_data: str) -> str:
     return signature.hex()
 
 def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: str) -> bool:
-    """Verify transaction signature"""
+    """Verifica della firma della transazione - tenta più metodi"""
     try:
         public_key = VerifyingKey.from_string(bytes.fromhex(public_key_hex), curve=SECP256k1)
-        return public_key.verify(bytes.fromhex(signature_hex), transaction_data.encode())
-    except BadSignatureError:
+        sig_bytes = bytes.fromhex(signature_hex)
+        
+        # Metodo 1: verify_digest con DER (frontend firma hash direttamente)
+        try:
+            msg_hash = hashlib.sha256(transaction_data.encode()).digest()
+            if public_key.verify_digest(sig_bytes, msg_hash, sigdecode=sigdecode_der):
+                logging.info("Firma OK (metodo 1: verify_digest + DER)")
+                return True
+        except: pass
+        
+        # Metodo 2: verify con DER
+        try:
+            if public_key.verify(sig_bytes, transaction_data.encode(), sigdecode=sigdecode_der):
+                logging.info("Firma OK (metodo 2: verify + DER)")
+                return True
+        except: pass
+        
+        # Metodo 3: doppio hash
+        try:
+            hex_hash = hashlib.sha256(transaction_data.encode()).hexdigest()
+            msg_hash2 = hashlib.sha256(hex_hash.encode()).digest()
+            if public_key.verify_digest(sig_bytes, msg_hash2, sigdecode=sigdecode_der):
+                logging.info("Firma OK (metodo 3: doppio hash)")
+                return True
+        except: pass
+        
+        # Metodo 4: firma raw
+        try:
+            msg_hash = hashlib.sha256(transaction_data.encode()).digest()
+            if public_key.verify_digest(sig_bytes, msg_hash):
+                logging.info("Firma OK (metodo 4: raw)")
+                return True
+        except: pass
+        
+        logging.error("Tutti i metodi di verifica della firma sono falliti")
         return False
+    except Exception as e:
+        logging.error(f"Errore firma: {e}")
+        return False
+
 
 def generate_address_from_public_key(public_key_hex: str) -> str:
     """Generate BRICS address from public key - used to verify sender owns the address"""
@@ -876,7 +914,10 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
         raise HTTPException(status_code=400, detail="Public key does not match sender address")
     
     # Create transaction data for verification (same format as client-side signing)
-    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{tx_request.timestamp}"
+    amount_str = str(tx_request.amount)
+    if amount_str.endswith('.0'):
+        amount_str = amount_str[:-2]
+    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{amount_str}{tx_request.timestamp}"
     
     # CRITICAL: Verify the signature
     try:

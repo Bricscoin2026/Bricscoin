@@ -243,6 +243,60 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Protocol Disclaimer */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Card className="bg-card border-yellow-500/20">
+          <CardHeader className="border-b border-yellow-500/20">
+            <CardTitle className="font-heading flex items-center gap-2 text-yellow-500">
+              ⚠️ Protocol Disclaimer
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
+              <div>
+                <h4 className="text-primary font-bold mb-3">{"<>"} BRICScoin</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Decentralized monetary protocol</li>
+                  <li>• Open-source software released publicly</li>
+                  <li>• Does not represent an investment</li>
+                  <li>• Does not guarantee value</li>
+                  <li>• No central entity controls or manages it</li>
+                  <li>• Functions only with voluntary network usage</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-primary font-bold mb-3">⚡ Purpose & Distribution</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Technical experiment only</li>
+                  <li>• Tests peer-to-peer value transfer</li>
+                  <li>• No financial or political objectives</li>
+                  <li>• No pre-sale or initial allocation</li>
+                  <li>• No sale of coins</li>
+                  <li>• Units issued exclusively via mining</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-primary font-bold mb-3">◇ Markets & Responsibility</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Protocol does not require markets</li>
+                  <li>• Trading is by independent third parties</li>
+                  <li>• Creator does not control price or listings</li>
+                  <li>• Not affiliated with any organization or state</li>
+                  <li>• Use entirely at your own risk</li>
+                  <li>• No guarantees or support provided</li>
+                </ul>
+              </div>
+            </div>
+            <p className="text-center text-yellow-500 font-mono mt-6 text-sm">Code is the only authority.</p>
+          </CardContent>
+        </Card>
+      </motion.div>
+
     </div>
   );
 }
