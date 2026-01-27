@@ -789,7 +789,8 @@ class StratumServer:
         logger.info("  Bitcoin-Compatible for ASIC Miners")
         logger.info("=" * 60)
         logger.info(f"  Listening on {STRATUM_HOST}:{STRATUM_PORT}")
-        logger.info(f"  Network difficulty: {NETWORK_DIFFICULTY}")
+        current_diff = await get_network_difficulty()
+        logger.info(f"  Network difficulty: {current_diff}")
         logger.info("=" * 60)
         
         async with self.server:
