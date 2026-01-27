@@ -137,6 +137,10 @@ POST /api/transactions
 - ✅ Rate limiting configured and tested
 - ✅ Fixed bug: wallet import from private key (request.name → wallet_request.name)
 - ✅ Created test suite: `/app/backend/tests/test_security_audit.py`
+- ✅ Added "Security Audit Passed" badge on Dashboard
+- ✅ Added Security Audit section on About page
+- ✅ Updated README.md with security badges and audit details
+- ✅ Created SECURITY_AUDIT.md documentation
 
 ### v2.3.0 (2026-01-25) - BricsCoin Core P2P Update
 - ✅ BricsCoin Core v2.1 with P2P network sync
