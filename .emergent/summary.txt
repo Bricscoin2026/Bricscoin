@@ -2,35 +2,105 @@
 
 **PRODUCT REQUIREMENTS:**
 - **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty system (retargeting every 2016 blocks), SHA256 hashing, 21,000,000 total supply, and a block reward halving mechanism.
-- **Transactions:** A fee of 0.05 BRICS per transaction. Transactions must appear instant to the user, with balances updating immediately upon submission.
-- **Mining:** Support for hardware ASIC miners (Bitaxe, Nerdminer) via a Bitcoin-compliant Stratum protocol, accessible at .
-- **Wallets:** A secure web wallet and a BricsCoin Core desktop wallet (for Windows, macOS, Linux) that perform client-side transaction signing.
-- **Source Code & Transparency:** The project must be 100% open-source and publicly available on GitHub. A whitepaper, team information (founder Jabo86), and a transparent breakdown of the 1,000,000 BRICS premine must be on the website.
-- **Credibility:** The project must address red flags to appear legitimate, including having a public codebase, a clear roadmap, reasonable chain parameters, and community links (Twitter/X).
+- **Transactions:** A fee per transaction that is burned (removed from circulation) rather than given to the miner. Transactions must be signed client-side.
+- **Mining:** Support for hardware ASIC miners via a Bitcoin-compliant Stratum protocol, accessible at .
+- **Wallets:** A secure web wallet. A BricsCoin Core desktop wallet (for Windows, macOS, Linux).
+- **Source Code & Transparency:** The project must be 100% open-source and publicly available on GitHub. The website must be transparent about the 1,000,000 BRICS premine and the fee-burning mechanism.
+- **Credibility & Longevity:** The project must address red flags to appear legitimate. The difficulty adjustment must function correctly to ensure the coin's longevity (project must last 100 years).
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-The project is functionally complete and feature-rich, but the latest version is **not yet live on the production domain**.
-- **Codebase:** All source code for the backend, frontend, stratum server, and desktop wallet is complete and has been pushed to the user's public GitHub repository: .
-- **Backend:** A FastAPI application with a Bitcoin-style difficulty system (initial difficulty 1000), a 0.05 BRICS transaction fee, and an instant confirmation mechanism for transactions. It includes a  endpoint for transparency.
-- **Frontend:** A React web app with all UI elements updated to reflect the new difficulty, fees, and community links. It clearly states that ASIC hardware is required for mining and provides links to download wallets from GitHub releases. All references to Emergent have been removed.
-- **Desktop Wallet:** The BricsCoin Core (v2.1) Electron wallet has been updated with P2P logic and secure client-side signing. A GitHub Actions workflow successfully builds binaries for Windows, macOS, and Linux, which are available on the GitHub repository's Releases page.
-- **Domain & DNS:** The user's domains  and  are correctly configured on Cloudflare to point to the Hetzner server IP () with the proxy disabled (DNS only), making them ready for the Stratum server and web traffic.
+A full-stack application (FastAPI backend, React frontend, MongoDB) is deployed on the user's Hetzner server () using Docker Compose and is accessible via . A Stratum server is running to support ASIC mining. However, the application is in a highly unstable state with several critical bugs related to core blockchain functions. The codebase is on a public GitHub repository.
 
 **Last working item**:
-- Last item agent was working: The user was struggling to update the production server on Hetzner with the latest code from GitHub. The agent was guiding the user through SSH commands on their Android device (Termux) and PC to perform the deployment. The final step is for the user to successfully run the deployment command.
-- Status: BLOCKED
-- Agent Testing Done: Y
-- Which testing method agent to use? Manual testing by user. The user needs to execute SSH commands on their production server.
+- Last item agent was working: The agent was debugging why transactions are failing with a Signature verification failed error, as reported by the user with a screenshot. The investigation pointed towards a mismatch in the data being signed on the frontend () and the data being verified on the backend (). The agent was also trying to address the user's concern about not being able to add BricsCoin to MetaMask, explaining it's an independent blockchain.
+- Status: IN PROGRESS
+- Agent Testing Done: N
+- Which testing method agent to use? The agent must fix the bug and then perform an end-to-end test by creating a transaction from the web wallet UI. This will validate both frontend signing and backend verification.
 - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-- Issue 1: Deploy Latest Code to Production Hetzner Server (P0)
+- Issue 1: Transactions are not working (P0)
+- Issue 2: Blockchain difficulty is not adjusting automatically (P0)
+- Issue 3: Wallet balances and circulating supply are calculated incorrectly (P1)
+- Issue 4: Transaction fees are not being burned correctly (P2)
+- Issue 5: Mining is not finding blocks at the expected rate (P2)
 
 Issues Detail:
 - Issue 1:
-    - Attempted fixes: The agent provided numerous usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+    - Attempted fixes: The agent has verified that the underlying API endpoint for importing wallets works, but sending a transaction fails. The error message Signature verification failed points to a mismatch between the client-side signing () and backend verification (). The agent has reviewed the code but has not yet implemented a definitive fix.
+    - Next debug checklist:
+        1. In  and , log the exact string message that is being signed and verified.
+        2. Ensure the order of fields (, , , ) and their data types (especially ) are identical.
+        3. Create a test transaction via the frontend and check the backend logs for the comparison failure.
+    - Why fix this issue and what will be achieved with the fix?: This is a critical blockchain function. Without working transactions, the cryptocurrency has no utility.
+    - Status: IN PROGRESS
+    - Is recurring issue? Y
+    - Should Test frontend/backend/both after fix? Both. The fix will likely be in both files. Testing must be E2E via the UI.
+    - Blocked on other issue: None.
+
+- Issue 2:
+    - Attempted fixes: The user reported the difficulty is stuck at 1, which could exhaust the coin supply too quickly. The agent identified a bug where the difficulty adjustment logic (in ) was calculated but not being saved or enforced globally. A fix was attempted by creating a  file to persist the state. The stratum server was also modified to read this difficulty dynamically. However, the user still reports it's not working.
+    - Next debug checklist:
+        1. Verify that the  function is correctly called when a new block is added.
+        2. Check if  is being written to and read from correctly by both  and .
+        3. Ensure the logic for  is triggering correctly.
+    - Why fix this issue and what will be achieved with the fix?: This is crucial for the long-term economic stability and security of the coin, as requested by the user.
+    - Status: IN PROGRESS
+    - Is recurring issue? Y
+    - Should Test frontend/backend/both after fix? Backend. Verify via API and stratum logs.
+    - Blocked on other issue: None.
+
+- Issue 3:
+    - Attempted fixes: The agent identified a double-counting bug where mining rewards were counted twice (once from the block's  field and once from the  transaction). A fix was implemented in the  function in  to only count non-coinbase transactions for the recipient. However, the user reports that balances are still wrong, and the circulating supply on the dashboard doesn't match the sum of wallet balances.
+    - Next debug checklist:
+        1. Re-examine the  and  functions in .
+        2. Ensure that  transactions are correctly attributed to the miner's balance.
+        3. The previous fix might be incorrect; the logic should be: .
+    - Why fix this issue and what will be achieved with the fix?: Correct balances are fundamental for user trust and the basic functioning of a cryptocurrency wallet.
+    - Status: IN PROGRESS
+    - Is recurring issue? Y
+    - Should Test frontend/backend/both after fix? Backend. Test via API calls.
+    - Blocked on other issue: None.
+
+- Issue 4:
+    - Attempted fixes: The user requested that transaction fees be burned. The agent modified  to deduct the fee from the sender's balance but not add it to any recipient. The  API and  page were updated to reflect this for transparency.
+    - Next debug checklist:
+        1. After fixing transactions (Issue 1), send a transaction and verify that the sender's balance decreases by .
+        2. Verify that the recipient's balance increases by  only.
+        3. Check the  function to ensure burned fees are correctly subtracted from the total supply.
+    - Why fix this issue and what will be achieved with the fix?: Fulfills a direct user requirement for the coin's economic model.
+    - Status: TESTING PENDING
+    - Is recurring issue? N
+    - Should Test frontend/backend/both after fix? Backend.
+    - Blocked on other issue: Issue 1: Transactions are not working
+
+- Issue 5:
+    - Attempted fixes: The user reported not finding blocks even with low difficulty. The agent discovered a major bug in the  constant in  and . The constant was set too low, requiring an extremely difficult hash (e.g., 8+ leading zeros) even for difficulty 1. The agent corrected  to a much higher value .
+    - Next debug checklist:
+        1. After deployment of the fix, monitor the stratum logs for BLOCK FOUND messages.
+        2. Verify that the block count increases via the  endpoint.
+    - Why fix this issue and what will be achieved with the fix?: Mining is the core of a PoW cryptocurrency. Without it, no new coins can be created or transactions confirmed.
+    - Status: IN PROGRESS
+    - Is recurring issue? Y
+    - Should Test frontend/backend/both after fix? Backend.
+    - Blocked on other issue: None.
+
+**In progress Task List**:
+- None.
+
+**Upcoming and Future Tasks**
+- **Future Tasks (Post-Launch):**
+    - Pursue exchange listings.
+    - Develop a mobile wallet for iOS/Android.
+    - Create a dedicated page for community mining pools.
+- **Removed from Roadmap:**
+    - P2P node network
+    - Community governance
+
+**Completed work in this session**
+- **Deployment & Server Management:** Guided the user through numerous complex deployments on their Hetzner server, resolving issues with usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
            [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
            [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
            [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
@@ -74,125 +144,104 @@ collaborate (see also: git help workflows)
 'git help -a' and 'git help -g' list available subcommands and some
 concept guides. See 'git help <command>' or 'git help <concept>'
 to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system., , , , and  command variations to the user, who was trying to execute them from an Android device. The user encountered issues with permissions, file paths, and corrupted downloads.
-    - Next debug checklist: The agent has provided a final, single, comprehensive command to be run from a PC (Mac/Windows/Linux) terminal. The next agent must guide the user to execute this command and verify its success.
-        **Command for user:**
-        
-        (Password: )
-    - Why fix this issue and what will be achieved with the fix?: This is the final step required to launch the project. It will update the live website () with all the requested features, bug fixes, and credibility improvements, while preserving the existing blockchain data.
-    - Status: BLOCKED
-    - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Both. After deployment, the agent and user must visit  to confirm all changes are live (e.g., difficulty is 1000, transaction fees are present, UI text is updated).
-    - Blocked on other issue: User action.
-
-**In progress Task List**:
-- None. All development tasks are complete pending the final deployment.
-
-**Upcoming and Future Tasks**
-- **Future Enhancements (Post-Launch):**
-    - Pursue exchange listings.
-    - Develop a mobile wallet for iOS/Android.
-    - Create a dedicated page for community mining pools.
-
-**Completed work in this session**
-- **Full Credibility Overhaul:**
-    - **Open Source:** Guided user to create a new GitHub account and successfully pushed the entire project, making it public.
-    - **Whitepaper & About Page:** Created a  and a new About page on the site with a roadmap, founder info (Jabo86), and technical specifications.
-    - **Premine Transparency:** Implemented a  endpoint and updated the About page to show a live, transparent breakdown of the token supply, including the 1M premine.
-    - **UI/UX Polish:** Removed all misleading Start Mining text, clarifying that ASIC hardware is required. Removed all branding/references to Emergent. Added favicon and Twitter/X profile links.
-- **Blockchain Core Upgrade:**
-    - **Bitcoin-style Difficulty:** Replaced the simple leading zeros system with a robust, scalable Bitcoin-style target-based difficulty, set to .
-    - **Difficulty Adjustment:** Implemented the Bitcoin algorithm to automatically adjust difficulty every 2016 blocks.
-    - **Transaction Fees:** Added a 0.05 BRICS fee to all transactions.
-    - **Instant Transactions:** Modified the backend to immediately confirm transactions and update balances to meet the user's UX requirements.
-- **Wallet and Deployment Pipeline:**
-    - **GitHub Actions:** Created and debugged a CI/CD workflow () to automatically build the BricsCoin Core desktop wallet for Windows (.exe), macOS (.zip), and Linux (.AppImage).
-    - **Wallet Releases:** The wallet binaries were successfully built and are available on the project's GitHub Releases page.
-    - **Site Downloads Page:** Updated the Downloads page to link directly to the GitHub releases for all platforms.
-- **Production Server Configuration:**
-    - **DNS Setup:** Guided user to correctly configure  and  on Cloudflare.
-    - **Stratum URL Update:** Updated all references in the frontend and documentation to use .
+See 'git help git' for an overview of the system., , disk space, port conflicts, and environment variables.
+- **SSL Configuration:** Successfully installed Certbot and configured Nginx to enable HTTPS on .
+- **Genesis Wallet & Blockchain Reset:** Implemented a robust genesis wallet creation system and an admin endpoint to reset the blockchain for debugging purposes. Unified the wallet address generation logic between creation and import.
+- **UI/UX Improvements:**
+    - Implemented a Delete Wallet feature in the frontend wallet.
+    - Removed the Future Updates section from the roadmap on the About page as requested.
+- **Bug Fixes (In Progress):**
+    - **Transaction Fees:** Updated backend and frontend to reflect that fees are burned.
+    - **Mining Difficulty:** Corrected the  constant, which was preventing any blocks from being found.
+    - **Wallet Balance:** Attempted to fix a double-counting bug in the balance calculation.
 
 **Earlier issues found/mentioned but not fixed**
-- None. All issues from the previous handoff and raised during this session have been resolved, pending the final deployment.
+- All known issues are captured in the All Pending/In progress Issue list.
 
 **Known issue recurrence from previous fork**
-- **Hetzner Server Instability:** This remains a low-level risk. The server's 2GB RAM can be stressed by  operations. This is a hardware limitation on the user's end.
+- **Hetzner Server Instability:** The user's server (2GB RAM) can be slow or crash during .
+- **Deployment Complexity:** The user struggles with the multi-step deployment process. The current workaround involves ing the GitHub tarball instead of using .
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Bitcoin-style Difficulty:** The system now uses  for block validation, allowing for much greater difficulty scaling.
-- **Bitcoin-style Difficulty Adjustment:** The difficulty automatically retargets every 2016 blocks based on the actual time taken, aiming for a 10-minute block time.
-- **Instant Confirmation (UX Choice):** Transactions are marked  on submission, a centralized shortcut to provide the instant feel requested by the user.
-- **GitHub Actions for Electron Build:** The  file automates the creation of cross-platform desktop applications.
+- **Bitcoin-style Difficulty:** Uses . The  value was recently corrected. The adjustment algorithm is still buggy.
+- **Client-Side Transaction Signing:** The frontend signs transactions before sending them to the backend. This process is currently failing signature verification.
+- **Fee Burning:** Fees are subtracted from the sender's balance and removed from the total circulating supply.
+- **Stratum Protocol:** A Bitcoin-compliant server () allows hardware miners to connect.
+- **Docker Deployment:** The application is containerized and managed via  on the user's production server.
 
 **key DB schema**
 - : 
+- : 
+- : 
+- :  (persisted in )
 
 **changes in tech stack**
-- No new technologies were added, but the use of  and GitHub Actions became a core part of the development workflow.
+- None.
 
 **All files of reference**
-- : The heart of the blockchain logic. Contains all recent changes to difficulty, fees, and transaction confirmation.
-- : New page central to the project's credibility, showing tokenomics and roadmap.
-- : Defines the automated wallet build process.
-- : The official project document created to enhance legitimacy.
-- : Contains configuration critical for the successful build of the desktop wallet.
+- : Contains bugs related to transaction verification, balance calculation, and difficulty adjustment.
+- : Contains bugs related to dynamic difficulty updates.
+- : Contains the UI logic for sending transactions.
+- : Contains the client-side signing logic which is part of the transaction bug.
+- : Defines the production environment. Incorrect  has been a recurring issue.
 
 **Areas that need refactoring**:
-- The instant transaction feature is a centralized implementation to satisfy a UX request. If the user desires true decentralization in the future, this logic would need to be refactored to rely solely on block confirmations.
+- The  function in  is fragile and has caused multiple bugs. It needs to be rewritten carefully to be correct and robust.
+- The difficulty adjustment logic needs a complete review to ensure it is saved and applied correctly across the  and the .
 
 **key api endpoints**
-- **New:** : Provides transparent data on supply, premine, and circulating coins.
-- **Modified:** : Now handles a  fee and confirms transactions instantly.
-- **Stratum:** 
+- : For sending transactions (failing verification).
+- : Returns wallet balance (calculation is buggy).
+- : Returns blockchain statistics (circulating supply is buggy).
+- : Returns block information.
+- : Resets the entire blockchain. **Should not be used unless absolutely necessary.**
 
 **Critical Info for New Agent**
-- **Your ONLY task is deployment support.** All development is complete. The user is blocked on updating their live server ( on Hetzner). You must guide them to run the final SSH command.
-- **Do NOT confuse the environments.** The Emergent preview URL shows the correct, updated site. The user's production domain, , points to a separate Hetzner server and shows the old, broken site. Do not suggest linking the domain to Emergent, as this will cause them to lose their real blockchain data.
-- **The user operates from a mobile device.** Instructions must be simple, clear, and easy to copy-paste into a mobile SSH client like Termux. Be patient, as this is a difficult environment for the user to work in.
-- **The project is considered Ready to Launch.** Once the deployment is complete, the user's goal is achieved. Your final interaction should be confirming the successful deployment and congratulating them on the launch.
+- **DO NOT RESET THE BLOCKCHAIN.** The user is frustrated with losing their mined blocks and getting new genesis wallets. All fixes must be applied to the existing, running blockchain on the Hetzner server.
+- **Systematic Debugging Required:** The project has multiple, interconnected critical bugs. Address them in order of priority: Transactions -> Difficulty -> Balances. Do not move on until the previous one is fully fixed and verified.
+- **Provide Clear Commands:** The user executes commands via SSH. Provide complete, copy-pasteable command blocks for deployment. Remember to include  after downloading code from GitHub.
+- **The live server is .** All work must be deployed and verified there.
 
 **documents and test reports created in this job**
-- 
-- 
-- 
-- 
-- 
+-  (Outdated, created on preview environment before production bugs were found)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks if the project is 100% ready to publish after all the changes. (COMPLETED)
-2.  **User:** Requests instant transactions instead of waiting for block confirmation. (COMPLETED)
-3.  **User:** Asks to update the roadmap to reflect the project is finished. (COMPLETED)
-4.  **User:** Requests to change the Stratum server URL to use the  domain. (COMPLETED)
-5.  **User:** Confirms DNS settings for  are correct via screenshot. (COMPLETED)
-6.  **User:** After deploying, reports that the live site  still shows the old version with many errors (wrong difficulty, Emergent branding, etc.). (PENDING)
-7.  **User:** Shows a screenshot of the correct, updated site on the Emergent preview URL and asks why his production site is different. (PENDING)
-8.  **User:** Confirms he wants to connect his domain to the updated site. (PENDING)
-9.  **User:** Realizes the Emergent preview site has a separate test database with only 68 blocks and does not want to lose his 400+ blocks from the production server. (PENDING)
-10. **User:** Adds his Twitter/X profile and asks again if the project is 100% perfect and ready for launch once deployed. (PENDING)
+1.  **User:** Reports transactions are failing with a signature verification failed error, and provides a screenshot. (PENDING)
+2.  **User:** Asks if BricsCoin can be added to MetaMask. (COMPLETED - Agent explained it's not possible)
+3.  **User:** Complains about the terminal closing and asks how to restart. (COMPLETED - Agent provided instructions)
+4.  **User:** States that transaction fees must be burned and this should be transparent. (PENDING - Agent implemented a fix, but it needs verification).
+5.  **User:** Reports a massive discrepancy between wallet balances and the circulating supply shown on the dashboard. (PENDING)
+6.  **User:** States that the difficulty is not increasing as it should in Bitcoin, which will cause the coin supply to run out too quickly. (PENDING)
+7.  **User:** Reports the downloaded macOS wallet from GitHub is damaged. (PENDING - Agent provided a workaround, needs user to test).
+8.  **User:** After a blockchain reset, complains that the genesis wallet balance shows 0 again and wants a permanent fix for this recurring issue. (PENDING)
+9.  **User:** Asks to lower the difficulty to 2 to speed up block finding for testing. (COMPLETED - Agent lowered it, but this revealed deeper bugs).
+10. **User:** Reports that even with low difficulty, no blocks are being found, and suspects a problem with the mining logic. (PENDING - Agent has since fixed the  but other issues remain).
 
 **Project Health Check:**
-- **Broken:** The production deployment on  is completely out-of-date and does not reflect the current state of the codebase on GitHub.
-- **Mocked:** None.
+- **Broken:**
+    - Transaction creation/sending
+    - Automatic difficulty adjustment
+    - Wallet balance and circulating supply calculation
 
 **3rd Party Integrations**
-- **Cloudflare:** Used for DNS management.
-- **GitHub:** Used for version control and for **GitHub Actions** to build desktop wallet binaries.
+- **Cloudflare:** DNS management.
+- **GitHub & GitHub Actions:** Source control and automated desktop wallet builds.
+- **Let's Encrypt (Certbot):** SSL certificate management for the production domain.
 
 **Testing status**
 - Testing agent used after significant changes: NO
 - Troubleshoot agent used after agent stuck in loop: NO
 - Test files created: []
-- Known regressions: None.
+- Known regressions: Wallet import functionality has been intermittently failing due to environment variable and backend issues.
 
 **Credentials to test flow:**
 - **Hetzner Server SSH:**
-  - IP: 
-  - User: 
-  - Password: 
+    - IP: 
+    - User: 
+    - Password: 
 
 **What agent forgot to execute**
-- The agent has completed all development requests. The final deployment task was initiated but is blocked by the user's difficulty in executing the necessary commands on their remote server.</analysis>
+The agent has not forgotten tasks but is in the middle of a complex, multi-faceted debugging session. The primary oversight has been not holistically testing the impact of changes. For example, fixing one bug (like wallet import) often regressed or was affected by another (like incorrect  in the deployment). The next agent must be more systematic.</analysis>
