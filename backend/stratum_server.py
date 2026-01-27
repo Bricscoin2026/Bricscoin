@@ -39,11 +39,27 @@ db = client[db_name]
 STRATUM_PORT = int(os.environ.get('STRATUM_PORT', 3333))
 STRATUM_HOST = os.environ.get('STRATUM_HOST', '0.0.0.0')
 
-# BricsCoin constants
-NETWORK_DIFFICULTY = 1  # Bitcoin-style difficulty (higher = harder)
+# BricsCoin constants - difficulty will be read from database
+INITIAL_DIFFICULTY = 1
 HALVING_INTERVAL = 210_000
 INITIAL_REWARD = 50
 COIN = 100_000_000  # satoshis
+DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
+TARGET_BLOCK_TIME = 600  # 10 minutes
+
+async def get_network_difficulty():
+    """Get current difficulty from blockchain (Bitcoin-style adjustment)"""
+    blocks_count = await db.blocks.count_documents({})
+    
+    if blocks_count < DIFFICULTY_ADJUSTMENT_INTERVAL:
+        return INITIAL_DIFFICULTY
+    
+    # Get difficulty from last block
+    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+    if last_block:
+        return last_block.get('difficulty', INITIAL_DIFFICULTY)
+    
+    return INITIAL_DIFFICULTY
 
 # Global state
 miners: Dict[str, dict] = {}
