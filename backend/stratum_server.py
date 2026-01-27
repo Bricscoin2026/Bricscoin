@@ -265,20 +265,23 @@ async def get_block_template() -> Optional[dict]:
                 "timestamp": tx.get("timestamp")
             })
         
+        # Get current difficulty from blockchain
+        current_difficulty = await get_network_difficulty()
+        
         template = {
             "index": new_index,
             "timestamp": int(time.time()),
             "previous_hash": prev_hash,
-            "difficulty": NETWORK_DIFFICULTY,
+            "difficulty": current_difficulty,
             "reward": reward,
             "transactions": transactions,
             "pending_tx_ids": [tx.get("id") for tx in pending_txs]  # Track IDs for confirmation
         }
         
         if transactions:
-            logger.info(f"Template: block #{new_index}, {len(transactions)} pending txs, reward={reward/COIN} BRICS")
+            logger.info(f"Template: block #{new_index}, {len(transactions)} pending txs, reward={reward/COIN} BRICS, diff={current_difficulty}")
         else:
-            logger.info(f"Template: block #{new_index}, prev={prev_hash[:16]}..., reward={reward/COIN} BRICS")
+            logger.info(f"Template: block #{new_index}, prev={prev_hash[:16]}..., reward={reward/COIN} BRICS, diff={current_difficulty}")
         
         return template
         
