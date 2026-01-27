@@ -142,10 +142,22 @@ Password: x
 
 ## Security
 
+BricsCoin has undergone a comprehensive security audit. See our [Security Audit Report](SECURITY_AUDIT.md) for details.
+
 - **Client-side signing**: Private keys never leave your device
-- **Rate limiting**: Protection against spam and DDoS
-- **Input validation**: All inputs are validated server-side
+- **Rate limiting**: Protection against spam and DDoS (5 req/min wallet, 10 req/min transactions)
+- **Input validation**: All inputs are validated server-side with Pydantic
 - **CORS protection**: Restricted to allowed origins
+- **Security headers**: X-Content-Type-Options, X-Frame-Options, HSTS, CSP
+- **IP blacklisting**: Automatic blocking after 10 failed attempts
+
+### Running Security Tests
+
+```bash
+cd backend
+pip install pytest ecdsa
+REACT_APP_BACKEND_URL=https://bricscoin26.org pytest tests/test_security_audit.py -v
+```
 
 ## BricsCoin Core (Desktop Wallet)
 
