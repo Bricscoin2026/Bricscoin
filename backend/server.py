@@ -724,7 +724,8 @@ async def get_tokenomics():
         },
         "fees": {
             "transaction_fee": TRANSACTION_FEE,
-            "note": "Fees are collected by miners who include transactions in blocks."
+            "destination": "burned",
+            "note": "Transaction fees are BURNED (destroyed) - they reduce the total supply over time, making BRICS deflationary."
         }
     }
 
