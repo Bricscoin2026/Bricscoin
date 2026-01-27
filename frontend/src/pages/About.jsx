@@ -12,7 +12,11 @@ import {
   CheckCircle,
   Clock,
   ExternalLink,
-  Coins
+  Coins,
+  ShieldCheck,
+  Lock,
+  AlertTriangle,
+  RefreshCw
 } from "lucide-react";
 import { getTokenomics } from "../lib/api";
 

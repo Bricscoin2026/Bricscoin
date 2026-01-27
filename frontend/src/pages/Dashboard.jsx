@@ -7,11 +7,13 @@ import {
   TrendingUp, 
   Clock,
   ChevronRight,
-  Pickaxe
+  Pickaxe,
+  ShieldCheck
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Skeleton } from "../components/ui/skeleton";
+import { Badge } from "../components/ui/badge";
 import { getNetworkStats, getBlocks } from "../lib/api";
 import { motion } from "framer-motion";
 
@@ -128,6 +130,17 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-8"
       >
+        <div className="flex justify-center mb-4">
+          <Link to="/about">
+            <Badge 
+              className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 cursor-pointer px-3 py-1"
+              data-testid="security-audit-badge"
+            >
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Security Audit Passed ✓
+            </Badge>
+          </Link>
+        </div>
         <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text mb-4">
           BRICSCOIN
         </h1>
