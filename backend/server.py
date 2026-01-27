@@ -294,17 +294,19 @@ async def get_current_difficulty() -> int:
     if blocks_count < DIFFICULTY_ADJUSTMENT_INTERVAL:
         return INITIAL_DIFFICULTY
     
-    # Only adjust at specific intervals
+    # Get the difficulty from the last block
+    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+    current_difficulty = last_block.get('difficulty', INITIAL_DIFFICULTY)
+    
+    # Only recalculate at specific intervals
     if blocks_count % DIFFICULTY_ADJUSTMENT_INTERVAL != 0:
-        # Return the difficulty from the last block
-        last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
-        return last_block.get('difficulty', INITIAL_DIFFICULTY)
+        return current_difficulty
     
     # Get the last DIFFICULTY_ADJUSTMENT_INTERVAL blocks for adjustment
     last_blocks = await db.blocks.find({}, {"_id": 0}).sort("index", -1).limit(DIFFICULTY_ADJUSTMENT_INTERVAL).to_list(DIFFICULTY_ADJUSTMENT_INTERVAL)
     
     if len(last_blocks) < DIFFICULTY_ADJUSTMENT_INTERVAL:
-        return INITIAL_DIFFICULTY
+        return current_difficulty
     
     # Calculate actual time taken for these blocks
     first_block = last_blocks[-1]
@@ -315,8 +317,6 @@ async def get_current_difficulty() -> int:
     
     actual_time = (last_time - first_time).total_seconds()
     expected_time = TARGET_BLOCK_TIME * DIFFICULTY_ADJUSTMENT_INTERVAL  # 2016 * 600 = ~2 weeks
-    
-    current_difficulty = last_block.get('difficulty', INITIAL_DIFFICULTY)
     
     # Bitcoin-style adjustment: new_difficulty = old_difficulty * (expected_time / actual_time)
     # With limits: max 4x increase or 4x decrease per adjustment
@@ -330,9 +330,9 @@ async def get_current_difficulty() -> int:
     # Minimum difficulty of 1
     new_difficulty = max(1, new_difficulty)
     
-    return new_difficulty
+    logging.info(f"Difficulty adjustment: {current_difficulty} -> {new_difficulty} (ratio: {ratio:.2f}, actual_time: {actual_time:.0f}s, expected: {expected_time:.0f}s)")
     
-    return current_difficulty
+    return new_difficulty
 
 async def get_circulating_supply() -> float:
     """Calculate total circulating supply (premine + mining rewards)"""
