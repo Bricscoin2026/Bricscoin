@@ -41,8 +41,8 @@ class TestNetworkStats:
         # Total supply should be 21M
         assert data['total_supply'] == 21000000, f"Expected 21M total supply, got {data['total_supply']}"
         
-        # Difficulty should be 1000 (initial)
-        assert data['current_difficulty'] == 1000, f"Expected difficulty 1000, got {data['current_difficulty']}"
+        # Difficulty should be 1 (initial) - Bitcoin-style difficulty
+        assert data['current_difficulty'] == 1, f"Expected difficulty 1, got {data['current_difficulty']}"
         
         # Current reward should be 50 BRICS
         assert data['current_reward'] == 50, f"Expected reward 50, got {data['current_reward']}"
@@ -208,8 +208,8 @@ class TestMining:
         assert 'difficulty' in data, "Missing difficulty"
         assert 'reward' in data, "Missing reward"
         
-        # Difficulty should be 1000
-        assert data['difficulty'] == 1000, f"Expected difficulty 1000, got {data['difficulty']}"
+        # Difficulty should be 1 (initial Bitcoin-style difficulty)
+        assert data['difficulty'] == 1, f"Expected difficulty 1, got {data['difficulty']}"
         
         # Reward should be 50
         assert data['reward'] == 50, f"Expected reward 50, got {data['reward']}"
