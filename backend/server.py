@@ -1178,7 +1178,7 @@ async def import_wallet_key(request: Request, wallet_request: WalletImportPrivat
             "address": wallet_data['address'],
             "public_key": wallet_data['public_key'],
             "private_key": wallet_data['private_key'],
-            "name": request.name,
+            "name": wallet_request.name,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
