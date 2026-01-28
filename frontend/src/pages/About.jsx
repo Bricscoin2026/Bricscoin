@@ -36,7 +36,7 @@ export default function About() {
   }, []);
 
   const roadmapItems = [
-    { phase: "January 2026", status: "done", items: ["Mainnet launch", "Web wallet with instant transactions", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet (Linux, Windows, Mac)", "Open source on GitHub", "Security audit completed"] },
+    { phase: "January 2026", status: "done", items: ["Mainnet launch", "Web wallet with instant transactions", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet (Linux, Windows, Mac)", "Open source on Codeberg", "Security audit completed"] },
   ];
 
   return (
