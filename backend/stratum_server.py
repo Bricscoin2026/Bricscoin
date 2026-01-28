@@ -48,18 +48,69 @@ DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes
 
 async def get_network_difficulty():
-    """Get current difficulty from blockchain (Bitcoin-style adjustment)"""
+    """
+    Get current difficulty from blockchain (reads from last block or calculates).
+    
+    The difficulty stored in each block is the difficulty that was used to mine it.
+    For the NEXT block, we may need to recalculate if we're at an adjustment boundary.
+    
+    This function returns the difficulty that should be used for the NEXT block.
+    """
     blocks_count = await db.blocks.count_documents({})
     
-    if blocks_count < DIFFICULTY_ADJUSTMENT_INTERVAL:
+    # For very early chain (< 2 blocks), use initial difficulty
+    if blocks_count < 2:
         return INITIAL_DIFFICULTY
     
-    # Get difficulty from last block
+    # Get the difficulty from the last block
     last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
-    if last_block:
-        return last_block.get('difficulty', INITIAL_DIFFICULTY)
+    if not last_block:
+        return INITIAL_DIFFICULTY
     
-    return INITIAL_DIFFICULTY
+    current_difficulty = last_block.get('difficulty', INITIAL_DIFFICULTY)
+    
+    # For new chains (< 2016 blocks), adjust every 10 blocks for faster response
+    adjustment_interval = 10 if blocks_count < DIFFICULTY_ADJUSTMENT_INTERVAL else DIFFICULTY_ADJUSTMENT_INTERVAL
+    
+    # Check if we're at an adjustment boundary
+    if blocks_count % adjustment_interval != 0:
+        return current_difficulty
+    
+    # Calculate new difficulty based on recent block times
+    last_blocks = await db.blocks.find({}, {"_id": 0}).sort("index", -1).limit(adjustment_interval).to_list(adjustment_interval)
+    
+    if len(last_blocks) < adjustment_interval:
+        return current_difficulty
+    
+    # Calculate actual time taken
+    first_block = last_blocks[-1]
+    last_block_data = last_blocks[0]
+    
+    try:
+        from datetime import datetime, timezone
+        first_time = datetime.fromisoformat(first_block['timestamp'].replace('Z', '+00:00'))
+        last_time = datetime.fromisoformat(last_block_data['timestamp'].replace('Z', '+00:00'))
+        actual_time = (last_time - first_time).total_seconds()
+    except (ValueError, KeyError):
+        return current_difficulty
+    
+    if actual_time <= 0:
+        actual_time = 1
+    
+    expected_time = TARGET_BLOCK_TIME * adjustment_interval
+    
+    # Calculate ratio and new difficulty
+    ratio = expected_time / actual_time
+    ratio = max(0.25, min(4.0, ratio))  # Bitcoin's 4x limit
+    
+    new_difficulty = max(1, int(current_difficulty * ratio))
+    
+    if new_difficulty != current_difficulty:
+        avg_time = actual_time / adjustment_interval
+        logger.info(f"⚙️ Stratum: Difficulty adjustment needed: {current_difficulty} -> {new_difficulty}")
+        logger.info(f"   Avg block time: {avg_time:.1f}s (target: {TARGET_BLOCK_TIME}s)")
+    
+    return new_difficulty
 
 # Global state
 miners: Dict[str, dict] = {}
