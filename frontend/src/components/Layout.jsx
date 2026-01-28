@@ -10,7 +10,7 @@ import {
   Download,
   Server,
   Info,
-  Github,
+  Code,
   Twitter
 } from "lucide-react";
 import { useState } from "react";
@@ -128,8 +128,8 @@ export default function Layout() {
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors flex items-center gap-1"
               >
-                <Github className="w-4 h-4" />
-                GitHub
+                <Code className="w-4 h-4" />
+                Source Code
               </a>
               <span>•</span>
               <a href="/about" className="hover:text-foreground transition-colors">
