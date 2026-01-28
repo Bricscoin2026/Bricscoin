@@ -123,7 +123,7 @@ export default function Layout() {
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <a 
-                href="https://github.com/bricscoin26/Bricscoin26" 
+                href="https://codeberg.org/Bricscoin_26/Bricscoin" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors flex items-center gap-1"
@@ -137,7 +137,7 @@ export default function Layout() {
               </a>
               <span>•</span>
               <a 
-                href="https://github.com/bricscoin26/Bricscoin26/blob/main/WHITEPAPER.md" 
+                href="https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/WHITEPAPER.md" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors"

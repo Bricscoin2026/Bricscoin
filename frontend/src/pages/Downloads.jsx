@@ -66,7 +66,7 @@ export default function Downloads() {
                 </p>
               </div>
               <Button 
-                onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/releases', '_blank')}
+                onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/wallet-app', '_blank')}
                 className="gold-button rounded-sm"
                 size="lg"
                 data-testid="github-releases-btn"
@@ -202,7 +202,7 @@ export default function Downloads() {
             <Button
               variant="outline"
               className="border-white/20"
-              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}
+              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}
               data-testid="github-link-btn"
             >
               <Github className="w-4 h-4 mr-2" />

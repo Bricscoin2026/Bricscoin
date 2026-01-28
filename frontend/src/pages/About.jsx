@@ -179,7 +179,7 @@ export default function About() {
               tokenomics, and roadmap.
             </p>
             <Button 
-              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/blob/main/WHITEPAPER.md', '_blank')}
+              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/WHITEPAPER.md', '_blank')}
               className="w-full"
               data-testid="whitepaper-btn"
             >
@@ -202,7 +202,7 @@ export default function About() {
             </p>
             <Button 
               variant="outline"
-              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}
+              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}
               className="w-full border-white/20"
               data-testid="github-btn"
             >
@@ -397,7 +397,7 @@ export default function About() {
           <Button onClick={() => window.location.href = '/wallet'} data-testid="get-started-btn">
             Get Started
           </Button>
-          <Button variant="outline" className="border-white/20" onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}>
+          <Button variant="outline" className="border-white/20" onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}>
             <Github className="w-4 h-4 mr-2" />
             GitHub
           </Button>
