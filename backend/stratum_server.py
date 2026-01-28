@@ -908,3 +908,46 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Server stopped")
+
+# HTTP stats endpoint
+from aiohttp import web
+
+async def stats_handler(request):
+    """Return current stratum stats"""
+    return web.json_response({
+        "connected_miners": len(stratum_server.miners) if stratum_server else 0,
+        "total_hashrate": sum(m.hashrate for m in stratum_server.miners) if stratum_server else 0,
+        "shares_submitted": sum(m.shares_accepted for m in stratum_server.miners) if stratum_server else 0
+    })
+
+async def start_stats_server():
+    app = web.Application()
+    app.router.add_get('/stats', stats_handler)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 3334)
+    await site.start()
+    logger.info("Stats server running on port 3334")
+
+# Stats HTTP server
+async def start_stats_server():
+    from aiohttp import web
+    
+    async def stats_handler(request):
+        global stratum_server
+        miners_count = len(stratum_server.miners) if stratum_server else 0
+        return web.json_response({
+            "connected_miners": miners_count,
+            "total_hashrate": 0,
+            "shares_submitted": 0
+        })
+    
+    app = web.Application()
+    app.router.add_get('/stats', stats_handler)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 3334)
+    await site.start()
+    logger.info("Stats server on port 3334")
+
+# Modifica main per avviare stats server

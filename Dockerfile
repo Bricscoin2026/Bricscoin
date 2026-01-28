@@ -6,7 +6,7 @@ WORKDIR /app
 # Install dependencies
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install httpx
+RUN pip install httpx aiohttp
 
 # Copy backend code
 COPY backend/ .
@@ -19,6 +19,6 @@ ENV NODE_URL=""
 ENV SEED_NODES=""
 ENV CORS_ORIGINS="*"
 
-EXPOSE 8001
+EXPOSE 8001 3333
 
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["bash", "start.sh"]

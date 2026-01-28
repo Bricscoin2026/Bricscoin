@@ -15,9 +15,13 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export default function Mining() {
   const [stats, setStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
+  const [minersCount, setMinersCount] = useState(0);
 
   useEffect(() => {
     fetchStats();
+    fetchMiners();
+    const minerInterval = setInterval(fetchMiners, 10000);
+    return () => clearInterval(minerInterval);
     // Load wallet from localStorage
     const saved = localStorage.getItem('bricscoin_web_wallet');
     if (saved) {
@@ -35,6 +39,18 @@ export default function Mining() {
       }
     } catch (error) {
       console.error("Error:", error);
+    }
+  };
+
+  const fetchMiners = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/miners/stats`);
+      if (response.ok) {
+        const data = await response.json();
+        setMinersCount(data.connected_miners || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching miners:", error);
     }
   };
 
@@ -103,6 +119,71 @@ export default function Mining() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Active Miners */}
+      <Card className="bg-card border-green-500/20">
+        <CardHeader className="border-b border-green-500/20">
+          <CardTitle className="font-heading flex items-center gap-2">
+            <Cpu className="w-5 h-5 text-green-500" />
+            Active Miners
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground py-4">
+            <p className="text-2xl font-bold text-green-500 mb-2">
+              {stats?.total_blocks > 0 ? "Mining Active" : "Waiting for miners..."}
+            </p>
+            <p className="text-sm">
+              Connect your ASIC miner to start mining BricsCoin
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="p-3 bg-green-500/10 rounded-lg">
+                <p className="text-xl font-bold text-green-400">{stats?.total_blocks || 0}</p>
+                <p className="text-xs text-muted-foreground">Blocks Mined</p>
+              </div>
+              <div className="p-3 bg-green-500/10 rounded-lg">
+                <p className="text-xl font-bold text-green-400">{stats?.current_difficulty?.toLocaleString() || 0}</p>
+                <p className="text-xs text-muted-foreground">Difficulty</p>
+              </div>
+              <div className="p-3 bg-green-500/10 rounded-lg">
+                <p className="text-xl font-bold text-green-400">{stats?.hashrate_estimate ? (stats.hashrate_estimate / 1e12).toFixed(2) + " TH/s" : "0 TH/s"}</p>
+                <p className="text-xs text-muted-foreground">Network Hashrate</p>
+              </div>
+              <div className="p-3 bg-green-500/10 rounded-lg">
+                <p className="text-xl font-bold text-green-400">{stats?.current_reward || 50} BRICS</p>
+                <p className="text-xs text-muted-foreground">Block Reward</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Connected Miners */}
+      <Card className="bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/30">
+        <CardHeader className="border-b border-green-500/20">
+          <CardTitle className="font-heading flex items-center gap-2 text-green-400">
+            <Cpu className="w-5 h-5" />
+            Connected Miners
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center gap-8">
+            <div className="text-center">
+              <p className="text-6xl font-bold text-green-400">{minersCount}</p>
+              <p className="text-sm text-muted-foreground mt-2">Active Miners</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">{stats?.total_blocks || 0}</p>
+              <p className="text-sm text-muted-foreground">Blocks Found</p>
+            </div>
+          </div>
+          {minersCount === 0 && (
+            <p className="text-center text-muted-foreground mt-4 text-sm">
+              No miners currently connected. Connect your ASIC to start mining!
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Stratum Configuration */}
       <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30">

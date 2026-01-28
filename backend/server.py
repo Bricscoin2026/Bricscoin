@@ -1557,3 +1557,20 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+# Endpoint per miner connessi (comunicazione con stratum)
+connected_miners_count = 0
+
+
+@api_router.get("/miners/stats")
+async def get_miners_stats():
+    """Get connected miners statistics from stratum"""
+    try:
+        import aiohttp
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://localhost:3334/stats", timeout=aiohttp.ClientTimeout(total=2)) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+    except:
+        pass
+    return {"connected_miners": 0, "total_hashrate": 0, "shares_submitted": 0}
