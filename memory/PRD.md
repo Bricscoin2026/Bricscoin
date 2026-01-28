@@ -129,7 +129,7 @@ POST /api/transactions
 
 ## Changelog
 
-### v2.5.0 (2026-01-28) - Codeberg Migration
+### v2.5.0 (2026-01-28) - Codeberg Migration & Difficulty Fix
 - ✅ Migrated all repository links from GitHub to Codeberg
 - ✅ Updated Downloads page with correct wallet-app URL
 - ✅ Updated About page links and Source Code section
@@ -138,6 +138,10 @@ POST /api/transactions
 - ✅ Changed all GitHub icons to Code icons
 - ✅ Repository URL: https://codeberg.org/Bricscoin_26/Bricscoin
 - ✅ Wallet download: https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/wallet-app
+- ✅ **FIXED: Difficulty system** - Now properly calculates nBits from network difficulty
+- ✅ **FIXED: Faster difficulty adjustment** - Every 10 blocks for new chain (vs 2016 standard)
+- ✅ Difficulty formula: `target = max_target / difficulty` (Bitcoin-style)
+- ✅ nBits correctly computed: diff 1 → 1d00ffff, diff 1000 → 1b4188f5
 
 ### v2.4.0 (2026-01-XX) - Security Audit Complete
 - ✅ Comprehensive security audit passed (27 tests)
