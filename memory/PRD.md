@@ -129,6 +129,16 @@ POST /api/transactions
 
 ## Changelog
 
+### v2.5.0 (2026-01-28) - Codeberg Migration
+- ✅ Migrated all repository links from GitHub to Codeberg
+- ✅ Updated Downloads page with correct wallet-app URL
+- ✅ Updated About page links and Source Code section
+- ✅ Updated Layout footer links
+- ✅ Updated Network and RunNode git clone commands
+- ✅ Changed all GitHub icons to Code icons
+- ✅ Repository URL: https://codeberg.org/Bricscoin_26/Bricscoin
+- ✅ Wallet download: https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/wallet-app
+
 ### v2.4.0 (2026-01-XX) - Security Audit Complete
 - ✅ Comprehensive security audit passed (27 tests)
 - ✅ Input validation tests: 8/8 passed
