@@ -5,7 +5,7 @@ import {
   Smartphone,
   HardDrive,
   ExternalLink,
-  Github
+  Code
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -51,17 +51,17 @@ export default function Downloads() {
       <div>
         <h2 className="font-heading font-bold text-xl mb-4">Desktop Wallets</h2>
         
-        {/* GitHub Releases Main Card */}
+        {/* Codeberg Wallet Source Card */}
         <Card className="bg-gradient-to-br from-white/10 to-white/5 border-white/20 mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col items-center text-center gap-4">
               <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-                <Github className="w-8 h-8" />
+                <Code className="w-8 h-8" />
               </div>
               <div>
                 <h3 className="font-bold text-xl mb-2">BricsCoin Core Wallet</h3>
                 <p className="text-muted-foreground mb-4">
-                  Download the official desktop wallet from GitHub Releases.<br />
+                  Download the official desktop wallet source from Codeberg.<br />
                   Available for Windows, macOS and Linux.
                 </p>
               </div>
@@ -69,10 +69,10 @@ export default function Downloads() {
                 onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/wallet-app', '_blank')}
                 className="gold-button rounded-sm"
                 size="lg"
-                data-testid="github-releases-btn"
+                data-testid="codeberg-wallet-btn"
               >
-                <Github className="w-5 h-5 mr-2" />
-                Download from GitHub
+                <Code className="w-5 h-5 mr-2" />
+                Download from Codeberg
               </Button>
             </div>
           </CardContent>
@@ -203,10 +203,10 @@ export default function Downloads() {
               variant="outline"
               className="border-white/20"
               onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}
-              data-testid="github-link-btn"
+              data-testid="codeberg-link-btn"
             >
-              <Github className="w-4 h-4 mr-2" />
-              View on GitHub
+              <Code className="w-4 h-4 mr-2" />
+              View on Codeberg
             </Button>
           </div>
         </CardContent>
