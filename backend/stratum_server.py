@@ -112,14 +112,55 @@ def var_int(n: int) -> bytes:
 
 def difficulty_to_nbits(difficulty: int) -> str:
     """
-    Convert difficulty to nBits compact format.
-    For low difficulty, use Bitcoin's minimum difficulty target.
+    Convert difficulty to nBits compact format (Bitcoin-style).
+    
+    nBits is a compact representation of the target.
+    target = coefficient * 2^(8*(exponent-3))
+    
+    For difficulty D:
+    target = max_target / D
+    where max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+    
+    Higher difficulty = lower target = harder to mine
     """
-    # For BricsCoin with difficulty 4 (4 leading zeros), 
-    # we use a simple target that ASICs can easily hit
-    # Bitcoin's minimum difficulty nBits: 1d00ffff
-    # We'll use an easier target for testing
-    return "1e0fffff"  # Very easy target for testing
+    if difficulty <= 0:
+        difficulty = 1
+    
+    # Bitcoin's max target (difficulty 1)
+    # This is the "easiest" target possible
+    max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+    
+    # Calculate target for this difficulty
+    target = max_target // difficulty
+    
+    # Convert target to compact nBits format
+    # Find the most significant byte
+    target_hex = format(target, '064x')
+    
+    # Strip leading zeros to find exponent
+    stripped = target_hex.lstrip('0') or '0'
+    
+    # Calculate exponent (number of bytes)
+    exponent = (len(stripped) + 1) // 2
+    
+    # Get coefficient (first 3 bytes of significant data)
+    if len(stripped) >= 6:
+        coefficient = int(stripped[:6], 16)
+    else:
+        coefficient = int(stripped.ljust(6, '0'), 16)
+    
+    # If coefficient would be negative (high bit set), increase exponent
+    if coefficient & 0x800000:
+        coefficient >>= 8
+        exponent += 1
+    
+    # Pack into nBits format: exponent (1 byte) + coefficient (3 bytes)
+    nbits = (exponent << 24) | coefficient
+    
+    result = format(nbits, '08x')
+    logger.debug(f"Difficulty {difficulty} -> nBits {result} (target: {target_hex[:16]}...)")
+    
+    return result
 
 def get_mining_reward(block_height: int) -> int:
     """Calculate mining reward in satoshis with halving"""
