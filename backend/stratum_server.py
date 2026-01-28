@@ -467,35 +467,35 @@ def verify_share(job: dict, extranonce1: str, extranonce2: str, ntime: str, nonc
             logger.info(f"DEBUG Result hash: {block_hash_hex}")
         
         # 7. Check if hash meets difficulty target
-        # Count leading zeros in the hash
-        leading_zeros = 0
-        for char in block_hash_hex:
-            if char == '0':
-                leading_zeros += 1
-            else:
-                break
-        
-        # Valid share = ANY submission (accept all for now to debug)
-        is_share = True
-        
-        # Valid block = meets network difficulty (Bitcoin-style target comparison)
-        # Get difficulty from the job template
+        # Get difficulty from the job (stored directly for easy access)
         job_difficulty = job.get('difficulty', INITIAL_DIFFICULTY)
         
-        # Convert hash to integer and compare against target
-        # Using higher max_target for easier mining with small hashrate
-        max_target = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        target = max_target // (job_difficulty * 256)  # Scale factor for reasonable difficulty
+        # Bitcoin-style: target = max_target / difficulty
+        # max_target is the "easiest" target at difficulty 1
+        max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+        target = max_target // job_difficulty
+        
+        # Convert hash to integer for comparison
         hash_int = int(block_hash_hex, 16)
+        
+        # Valid share = hash meets the share difficulty (always accept for now)
+        is_share = True
+        
+        # Valid block = hash is below the target (smaller hash = better)
         is_block = hash_int <= target
         
-        # Log if we get a good hash
+        # Log hash quality
         leading_zeros = len(block_hash_hex) - len(block_hash_hex.lstrip('0'))
-        if leading_zeros >= 1:
+        if leading_zeros >= 4:
             logger.info(f"*** GOOD HASH with {leading_zeros} leading zeros: {block_hash_hex[:16]}... (diff={job_difficulty})")
         
         if is_block:
-            logger.info(f"*** BLOCK FOUND! Hash: {block_hash_hex[:16]}... Target: {hex(target)[:16]}... (diff={job_difficulty})")
+            target_hex = format(target, '064x')
+            logger.info(f"🎉 BLOCK FOUND! Hash: {block_hash_hex}")
+            logger.info(f"   Target was: {target_hex}")
+            logger.info(f"   Difficulty: {job_difficulty}")
+        
+        return is_share, is_block, block_hash_hex
         
         return is_share, is_block, block_hash_hex
         
