@@ -40,7 +40,7 @@ STRATUM_PORT = int(os.environ.get('STRATUM_PORT', 3333))
 STRATUM_HOST = os.environ.get('STRATUM_HOST', '0.0.0.0')
 
 # BricsCoin constants - difficulty will be read from database
-INITIAL_DIFFICULTY = 1
+INITIAL_DIFFICULTY = 30000000
 HALVING_INTERVAL = 210_000
 INITIAL_REWARD = 50
 COIN = 100_000_000  # satoshis
@@ -112,29 +112,27 @@ def var_int(n: int) -> bytes:
 
 def difficulty_to_nbits(difficulty: int) -> str:
     """
-    Convert difficulty to nBits compact format.
-    For low difficulty, use Bitcoin's minimum difficulty target.
+    Convert difficulty to nBits compact format (Bitcoin-style).
     """
-    # For BricsCoin with difficulty 4 (4 leading zeros), 
-    # we use a simple target that ASICs can easily hit
-    # Bitcoin's minimum difficulty nBits: 1d00ffff
-    # We'll use an easier target for testing
-    if difficulty <= 0:
-        difficulty = 1
+    # Bitcoin max target for difficulty 1
     max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
     target = max_target // difficulty
+    
+    # Convert to compact nBits format
     target_hex = format(target, '064x')
-    stripped = target_hex.lstrip('0') or '0'
-    exponent = (len(stripped) + 1) // 2
-    if len(stripped) >= 6:
-        coefficient = int(stripped[:6], 16)
-    else:
-        coefficient = int(stripped.ljust(6, '0'), 16)
-    if coefficient & 0x800000:
-        coefficient >>= 8
-        exponent += 1
-    nbits = (exponent << 24) | coefficient
-    return format(nbits, '08x')
+    
+    # Find first non-zero byte
+    for i in range(0, 64, 2):
+        if target_hex[i:i+2] != '00':
+            break
+    
+    # Calculate exponent and coefficient
+    exponent = (64 - i) // 2
+    coefficient = int(target_hex[i:i+6], 16)
+    
+    # Format as nBits: 1 byte exponent + 3 bytes coefficient
+    nbits = format(exponent, '02x') + format(coefficient, '06x')
+    return nbits
 
 def get_mining_reward(block_height: int) -> int:
     """Calculate mining reward in satoshis with halving"""
@@ -456,9 +454,9 @@ def verify_share(job: dict, extranonce1: str, extranonce2: str, ntime: str, nonc
         job_difficulty = job.get('difficulty', INITIAL_DIFFICULTY)
         
         # Convert hash to integer and compare against target
-        # Bitcoin-style: target = max_target / difficulty
-        max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
-        target = max_target // job_difficulty
+        # Using higher max_target for easier mining with small hashrate
+        max_target = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        target = max_target // (job_difficulty * 256)  # Scale factor for reasonable difficulty
         hash_int = int(block_hash_hex, 16)
         is_block = hash_int <= target
         
@@ -897,18 +895,6 @@ class StratumServer:
         
         if count > 0:
             logger.info(f"Personalized jobs sent to {count} miners")
-            # Write miners count for API
-            try:
-                with open("/tmp/miners_count.txt", "w") as f:
-                    f.write(str(count))
-            except:
-                pass
-            # Write miners count for API
-            try:
-                with open("/tmp/miners_count.txt", "w") as f:
-                    f.write(str(count))
-            except:
-                pass
     
     async def broadcast_job(self, job: dict):
         """DEPRECATED: Use broadcast_personalized_jobs instead"""

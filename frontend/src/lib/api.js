@@ -1,7 +1,9 @@
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = 'https://bricscoin26.org';
 const API = `${BACKEND_URL}/api`;
+
+console.log("API URL:", API);
 
 const api = axios.create({
   baseURL: API,
@@ -40,17 +42,9 @@ export const getTransactions = (limit = 20, offset = 0, confirmed = null) => {
 
 export const getTransaction = (txId) => api.get(`/transactions/${txId}`);
 
-/**
- * Create a SECURE transaction - signs locally, private key NEVER sent to server
- * @param {object} transactionData - Pre-signed transaction from crypto.prepareSecureTransaction()
- */
 export const createSecureTransaction = (transactionData) => 
   api.post("/transactions/secure", transactionData);
 
-/**
- * @deprecated Use createSecureTransaction instead
- * This function sends private keys over the network and is INSECURE
- */
 export const createTransaction = (data) => {
   console.warn('WARNING: createTransaction is deprecated and insecure. Use createSecureTransaction instead.');
   return api.post("/transactions", data);

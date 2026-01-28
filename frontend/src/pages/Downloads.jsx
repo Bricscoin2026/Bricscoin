@@ -47,11 +47,11 @@ export default function Downloads() {
         </CardContent>
       </Card>
 
-      {/* Desktop Wallets from GitHub */}
+      {/* Desktop Wallets from Codeberg */}
       <div>
         <h2 className="font-heading font-bold text-xl mb-4">Desktop Wallets</h2>
         
-        {/* GitHub Releases Main Card */}
+        {/* Codeberg Releases Main Card */}
         <Card className="bg-gradient-to-br from-white/10 to-white/5 border-white/20 mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col items-center text-center gap-4">
@@ -61,18 +61,18 @@ export default function Downloads() {
               <div>
                 <h3 className="font-bold text-xl mb-2">BricsCoin Core Wallet</h3>
                 <p className="text-muted-foreground mb-4">
-                  Download the official desktop wallet from GitHub Releases.<br />
+                  Download the official desktop wallet from Codeberg Releases.<br />
                   Available for Windows, macOS and Linux.
                 </p>
               </div>
               <Button 
-                onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/releases', '_blank')}
+                onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/wallet-app', '_blank')}
                 className="gold-button rounded-sm"
                 size="lg"
-                data-testid="github-releases-btn"
+                data-testid="codeberg-releases-btn"
               >
                 <Github className="w-5 h-5 mr-2" />
-                Download from GitHub
+                Download from Codeberg
               </Button>
             </div>
           </CardContent>
@@ -153,7 +153,7 @@ export default function Downloads() {
                 <h4 className="font-bold">Windows</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download the .exe file from GitHub</li>
+                <li>Download the .exe file from Codeberg</li>
                 <li>Run the installer</li>
                 <li>Launch BricsCoin Core</li>
               </ol>
@@ -166,7 +166,7 @@ export default function Downloads() {
                 <h4 className="font-bold">macOS</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download the .zip file from GitHub</li>
+                <li>Download the .zip file from Codeberg</li>
                 <li>Extract the archive</li>
                 <li>Move to Applications folder</li>
                 <li>Right-click → Open (first time)</li>
@@ -180,7 +180,7 @@ export default function Downloads() {
                 <h4 className="font-bold">Linux</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download the .AppImage from GitHub</li>
+                <li>Download the .AppImage from Codeberg</li>
                 <li><code className="bg-white/10 px-1 rounded">chmod +x BricsCoin*.AppImage</code></li>
                 <li><code className="bg-white/10 px-1 rounded">./BricsCoin*.AppImage</code></li>
               </ol>
@@ -202,11 +202,11 @@ export default function Downloads() {
             <Button
               variant="outline"
               className="border-white/20"
-              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}
-              data-testid="github-link-btn"
+              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}
+              data-testid="codeberg-link-btn"
             >
               <Github className="w-4 h-4 mr-2" />
-              View on GitHub
+              View on Codeberg
             </Button>
           </div>
         </CardContent>

@@ -36,7 +36,7 @@ export default function About() {
   }, []);
 
   const roadmapItems = [
-    { phase: "January 2026", status: "done", items: ["Mainnet launch", "Web wallet with instant transactions", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet (Linux, Windows, Mac)", "Open source on GitHub", "Security audit completed"] },
+    { phase: "January 2026", status: "done", items: ["Mainnet launch", "Web wallet with instant transactions", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet (Linux, Windows, Mac)", "Open source on Codeberg", "Security audit completed"] },
   ];
 
   return (
@@ -164,7 +164,7 @@ export default function About() {
         </CardContent>
       </Card>
 
-      {/* Whitepaper & GitHub */}
+      {/* Whitepaper & Codeberg */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-card/50 border-white/10">
           <CardHeader>
@@ -179,7 +179,7 @@ export default function About() {
               tokenomics, and roadmap.
             </p>
             <Button 
-              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26/blob/main/WHITEPAPER.md', '_blank')}
+              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/WHITEPAPER.md', '_blank')}
               className="w-full"
               data-testid="whitepaper-btn"
             >
@@ -202,12 +202,12 @@ export default function About() {
             </p>
             <Button 
               variant="outline"
-              onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}
+              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}
               className="w-full border-white/20"
-              data-testid="github-btn"
+              data-testid="codeberg-btn"
             >
               <Github className="w-4 h-4 mr-2" />
-              View on GitHub
+              View on Codeberg
             </Button>
           </CardContent>
         </Card>
@@ -397,9 +397,9 @@ export default function About() {
           <Button onClick={() => window.location.href = '/wallet'} data-testid="get-started-btn">
             Get Started
           </Button>
-          <Button variant="outline" className="border-white/20" onClick={() => window.open('https://github.com/bricscoin26/Bricscoin26', '_blank')}>
+          <Button variant="outline" className="border-white/20" onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}>
             <Github className="w-4 h-4 mr-2" />
-            GitHub
+            Codeberg
           </Button>
           <Button variant="outline" className="border-white/20" onClick={() => window.open('https://x.com/Bricscoin26', '_blank')}>
             <ExternalLink className="w-4 h-4 mr-2" />

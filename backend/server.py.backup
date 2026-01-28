@@ -292,7 +292,7 @@ async def get_current_difficulty() -> int:
     """
     try:
         # Prendi ultimi 100 blocchi
-        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(10).to_list(10)
+        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(100).to_list(100)
         
         if len(recent_blocks) < 2:
             return 1000  # Difficoltà iniziale minima
@@ -1097,7 +1097,7 @@ async def get_mining_template():
         raise HTTPException(status_code=500, detail="No genesis block")
     
     # Get pending transactions (max 100 per block)
-    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(10).to_list(10)
+    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(100).to_list(100)
     
     new_index = last_block['index'] + 1
     difficulty = await get_current_difficulty()
@@ -1155,7 +1155,7 @@ async def submit_mined_block(submission: MiningSubmit):
         raise HTTPException(status_code=409, detail="Block already mined")
     
     # Get pending transactions
-    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(10).to_list(10)
+    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(100).to_list(100)
     
     # Create the new block
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -1577,17 +1577,6 @@ security_handler = logging.StreamHandler()
 security_handler.setLevel(logging.WARNING)
 security_handler.setFormatter(logging.Formatter('%(asctime)s - SECURITY - %(levelname)s - %(message)s'))
 security_logger.addHandler(security_handler)
-
-
-@app.get("/api/miners/stats")
-async def get_miners_stats():
-    """Get mining stats including active miners count"""
-    try:
-        with open('/tmp/miners_count.txt', 'r') as f:
-            count = int(f.read().strip())
-    except:
-        count = 0
-    return {"active_miners": count}
 
 @app.on_event("startup")
 async def startup_event():
