@@ -389,7 +389,7 @@ def create_stratum_job(template: dict, miner_address: str, extranonce1: str = "0
     # Cache the job (never delete, keeps growing but that's OK for dev)
     job_cache[job_id] = job
     
-    logger.info(f"Job {job_id}: block #{template['index']}, miner={miner_address[:20]}...")
+    logger.info(f"Job {job_id}: block #{template['index']}, miner={miner_address[:20]}..., diff={template['difficulty']}, nbits={nbits}")
     
     return job
 
