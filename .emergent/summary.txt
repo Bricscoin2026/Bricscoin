@@ -1,241 +1,190 @@
-<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project has since evolved into a full-stack application with a web and desktop wallet, hardware mining support, and deployment to a custom domain () on the user's Hetzner server.
+<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project has since evolved into a full-stack application with a web and desktop wallet, hardware mining support, and deployment to a custom domain on the user's Hetzner server. The user's primary concern is ensuring the blockchain's economic model is sound, specifically that the difficulty adjusts automatically to maintain a ~10-minute block time, similar to Bitcoin.
 
 **PRODUCT REQUIREMENTS:**
-- **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty system (retargeting every 2016 blocks), SHA256 hashing, 21,000,000 total supply, and a block reward halving mechanism.
-- **Transactions:** A fee per transaction that is burned (removed from circulation) rather than given to the miner. Transactions must be signed client-side.
-- **Mining:** Support for hardware ASIC miners via a Bitcoin-compliant Stratum protocol, accessible at .
-- **Wallets:** A secure web wallet. A BricsCoin Core desktop wallet (for Windows, macOS, Linux).
-- **Source Code & Transparency:** The project must be 100% open-source and publicly available on GitHub. The website must be transparent about the 1,000,000 BRICS premine and the fee-burning mechanism.
-- **Credibility & Longevity:** The project must address red flags to appear legitimate. The difficulty adjustment must function correctly to ensure the coin's longevity (project must last 100 years).
+- **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty system (retargeting), SHA256 hashing, 21,000,000 total supply, and a block reward halving mechanism.
+- **Transactions:** Client-side signed transactions with a burned fee.
+- **Mining:** Support for hardware ASIC miners via a Bitcoin-compliant Stratum protocol.
+- **Wallets:** A secure web wallet.
+- **Source Code & Transparency:** The project must be 100% open-source and has recently been migrated from GitHub to Codeberg. The website should display key metrics.
+- **Credibility & Longevity:** The project must function correctly to appear legitimate, with the difficulty adjustment being the most critical component for long-term stability.
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack application (FastAPI backend, React frontend, MongoDB) is deployed on the user's Hetzner server () using Docker Compose and is accessible via . A Stratum server is running to support ASIC mining. However, the application is in a highly unstable state with several critical bugs related to core blockchain functions. The codebase is on a public GitHub repository.
+A full-stack application (FastAPI backend, React frontend, MongoDB) is deployed on the user's Hetzner server () using Docker Compose. The application codebase is now hosted on Codeberg. The backend runs both the main API and a Stratum server for mining within the same Docker container. While a previous bug with transaction signatures was fixed, the application is highly unstable due to critical, unresolved issues with the blockchain's difficulty adjustment, leading to an incorrect block generation rate. The agent also performed a security audit and added a corresponding badge to the UI.
 
 **Last working item**:
-- Last item agent was working: The agent was debugging why transactions are failing with a Signature verification failed error, as reported by the user with a screenshot. The investigation pointed towards a mismatch in the data being signed on the frontend () and the data being verified on the backend (). The agent was also trying to address the user's concern about not being able to add BricsCoin to MetaMask, explaining it's an independent blockchain.
-- Status: IN PROGRESS
+- Last item agent was working: The agent was attempting a major refactor to fix multiple core issues at once:
+    1.  **Block Time:** Blocks are found every few seconds, not every 10 minutes. The agent was trying to implement a dynamic difficulty adjustment based on the real-world time between blocks.
+    2.  **Miner Count:** The user wants to see the number of connected miners, which always shows 0. The agent was trying to implement a file-based communication system between the stratum and API servers.
+    3.  **Hashrate Display:** The user pointed out the displayed network hashrate was a theoretical calculation from difficulty, not a reflection of real miner power.
+    This comprehensive fix failed, resulting in the application showing all zero values for the user (hai fatto un casino). The agent then restored the code from a backup, leaving the core issues unresolved.
+- Status: BLOCKED
 - Agent Testing Done: N
-- Which testing method agent to use? The agent must fix the bug and then perform an end-to-end test by creating a transaction from the web wallet UI. This will validate both frontend signing and backend verification.
-- User Testing Done: N
+- Which testing method agent to use? The agent must fix the core issues and then perform an end-to-end test. This involves:
+    1.  Connecting a test miner to the stratum server.
+    2.  Verifying the difficulty sent in the job template is correct.
+    3.  Monitoring block times over a period (e.g., 10-20 minutes) to see if they are slowing down.
+    4.  Using  to check the  endpoint once it's fixed.
+- User Testing Done: Y (User is actively monitoring the live site and reporting failures).
 
 **All Pending/In progress Issue list**:
-- Issue 1: Transactions are not working (P0)
-- Issue 2: Blockchain difficulty is not adjusting automatically (P0)
-- Issue 3: Wallet balances and circulating supply are calculated incorrectly (P1)
-- Issue 4: Transaction fees are not being burned correctly (P2)
-- Issue 5: Mining is not finding blocks at the expected rate (P2)
+- Issue 1: Block generation rate is incorrect (P0)
+- Issue 2: Miner count is not displayed (P0)
+- Issue 3: Incomplete migration from GitHub to Codeberg (P1)
+- Issue 4: Network Hashrate display is misleading (P2)
 
 Issues Detail:
 - Issue 1:
-    - Attempted fixes: The agent has verified that the underlying API endpoint for importing wallets works, but sending a transaction fails. The error message Signature verification failed points to a mismatch between the client-side signing () and backend verification (). The agent has reviewed the code but has not yet implemented a definitive fix.
+    - Attempted fixes: The agent correctly identified that  was using a hardcoded or incorrect difficulty for mining jobs and share validation, ignoring the network's dynamically calculated difficulty. Multiple attempts to fix this by rewriting the difficulty calculation logic in  and  have failed because the core issue—the stratum server not applying the correct difficulty to the jobs it sends to miners—was not properly addressed. The logs consistently showed  or  being used for block validation, even when the network difficulty was much higher.
     - Next debug checklist:
-        1. In  and , log the exact string message that is being signed and verified.
-        2. Ensure the order of fields (, , , ) and their data types (especially ) are identical.
-        3. Create a test transaction via the frontend and check the backend logs for the comparison failure.
-    - Why fix this issue and what will be achieved with the fix?: This is a critical blockchain function. Without working transactions, the cryptocurrency has no utility.
+        1.  In , locate the  function (or equivalent).
+        2.  Trace where the  or  variable used for share validation comes from. The log  is the smoking gun.
+        3.  Ensure this validation uses the same difficulty that was part of the job template (). The  object retrieved from  must contain the correct difficulty from when it was created.
+        4.  Fix  to correctly retrieve and use the job's specific difficulty for validation.
+    - Why fix this issue and what will be achieved with the fix?: This is the most critical issue. Fixing it will stabilize the block time to ~10 minutes, which is the user's primary requirement for the coin's economic model.
     - Status: IN PROGRESS
     - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Both. The fix will likely be in both files. Testing must be E2E via the UI.
-    - Blocked on other issue: None.
+    - Should Test frontend/backend/both after fix? Backend. Monitor stratum logs and the  endpoint to observe block times.
+    - Blocked on other issue: none
 
 - Issue 2:
-    - Attempted fixes: The user reported the difficulty is stuck at 1, which could exhaust the coin supply too quickly. The agent identified a bug where the difficulty adjustment logic (in ) was calculated but not being saved or enforced globally. A fix was attempted by creating a  file to persist the state. The stratum server was also modified to read this difficulty dynamically. However, the user still reports it's not working.
+    - Attempted fixes: The agent tried creating a separate HTTP stats server and then a file-based communication method () to get the miner count from the stratum process to the API process. The API endpoint () repeatedly returned , indicating it was not being registered correctly in the FastAPI app due to being appended to the file incorrectly or other script errors.
     - Next debug checklist:
-        1. Verify that the  function is correctly called when a new block is added.
-        2. Check if  is being written to and read from correctly by both  and .
-        3. Ensure the logic for  is triggering correctly.
-    - Why fix this issue and what will be achieved with the fix?: This is crucial for the long-term economic stability and security of the coin, as requested by the user.
+        1.  Adopt the file-based approach as it's simpler.
+        2.  In , find the  loop. After the log , add a  block to write  to .
+        3.  In , cleanly remove any duplicate  endpoints and add one correct version that reads from that file. Ensure it's added before .
+        4.  Rebuild the  container and test the endpoint with {"detail":"Not Found"}.
+    - Why fix this issue and what will be achieved with the fix?: Fulfills the user's request for transparency on miner activity.
     - Status: IN PROGRESS
     - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Backend. Verify via API and stratum logs.
-    - Blocked on other issue: None.
+    - Should Test frontend/backend/both after fix? Backend (API), then Frontend (UI).
+    - Blocked on other issue: none
 
 - Issue 3:
-    - Attempted fixes: The agent identified a double-counting bug where mining rewards were counted twice (once from the block's  field and once from the  transaction). A fix was implemented in the  function in  to only count non-coinbase transactions for the recipient. However, the user reports that balances are still wrong, and the circulating supply on the dashboard doesn't match the sum of wallet balances.
+    - Attempted fixes: The agent used  to replace most GitHub URLs with the new Codeberg URL.
     - Next debug checklist:
-        1. Re-examine the  and  functions in .
-        2. Ensure that  transactions are correctly attributed to the miner's balance.
-        3. The previous fix might be incorrect; the logic should be: .
-    - Why fix this issue and what will be achieved with the fix?: Correct balances are fundamental for user trust and the basic functioning of a cryptocurrency wallet.
+        1.  The user reported links still remain. Run a global search: .
+        2.  Systematically replace any remaining URLs in , , and  with .
+        3.  Rebuild the frontend container: .
+    - Why fix this issue and what will be achieved with the fix?: Ensures all project links point to the new official repository.
     - Status: IN PROGRESS
-    - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Backend. Test via API calls.
-    - Blocked on other issue: None.
+    - Is recurring issue? N
+    - Should Test frontend/backend/both after fix? Frontend.
+    - Blocked on other issue: none
 
 - Issue 4:
-    - Attempted fixes: The user requested that transaction fees be burned. The agent modified  to deduct the fee from the sender's balance but not add it to any recipient. The  API and  page were updated to reflect this for transparency.
+    - Attempted fixes: The agent attempted to rewrite the hashrate calculation logic to be based on actual block times. This was part of a larger failed patch and was rolled back. The user also requested this display be removed entirely for now.
     - Next debug checklist:
-        1. After fixing transactions (Issue 1), send a transaction and verify that the sender's balance decreases by .
-        2. Verify that the recipient's balance increases by  only.
-        3. Check the  function to ensure burned fees are correctly subtracted from the total supply.
-    - Why fix this issue and what will be achieved with the fix?: Fulfills a direct user requirement for the coin's economic model.
-    - Status: TESTING PENDING
-    - Is recurring issue? N
-    - Should Test frontend/backend/both after fix? Backend.
-    - Blocked on other issue: Issue 1: Transactions are not working
-
-- Issue 5:
-    - Attempted fixes: The user reported not finding blocks even with low difficulty. The agent discovered a major bug in the  constant in  and . The constant was set too low, requiring an extremely difficult hash (e.g., 8+ leading zeros) even for difficulty 1. The agent corrected  to a much higher value .
-    - Next debug checklist:
-        1. After deployment of the fix, monitor the stratum logs for BLOCK FOUND messages.
-        2. Verify that the block count increases via the  endpoint.
-    - Why fix this issue and what will be achieved with the fix?: Mining is the core of a PoW cryptocurrency. Without it, no new coins can be created or transactions confirmed.
-    - Status: IN PROGRESS
+        1.  The agent has already replaced the hashrate display with a static Network Status: Active message in .
+        2.  Once Issue 1 (block time) is resolved, the logic to calculate real hashrate can be correctly re-implemented in  in .
+    - Why fix this issue and what will be achieved with the fix?: Provides an accurate, real-world metric of network security, as requested by the user.
+    - Status: NOT STARTED (pending Issue 1)
     - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Backend.
-    - Blocked on other issue: None.
+    - Should Test frontend/backend/both after fix? Backend (API), then Frontend (UI).
+    - Blocked on other issue: Issue 1: Block generation rate is incorrect
 
 **In progress Task List**:
-- None.
+- Task 1: Complete the UI migration from GitHub to Codeberg (P1)
+  - Where to resume:  for remaining github strings in the  directory and replace them. Key files are , , and .
+  - What will be achieved with this?: All links in the application will point to the new official Codeberg repository.
+  - Status: IN PROGRESS
+  - Should Test frontend/backend/both after fix? Frontend.
+  - Blocked on something: No.
 
 **Upcoming and Future Tasks**
-- **Future Tasks (Post-Launch):**
-    - Pursue exchange listings.
-    - Develop a mobile wallet for iOS/Android.
-    - Create a dedicated page for community mining pools.
-- **Removed from Roadmap:**
-    - P2P node network
-    - Community governance
+- **Upcoming Tasks:**
+  - Re-implement a real-time network hashrate calculation based on actual block times (P1).
+- **Future Tasks:**
+  - Develop a mobile wallet for iOS/Android (P2).
+  - Pursue exchange listings (P2).
+  - Create a dedicated page for community mining pools (P3).
 
 **Completed work in this session**
-- **Deployment & Server Management:** Guided the user through numerous complex deployments on their Hetzner server, resolving issues with usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
-           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
-           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
-           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
-           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
-           <command> [<args>]
-
-These are common Git commands used in various situations:
-
-start a working area (see also: git help tutorial)
-   clone     Clone a repository into a new directory
-   init      Create an empty Git repository or reinitialize an existing one
-
-work on the current change (see also: git help everyday)
-   add       Add file contents to the index
-   mv        Move or rename a file, a directory, or a symlink
-   restore   Restore working tree files
-   rm        Remove files from the working tree and from the index
-
-examine the history and state (see also: git help revisions)
-   bisect    Use binary search to find the commit that introduced a bug
-   diff      Show changes between commits, commit and working tree, etc
-   grep      Print lines matching a pattern
-   log       Show commit logs
-   show      Show various types of objects
-   status    Show the working tree status
-
-grow, mark and tweak your common history
-   branch    List, create, or delete branches
-   commit    Record changes to the repository
-   merge     Join two or more development histories together
-   rebase    Reapply commits on top of another base tip
-   reset     Reset current HEAD to the specified state
-   switch    Switch branches
-   tag       Create, list, delete or verify a tag object signed with GPG
-
-collaborate (see also: git help workflows)
-   fetch     Download objects and refs from another repository
-   pull      Fetch from and integrate with another repository or a local branch
-   push      Update remote refs along with associated objects
-
-'git help -a' and 'git help -g' list available subcommands and some
-concept guides. See 'git help <command>' or 'git help <concept>'
-to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system., , disk space, port conflicts, and environment variables.
-- **SSL Configuration:** Successfully installed Certbot and configured Nginx to enable HTTPS on .
-- **Genesis Wallet & Blockchain Reset:** Implemented a robust genesis wallet creation system and an admin endpoint to reset the blockchain for debugging purposes. Unified the wallet address generation logic between creation and import.
-- **UI/UX Improvements:**
-    - Implemented a Delete Wallet feature in the frontend wallet.
-    - Removed the Future Updates section from the roadmap on the About page as requested.
-- **Bug Fixes (In Progress):**
-    - **Transaction Fees:** Updated backend and frontend to reflect that fees are burned.
-    - **Mining Difficulty:** Corrected the  constant, which was preventing any blocks from being found.
-    - **Wallet Balance:** Attempted to fix a double-counting bug in the balance calculation.
+- **Security Audit & Reporting:** Conducted a security audit using the testing agent, which generated a new test suite (), and added an audit badge and report () to the project UI and repository.
+- **Transaction Signature Fix:** Successfully resolved the critical Signature verification failed bug by implementing a multi-method verification in  to handle the DER format from the frontend and normalize the amount field.
+- **Docker Architecture Fix:** Corrected the  to run both the  API server and the  script by using a  entrypoint script.
+- **Repository Migration:** Migrated the project's git remote from GitHub to Codeberg on the user's server and updated most, but not all, of the corresponding links in the frontend.
+- **Extensive Deployment Debugging:** Guided the user through numerous complex deployment and configuration issues on the production server, including fixing  files, git remote mismatches, and Docker build problems.
 
 **Earlier issues found/mentioned but not fixed**
 - All known issues are captured in the All Pending/In progress Issue list.
 
 **Known issue recurrence from previous fork**
-- **Hetzner Server Instability:** The user's server (2GB RAM) can be slow or crash during .
-- **Deployment Complexity:** The user struggles with the multi-step deployment process. The current workaround involves ing the GitHub tarball instead of using .
+- **Deployment Fragility:** The user consistently struggles with the command-line deployment process. Incorrect commands, typos, and environmental differences lead to frequent failures.
+- **Application State Corruption:** Attempts to apply large, multi-file fixes have repeatedly broken the application, requiring rollbacks from backups. Changes need to be smaller and more targeted.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Bitcoin-style Difficulty:** Uses . The  value was recently corrected. The adjustment algorithm is still buggy.
-- **Client-Side Transaction Signing:** The frontend signs transactions before sending them to the backend. This process is currently failing signature verification.
-- **Fee Burning:** Fees are subtracted from the sender's balance and removed from the total circulating supply.
-- **Stratum Protocol:** A Bitcoin-compliant server () allows hardware miners to connect.
-- **Docker Deployment:** The application is containerized and managed via  on the user's production server.
+- **Docker Multi-process:** The  was updated to use a  script to run both the API server and the Stratum server in the same container.
+- **Stratum Protocol Difficulty:** The agent identified that the difficulty sent to miners () was hardcoded. A fix was attempted, but the core issue remains that the stratum server validates shares against the wrong difficulty.
+- **File-based Inter-process Communication:** The agent attempted to use a temporary file () to share the miner count between the  process and the  API process.
 
 **key DB schema**
 - : 
 - : 
-- : 
-- :  (persisted in )
+- :  (This collection exists but the code seems to ignore it, instead reading difficulty from the last block).
 
 **changes in tech stack**
 - None.
 
 **All files of reference**
-- : Contains bugs related to transaction verification, balance calculation, and difficulty adjustment.
-- : Contains bugs related to dynamic difficulty updates.
-- : Contains the UI logic for sending transactions.
-- : Contains the client-side signing logic which is part of the transaction bug.
-- : Defines the production environment. Incorrect  has been a recurring issue.
+- : Contains the flawed difficulty adjustment and hashrate calculation logic.
+- : Has the critical bug where it does not apply the correct network difficulty to mining jobs and share validation.
+- : The new script that runs both backend processes.
+- : Was updated to use .
+- : Needs UI for the miner count.
+- , , : Contain hardcoded GitHub links that need to be replaced with Codeberg links.
 
 **Areas that need refactoring**:
-- The  function in  is fragile and has caused multiple bugs. It needs to be rewritten carefully to be correct and robust.
-- The difficulty adjustment logic needs a complete review to ensure it is saved and applied correctly across the  and the .
+- **Difficulty Logic:** The logic for calculating and applying difficulty is spread across  and , is duplicated, and is incorrect. It needs to be centralized in  and consumed correctly by .
+- **Inter-process Communication:** The method for sharing the miner count between the stratum and API servers is fragile. A more robust solution (like a simple internal API or Redis) should be considered in the future, but for now, making the file-based approach work is the priority.
 
 **key api endpoints**
-- : For sending transactions (failing verification).
-- : Returns wallet balance (calculation is buggy).
-- : Returns blockchain statistics (circulating supply is buggy).
-- : Returns block information.
-- : Resets the entire blockchain. **Should not be used unless absolutely necessary.**
+- : Returns network statistics. The  and  values are currently incorrect.
+- : The newly added (but not working) endpoint intended to return the number of connected miners.
 
 **Critical Info for New Agent**
-- **DO NOT RESET THE BLOCKCHAIN.** The user is frustrated with losing their mined blocks and getting new genesis wallets. All fixes must be applied to the existing, running blockchain on the Hetzner server.
-- **Systematic Debugging Required:** The project has multiple, interconnected critical bugs. Address them in order of priority: Transactions -> Difficulty -> Balances. Do not move on until the previous one is fully fixed and verified.
-- **Provide Clear Commands:** The user executes commands via SSH. Provide complete, copy-pasteable command blocks for deployment. Remember to include  after downloading code from GitHub.
-- **The live server is .** All work must be deployed and verified there.
+- **The user is highly frustrated.** The application is in a worse state than before. Prioritize stability and making small, verifiable changes. Do not attempt large, multi-faceted fixes at once.
+- **The Core Bug:** The stratum server () is not using the correct network difficulty when validating shares, causing blocks to be found instantly regardless of the  value shown in the API. The logs show  or  being used. Focus on fixing this first.
+- **Work on the Live Server:** All work happens on the user's Hetzner server () in the  directory.
+- **New Repository:** The project has been migrated to . Use this for all future source control interactions.
 
 **documents and test reports created in this job**
--  (Outdated, created on preview environment before production bugs were found)
+- 
+- 
+- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Reports transactions are failing with a signature verification failed error, and provides a screenshot. (PENDING)
-2.  **User:** Asks if BricsCoin can be added to MetaMask. (COMPLETED - Agent explained it's not possible)
-3.  **User:** Complains about the terminal closing and asks how to restart. (COMPLETED - Agent provided instructions)
-4.  **User:** States that transaction fees must be burned and this should be transparent. (PENDING - Agent implemented a fix, but it needs verification).
-5.  **User:** Reports a massive discrepancy between wallet balances and the circulating supply shown on the dashboard. (PENDING)
-6.  **User:** States that the difficulty is not increasing as it should in Bitcoin, which will cause the coin supply to run out too quickly. (PENDING)
-7.  **User:** Reports the downloaded macOS wallet from GitHub is damaged. (PENDING - Agent provided a workaround, needs user to test).
-8.  **User:** After a blockchain reset, complains that the genesis wallet balance shows 0 again and wants a permanent fix for this recurring issue. (PENDING)
-9.  **User:** Asks to lower the difficulty to 2 to speed up block finding for testing. (COMPLETED - Agent lowered it, but this revealed deeper bugs).
-10. **User:** Reports that even with low difficulty, no blocks are being found, and suspects a problem with the mining logic. (PENDING - Agent has since fixed the  but other issues remain).
+1.  **User:** States the difficulty should auto-adjust to target 10 minutes/block and that the hashrate should be real.
+2.  **User:** Reports the agent's fix failed and the site shows all zeros again: you made a mess.
+3.  **User:** Asks to remove GitHub links and hide the incorrect hashrate display.
+4.  **User:** Reports the explorer is stuck and there are still GitHub links on the About page.
+5.  **User:** Reports all values on the site are zero again.
+6.  **User:** Asks to fix the remaining GitHub links in the site footer.
+7.  **User:** Asks to fix the miner count, which is showing 0.
+8.  **User:** Reports that even with a difficulty of 10M, blocks are found every minute, which is too fast.
+9.  **User:** After a failed fix, asks the agent to restore from backup.
+10. **User:** Asks the agent to fix the code to be 100% working without any more bugs.
 
 **Project Health Check:**
 - **Broken:**
-    - Transaction creation/sending
-    - Automatic difficulty adjustment
-    - Wallet balance and circulating supply calculation
+  - Blockchain difficulty adjustment.
+  - Block generation rate (too fast).
+  - Active miner count display.
+  - Network hashrate display.
 
 **3rd Party Integrations**
-- **Cloudflare:** DNS management.
-- **GitHub & GitHub Actions:** Source control and automated desktop wallet builds.
-- **Let's Encrypt (Certbot):** SSL certificate management for the production domain.
+- **Codeberg:** Source control (migrated from GitHub).
+- **Let's Encrypt (Certbot):** SSL certificate management.
 
 **Testing status**
-- Testing agent used after significant changes: NO
+- Testing agent used after significant changes: NO (Only at the very beginning for the security audit).
 - Troubleshoot agent used after agent stuck in loop: NO
 - Test files created: []
-- Known regressions: Wallet import functionality has been intermittently failing due to environment variable and backend issues.
+- Known regressions: Core blockchain functionality (difficulty adjustment) is severely broken.
 
 **Credentials to test flow:**
 - **Hetzner Server SSH:**
@@ -244,4 +193,4 @@ See 'git help git' for an overview of the system., , disk space, port conflicts,
     - Password: 
 
 **What agent forgot to execute**
-The agent has not forgotten tasks but is in the middle of a complex, multi-faceted debugging session. The primary oversight has been not holistically testing the impact of changes. For example, fixing one bug (like wallet import) often regressed or was affected by another (like incorrect  in the deployment). The next agent must be more systematic.</analysis>
+The agent failed to properly test its complex fixes before deploying them, leading to multiple regressions and a broken application state. Specifically, after attempting to fix the difficulty logic, the agent did not verify that the stratum server was actually using the new difficulty for its jobs, which was the root cause of the problem. The agent also repeatedly failed to correctly add a new API endpoint to the FastAPI application, resulting in persistent  errors.</analysis>
