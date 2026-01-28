@@ -47,7 +47,7 @@ export default function Downloads() {
         </CardContent>
       </Card>
 
-      {/* Desktop Wallets from GitHub */}
+      {/* Desktop Wallets */}
       <div>
         <h2 className="font-heading font-bold text-xl mb-4">Desktop Wallets</h2>
         
@@ -153,7 +153,7 @@ export default function Downloads() {
                 <h4 className="font-bold">Windows</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download the .exe file from GitHub</li>
+                <li>Download the .exe file from Codeberg</li>
                 <li>Run the installer</li>
                 <li>Launch BricsCoin Core</li>
               </ol>
@@ -166,7 +166,7 @@ export default function Downloads() {
                 <h4 className="font-bold">macOS</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download the .zip file from GitHub</li>
+                <li>Download the .zip file from Codeberg</li>
                 <li>Extract the archive</li>
                 <li>Move to Applications folder</li>
                 <li>Right-click → Open (first time)</li>
@@ -180,7 +180,7 @@ export default function Downloads() {
                 <h4 className="font-bold">Linux</h4>
               </div>
               <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-                <li>Download the .AppImage from GitHub</li>
+                <li>Download the .AppImage from Codeberg</li>
                 <li><code className="bg-white/10 px-1 rounded">chmod +x BricsCoin*.AppImage</code></li>
                 <li><code className="bg-white/10 px-1 rounded">./BricsCoin*.AppImage</code></li>
               </ol>

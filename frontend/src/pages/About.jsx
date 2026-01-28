@@ -164,7 +164,7 @@ export default function About() {
         </CardContent>
       </Card>
 
-      {/* Whitepaper & GitHub */}
+      {/* Whitepaper & Source */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-card/50 border-white/10">
           <CardHeader>
