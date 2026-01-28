@@ -647,7 +647,7 @@ export default function Network() {
             <div className="mt-4 p-4 bg-background/50 rounded-sm border border-white/10">
               <pre className="font-mono text-xs text-muted-foreground overflow-x-auto">
 {`# Quick Start
-git clone https://github.com/bricscoin26/Bricscoin26.git
+git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
 cd Bricscoin26
 docker-compose up -d
 
