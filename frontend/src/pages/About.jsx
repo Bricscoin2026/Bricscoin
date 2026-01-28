@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { 
   FileText, 
-  Github, 
+  Code, 
   User, 
   Target, 
   Shield, 
@@ -156,7 +156,7 @@ export default function About() {
               <p className="text-sm text-muted-foreground">0.05 BRICS fee per transaction - fees are BURNED (destroyed)</p>
             </div>
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-              <Github className="w-8 h-8 text-primary mb-2" />
+              <Code className="w-8 h-8 text-primary mb-2" />
               <h4 className="font-bold">Open Source</h4>
               <p className="text-sm text-muted-foreground">100% transparent, MIT licensed code</p>
             </div>
@@ -192,7 +192,7 @@ export default function About() {
         <Card className="bg-card/50 border-white/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Github className="w-5 h-5 text-primary" />
+              <Code className="w-5 h-5 text-primary" />
               Source Code
             </CardTitle>
           </CardHeader>
@@ -204,10 +204,10 @@ export default function About() {
               variant="outline"
               onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}
               className="w-full border-white/20"
-              data-testid="github-btn"
+              data-testid="codeberg-btn"
             >
-              <Github className="w-4 h-4 mr-2" />
-              View on GitHub
+              <Code className="w-4 h-4 mr-2" />
+              View on Codeberg
             </Button>
           </CardContent>
         </Card>
@@ -398,8 +398,8 @@ export default function About() {
             Get Started
           </Button>
           <Button variant="outline" className="border-white/20" onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}>
-            <Github className="w-4 h-4 mr-2" />
-            GitHub
+            <Code className="w-4 h-4 mr-2" />
+            Codeberg
           </Button>
           <Button variant="outline" className="border-white/20" onClick={() => window.open('https://x.com/Bricscoin26', '_blank')}>
             <ExternalLink className="w-4 h-4 mr-2" />
