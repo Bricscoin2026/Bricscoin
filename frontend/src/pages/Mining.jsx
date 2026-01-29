@@ -15,6 +15,20 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export default function Mining() {
   const [stats, setStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
+  const [activeMiners, setActiveMiners] = useState([]);
+
+  const fetchActiveMiners = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/mining/miners`);
+      if (res.ok) {
+        const data = await res.json();
+        setActiveMiners(data.miners || []);
+      }
+    } catch (err) {
+      console.error("Error loading miners", err);
+    }
+  };
+
 
   useEffect(() => {
     fetchStats();
