@@ -38,6 +38,8 @@ export default function Mining() {
       const wallet = JSON.parse(saved);
       setWalletAddress(wallet.address || "");
     }
+    fetchActiveMiners();
+
   }, []);
 
   const fetchStats = async () => {
