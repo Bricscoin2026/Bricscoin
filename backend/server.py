@@ -676,6 +676,40 @@ async def get_balance(address: str) -> float:
 
 # ==================== API ENDPOINTS ====================
 
+
+# Mining / Stratum endpoints
+
+@api_router.get("/mining/miners")
+async def get_active_miners():
+    """Return active miners connected to the Stratum server.
+
+    NOTE: This reads the in-memory `miners` dict from stratum_server.
+    It shows only currently connected miners (not historical stats).
+    """
+    try:
+        from . import stratum_server as stratum
+    except Exception:
+        # Fallback import style if relative import fails in this environment
+        import stratum_server as stratum  # type: ignore
+
+    miners_dict = getattr(stratum, "miners", {}) or {}
+
+    # Normalizza in lista di oggetti serializzabili
+    result = []
+    for miner_id, info in miners_dict.items():
+        if not isinstance(info, dict):
+            continue
+        result.append({
+            "id": miner_id,
+            "worker": info.get("worker"),
+            "connected_at": info.get("connected_at"),
+            "shares": info.get("shares", 0),
+            "blocks": info.get("blocks", 0),
+            "extranonce1": info.get("extranonce1"),
+        })
+
+    return {"miners": result, "count": len(result)}
+
 @api_router.get("/")
 async def root():
     return {"message": "BricsCoin API", "version": "1.0.0"}
