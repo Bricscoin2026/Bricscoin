@@ -16,7 +16,6 @@ export default function Mining() {
   const [stats, setStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
   const [minersCount, setMinersCount] = useState(0);
-  const [activeMiners, setActiveMiners] = useState([]);
 
   const fetchStats = async () => {
     try {
@@ -26,18 +25,17 @@ export default function Mining() {
         setStats(data);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error loading stats:", error);
     }
   };
 
   const fetchMiners = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/mining/miners`);
+      // USA L'ENDPOINT CHE ESISTE DAVVERO SUL NODO:
+      const response = await fetch(`${BACKEND_URL}/api/miners/stats`);
       if (response.ok) {
         const data = await response.json();
-        const miners = data.miners || [];
-        setActiveMiners(miners);
-        setMinersCount(data.count || miners.length || 0);
+        setMinersCount(data.active_miners ?? 0);
       }
     } catch (error) {
       console.error("Error fetching miners:", error);
@@ -49,7 +47,7 @@ export default function Mining() {
     fetchMiners();
     const minerInterval = setInterval(fetchMiners, 10000);
 
-    // Load wallet from localStorage
+    // Carica il wallet salvato (se esiste)
     const saved = localStorage.getItem("bricscoin_web_wallet");
     if (saved) {
       const wallet = JSON.parse(saved);
@@ -144,108 +142,34 @@ export default function Mining() {
         </Card>
       </div>
 
-      {/* Active Miners */}
-      <Card className="bg-card border-green-500/20">
-        <CardHeader className="border-b border-green-500/20">
-          <CardTitle className="font-heading flex items-center gap-2">
+      {/* Active Miners (solo conteggio, dato che il backend dà solo active_miners) */}
+      <Card className="bg-card border-white/10">
+        <CardHeader className="border-b border-white/10 flex flex-row items-center justify-between">
+          <CardTitle className="font-heading text-lg flex items-center gap-2">
             <Cpu className="w-5 h-5 text-green-500" />
             Active Miners
           </CardTitle>
+          <Button variant="outline" size="sm" onClick={fetchMiners}>
+            Refresh
+          </Button>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="text-center text-muted-foreground py-4">
-            <p className="text-2xl font-bold text-green-500 mb-2">
-              {stats?.total_blocks > 0 ? "Mining Active" : "Waiting for miners..."}
+        <CardContent className="p-4">
+          <p className="text-sm text-muted-foreground mb-2">
+            Connected miners:{" "}
+            <span className="font-mono font-semibold">{minersCount}</span>
+          </p>
+          {minersCount === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No miners detected in the last few minutes. Once ASICs connect to
+              the Stratum server and start submitting shares, they will appear
+              here as active.
             </p>
-            <p className="text-sm">
-              Connect your ASIC miner to start mining BricsCoin
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Miners are currently connected and submitting shares to the
+              network.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-              <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">
-                  {stats?.total_blocks || 0}
-                </p>
-                <p className="text-xs text-muted-foreground">Blocks Mined</p>
-              </div>
-              <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">
-                  {stats?.current_difficulty?.toLocaleString() || 0}
-                </p>
-                <p className="text-xs text-muted-foreground">Difficulty</p>
-              </div>
-              <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">Active</p>
-                <p className="text-xs text-muted-foreground">Network Status</p>
-              </div>
-              <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">
-                  {stats?.current_reward || 50} BRICS
-                </p>
-                <p className="text-xs text-muted-foreground">Block Reward</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Lista miners attivi */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">
-                Connected miners:{" "}
-                <span className="font-mono">{minersCount}</span>
-              </p>
-              <Button variant="outline" size="sm" onClick={fetchMiners}>
-                Refresh
-              </Button>
-            </div>
-
-            {activeMiners.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Nessun miner attivo rilevato al momento. Quando gli ASIC si
-                collegano allo Stratum e iniziano a inviare share, appariranno
-                qui.
-              </p>
-            ) : (
-              <div className="overflow-x-auto mt-2">
-                <table className="w-full text-xs">
-                  <thead className="border-b border-white/10 text-muted-foreground text-left">
-                    <tr>
-                      <th className="py-1 pr-2">Address</th>
-                      <th className="py-1 pr-2">Worker</th>
-                      <th className="py-1 pr-2">Connected</th>
-                      <th className="py-1 pr-2 text-right">Shares</th>
-                      <th className="py-1 pr-2 text-right">Blocks</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeMiners.map((m) => (
-                      <tr
-                        key={m.id}
-                        className="border-b border-white/5 last:border-0"
-                      >
-                        <td className="py-1 pr-2 font-mono break-all">
-                          {m.id}
-                        </td>
-                        <td className="py-1 pr-2 text-muted-foreground">
-                          {m.worker || "-"}
-                        </td>
-                        <td className="py-1 pr-2 text-muted-foreground">
-                          {m.connected_at
-                            ? new Date(m.connected_at).toLocaleTimeString()
-                            : "-"}
-                        </td>
-                        <td className="py-1 pr-2 text-right">
-                          {m.shares ?? 0}
-                        </td>
-                        <td className="py-1 pr-2 text-right">
-                          {m.blocks ?? 0}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -402,7 +326,7 @@ export default function Mining() {
               </li>
               <li>
                 Set Port:{" "}
-                <code className="bg-white/10 px-1 rounded">3333</code>
+                <code className="bg白/10 px-1 rounded">3333</code>
               </li>
               <li>Set User: Your BRICS wallet address</li>
               <li>
