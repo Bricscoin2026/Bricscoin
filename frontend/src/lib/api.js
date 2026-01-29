@@ -62,6 +62,8 @@ export const getAddressTransactions = (address, limit = 50) =>
 // Mining
 export const getMiningTemplate = () => api.get("/mining/template");
 
+export const getActiveMiners = () => api.get("/mining/miners");
+
 export const submitMinedBlock = (data) => api.post("/mining/submit", data);
 
 // Wallet
