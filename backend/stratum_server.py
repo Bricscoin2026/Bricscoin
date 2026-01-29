@@ -59,9 +59,37 @@ async def get_network_difficulty() -> int:
     """
     blocks_count = await db.blocks.count_documents({})
     
-    # Catena molto giovane: tieni difficoltà iniziale
-    if blocks_count < 2:
+    # Catena molto giovane:
+    # - per il blocco 0 (genesis) usiamo una difficoltà fissa
+    # - dal blocco 1 in poi permettiamo già il decay se la chain è ferma
+    if blocks_count == 0:
         return INITIAL_DIFFICULTY
+
+    if blocks_count == 1:
+        last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+        if not last_block:
+            return INITIAL_DIFFICULTY
+        try:
+            last_time = datetime.fromisoformat(last_block["timestamp"].replace("Z", "+00:00"))
+        except (ValueError, KeyError):
+            last_time = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc)
+        elapsed = (now - last_time).total_seconds()
+        if elapsed <= TARGET_BLOCK_TIME:
+            return INITIAL_DIFFICULTY
+        delay_units = elapsed / TARGET_BLOCK_TIME
+        decay_factor = 0.5 ** (delay_units - 1)
+        new_difficulty = int(INITIAL_DIFFICULTY * decay_factor)
+        if new_difficulty < 1:
+            new_difficulty = 1
+        logger.info(
+            "⚙️ Stratum difficulty (genesis decay): base=%s, elapsed=%.1fs, decay_factor=%.4f, final=%s",
+            INITIAL_DIFFICULTY,
+            elapsed,
+            decay_factor,
+            new_difficulty,
+        )
+        return new_difficulty
     
     # Ultimo blocco registrato
     last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
