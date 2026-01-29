@@ -203,6 +203,52 @@ export default function Mining() {
         </CardContent>
       </Card>
 
+      {/* Active Miners */}
+      <Card className="bg-card border-white/10">
+        <CardHeader className="border-b border-white/10 flex flex-row items-center justify-between">
+          <CardTitle className="font-heading text-lg">Active Miners</CardTitle>
+          <Button variant="outline" size="sm" onClick={fetchActiveMiners}>
+            Refresh
+          </Button>
+        </CardHeader>
+        <CardContent className="p-4">
+          {activeMiners.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No miners detected in the last few minutes. Once ASICs connect to the Stratum server
+              and start submitting shares, they will appear here.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-muted-foreground border-b border-white/10">
+                  <tr>
+                    <th className="py-2 pr-4">Address</th>
+                    <th className="py-2 pr-4">Worker</th>
+                    <th className="py-2 pr-4">Connected</th>
+                    <th className="py-2 pr-4 text-right">Shares</th>
+                    <th className="py-2 pr-4 text-right">Blocks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeMiners.map((m) => (
+                    <tr key={m.id} className="border-b border-white/5 last:border-none">
+                      <td className="py-2 pr-4 font-mono text-xs break-all">{m.id}</td>
+                      <td className="py-2 pr-4 text-xs text-muted-foreground">{m.worker || "-"}</td>
+                      <td className="py-2 pr-4 text-xs text-muted-foreground">
+                        {m.connected_at ? new Date(m.connected_at).toLocaleTimeString() : "-"}
+                      </td>
+                      <td className="py-2 pr-4 text-right text-xs">{m.shares ?? 0}</td>
+                      <td className="py-2 pr-4 text-right text-xs">{m.blocks ?? 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
       {/* Setup Guides */}
       <div className="grid md:grid-cols-2 gap-4">
         {/* Bitaxe */}
