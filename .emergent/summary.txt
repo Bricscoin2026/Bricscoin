@@ -4,187 +4,202 @@
 - **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty system (retargeting), SHA256 hashing, 21,000,000 total supply, and a block reward halving mechanism.
 - **Transactions:** Client-side signed transactions with a burned fee.
 - **Mining:** Support for hardware ASIC miners via a Bitcoin-compliant Stratum protocol.
-- **Wallets:** A secure web wallet.
-- **Source Code & Transparency:** The project must be 100% open-source and has recently been migrated from GitHub to Codeberg. The website should display key metrics.
+- **Wallets:** A secure web wallet. The user has also requested a server-side backup mechanism after losing a wallet.
+- **Source Code & Transparency:** The project must be 100% open-source and is hosted on Codeberg. The website should display key metrics.
 - **Credibility & Longevity:** The project must function correctly to appear legitimate, with the difficulty adjustment being the most critical component for long-term stability.
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack application (FastAPI backend, React frontend, MongoDB) is deployed on the user's Hetzner server () using Docker Compose. The application codebase is now hosted on Codeberg. The backend runs both the main API and a Stratum server for mining within the same Docker container. While a previous bug with transaction signatures was fixed, the application is highly unstable due to critical, unresolved issues with the blockchain's difficulty adjustment, leading to an incorrect block generation rate. The agent also performed a security audit and added a corresponding badge to the UI.
+A full-stack application (FastAPI backend, React frontend, MongoDB) is deployed on the user's Hetzner server. The backend runs the API and a Stratum server for mining. The application's core instability stems from a flawed difficulty adjustment mechanism. The agent has performed extensive remote debugging on the user's server to fix this, along with completing a full migration of all frontend links and text from GitHub to Codeberg. A major issue was identified where the Stratum server used a different, outdated difficulty calculation than the main API, causing the blockchain to stall. The latest fix involved implementing an exponential time decay to automatically lower the difficulty if no blocks are found for an extended period.
 
 **Last working item**:
-- Last item agent was working: The agent was attempting a major refactor to fix multiple core issues at once:
-    1.  **Block Time:** Blocks are found every few seconds, not every 10 minutes. The agent was trying to implement a dynamic difficulty adjustment based on the real-world time between blocks.
-    2.  **Miner Count:** The user wants to see the number of connected miners, which always shows 0. The agent was trying to implement a file-based communication system between the stratum and API servers.
-    3.  **Hashrate Display:** The user pointed out the displayed network hashrate was a theoretical calculation from difficulty, not a reflection of real miner power.
-    This comprehensive fix failed, resulting in the application showing all zero values for the user (hai fatto un casino). The agent then restored the code from a backup, leaving the core issues unresolved.
-- Status: BLOCKED
+- Last item agent was working: The agent implemented an exponential time decay for the difficulty adjustment in . This was to solve a critical issue where the blockchain would get stuck if the difficulty was too high for the network hashrate, as the difficulty would only adjust *after* a block was found. This new logic automatically lowers the difficulty if a block isn't found after the 10-minute target time has passed.
+- Status: IN PROGRESS
 - Agent Testing Done: N
-- Which testing method agent to use? The agent must fix the core issues and then perform an end-to-end test. This involves:
-    1.  Connecting a test miner to the stratum server.
-    2.  Verifying the difficulty sent in the job template is correct.
-    3.  Monitoring block times over a period (e.g., 10-20 minutes) to see if they are slowing down.
-    4.  Using  to check the  endpoint once it's fixed.
-- User Testing Done: Y (User is actively monitoring the live site and reporting failures).
+- Which testing method agent to use? Backend testing. The agent must monitor the live server's logs to confirm that new blocks are being found with the new, lower difficulty.
+  1.  Connect to the server: 
+  2.  Monitor logs for new blocks: 
+  3.  Check the latest block's difficulty via the API: {"blocks":[{"index":13656,"timestamp":"2026-01-29T10:49:55.280133+00:00","transactions":[{"id":"fca8f9bc-67ac-4370-8439-c04c351f342a","sender":"COINBASE","recipient":"BRICS83df6e87e55f15c03a049aa66a487da89275a769","amount":50.0,"type":"mining_reward"}],"proof":3669908169,"previous_hash":"0000000000a724c4196fbb12684e3c03692d93f954ce1f9d7eb70c054fc05602","hash":"000000009e14e3e522f38c8908fce867368eeb9d60b90c77675f14c1641fcfb8","miner":"BRICS83df6e87e55f15c03a049aa66a487da89275a769","difficulty":7500000,"nonce":3669908169}],"total":13657}
+- User Testing Done: N
 
 **All Pending/In progress Issue list**:
-- Issue 1: Block generation rate is incorrect (P0)
-- Issue 2: Miner count is not displayed (P0)
-- Issue 3: Incomplete migration from GitHub to Codeberg (P1)
-- Issue 4: Network Hashrate display is misleading (P2)
+- Issue 1: Incorrect Block Generation Rate & Difficulty Adjustment (P0)
+- Issue 2: Explorer UI block count discrepancy (P1)
 
 Issues Detail:
 - Issue 1:
-    - Attempted fixes: The agent correctly identified that  was using a hardcoded or incorrect difficulty for mining jobs and share validation, ignoring the network's dynamically calculated difficulty. Multiple attempts to fix this by rewriting the difficulty calculation logic in  and  have failed because the core issue—the stratum server not applying the correct difficulty to the jobs it sends to miners—was not properly addressed. The logs consistently showed  or  being used for block validation, even when the network difficulty was much higher.
+    - Attempted fixes:
+        1.  Synced difficulty calculation logic between the API and Stratum server.
+        2.  Reduced the adjustment window from 100 to 10 blocks.
+        3.  Identified that valid hashes (with 9 leading zeros) were being rejected because the difficulty was still too high.
+        4.  Implemented an exponential time decay in  to force the difficulty down if the chain stalls. This successfully lowered the difficulty from 7.5M to ~1M.
     - Next debug checklist:
-        1.  In , locate the  function (or equivalent).
-        2.  Trace where the  or  variable used for share validation comes from. The log  is the smoking gun.
-        3.  Ensure this validation uses the same difficulty that was part of the job template (). The  object retrieved from  must contain the correct difficulty from when it was created.
-        4.  Fix  to correctly retrieve and use the job's specific difficulty for validation.
-    - Why fix this issue and what will be achieved with the fix?: This is the most critical issue. Fixing it will stabilize the block time to ~10 minutes, which is the user's primary requirement for the coin's economic model.
+        1.  Monitor the live server to see if a new block is mined with the lower difficulty (~1M).
+        2.  If a block is found, verify its difficulty is correct.
+        3.  Observe the average block time over the next few blocks to see if it approaches the 10-minute target.
+        4.  **IMPORTANT**: The time decay logic was only added to . The same logic must be added to  in  to keep the API and Stratum server in sync.
+    - Why fix this issue and what will be achieved with the fix?: This is the core requirement for the project's economic stability and legitimacy.
     - Status: IN PROGRESS
     - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Backend. Monitor stratum logs and the  endpoint to observe block times.
-    - Blocked on other issue: none
+    - Should Test frontend/backend/both after fix? Backend.
+    - Blocked on other issue: None.
 
 - Issue 2:
-    - Attempted fixes: The agent tried creating a separate HTTP stats server and then a file-based communication method () to get the miner count from the stratum process to the API process. The API endpoint () repeatedly returned , indicating it was not being registered correctly in the FastAPI app due to being appended to the file incorrectly or other script errors.
+    - Attempted fixes: The user reported the explorer showing a different total block count than the dashboard. The agent found and deleted 11 duplicate blocks in the database, which corrected the  count in the API response ().
     - Next debug checklist:
-        1.  Adopt the file-based approach as it's simpler.
-        2.  In , find the  loop. After the log , add a  block to write  to .
-        3.  In , cleanly remove any duplicate  endpoints and add one correct version that reads from that file. Ensure it's added before .
-        4.  Rebuild the  container and test the endpoint with {"detail":"Not Found"}.
-    - Why fix this issue and what will be achieved with the fix?: Fulfills the user's request for transparency on miner activity.
-    - Status: IN PROGRESS
+        1.  After the block generation rate is stable (Issue 1), the user needs to re-verify if the explorer UI is displaying the correct total block count consistently.
+        2.  If the issue persists, investigate the frontend code in  to see how it fetches and displays the total count.
+    - Why fix this issue and what will be achieved with the fix?: Ensures data consistency and user trust in the explorer.
+    - Status: USER VERIFICATION PENDING
     - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Backend (API), then Frontend (UI).
-    - Blocked on other issue: none
-
-- Issue 3:
-    - Attempted fixes: The agent used  to replace most GitHub URLs with the new Codeberg URL.
-    - Next debug checklist:
-        1.  The user reported links still remain. Run a global search: .
-        2.  Systematically replace any remaining URLs in , , and  with .
-        3.  Rebuild the frontend container: .
-    - Why fix this issue and what will be achieved with the fix?: Ensures all project links point to the new official repository.
-    - Status: IN PROGRESS
-    - Is recurring issue? N
     - Should Test frontend/backend/both after fix? Frontend.
-    - Blocked on other issue: none
-
-- Issue 4:
-    - Attempted fixes: The agent attempted to rewrite the hashrate calculation logic to be based on actual block times. This was part of a larger failed patch and was rolled back. The user also requested this display be removed entirely for now.
-    - Next debug checklist:
-        1.  The agent has already replaced the hashrate display with a static Network Status: Active message in .
-        2.  Once Issue 1 (block time) is resolved, the logic to calculate real hashrate can be correctly re-implemented in  in .
-    - Why fix this issue and what will be achieved with the fix?: Provides an accurate, real-world metric of network security, as requested by the user.
-    - Status: NOT STARTED (pending Issue 1)
-    - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Backend (API), then Frontend (UI).
-    - Blocked on other issue: Issue 1: Block generation rate is incorrect
+    - Blocked on other issue: Issue 1: Incorrect Block Generation Rate & Difficulty Adjustment
 
 **In progress Task List**:
-- Task 1: Complete the UI migration from GitHub to Codeberg (P1)
-  - Where to resume:  for remaining github strings in the  directory and replace them. Key files are , , and .
-  - What will be achieved with this?: All links in the application will point to the new official Codeberg repository.
-  - Status: IN PROGRESS
-  - Should Test frontend/backend/both after fix? Frontend.
-  - Blocked on something: No.
+None.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-  - Re-implement a real-time network hashrate calculation based on actual block times (P1).
+  - **P0: Sync Time Decay Logic:** Add the exponential time decay logic from  to  in .
+  - **P0: Server-side Wallet Backup:** Implement a feature to save wallets (encrypted) in the database to prevent loss from clearing browser cache.
+  - **P1: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation.
+  - **P1: Real-time Hashrate Calculation:** Re-implement the network hashrate calculation based on actual block times and difficulty.
+
 - **Future Tasks:**
-  - Develop a mobile wallet for iOS/Android (P2).
-  - Pursue exchange listings (P2).
-  - Create a dedicated page for community mining pools (P3).
+  - Develop a mobile wallet for iOS/Android.
+  - Pursue exchange listings.
+  - Create a dedicated page for community mining pools.
 
 **Completed work in this session**
-- **Security Audit & Reporting:** Conducted a security audit using the testing agent, which generated a new test suite (), and added an audit badge and report () to the project UI and repository.
-- **Transaction Signature Fix:** Successfully resolved the critical Signature verification failed bug by implementing a multi-method verification in  to handle the DER format from the frontend and normalize the amount field.
-- **Docker Architecture Fix:** Corrected the  to run both the  API server and the  script by using a  entrypoint script.
-- **Repository Migration:** Migrated the project's git remote from GitHub to Codeberg on the user's server and updated most, but not all, of the corresponding links in the frontend.
-- **Extensive Deployment Debugging:** Guided the user through numerous complex deployment and configuration issues on the production server, including fixing  files, git remote mismatches, and Docker build problems.
+- **Core Difficulty Logic Fixes:**
+  - Corrected the  function in  to use the proper Bitcoin formula.
+  - Fixed a critical bug where the Stratum server validated shares against  instead of the network difficulty.
+  - Implemented an exponential time decay to automatically lower difficulty when the chain is stalled.
+- **GitHub to Codeberg Migration:** Replaced all hardcoded GitHub URLs, text references, and icons with Codeberg equivalents across the entire frontend.
+- **Database Cleanup:** Identified and removed 11 duplicate block entries from the MongoDB database, correcting the total block count.
+- **Production Debugging & Fixes:**
+  - Resolved frontend Mixed Content errors on the production server by fixing hardcoded HTTP URLs.
+  - Guided the user through numerous live server commands (, , , ) to apply fixes, diagnose issues, and restart services correctly.
+  - Pushed all accumulated changes to the user's Codeberg repository.
+- **Wallet Recovery Attempt:** Assisted the user in a failed attempt to recover a lost wallet by searching the browser's local storage files on their Mac, confirming that the seed phrase was unrecoverable.
 
 **Earlier issues found/mentioned but not fixed**
-- All known issues are captured in the All Pending/In progress Issue list.
+None. All are tracked in the pending list.
 
 **Known issue recurrence from previous fork**
-- **Deployment Fragility:** The user consistently struggles with the command-line deployment process. Incorrect commands, typos, and environmental differences lead to frequent failures.
-- **Application State Corruption:** Attempts to apply large, multi-file fixes have repeatedly broken the application, requiring rollbacks from backups. Changes need to be smaller and more targeted.
+- **Deployment Fragility:** The user requires significant guidance for server operations. All code changes must be pushed to Codeberg, followed by explicit  and  commands for the user to execute.
+- **Difficulty Logic Complexity:** The difficulty adjustment remains the most complex and fragile part of the application. The logic is duplicated and has now diverged between  and .
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Docker Multi-process:** The  was updated to use a  script to run both the API server and the Stratum server in the same container.
-- **Stratum Protocol Difficulty:** The agent identified that the difficulty sent to miners () was hardcoded. A fix was attempted, but the core issue remains that the stratum server validates shares against the wrong difficulty.
-- **File-based Inter-process Communication:** The agent attempted to use a temporary file () to share the miner count between the  process and the  API process.
+- **Dynamic Difficulty Adjustment:** The system now uses a combination of average block time (over the last 10 blocks) and an exponential time decay to adjust difficulty, aiming for a 10-minute block time.
+- **Divergent Logic:** The difficulty calculation logic in  (for the API) is different from the logic in  (for mining). The stratum server has the latest, most correct version. This must be unified.
+- **Live Server Deployment:** All work is done in a preview environment, but fixes must be manually applied by the user on their production Hetzner server via SSH commands provided by the agent.
 
 **key DB schema**
 - : 
 - : 
-- :  (This collection exists but the code seems to ignore it, instead reading difficulty from the last block).
 
 **changes in tech stack**
 - None.
 
 **All files of reference**
-- : Contains the flawed difficulty adjustment and hashrate calculation logic.
-- : Has the critical bug where it does not apply the correct network difficulty to mining jobs and share validation.
-- : The new script that runs both backend processes.
-- : Was updated to use .
-- : Needs UI for the miner count.
-- , , : Contain hardcoded GitHub links that need to be replaced with Codeberg links.
+- : Contains the most up-to-date difficulty calculation logic, including the new time decay feature.
+- : Contains an outdated version of the difficulty calculation logic that needs to be updated.
+- : The page where the user noticed the block count discrepancy.
+- : The Connected Miners section was removed from this file.
+- : The wallet download link was corrected in this file.
 
 **Areas that need refactoring**:
-- **Difficulty Logic:** The logic for calculating and applying difficulty is spread across  and , is duplicated, and is incorrect. It needs to be centralized in  and consumed correctly by .
-- **Inter-process Communication:** The method for sharing the miner count between the stratum and API servers is fragile. A more robust solution (like a simple internal API or Redis) should be considered in the future, but for now, making the file-based approach work is the priority.
+- **Unify Difficulty Logic:** The  function in  and the  function in  MUST be unified. The logic from the stratum server should be copied to the main server to ensure the API and mining operations use the exact same calculation.
 
 **key api endpoints**
-- : Returns network statistics. The  and  values are currently incorrect.
-- : The newly added (but not working) endpoint intended to return the number of connected miners.
+- : Returns network statistics.  is calculated here.
+- : Returns a list of blocks.
+- : Provides a block template for miners. Its difficulty is based on .
 
 **Critical Info for New Agent**
-- **The user is highly frustrated.** The application is in a worse state than before. Prioritize stability and making small, verifiable changes. Do not attempt large, multi-faceted fixes at once.
-- **The Core Bug:** The stratum server () is not using the correct network difficulty when validating shares, causing blocks to be found instantly regardless of the  value shown in the API. The logs show  or  being used. Focus on fixing this first.
-- **Work on the Live Server:** All work happens on the user's Hetzner server () in the  directory.
-- **New Repository:** The project has been migrated to . Use this for all future source control interactions.
+- **The user is working directly on the production server.** You must provide the user with explicit usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add       Add file contents to the index
+   mv        Move or rename a file, a directory, or a symlink
+   restore   Restore working tree files
+   rm        Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect    Use binary search to find the commit that introduced a bug
+   diff      Show changes between commits, commit and working tree, etc
+   grep      Print lines matching a pattern
+   log       Show commit logs
+   show      Show various types of objects
+   status    Show the working tree status
+
+grow, mark and tweak your common history
+   branch    List, create, or delete branches
+   commit    Record changes to the repository
+   merge     Join two or more development histories together
+   rebase    Reapply commits on top of another base tip
+   reset     Reset current HEAD to the specified state
+   switch    Switch branches
+   tag       Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch     Download objects and refs from another repository
+   pull      Fetch from and integrate with another repository or a local branch
+   push      Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system. commands and  commands to push and deploy your changes.  is required before the user can .
+- **The user lost a wallet with ~182,000 BRICS.** This was a major event. Prioritize the user's requests to prevent this from happening again (server-side wallet backup, UI warnings).
+- **The difficulty logic is split.** The most recent and correct logic (with time decay) is in . You must copy this logic to  to ensure the API and stratum server report and use the same difficulty. This is your first priority.
+- **Another user is mining!** The network has at least one other miner besides the user, which is a positive development.
 
 **documents and test reports created in this job**
-- 
-- 
-- 
+-  (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** States the difficulty should auto-adjust to target 10 minutes/block and that the hashrate should be real.
-2.  **User:** Reports the agent's fix failed and the site shows all zeros again: you made a mess.
-3.  **User:** Asks to remove GitHub links and hide the incorrect hashrate display.
-4.  **User:** Reports the explorer is stuck and there are still GitHub links on the About page.
-5.  **User:** Reports all values on the site are zero again.
-6.  **User:** Asks to fix the remaining GitHub links in the site footer.
-7.  **User:** Asks to fix the miner count, which is showing 0.
-8.  **User:** Reports that even with a difficulty of 10M, blocks are found every minute, which is too fast.
-9.  **User:** After a failed fix, asks the agent to restore from backup.
-10. **User:** Asks the agent to fix the code to be 100% working without any more bugs.
+1.  **User:** The block time is not 10 minutes.
+2.  **User:** Difficulty should be automatic; low for few miners, high for many.
+3.  **User:** Ok, proceed with the fix to make difficulty automatic.
+4.  **User:** Test the changes before saving.
+5.  **User:** Blocks are still not found every 10 minutes. (This was after the first fix, leading to more investigation).
+6.  **User:** The site shows difficulty 1.8M but explorer shows 7.5M.
+7.  **User:** Why is the difficulty still too high? Hash with 9 zeros is not accepted.
+8.  **User:** It must be automatic.
+9.  **User:** Yes, proceed with adding the time decay.
+10. **User:** Ok, the site shows block 13657 now.
 
 **Project Health Check:**
 - **Broken:**
-  - Blockchain difficulty adjustment.
-  - Block generation rate (too fast).
-  - Active miner count display.
-  - Network hashrate display.
+  - **Block Generation Rate:** Still not consistently at the 10-minute target, but the latest fixes are promising. Status: .
+- **Mocked:**
+  - None.
 
 **3rd Party Integrations**
-- **Codeberg:** Source control (migrated from GitHub).
-- **Let's Encrypt (Certbot):** SSL certificate management.
+- **Codeberg:** Source control.
 
 **Testing status**
-- Testing agent used after significant changes: NO (Only at the very beginning for the security audit).
+- Testing agent used after significant changes: NO
 - Troubleshoot agent used after agent stuck in loop: NO
-- Test files created: []
-- Known regressions: Core blockchain functionality (difficulty adjustment) is severely broken.
+- Test files created: None
+- Known regressions: None in this session; the session was focused on fixing a pre-existing regression.
 
 **Credentials to test flow:**
 - **Hetzner Server SSH:**
@@ -193,4 +208,4 @@ Issues Detail:
     - Password: 
 
 **What agent forgot to execute**
-The agent failed to properly test its complex fixes before deploying them, leading to multiple regressions and a broken application state. Specifically, after attempting to fix the difficulty logic, the agent did not verify that the stratum server was actually using the new difficulty for its jobs, which was the root cause of the problem. The agent also repeatedly failed to correctly add a new API endpoint to the FastAPI application, resulting in persistent  errors.</analysis>
+The agent implemented the final, most important difficulty fix (exponential time decay) only in . It forgot to apply the same critical update to the corresponding function  in . This will cause the API to report a different difficulty than the one the stratum server is actually using for mining jobs. This must be the very first task for the next agent.</analysis>
