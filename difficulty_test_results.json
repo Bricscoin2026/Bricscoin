@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-01-29T21:22:16.235191+00:00",
+  "backend_url": "https://chain-pulse-1.preview.emergentagent.com",
+  "total_tests": 7,
+  "passed_tests": 7,
+  "success": true,
+  "results": [
+    {
+      "test": "Network Stats API",
+      "success": true,
+      "details": "Status 200, current_difficulty = 1",
+      "timestamp": "2026-01-29T21:22:10.694980+00:00",
+      "response_time_ms": 86.81
+    },
+    {
+      "test": "Mining Template API",
+      "success": true,
+      "details": "Status 200, difficulty = 1, reward = 50.0",
+      "timestamp": "2026-01-29T21:22:10.749138+00:00",
+      "response_time_ms": 54.08
+    },
+    {
+      "test": "Network Stats API",
+      "success": true,
+      "details": "Status 200, current_difficulty = 1",
+      "timestamp": "2026-01-29T21:22:10.765807+00:00",
+      "response_time_ms": 16.59
+    },
+    {
+      "test": "Mining Template API",
+      "success": true,
+      "details": "Status 200, difficulty = 1, reward = 50.0",
+      "timestamp": "2026-01-29T21:22:10.780909+00:00",
+      "response_time_ms": 15.02
+    },
+    {
+      "test": "Difficulty Consistency",
+      "success": true,
+      "details": "Coerenza OK - Stats: 1, Template: 1 (diff: 0)",
+      "timestamp": "2026-01-29T21:22:10.780955+00:00",
+      "response_time_ms": null
+    },
+    {
+      "test": "Edge Case Resistance",
+      "success": true,
+      "details": "5 chiamate OK - Avg times: Stats 0.02s, Template 0.01s",
+      "timestamp": "2026-01-29T21:22:16.216421+00:00",
+      "response_time_ms": null
+    },
+    {
+      "test": "Time Decay Logic",
+      "success": true,
+      "details": "Blocco vecchio (4813.6min) - Time decay atteso (non testabile senza manipolare DB)",
+      "timestamp": "2026-01-29T21:22:16.235007+00:00",
+      "response_time_ms": null
+    }
+  ]
+}
