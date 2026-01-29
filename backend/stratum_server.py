@@ -47,68 +47,85 @@ COIN = 100_000_000  # satoshis
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes
 
-async def get_network_difficulty():
-    """
-    Get current difficulty from blockchain (reads from last block or calculates).
+async def get_network_difficulty() -> int:
+    """Calcola la difficoltà di rete per **il prossimo blocco**.
     
-    The difficulty stored in each block is the difficulty that was used to mine it.
-    For the NEXT block, we may need to recalculate if we're at an adjustment boundary.
-    
-    This function returns the difficulty that should be used for the NEXT block.
+    Logica:
+    - Base: stesso algoritmo Bitcoin-style sui tempi medi degli ultimi N blocchi
+      (N = 10 fino a 2016 blocchi, poi 2016).
+    - Time-decay: se l'ultimo blocco è più vecchio del TARGET_BLOCK_TIME,
+      la difficoltà viene ridotta in modo esponenziale nel tempo per evitare
+      che la chain si blocchi quando l'hashrate è troppo basso.
     """
     blocks_count = await db.blocks.count_documents({})
     
-    # For very early chain (< 2 blocks), use initial difficulty
+    # Catena molto giovane: tieni difficoltà iniziale
     if blocks_count < 2:
         return INITIAL_DIFFICULTY
     
-    # Get the difficulty from the last block
+    # Ultimo blocco registrato
     last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
     if not last_block:
         return INITIAL_DIFFICULTY
     
-    current_difficulty = last_block.get('difficulty', INITIAL_DIFFICULTY)
+    current_difficulty = last_block.get("difficulty", INITIAL_DIFFICULTY)
     
-    # For new chains (< 2016 blocks), adjust every 10 blocks for faster response
+    # ================= BASE DIFFICULTY (media ultimi N blocchi) =================
     adjustment_interval = 10 if blocks_count < DIFFICULTY_ADJUSTMENT_INTERVAL else DIFFICULTY_ADJUSTMENT_INTERVAL
     
-    # Check if we're at an adjustment boundary
-    if blocks_count % adjustment_interval != 0:
-        return current_difficulty
+    # Se non siamo esattamente su un boundary di aggiustamento, usa la difficoltà corrente
+    if blocks_count % adjustment_interval == 0:
+        # Prendi gli ultimi N blocchi
+        last_blocks = await db.blocks.find({}, {"_id": 0}).sort("index", -1).limit(adjustment_interval).to_list(adjustment_interval)
+        if len(last_blocks) == adjustment_interval:
+            first_block = last_blocks[-1]
+            last_block_data = last_blocks[0]
+            try:
+                first_time = datetime.fromisoformat(first_block["timestamp"].replace("Z", "+00:00"))
+                last_time = datetime.fromisoformat(last_block_data["timestamp"].replace("Z", "+00:00"))
+                actual_time = (last_time - first_time).total_seconds()
+            except (ValueError, KeyError):
+                actual_time = TARGET_BLOCK_TIME * adjustment_interval
+            if actual_time <= 0:
+                actual_time = 1
+            expected_time = TARGET_BLOCK_TIME * adjustment_interval
+            ratio = expected_time / actual_time
+            ratio = max(0.25, min(4.0, ratio))  # limite 4x stile Bitcoin
+            base_difficulty = max(1, int(current_difficulty * ratio))
+        else:
+            base_difficulty = current_difficulty
+    else:
+        base_difficulty = current_difficulty
     
-    # Calculate new difficulty based on recent block times
-    last_blocks = await db.blocks.find({}, {"_id": 0}).sort("index", -1).limit(adjustment_interval).to_list(adjustment_interval)
-    
-    if len(last_blocks) < adjustment_interval:
-        return current_difficulty
-    
-    # Calculate actual time taken
-    first_block = last_blocks[-1]
-    last_block_data = last_blocks[0]
-    
+    # ================= TIME DECAY (catena ferma) =================
     try:
-        from datetime import datetime, timezone
-        first_time = datetime.fromisoformat(first_block['timestamp'].replace('Z', '+00:00'))
-        last_time = datetime.fromisoformat(last_block_data['timestamp'].replace('Z', '+00:00'))
-        actual_time = (last_time - first_time).total_seconds()
+        last_time = datetime.fromisoformat(last_block["timestamp"].replace("Z", "+00:00"))
     except (ValueError, KeyError):
-        return current_difficulty
+        last_time = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
+    elapsed = (now - last_time).total_seconds()
     
-    if actual_time <= 0:
-        actual_time = 1
+    if elapsed <= TARGET_BLOCK_TIME:
+        # Nessun decay necessario
+        return base_difficulty
     
-    expected_time = TARGET_BLOCK_TIME * adjustment_interval
+    # Quante "unità di ritardo" rispetto al target (es. ogni 10 minuti extra)
+    delay_units = elapsed / TARGET_BLOCK_TIME
+    # Fattore di decadimento esponenziale (0.5^unità): ogni 10 minuti oltre il target si dimezza
+    decay_factor = 0.5 ** (delay_units - 1)
+    new_difficulty = int(base_difficulty * decay_factor)
     
-    # Calculate ratio and new difficulty
-    ratio = expected_time / actual_time
-    ratio = max(0.25, min(4.0, ratio))  # Bitcoin's 4x limit
+    # Mantieni sempre almeno difficoltà 1
+    if new_difficulty < 1:
+        new_difficulty = 1
     
-    new_difficulty = max(1, int(current_difficulty * ratio))
-    
-    if new_difficulty != current_difficulty:
-        avg_time = actual_time / adjustment_interval
-        logger.info(f"⚙️ Stratum: Difficulty adjustment needed: {current_difficulty} -> {new_difficulty}")
-        logger.info(f"   Avg block time: {avg_time:.1f}s (target: {TARGET_BLOCK_TIME}s)")
+    logger.info(
+        "⚙️ Stratum difficulty: base=%s, elapsed=%.1fs, decay_factor=%.4f, final=%s",
+        base_difficulty,
+        elapsed,
+        decay_factor,
+        new_difficulty,
+    )
     
     return new_difficulty
 
