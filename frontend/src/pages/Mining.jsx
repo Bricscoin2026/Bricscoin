@@ -12,6 +12,16 @@ import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+const formatHashrate = (value) => {
+  if (!value || typeof value !== "number") return "-";
+  const abs = Math.abs(value);
+  if (abs >= 1e12) return (value / 1e12).toFixed(2) + " TH/s";
+  if (abs >= 1e9) return (value / 1e9).toFixed(2) + " GH/s";
+  if (abs >= 1e6) return (value / 1e6).toFixed(2) + " MH/s";
+  if (abs >= 1e3) return (value / 1e3).toFixed(2) + " kH/s";
+  return value.toFixed(0) + " H/s";
+};
+
 export default function Mining() {
   const [stats, setStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
