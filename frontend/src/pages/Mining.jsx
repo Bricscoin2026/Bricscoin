@@ -20,13 +20,18 @@ export default function Mining() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/network/stats`);
+      // Usa sempre HTTPS se la pagina è servita in HTTPS per evitare Mixed Content
+      let base = BACKEND_URL || (typeof window !== "undefined" ? window.location.origin : "");
+      if (typeof window !== "undefined" && window.location.protocol === "https:" && base.startsWith("http://")) {
+        base = "https://" + base.slice("http://".length);
+      }
+      const response = await fetch(`${base}/api/network/stats`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error loading network stats:", error);
     }
   };
 
