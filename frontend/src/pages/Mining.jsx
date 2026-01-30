@@ -1,16 +1,40 @@
 import { useState, useEffect } from "react";
 import { 
-Pickaxe,
-Copy,
-AlertCircle,
-Cpu,
-CheckCircle
+  Pickaxe,
+  Copy,
+  AlertCircle,
+  Cpu,
+  CheckCircle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
 
-const BACKEND_URL = 'https://bricscoin26.org';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+const getBaseUrl = () => {
+  let base =
+    BACKEND_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "");
+  if (
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:" &&
+    base.startsWith("http://")
+  ) {
+    base = "https://" + base.slice("http://".length);
+  }
+  return base;
+};
+
+const formatHashrate = (value) => {
+  if (!value || typeof value !== "number") return "-";
+  const abs = Math.abs(value);
+  if (abs >= 1e12) return (value / 1e12).toFixed(2) + " TH/s";
+  if (abs >= 1e9) return (value / 1e9).toFixed(2) + " GH/s";
+  if (abs >= 1e6) return (value / 1e6).toFixed(2) + " MH/s";
+  if (abs >= 1e3) return (value / 1e3).toFixed(2) + " kH/s";
+  return value.toFixed(0) + " H/s";
+};
 
 export default function Mining() {
   const [stats, setStats] = useState(null);
@@ -18,36 +42,45 @@ export default function Mining() {
   const [minersCount, setMinersCount] = useState(0);
 
   useEffect(() => {
-    fetchStats();
-    fetchMiners();
-    const minerInterval = setInterval(fetchMiners, 10000);
-    return () => clearInterval(minerInterval);
-    // Load wallet from localStorage
-    const saved = localStorage.getItem('bricscoin_web_wallet');
+    // Carica il wallet locale una sola volta
+    const saved = localStorage.getItem("bricscoin_web_wallet");
     if (saved) {
       const wallet = JSON.parse(saved);
       setWalletAddress(wallet.address || "");
     }
+
+    // Primo fetch
+    fetchStats();
+    fetchMiners();
+
+    // Aggiorna i miner ogni 10 secondi
+    const minerInterval = setInterval(fetchMiners, 10000);
+    return () => clearInterval(minerInterval);
   }, []);
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/network/stats`);
+      const base = getBaseUrl();
+      const response = await fetch(`${base}/api/network/stats`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error loading network stats:", error);
     }
   };
 
   const fetchMiners = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/miners/stats`);
+      const base = getBaseUrl();
+      const response = await fetch(`${base}/api/miners/stats`);
       if (response.ok) {
         const data = await response.json();
-        setMinersCount(data.connected_miners || 0);
+        // l'endpoint restituisce {"active_miners": N}
+        setMinersCount(
+          typeof data.active_miners === "number" ? data.active_miners : 0
+        );
       }
     } catch (error) {
       console.error("Error fetching miners:", error);
@@ -75,17 +108,30 @@ export default function Mining() {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-6 h-6 text-red-500 mt-0.5" />
             <div>
-              <h4 className="font-bold text-red-500 text-lg">⚠️ ASIC Hardware Required</h4>
+              <h4 className="font-bold text-red-500 text-lg">
+                ⚠️ ASIC Hardware Required
+              </h4>
               <p className="text-sm text-muted-foreground mt-2">
-                BricsCoin uses <strong>SHA256 Proof-of-Work</strong> (same as Bitcoin). Mining is <strong>NOT possible</strong> with:
+                BricsCoin uses <strong>SHA256 Proof-of-Work</strong> (same as
+                Bitcoin). Mining is <strong>NOT possible</strong> with:
               </p>
               <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc list-inside">
-                <li><strong className="text-red-400">Smartphones</strong> - No mining apps will work</li>
-                <li><strong className="text-red-400">CPU/GPU</strong> - Not profitable, difficulty too high</li>
-                <li><strong className="text-red-400">Browser mining</strong> - Not supported</li>
+                <li>
+                  <strong className="text-red-400">Smartphones</strong> - No
+                  mining apps will work
+                </li>
+                <li>
+                  <strong className="text-red-400">CPU/GPU</strong> - Not
+                  profitable, difficulty too high
+                </li>
+                <li>
+                  <strong className="text-red-400">Browser mining</strong> - Not
+                  supported
+                </li>
               </ul>
               <p className="text-sm text-muted-foreground mt-3">
-                <strong className="text-green-500">✓ Supported:</strong> ASIC miners (Bitaxe, Antminer S19/S21, Whatsminer M50/M60, etc.)
+                <strong className="text-green-500">✓ Supported:</strong> ASIC
+                miners (Bitaxe, Antminer S19/S21, Whatsminer M50/M60, etc.)
               </p>
             </div>
           </div>
@@ -93,22 +139,28 @@ export default function Mining() {
       </Card>
 
       {/* Network Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{stats?.current_difficulty?.toLocaleString() || "-"}</p>
+            <p className="text-2xl font-bold text-primary">
+              {stats?.current_difficulty?.toLocaleString() || "-"}
+            </p>
             <p className="text-xs text-muted-foreground">Difficulty</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{stats?.current_reward || 50}</p>
+            <p className="text-2xl font-bold text-primary">
+              {stats?.current_reward || 50}
+            </p>
             <p className="text-xs text-muted-foreground">Block Reward</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{stats?.total_blocks || 0}</p>
+            <p className="text-2xl font-bold text-primary">
+              {stats?.total_blocks || 0}
+            </p>
             <p className="text-xs text-muted-foreground">Total Blocks</p>
           </CardContent>
         </Card>
@@ -116,6 +168,14 @@ export default function Mining() {
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">SHA256</p>
             <p className="text-xs text-muted-foreground">Algorithm</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-white/10">
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-primary">
+              {stats ? formatHashrate(stats.hashrate_estimate) : "-"}
+            </p>
+            <p className="text-xs text-muted-foreground">Network Hashrate</p>
           </CardContent>
         </Card>
       </div>
@@ -131,33 +191,40 @@ export default function Mining() {
         <CardContent className="p-6">
           <div className="text-center text-muted-foreground py-4">
             <p className="text-2xl font-bold text-green-500 mb-2">
-              {stats?.total_blocks > 0 ? "Mining Active" : "Waiting for miners..."}
+              {minersCount} miner{minersCount === 1 ? "" : "s"} online
             </p>
             <p className="text-sm">
               Connect your ASIC miner to start mining BricsCoin
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">{stats?.total_blocks || 0}</p>
+                <p className="text-xl font-bold text-green-400">
+                  {stats?.total_blocks || 0}
+                </p>
                 <p className="text-xs text-muted-foreground">Blocks Mined</p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">{stats?.current_difficulty?.toLocaleString() || 0}</p>
+                <p className="text-xl font-bold text-green-400">
+                  {stats?.current_difficulty?.toLocaleString() || 0}
+                </p>
                 <p className="text-xs text-muted-foreground">Difficulty</p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">Active</p>
+                <p className="text-xl font-bold text-green-400">
+                  {minersCount > 0 ? "Active" : "Waiting"}
+                </p>
                 <p className="text-xs text-muted-foreground">Network Status</p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-lg">
-                <p className="text-xl font-bold text-green-400">{stats?.current_reward || 50} BRICS</p>
+                <p className="text-xl font-bold text-green-400">
+                  {stats?.current_reward || 50} BRICS
+                </p>
                 <p className="text-xs text-muted-foreground">Block Reward</p>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
-
 
       {/* Stratum Configuration */}
       <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30">
@@ -177,7 +244,14 @@ export default function Mining() {
               <span className="text-muted-foreground">Pool URL:</span>
               <div className="flex items-center gap-2">
                 <code className="text-primary font-bold">stratum+tcp://stratum.bricscoin26.org:3333</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://stratum.bricscoin26.org:3333")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() =>
+                    copyToClipboard("stratum+tcp://stratum.bricscoin26.org:3333")
+                  }
+                >
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
@@ -187,7 +261,14 @@ export default function Mining() {
               <span className="text-muted-foreground">Alternative (IP diretto):</span>
               <div className="flex items-center gap-2">
                 <code className="text-yellow-400">stratum+tcp://5.161.254.163:3333</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://5.161.254.163:3333")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() =>
+                    copyToClipboard("stratum+tcp://5.161.254.163:3333")
+                  }
+                >
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
@@ -197,7 +278,12 @@ export default function Mining() {
               <span className="text-muted-foreground">Server:</span>
               <div className="flex items-center gap-2">
                 <code className="text-white">stratum.bricscoin26.org</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum.bricscoin26.org")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => copyToClipboard("stratum.bricscoin26.org")}
+                >
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
@@ -207,7 +293,12 @@ export default function Mining() {
               <span className="text-muted-foreground">Port:</span>
               <div className="flex items-center gap-2">
                 <code className="text-white">3333</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("3333")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => copyToClipboard("3333")}
+                >
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
@@ -216,9 +307,16 @@ export default function Mining() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-white/10">
               <span className="text-muted-foreground">Username:</span>
               <div className="flex items-center gap-2">
-                <code className="text-green-400 break-all">{walletAddress || "YOUR_BRICS_WALLET_ADDRESS"}</code>
+                <code className="text-green-400 break-all">
+                  {walletAddress || "YOUR_BRICS_WALLET_ADDRESS"}
+                </code>
                 {walletAddress && (
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(walletAddress)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => copyToClipboard(walletAddress)}
+                  >
                     <Copy className="w-4 h-4" />
                   </Button>
                 )}
@@ -256,11 +354,21 @@ export default function Mining() {
             <ol className="text-sm text-muted-foreground space-y-3 list-decimal list-inside">
               <li>Open your Bitaxe web dashboard</li>
               <li>Navigate to <strong>Settings → Pool</strong></li>
-              <li>Set Hostname: <code className="bg-white/10 px-1 rounded">stratum.bricscoin26.org</code> (or <code className="bg-white/10 px-1 rounded">5.161.254.163</code>)</li>
-              <li>Set Port: <code className="bg-white/10 px-1 rounded">3333</code></li>
+              <li>
+                Set Hostname:{" "}
+                <code className="bg-white/10 px-1 rounded">stratum.bricscoin26.org</code>{" "}
+                (or <code className="bg-white/10 px-1 rounded">5.161.254.163</code>)
+              </li>
+              <li>
+                Set Port: <code className="bg-white/10 px-1 rounded">3333</code>
+              </li>
               <li>Set User: Your BRICS wallet address</li>
-              <li>Set Password: <code className="bg-white/10 px-1 rounded">x</code></li>
-              <li>Click <strong>Save & Restart</strong></li>
+              <li>
+                Set Password: <code className="bg-white/10 px-1 rounded">x</code>
+              </li>
+              <li>
+                Click <strong>Save & Restart</strong>
+              </li>
             </ol>
           </CardContent>
         </Card>
@@ -277,8 +385,14 @@ export default function Mining() {
             <ol className="text-sm text-muted-foreground space-y-3 list-decimal list-inside">
               <li>Access NerdMiner via web interface</li>
               <li>Go to <strong>Settings → Mining Pool</strong></li>
-              <li>Set Pool: <code className="bg-white/10 px-1 rounded">stratum.bricscoin26.org</code> (or <code className="bg-white/10 px-1 rounded">5.161.254.163</code>)</li>
-              <li>Set Port: <code className="bg-white/10 px-1 rounded">3333</code></li>
+              <li>
+                Set Pool:{" "}
+                <code className="bg-white/10 px-1 rounded">stratum.bricscoin26.org</code>{" "}
+                (or <code className="bg-white/10 px-1 rounded">5.161.254.163</code>)
+              </li>
+              <li>
+                Set Port: <code className="bg-white/10 px-1 rounded">3333</code>
+              </li>
               <li>Set Address: Your BRICS wallet address</li>
               <li>Save and restart the device</li>
             </ol>
@@ -298,23 +412,35 @@ export default function Mining() {
           <ul className="text-sm text-muted-foreground space-y-3">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Use <strong>stratum.bricscoin26.org</strong> or the direct IP <strong>5.161.254.163</strong></span>
+              <span>
+                Use <strong>stratum.bricscoin26.org</strong> or the direct IP{" "}
+                <strong>5.161.254.163</strong>
+              </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>If the domain doesn't work, use the <strong>direct IP address</strong> as fallback</span>
+              <span>
+                If the domain doesn&apos;t work, use the <strong>direct IP address</strong> as fallback
+              </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Your wallet address must start with <strong>BRICS</strong></span>
+              <span>
+                Your wallet address must start with <strong>BRICS</strong>
+              </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Current block reward: <strong>{stats?.current_reward || 50} BRICS</strong></span>
+              <span>
+                Current block reward:{" "}
+                <strong>{stats?.current_reward || 50} BRICS</strong>
+              </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Algorithm: <strong>SHA256</strong> (Bitcoin-compatible)</span>
+              <span>
+                Algorithm: <strong>SHA256</strong> (Bitcoin-compatible)
+              </span>
             </li>
           </ul>
         </CardContent>
@@ -327,8 +453,20 @@ export default function Mining() {
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {["Bitaxe", "NerdMiner", "Antminer S9/S19", "Whatsminer", "AvalonMiner", "Canaan", "Innosilicon", "Ebang"].map((miner) => (
-              <div key={miner} className="p-3 bg-white/5 rounded-lg text-center text-sm">
+            {[
+              "Bitaxe",
+              "NerdMiner",
+              "Antminer S9/S19",
+              "Whatsminer",
+              "AvalonMiner",
+              "Canaan",
+              "Innosilicon",
+              "Ebang",
+            ].map((miner) => (
+              <div
+                key={miner}
+                className="p-3 bg-white/5 rounded-lg text-center text-sm"
+              >
                 {miner}
               </div>
             ))}
