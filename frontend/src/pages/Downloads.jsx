@@ -66,19 +66,14 @@ export default function Downloads() {
                 </p>
               </div>
               <Button 
-                onClick={() =>
-                  window.open(
-                    "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/wallet-app",
-                    "_blank"
-                  )
-                }
-                className="gold-button rounded-sm"
-                size="lg"
-                data-testid="codeberg-wallet-btn"
-              >
-                <Code className="w-5 h-5 mr-2" />
-                Download from Codeberg
-              </Button>
+  onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads', '_blank')}
+  className="gold-button rounded-sm"
+  size="lg"
+  data-testid="codeberg-wallet-btn"
+>
+  <Code className="w-5 h-5 mr-2" />
+  Download from Codeberg
+</Button>
             </div>
           </CardContent>
         </Card>
