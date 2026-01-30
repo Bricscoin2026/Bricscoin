@@ -16,7 +16,6 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export default function Mining() {
   const [stats, setStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
-  const [activeMiners, setActiveMiners] = useState([]);
   const [activeMinersCount, setActiveMinersCount] = useState(null);
 
   const fetchStats = async () => {
@@ -29,35 +28,25 @@ export default function Mining() {
   };
 
   const fetchActiveMiners = async () => {
-    const backendUrl = BACKEND_URL;
+    if (!BACKEND_URL) {
+      console.error("REACT_APP_BACKEND_URL non configurato");
+      return;
+    }
 
-    // 1) Endpoint dettagliato (se esiste)
-    if (backendUrl) {
-      try {
-        const res = await fetch(`${backendUrl}/api/mining/miners`);
-        if (res.ok) {
-          const data = await res.json();
-          setActiveMiners(data.miners || []);
-          if (typeof data.count === "number") {
-            setActiveMinersCount(data.count);
-          }
-        }
-      } catch (err) {
-        console.error("Error loading detailed miners:", err);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/miners/stats`);
+      if (!res.ok) {
+        console.error("Errore /api/miners/stats:", res.status);
+        return;
       }
-
-      // 2) Fallback: /api/miners/stats se è presente sul backend
-      try {
-        const resStats = await fetch(`${backendUrl}/api/miners/stats`);
-        if (resStats.ok) {
-          const statsJson = await resStats.json();
-          if (typeof statsJson.active_miners === "number") {
-            setActiveMinersCount(statsJson.active_miners);
-          }
-        }
-      } catch (err) {
-        console.error("Error loading miners stats:", err);
+      const data = await res.json();
+      if (typeof data.active_miners === "number") {
+        setActiveMinersCount(data.active_miners);
+      } else {
+        console.error("Risposta /api/miners/stats senza active_miners numerico:", data);
       }
+    } catch (err) {
+      console.error("Error loading miners stats:", err);
     }
   };
 
@@ -79,11 +68,7 @@ export default function Mining() {
   };
 
   const activeMinersValue =
-    activeMinersCount != null
-      ? activeMinersCount
-      : Array.isArray(activeMiners)
-      ? activeMiners.length
-      : 0;
+    typeof activeMinersCount === "number" ? activeMinersCount : 0;
 
   return (
     <div className="space-y-6" data-testid="mining-page">
@@ -278,12 +263,12 @@ export default function Mining() {
         </CardContent>
       </Card>
 
-      {/* Active Miners - dettaglio */}
+      {/* Active Miners - messaggio sotto */}
       <Card className="bg-card border-white/10">
         <CardHeader className="border-b border-white/10 flex flex-row items-center justify-between">
           <CardTitle className="font-heading text-lg">
             Active Miners
-            {activeMinersCount != null && (
+            {typeof activeMinersCount === "number" && (
               <span className="ml-2 text-xs text-muted-foreground">
                 ({activeMinersCount})
               </span>
@@ -294,53 +279,15 @@ export default function Mining() {
           </Button>
         </CardHeader>
         <CardContent className="p-4">
-          {activeMiners.length === 0 ? (
-            activeMinersValue && activeMinersValue > 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {activeMinersValue} miners are currently active according to the pool stats, but detailed
-                per-miner information is not yet available from the server.
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No miners detected in the last few minutes. Once ASICs connect to the Stratum server
-                and start submitting shares, they will appear here.
-              </p>
-            )
+          {activeMinersValue > 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Currently <strong>{activeMinersValue}</strong> miners are online and submitting shares to the Stratum server.
+            </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-muted-foreground border-b border-white/10">
-                  <tr>
-                    <th className="py-2 pr-4">Address</th>
-                    <th className="py-2 pr-4">Worker</th>
-                    <th className="py-2 pr-4">Connected</th>
-                    <th className="py-2 pr-4 text-right">Shares</th>
-                    <th className="py-2 pr-4 text-right">Blocks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeMiners.map((m) => (
-                    <tr key={m.id} className="border-b border-white/5 last:border-none">
-                      <td className="py-2 pr-4 font-mono text-xs break-all">{m.id}</td>
-                      <td className="py-2 pr-4 text-xs text-muted-foreground">
-                        {m.worker || "-"}
-                      </td>
-                      <td className="py-2 pr-4 text-xs text-muted-foreground">
-                        {m.connected_at
-                          ? new Date(m.connected_at).toLocaleTimeString()
-                          : "-"}
-                      </td>
-                      <td className="py-2 pr-4 text-right text-xs">
-                        {m.shares ?? 0}
-                      </td>
-                      <td className="py-2 pr-4 text-right text-xs">
-                        {m.blocks ?? 0}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              No miners detected in the last few minutes. Once ASICs connect to the Stratum server
+              and start submitting shares, they will appear in this counter.
+            </p>
           )}
         </CardContent>
       </Card>
