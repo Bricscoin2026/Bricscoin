@@ -139,7 +139,7 @@ export default function Mining() {
       </Card>
 
       {/* Network Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">{stats?.current_difficulty?.toLocaleString() || "-"}</p>
@@ -162,6 +162,14 @@ export default function Mining() {
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">SHA256</p>
             <p className="text-xs text-muted-foreground">Algorithm</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-white/10">
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-primary">
+              {stats ? formatHashrate(stats.hashrate_estimate) : "-"}
+            </p>
+            <p className="text-xs text-muted-foreground">Network Hashrate</p>
           </CardContent>
         </Card>
       </div>
