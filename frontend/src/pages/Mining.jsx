@@ -339,7 +339,7 @@ export default function Mining() {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>If the domain doesn't work, use the <strong>direct IP address</strong> as fallback</span>
+              <span>If the domain doesn&apos;t work, use the <strong>direct IP address</strong> as fallback</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
