@@ -16,16 +16,34 @@ export default function Mining() {
   const [stats, setStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
   const [activeMiners, setActiveMiners] = useState([]);
+  const [activeMinersCount, setActiveMinersCount] = useState(null);
 
   const fetchActiveMiners = async () => {
+    // Primo tentativo: endpoint dettagliato (se disponibile)
     try {
       const res = await fetch(`${BACKEND_URL}/api/mining/miners`);
       if (res.ok) {
         const data = await res.json();
         setActiveMiners(data.miners || []);
+        if (typeof data.count === "number") {
+          setActiveMinersCount(data.count);
+        }
       }
     } catch (err) {
-      console.error("Error loading miners", err);
+      console.error("Error loading detailed miners", err);
+    }
+
+    // Fallback: endpoint semplificato /api/miners/stats (solo conteggio), se esiste
+    try {
+      const resStats = await fetch(`${BACKEND_URL}/api/miners/stats`);
+      if (resStats.ok) {
+        const stats = await resStats.json();
+        if (typeof stats.active_miners === "number") {
+          setActiveMinersCount(stats.active_miners);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading miners stats", err);
     }
   };
 
@@ -206,17 +224,31 @@ export default function Mining() {
       {/* Active Miners */}
       <Card className="bg-card border-white/10">
         <CardHeader className="border-b border-white/10 flex flex-row items-center justify-between">
-          <CardTitle className="font-heading text-lg">Active Miners</CardTitle>
+          <CardTitle className="font-heading text-lg">
+            Active Miners
+            {activeMinersCount != null && (
+              <span className="ml-2 text-xs text-muted-foreground">
+                ({activeMinersCount})
+              </span>
+            )}
+          </CardTitle>
           <Button variant="outline" size="sm" onClick={fetchActiveMiners}>
             Refresh
           </Button>
         </CardHeader>
         <CardContent className="p-4">
           {activeMiners.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No miners detected in the last few minutes. Once ASICs connect to the Stratum server
-              and start submitting shares, they will appear here.
-            </p>
+            activeMinersCount && activeMinersCount > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {activeMinersCount} miners are currently active according to the pool stats, but detailed
+                per-miner information is not yet available from the server.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No miners detected in the last few minutes. Once ASICs connect to the Stratum server
+                and start submitting shares, they will appear here.
+              </p>
+            )
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
