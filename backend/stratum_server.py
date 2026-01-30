@@ -902,6 +902,20 @@ class StratumMiner:
             self.blocks += 1
             if self.miner_id in miners:
                 miners[self.miner_id]['blocks'] += 1
+
+            # Aggiorna anche in DB il numero di blocchi trovati
+            try:
+                now = datetime.now(timezone.utc).isoformat()
+                await db.miners.update_one(
+                    {"id": self.miner_id},
+                    {
+                        "$set": {"last_seen": now, "online": True},
+                        "$inc": {"blocks": 1},
+                    },
+                    upsert=True,
+                )
+            except Exception as e:
+                logger.error(f"Failed to update miner blocks in DB: {e}")
             
             logger.info(f"✅ Block #{template['index']} saved! Miner: {miner_address}, Reward: {reward_amount} BRICS")
             
