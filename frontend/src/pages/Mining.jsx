@@ -9,8 +9,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+import { getNetworkStats, getActiveMiners } from "../lib/api";
 
 export default function Mining() {
   const [stats, setStats] = useState(null);
@@ -20,42 +19,40 @@ export default function Mining() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/network/stats`);
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const response = await getNetworkStats();
+      setStats(response.data);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error loading network stats:", error);
     }
   };
 
   const fetchActiveMiners = async () => {
-    // 1) Tentativo: endpoint dettagliato (se disponibile)
+    // 1) Endpoint dettagliato (se esiste)
     try {
-      const res = await fetch(`${BACKEND_URL}/api/mining/miners`);
-      if (res.ok) {
-        const data = await res.json();
-        setActiveMiners(data.miners || []);
-        if (typeof data.count === "number") {
-          setActiveMinersCount(data.count);
-        }
+      const response = await getActiveMiners();
+      const data = response.data;
+      setActiveMiners(data.miners || []);
+      if (typeof data.count === "number") {
+        setActiveMinersCount(data.count);
       }
     } catch (err) {
-      console.error("Error loading detailed miners", err);
+      console.error("Error loading detailed miners:", err);
     }
 
-    // 2) Fallback: endpoint semplice /api/miners/stats (solo conteggio), se esiste
+    // 2) Fallback: /api/miners/stats se è presente sul backend
     try {
-      const resStats = await fetch(`${BACKEND_URL}/api/miners/stats`);
-      if (resStats.ok) {
-        const stats = await resStats.json();
-        if (typeof stats.active_miners === "number") {
-          setActiveMinersCount(stats.active_miners);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      if (backendUrl) {
+        const resStats = await fetch(`${backendUrl}/api/miners/stats`);
+        if (resStats.ok) {
+          const statsJson = await resStats.json();
+          if (typeof statsJson.active_miners === "number") {
+            setActiveMinersCount(statsJson.active_miners);
+          }
         }
       }
     } catch (err) {
-      console.error("Error loading miners stats", err);
+      console.error("Error loading miners stats:", err);
     }
   };
 
@@ -67,7 +64,6 @@ export default function Mining() {
       setWalletAddress(wallet.address || "");
     }
 
-    // Avvia fetch asincroni
     fetchStats();
     fetchActiveMiners();
   }, []);
@@ -152,7 +148,7 @@ export default function Mining() {
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">
-              {activeMinersValue ?? "-"}
+              {activeMinersValue}
             </p>
             <p className="text-xs text-muted-foreground">Active Miners</p>
           </CardContent>
@@ -321,12 +317,20 @@ export default function Mining() {
                   {activeMiners.map((m) => (
                     <tr key={m.id} className="border-b border-white/5 last:border-none">
                       <td className="py-2 pr-4 font-mono text-xs break-all">{m.id}</td>
-                      <td className="py-2 pr-4 text-xs text-muted-foreground">{m.worker || "-"}</td>
                       <td className="py-2 pr-4 text-xs text-muted-foreground">
-                        {m.connected_at ? new Date(m.connected_at).toLocaleTimeString() : "-"}
+                        {m.worker || "-"}
                       </td>
-                      <td className="py-2 pr-4 text-right text-xs">{m.shares ?? 0}</td>
-                      <td className="py-2 pr-4 text-right text-xs">{m.blocks ?? 0}</td>
+                      <td className="py-2 pr-4 text-xs text-muted-foreground">
+                        {m.connected_at
+                          ? new Date(m.connected_at).toLocaleTimeString()
+                          : "-"}
+                      </td>
+                      <td className="py-2 pr-4 text-right text-xs">
+                        {m.shares ?? 0}
+                      </td>
+                      <td className="py-2 pr-4 text-right text-xs">
+                        {m.blocks ?? 0}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
