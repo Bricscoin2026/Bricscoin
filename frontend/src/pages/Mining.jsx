@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { 
+import {
   Pickaxe,
   Copy,
   AlertCircle,
   Cpu,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+// Risolve la base URL tenendo conto di HTTPS
 const getBaseUrl = () => {
   let base =
     BACKEND_URL ||
@@ -26,6 +27,7 @@ const getBaseUrl = () => {
   return base;
 };
 
+// Formatta l’hashrate in H/s, kH/s, MH/s, GH/s, TH/s
 const formatHashrate = (value) => {
   if (!value || typeof value !== "number") return "-";
   const abs = Math.abs(value);
@@ -41,24 +43,22 @@ export default function Mining() {
   const [walletAddress, setWalletAddress] = useState("");
   const [minersCount, setMinersCount] = useState(0);
 
+  // Carica wallet + avvia fetch di stats e miners
   useEffect(() => {
-    // Carica il wallet locale una sola volta
     const saved = localStorage.getItem("bricscoin_web_wallet");
     if (saved) {
       const wallet = JSON.parse(saved);
       setWalletAddress(wallet.address || "");
     }
 
-    // Primo fetch
     fetchStats();
     fetchMiners();
 
-    // Aggiorna i miner ogni 10 secondi
     const minerInterval = setInterval(fetchMiners, 10000);
     return () => clearInterval(minerInterval);
   }, []);
 
-  const fetchStats = async () => {
+  async function fetchStats() {
     try {
       const base = getBaseUrl();
       const response = await fetch(`${base}/api/network/stats`);
@@ -69,23 +69,23 @@ export default function Mining() {
     } catch (error) {
       console.error("Error loading network stats:", error);
     }
-  };
+  }
 
-  const fetchMiners = async () => {
+  async function fetchMiners() {
     try {
       const base = getBaseUrl();
       const response = await fetch(`${base}/api/miners/stats`);
       if (response.ok) {
         const data = await response.json();
-        // l'endpoint restituisce {"active_miners": N}
-        setMinersCount(
-          typeof data.active_miners === "number" ? data.active_miners : 0
-        );
+        // L’endpoint sul tuo server restituisce {"active_miners": N}
+        const count =
+          typeof data.active_miners === "number" ? data.active_miners : 0;
+        setMinersCount(count);
       }
     } catch (error) {
       console.error("Error fetching miners:", error);
     }
-  };
+  }
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -243,7 +243,9 @@ export default function Mining() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-primary/20">
               <span className="text-muted-foreground">Pool URL:</span>
               <div className="flex items-center gap-2">
-                <code className="text-primary font-bold">stratum+tcp://stratum.bricscoin26.org:3333</code>
+                <code className="text-primary font-bold">
+                  stratum+tcp://stratum.bricscoin26.org:3333
+                </code>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -260,7 +262,9 @@ export default function Mining() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
               <span className="text-muted-foreground">Alternative (IP diretto):</span>
               <div className="flex items-center gap-2">
-                <code className="text-yellow-400">stratum+tcp://5.161.254.163:3333</code>
+                <code className="text-yellow-400">
+                  stratum+tcp://5.161.254.163:3333
+                </code>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -330,10 +334,14 @@ export default function Mining() {
           </div>
 
           {!walletAddress && (
-            <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-start gap-2">
+            <div className="mt-4 p-3 bg-yellow-500/10 border-yellow-500/20 rounded-lg flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
               <p className="text-xs text-yellow-200">
-                Create a wallet first in the <a href="/wallet" className="underline">Wallet</a> section to get your mining address.
+                Create a wallet first in the{" "}
+                <a href="/wallet" className="underline">
+                  Wallet
+                </a>{" "}
+                section to get your mining address.
               </p>
             </div>
           )}
@@ -356,15 +364,23 @@ export default function Mining() {
               <li>Navigate to <strong>Settings → Pool</strong></li>
               <li>
                 Set Hostname:{" "}
-                <code className="bg-white/10 px-1 rounded">stratum.bricscoin26.org</code>{" "}
-                (or <code className="bg-white/10 px-1 rounded">5.161.254.163</code>)
+                <code className="bg-white/10 px-1 rounded">
+                  stratum.bricscoin26.org
+                </code>{" "}
+                (or{" "}
+                <code className="bg-white/10 px-1 rounded">
+                  5.161.254.163
+                </code>
+                )
               </li>
               <li>
-                Set Port: <code className="bg-white/10 px-1 rounded">3333</code>
+                Set Port:{" "}
+                <code className="bg-white/10 px-1 rounded">3333</code>
               </li>
               <li>Set User: Your BRICS wallet address</li>
               <li>
-                Set Password: <code className="bg-white/10 px-1 rounded">x</code>
+                Set Password:{" "}
+                <code className="bg-white/10 px-1 rounded">x</code>
               </li>
               <li>
                 Click <strong>Save & Restart</strong>
@@ -387,11 +403,18 @@ export default function Mining() {
               <li>Go to <strong>Settings → Mining Pool</strong></li>
               <li>
                 Set Pool:{" "}
-                <code className="bg-white/10 px-1 rounded">stratum.bricscoin26.org</code>{" "}
-                (or <code className="bg-white/10 px-1 rounded">5.161.254.163</code>)
+                <code className="bg-white/10 px-1 rounded">
+                  stratum.bricscoin26.org
+                </code>{" "}
+                (or{" "}
+                <code className="bg-white/10 px-1 rounded">
+                  5.161.254.163
+                </code>
+                )
               </li>
               <li>
-                Set Port: <code className="bg-white/10 px-1 rounded">3333</code>
+                Set Port:{" "}
+                <code className="bg-white/10 px-1 rounded">3333</code>
               </li>
               <li>Set Address: Your BRICS wallet address</li>
               <li>Save and restart the device</li>
@@ -420,7 +443,8 @@ export default function Mining() {
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
               <span>
-                If the domain doesn&apos;t work, use the <strong>direct IP address</strong> as fallback
+                If the domain doesn&apos;t work, use the{" "}
+                <strong>direct IP address</strong> as fallback
               </span>
             </li>
             <li className="flex items-start gap-2">
