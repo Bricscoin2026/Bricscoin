@@ -10,24 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// URL fisso come richiesto
+const BACKEND_URL = "https://bricscoin26.org";
 
-// Risolve la base URL tenendo conto di HTTPS
-const getBaseUrl = () => {
-  let base =
-    BACKEND_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "");
-  if (
-    typeof window !== "undefined" &&
-    window.location.protocol === "https:" &&
-    base.startsWith("http://")
-  ) {
-    base = "https://" + base.slice("http://".length);
-  }
-  return base;
-};
-
-// Formatta l’hashrate in H/s, kH/s, MH/s, GH/s, TH/s
+// Format network hashrate (da hashrate_estimate)
 const formatHashrate = (value) => {
   if (!value || typeof value !== "number") return "-";
   const abs = Math.abs(value);
@@ -43,49 +29,51 @@ export default function Mining() {
   const [walletAddress, setWalletAddress] = useState("");
   const [minersCount, setMinersCount] = useState(0);
 
-  // Carica wallet + avvia fetch di stats e miners
   useEffect(() => {
+    // carica wallet
     const saved = localStorage.getItem("bricscoin_web_wallet");
     if (saved) {
       const wallet = JSON.parse(saved);
       setWalletAddress(wallet.address || "");
     }
 
+    // primo fetch
     fetchStats();
     fetchMiners();
 
+    // aggiorna i miner ogni 10 secondi
     const minerInterval = setInterval(fetchMiners, 10000);
     return () => clearInterval(minerInterval);
   }, []);
 
-  async function fetchStats() {
+  const fetchStats = async () => {
     try {
-      const base = getBaseUrl();
-      const response = await fetch(`${base}/api/network/stats`);
+      const response = await fetch(`${BACKEND_URL}/api/network/stats`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (error) {
-      console.error("Error loading network stats:", error);
+      console.error("Error loading stats:", error);
     }
-  }
+  };
 
-  async function fetchMiners() {
+  const fetchMiners = async () => {
     try {
-      const base = getBaseUrl();
-      const response = await fetch(`${base}/api/miners/stats`);
+      const response = await fetch(`${BACKEND_URL}/api/miners/stats`);
       if (response.ok) {
         const data = await response.json();
-        // L’endpoint sul tuo server restituisce {"active_miners": N}
+        // sul tuo server il campo è {"active_miners": 6}
         const count =
-          typeof data.active_miners === "number" ? data.active_miners : 0;
+          typeof data.active_miners === "number"
+            ? data.active_miners
+            : data.connected_miners || 0;
         setMinersCount(count);
       }
     } catch (error) {
       console.error("Error fetching miners:", error);
     }
-  }
+  };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -236,9 +224,10 @@ export default function Mining() {
         </CardHeader>
         <CardContent className="p-6">
           <p className="text-muted-foreground mb-6">
-            Connect your ASIC miner (Bitaxe, NerdMiner, Antminer, Whatsminer) using these settings:
+            Connect your ASIC miner (Bitaxe, NerdMiner, Antminer, Whatsminer)
+            using these settings:
           </p>
-          
+
           <div className="space-y-4 font-mono text-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-primary/20">
               <span className="text-muted-foreground">Pool URL:</span>
@@ -251,7 +240,9 @@ export default function Mining() {
                   size="icon"
                   className="h-8 w-8"
                   onClick={() =>
-                    copyToClipboard("stratum+tcp://stratum.bricscoin26.org:3333")
+                    copyToClipboard(
+                      "stratum+tcp://stratum.bricscoin26.org:3333"
+                    )
                   }
                 >
                   <Copy className="w-4 h-4" />
@@ -277,7 +268,7 @@ export default function Mining() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-white/10">
               <span className="text-muted-foreground">Server:</span>
               <div className="flex items-center gap-2">
