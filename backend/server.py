@@ -710,34 +710,46 @@ async def get_balance(address: str) -> float:
 
 @api_router.get("/mining/miners")
 async def get_active_miners():
-    """Return active miners connected to the Stratum server.
+    """Return active miners based on database state.
 
-    NOTE: This reads the in-memory `miners` dict from stratum_server.
-    It shows only currently connected miners (not historical stats).
+    IMPORTANTO:
+    - Non legge più lo stato in-memory del processo Stratum (che vive in un
+      container/processo separato), ma utilizza la collezione `miners` su MongoDB.
+    - I miner sono considerati *online* se:
+      - non sono marcati come offline, e
+      - l'ultimo `last_seen` è recente (es. ultimi 10 minuti).
     """
-    try:
-        from . import stratum_server as stratum
-    except Exception:
-        # Fallback import style if relative import fails in this environment
-        import stratum_server as stratum  # type: ignore
+    # Finestra di attività (in secondi) oltre la quale un miner è considerato offline
+    activity_window_seconds = 600  # 10 minuti
 
-    miners_dict = getattr(stratum, "miners", {}) or {}
+    # Recupera tutti i miner salvati in DB (la quantità è comunque molto piccola)
+    docs = await db.miners.find({}, {"_id": 0}).to_list(1000)
 
-    # Normalizza in lista di oggetti serializzabili
-    result = []
-    for miner_id, info in miners_dict.items():
-        if not isinstance(info, dict):
+    now = datetime.now(timezone.utc)
+    active_miners = []
+
+    for doc in docs:
+        last_seen_str = doc.get("last_seen")
+        online_flag = doc.get("online", True)
+
+        # Se manca last_seen o è marcato esplicitamente offline, salta
+        if not last_seen_str or not online_flag:
             continue
-        result.append({
-            "id": miner_id,
-            "worker": info.get("worker"),
-            "connected_at": info.get("connected_at"),
-            "shares": info.get("shares", 0),
-            "blocks": info.get("blocks", 0),
-            "extranonce1": info.get("extranonce1"),
-        })
 
-    return {"miners": result, "count": len(result)}
+        try:
+            last_seen = datetime.fromisoformat(last_seen_str.replace("Z", "+00:00"))
+        except ValueError:
+            # Formato non valido: meglio saltare questo record
+            continue
+
+        elapsed = (now - last_seen).total_seconds()
+        if elapsed > activity_window_seconds:
+            # Troppo vecchio, consideralo offline
+            continue
+
+        active_miners.append(doc)
+
+    return {"miners": active_miners, "count": len(active_miners)}
 
 @api_router.get("/")
 async def root():
