@@ -1,196 +1,153 @@
-<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project has since evolved into a full-stack application with a web and desktop wallet, hardware mining support, and deployment to a custom domain on the user's Hetzner server. The user's primary concern is ensuring the blockchain's economic model is sound, specifically that the difficulty adjusts automatically to maintain a ~10-minute block time, similar to Bitcoin.
+<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The core of the project is a full-stack application with a web wallet, hardware mining support via Stratum, and a dynamic difficulty adjustment mechanism to maintain a ~10-minute block time. The project was suffering from a stalled blockchain due to flawed and inconsistent difficulty logic across the backend services. The user has since requested to reset the entire blockchain to start fresh with the corrected logic and to add a feature to view active miners on the website.
 
 **PRODUCT REQUIREMENTS:**
-- **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty system (retargeting), SHA256 hashing, 21,000,000 total supply, and a block reward halving mechanism.
-- **Transactions:** Client-side signed transactions with a burned fee.
+- **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty system (retargeting) and a time-decay mechanism to prevent stalls.
+- **Transactions:** Client-side signed transactions.
 - **Mining:** Support for hardware ASIC miners via a Bitcoin-compliant Stratum protocol.
-- **Wallets:** A secure web wallet. The user has also requested a server-side backup mechanism after losing a wallet.
-- **Source Code & Transparency:** The project must be 100% open-source and is hosted on Codeberg. The website should display key metrics.
-- **Credibility & Longevity:** The project must function correctly to appear legitimate, with the difficulty adjustment being the most critical component for long-term stability.
+- **Wallets:** A secure web wallet.
+- **UI Feature:** The mining page should display a real-time list of active miners connected to the Stratum server.
+- **Credibility & Longevity:** The project must function correctly, with the difficulty adjustment being the most critical component for long-term stability.
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack application (FastAPI backend, React frontend, MongoDB) is deployed on the user's Hetzner server. The backend runs the API and a Stratum server for mining. The application's core instability stems from a flawed difficulty adjustment mechanism. The agent has performed extensive remote debugging on the user's server to fix this, along with completing a full migration of all frontend links and text from GitHub to Codeberg. A major issue was identified where the Stratum server used a different, outdated difficulty calculation than the main API, causing the blockchain to stall. The latest fix involved implementing an exponential time decay to automatically lower the difficulty if no blocks are found for an extended period.
+The project is a full-stack application (FastAPI backend, React frontend, MongoDB) deployed on the user's Hetzner server. After extensive debugging of the original difficulty logic, the agent and user decided to perform a hard reset of the blockchain.
+
+A new genesis block has been created, and the credentials for the new premine wallet have been provided to the user. The core difficulty logic in both  (API) and  (Stratum server) has been patched directly on the server to be identical and to include a genesis decay mechanism. This new logic is intended to automatically lower the initial high difficulty if the first block after genesis isn't found in a timely manner.
+
+However, the chain is still stalled. The initial difficulty of 1,000,000 is decaying, but too slowly for the current network hashrate.
+
+The agent also started implementing a feature to display active miners on the mining page. It added a backend endpoint () and modified the frontend code (), but these changes exist only in the agent's local environment and have **not** been successfully deployed to the user's server or fully committed to the Codeberg repository. The user has reported that the mining page is broken.
 
 **Last working item**:
-- Last item agent was working: The agent implemented an exponential time decay for the difficulty adjustment in . This was to solve a critical issue where the blockchain would get stuck if the difficulty was too high for the network hashrate, as the difficulty would only adjust *after* a block was found. This new logic automatically lowers the difficulty if a block isn't found after the 10-minute target time has passed.
-- Status: IN PROGRESS
+- Last item agent was working: The agent was attempting to fix the Active Miners feature on the . It correctly diagnosed that the frontend was calling a non-existent API endpoint () because the version of the code running on the user's server was outdated and only exposed a simpler endpoint (). The agent provided the user with a complete, corrected version of the  file to fix this discrepancy.
+- Status: USER VERIFICATION PENDING
 - Agent Testing Done: N
-- Which testing method agent to use? Backend testing. The agent must monitor the live server's logs to confirm that new blocks are being found with the new, lower difficulty.
-  1.  Connect to the server: 
-  2.  Monitor logs for new blocks: 
-  3.  Check the latest block's difficulty via the API: {"blocks":[{"index":13656,"timestamp":"2026-01-29T10:49:55.280133+00:00","transactions":[{"id":"fca8f9bc-67ac-4370-8439-c04c351f342a","sender":"COINBASE","recipient":"BRICS83df6e87e55f15c03a049aa66a487da89275a769","amount":50.0,"type":"mining_reward"}],"proof":3669908169,"previous_hash":"0000000000a724c4196fbb12684e3c03692d93f954ce1f9d7eb70c054fc05602","hash":"000000009e14e3e522f38c8908fce867368eeb9d60b90c77675f14c1641fcfb8","miner":"BRICS83df6e87e55f15c03a049aa66a487da89275a769","difficulty":7500000,"nonce":3669908169}],"total":13657}
+- Which testing method agent to use? Manual testing by user. The user needs to deploy the updated frontend code and verify if the mining page now correctly displays the number of active miners.
 - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-- Issue 1: Incorrect Block Generation Rate & Difficulty Adjustment (P0)
-- Issue 2: Explorer UI block count discrepancy (P1)
+- Issue 1: Blockchain stalled after reset; initial difficulty too high (P0)
+- Issue 2: Active Miners feature is not visible/working on the live site (P1)
+- Issue 3: Explorer UI block count discrepancy (P2 - currently on hold)
 
 Issues Detail:
 - Issue 1:
-    - Attempted fixes:
-        1.  Synced difficulty calculation logic between the API and Stratum server.
-        2.  Reduced the adjustment window from 100 to 10 blocks.
-        3.  Identified that valid hashes (with 9 leading zeros) were being rejected because the difficulty was still too high.
-        4.  Implemented an exponential time decay in  to force the difficulty down if the chain stalls. This successfully lowered the difficulty from 7.5M to ~1M.
-    - Next debug checklist:
-        1.  Monitor the live server to see if a new block is mined with the lower difficulty (~1M).
-        2.  If a block is found, verify its difficulty is correct.
-        3.  Observe the average block time over the next few blocks to see if it approaches the 10-minute target.
-        4.  **IMPORTANT**: The time decay logic was only added to . The same logic must be added to  in  to keep the API and Stratum server in sync.
-    - Why fix this issue and what will be achieved with the fix?: This is the core requirement for the project's economic stability and legitimacy.
-    - Status: IN PROGRESS
-    - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Backend.
-    - Blocked on other issue: None.
+  - Attempted fixes: The chain was reset. A genesis decay logic was patched into  and  to lower the difficulty from the initial 1,000,000 if block #1 isn't found. This is working, but the decay is too slow (difficulty is still ~190k+ after more than 30 minutes).
+  - Next debug checklist:
+    1.  Propose to the user to make the initial difficulty adjustment more aggressive.
+    2.  Modify the genesis decay logic in both  and . Instead of a slow decay from 1,000,000, for the first few blocks (e.g., when ), set a much lower fixed difficulty (e.g., 1,000).
+    3.  Guide the user to apply these patches on the server, rebuild, and restart the containers.
+    4.  Monitor logs and the  endpoint to confirm that new blocks (1, 2, 3...) are being mined.
+  - Why fix this issue and what will be achieved with the fix?: This is the highest priority. Without this, the blockchain is unusable. The fix will allow the chain to start producing blocks with the available hashrate.
+  - Status: IN PROGRESS
+  - Is recurring issue? Y
+  - Should Test frontend/backend/both after fix? Backend.
+  - Blocked on other issue: none
 
 - Issue 2:
-    - Attempted fixes: The user reported the explorer showing a different total block count than the dashboard. The agent found and deleted 11 duplicate blocks in the database, which corrected the  count in the API response ().
-    - Next debug checklist:
-        1.  After the block generation rate is stable (Issue 1), the user needs to re-verify if the explorer UI is displaying the correct total block count consistently.
-        2.  If the issue persists, investigate the frontend code in  to see how it fetches and displays the total count.
-    - Why fix this issue and what will be achieved with the fix?: Ensures data consistency and user trust in the explorer.
-    - Status: USER VERIFICATION PENDING
-    - Is recurring issue? Y
-    - Should Test frontend/backend/both after fix? Frontend.
-    - Blocked on other issue: Issue 1: Incorrect Block Generation Rate & Difficulty Adjustment
+  - Attempted fixes: The agent created a new backend endpoint  and updated  to display a table of active miners. This failed because the changes were never properly deployed. The agent then provided a new version of  that calls a simpler, existing endpoint () just to show the count, but the user reports this is also not working.
+  - Next debug checklist:
+    1.  First, ensure the backend changes (the difficulty fixes from Issue 1 and the new  endpoint) are committed and pushed to the user's Codeberg repository from the server. The last push only included the difficulty fixes.
+    2.  Provide the user with the complete, correct code for  that includes the full table display.
+    3.  Guide the user to update this file in their Codeberg repository (e.g., via the web UI).
+    4.  Provide clear, consolidated commands for the user to run on the server: , , and .
+    5.  Verify with the user that the page now shows the active miner count and table.
+  - Why fix this issue and what will be achieved with the fix?: Fulfills a direct user feature request and improves the usability of the mining page.
+  - Status: IN PROGRESS
+  - Is recurring issue? Y
+  - Should Test frontend/backend/both after fix? Both.
+  - Blocked on other issue: none
+
+- Issue 3:
+  - Attempted fixes: Previously, duplicate blocks were deleted from the database.
+  - Next debug checklist: This issue is on hold until the block generation rate is stable (Issue 1 is resolved).
+  - Why fix this issue and what will be achieved with the fix?: Ensures data consistency and user trust.
+  - Status: USER VERIFICATION PENDING
+  - Is recurring issue? Y
+  - Should Test frontend/backend/both after fix? Frontend.
+  - Blocked on other issue: Issue 1
 
 **In progress Task List**:
 None.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-  - **P0: Sync Time Decay Logic:** Add the exponential time decay logic from  to  in .
-  - **P0: Server-side Wallet Backup:** Implement a feature to save wallets (encrypted) in the database to prevent loss from clearing browser cache.
-  - **P1: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation.
-  - **P1: Real-time Hashrate Calculation:** Re-implement the network hashrate calculation based on actual block times and difficulty.
+  - **P0: Aggressive Initial Difficulty:** Implement the fix for Issue #1 to ensure the new chain starts producing blocks.
+  - **P1: Deploy Active Miners Page:** Implement the fix for Issue #2 to get the UI feature working on the live server.
+  - **P1: Server-side Wallet Backup:** Implement a feature to save wallets (encrypted) in the database to prevent loss from clearing browser cache.
+  - **P2: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation.
 
 - **Future Tasks:**
+  - Re-implement real-time network hashrate calculation.
   - Develop a mobile wallet for iOS/Android.
   - Pursue exchange listings.
   - Create a dedicated page for community mining pools.
 
 **Completed work in this session**
-- **Core Difficulty Logic Fixes:**
-  - Corrected the  function in  to use the proper Bitcoin formula.
-  - Fixed a critical bug where the Stratum server validated shares against  instead of the network difficulty.
-  - Implemented an exponential time decay to automatically lower difficulty when the chain is stalled.
-- **GitHub to Codeberg Migration:** Replaced all hardcoded GitHub URLs, text references, and icons with Codeberg equivalents across the entire frontend.
-- **Database Cleanup:** Identified and removed 11 duplicate block entries from the MongoDB database, correcting the total block count.
-- **Production Debugging & Fixes:**
-  - Resolved frontend Mixed Content errors on the production server by fixing hardcoded HTTP URLs.
-  - Guided the user through numerous live server commands (, , , ) to apply fixes, diagnose issues, and restart services correctly.
-  - Pushed all accumulated changes to the user's Codeberg repository.
-- **Wallet Recovery Attempt:** Assisted the user in a failed attempt to recover a lost wallet by searching the browser's local storage files on their Mac, confirming that the seed phrase was unrecoverable.
-
-**Earlier issues found/mentioned but not fixed**
-None. All are tracked in the pending list.
-
-**Known issue recurrence from previous fork**
-- **Deployment Fragility:** The user requires significant guidance for server operations. All code changes must be pushed to Codeberg, followed by explicit  and  commands for the user to execute.
-- **Difficulty Logic Complexity:** The difficulty adjustment remains the most complex and fragile part of the application. The logic is duplicated and has now diverged between  and .
+- **Core Difficulty Logic Overhaul:**
+  - Unified the difficulty adjustment logic between  and .
+  - Implemented a genesis decay mechanism, allowing difficulty to drop automatically even when only the genesis block exists. These changes were patched directly on the user's server.
+- **Blockchain Reset:**
+  - Guided the user to perform a hard reset of the entire blockchain via the  endpoint.
+  - A new genesis block was created, and the new premine wallet credentials were securely passed to the user.
+- **Git Synchronization:**
+  - Diagnosed and resolved a  failure from the user's server to Codeberg, enabling the user to version the backend patches.
+- **Active Miners Feature (Backend):**
+  - Added a new endpoint  to  to expose the list of connected miners from the Stratum server's in-memory state. (Note: This change is in the agent's local environment and has not been fully deployed to the user's server).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Dynamic Difficulty Adjustment:** The system now uses a combination of average block time (over the last 10 blocks) and an exponential time decay to adjust difficulty, aiming for a 10-minute block time.
-- **Divergent Logic:** The difficulty calculation logic in  (for the API) is different from the logic in  (for mining). The stratum server has the latest, most correct version. This must be unified.
-- **Live Server Deployment:** All work is done in a preview environment, but fixes must be manually applied by the user on their production Hetzner server via SSH commands provided by the agent.
+- **Genesis Decay:** A custom logic added to the difficulty adjustment algorithm. It is triggered when  and reduces the  over time to prevent the chain from stalling after a reset.
+- **Direct Server Patching:** Due to the experimental nature of the fixes, the agent has been generating Python scripts for the user to execute directly on the production server to patch files, followed by a .
+- **Git Push from Server:** The user is now versioning the server-side patches by committing and pushing directly from the Hetzner server to their Codeberg repository.
 
 **key DB schema**
 - : 
 - : 
+- : Stores the credentials for the genesis wallet (this table is cleared on reset).
 
 **changes in tech stack**
 - None.
 
 **All files of reference**
-- : Contains the most up-to-date difficulty calculation logic, including the new time decay feature.
-- : Contains an outdated version of the difficulty calculation logic that needs to be updated.
-- : The page where the user noticed the block count discrepancy.
-- : The Connected Miners section was removed from this file.
-- : The wallet download link was corrected in this file.
-
-**Areas that need refactoring**:
-- **Unify Difficulty Logic:** The  function in  and the  function in  MUST be unified. The logic from the stratum server should be copied to the main server to ensure the API and mining operations use the exact same calculation.
+- : Contains the API logic and the  function. Has been patched on the server.
+- : Contains the Stratum server logic and  function. Has been patched on the server.
+- : The frontend page the user wants to update. The version on the server is out of sync with the agent's latest implementation.
 
 **key api endpoints**
-- : Returns network statistics.  is calculated here.
+- : Resets the entire blockchain.
+- : Returns network statistics, including .
 - : Returns a list of blocks.
-- : Provides a block template for miners. Its difficulty is based on .
+- : **(Exists on server)** A simple endpoint that returns .
+- : **(Exists locally for agent, but NOT deployed)** A more detailed endpoint intended to return a full list of active miner objects.
 
 **Critical Info for New Agent**
-- **The user is working directly on the production server.** You must provide the user with explicit usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
-           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
-           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
-           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
-           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
-           <command> [<args>]
-
-These are common Git commands used in various situations:
-
-start a working area (see also: git help tutorial)
-   clone     Clone a repository into a new directory
-   init      Create an empty Git repository or reinitialize an existing one
-
-work on the current change (see also: git help everyday)
-   add       Add file contents to the index
-   mv        Move or rename a file, a directory, or a symlink
-   restore   Restore working tree files
-   rm        Remove files from the working tree and from the index
-
-examine the history and state (see also: git help revisions)
-   bisect    Use binary search to find the commit that introduced a bug
-   diff      Show changes between commits, commit and working tree, etc
-   grep      Print lines matching a pattern
-   log       Show commit logs
-   show      Show various types of objects
-   status    Show the working tree status
-
-grow, mark and tweak your common history
-   branch    List, create, or delete branches
-   commit    Record changes to the repository
-   merge     Join two or more development histories together
-   rebase    Reapply commits on top of another base tip
-   reset     Reset current HEAD to the specified state
-   switch    Switch branches
-   tag       Create, list, delete or verify a tag object signed with GPG
-
-collaborate (see also: git help workflows)
-   fetch     Download objects and refs from another repository
-   pull      Fetch from and integrate with another repository or a local branch
-   push      Update remote refs along with associated objects
-
-'git help -a' and 'git help -g' list available subcommands and some
-concept guides. See 'git help <command>' or 'git help <concept>'
-to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system. commands and  commands to push and deploy your changes.  is required before the user can .
-- **The user lost a wallet with ~182,000 BRICS.** This was a major event. Prioritize the user's requests to prevent this from happening again (server-side wallet backup, UI warnings).
-- **The difficulty logic is split.** The most recent and correct logic (with time decay) is in . You must copy this logic to  to ensure the API and stratum server report and use the same difficulty. This is your first priority.
-- **Another user is mining!** The network has at least one other miner besides the user, which is a positive development.
-
-**documents and test reports created in this job**
--  (updated)
+- **The blockchain is currently stalled.** Your absolute first priority is to get it moving by making the initial difficulty lower. The genesis decay is too slow. Propose a more aggressive fix.
+- **The user's server is the source of truth.** All backend patches have been applied directly there. These changes must be committed and pushed to Codeberg by the user.
+- **Frontend/Backend Desync:** The Active Miners feature is broken because the frontend code expects an endpoint () that is not deployed on the user's server. The server only has a simpler . You need to synchronize both backend and frontend code and guide the user through a full deployment (, , ).
+- **Communicate in Italian.** The user is Italian and all communication should be in that language.
+- **The Genesis Wallet was reset.** The new credentials were provided to the user. Do not attempt to reset it again unless explicitly asked.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** The block time is not 10 minutes.
-2.  **User:** Difficulty should be automatic; low for few miners, high for many.
-3.  **User:** Ok, proceed with the fix to make difficulty automatic.
-4.  **User:** Test the changes before saving.
-5.  **User:** Blocks are still not found every 10 minutes. (This was after the first fix, leading to more investigation).
-6.  **User:** The site shows difficulty 1.8M but explorer shows 7.5M.
-7.  **User:** Why is the difficulty still too high? Hash with 9 zeros is not accepted.
-8.  **User:** It must be automatic.
-9.  **User:** Yes, proceed with adding the time decay.
-10. **User:** Ok, the site shows block 13657 now.
+1.  **User:** Yes, I want to reset everything and start from scratch. (COMPLETED)
+2.  **User:** *(Provides output of successful reset)* (COMPLETED)
+3.  **User:** *(Provides output of new chain state post-reset)* (COMPLETED)
+4.  **User:** How do I see the active miners? (IN PROGRESS)
+5.  **User:** The mining page is broken, and after 20 minutes no block was found, difficulty is still 1M. (IN PROGRESS)
+6.  **User:** Apply the patches to fix the difficulty for the new chain. (COMPLETED)
+7.  **User:** I'll wait (for the difficulty to drop). How high can the difficulty go? (ADDRESSED)
+8.  **User:** To get the mining page updated, do I have to save to Codeberg? (ADDRESSED)
+9.  **User:** I'm not on GitHub, but on Codeberg. URL is https://codeberg.org/Bricscoin_26/Bricscoin. Copy directly. (ADDRESSED)
+10. **User:** The mining page doesn't work anymore and doesn't give me info on the miners. (PENDING)
+11. **User:** *(latest)* The page doesn't show anything for the miners, fix the page. Active miners are 2 right now. (PENDING - This is the current active problem)
 
 **Project Health Check:**
 - **Broken:**
-  - **Block Generation Rate:** Still not consistently at the 10-minute target, but the latest fixes are promising. Status: .
-- **Mocked:**
-  - None.
+  - **Block Generation:** The chain is stalled at the genesis block. The difficulty adjustment for a new chain is not aggressive enough.
+  - **Mining Page UI:** The Active Miners section is not working on the live site due to a backend/frontend code mismatch.
 
 **3rd Party Integrations**
 - **Codeberg:** Source control.
@@ -199,13 +156,14 @@ See 'git help git' for an overview of the system. commands and  commands to push
 - Testing agent used after significant changes: NO
 - Troubleshoot agent used after agent stuck in loop: NO
 - Test files created: None
-- Known regressions: None in this session; the session was focused on fixing a pre-existing regression.
+- Known regressions: The Active Miners UI is broken after the latest attempted changes.
 
 **Credentials to test flow:**
 - **Hetzner Server SSH:**
     - IP: 
     - User: 
-    - Password: 
+- **Codeberg Repo:** 
+  - User: 
 
 **What agent forgot to execute**
-The agent implemented the final, most important difficulty fix (exponential time decay) only in . It forgot to apply the same critical update to the corresponding function  in . This will cause the API to report a different difficulty than the one the stratum server is actually using for mining jobs. This must be the very first task for the next agent.</analysis>
+The agent did not ensure the backend changes for the  endpoint were pushed to Codeberg before instructing the user on frontend changes. This led to a desync where the frontend called an endpoint that didn't exist in the deployed backend, breaking the page. The agent also did not create a sufficiently aggressive genesis decay logic, causing the chain to remain stalled even after the reset and subsequent patches.</analysis>
