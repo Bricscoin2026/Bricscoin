@@ -711,7 +711,7 @@ class StratumMiner:
         self.respond(msg_id, True)
         logger.info(f"[{self.miner_id}] Authorized as {self.worker_name}")
         
-        # Update global miners dict
+        # Update in-memory miners dict
         miners[self.miner_id] = {
             'worker': self.worker_name,
             'connected_at': datetime.now(timezone.utc).isoformat(),
@@ -719,6 +719,28 @@ class StratumMiner:
             'blocks': 0,
             'extranonce1': self.extranonce1
         }
+
+        # Persist miner info to MongoDB for API visibility across processes
+        try:
+            now = datetime.now(timezone.utc).isoformat()
+            await db.miners.update_one(
+                {"id": self.miner_id},
+                {
+                    "$set": {
+                        "id": self.miner_id,
+                        "worker": self.worker_name,
+                        "connected_at": miners[self.miner_id]["connected_at"],
+                        "last_seen": now,
+                        "shares": miners[self.miner_id]["shares"],
+                        "blocks": miners[self.miner_id]["blocks"],
+                        "extranonce1": self.extranonce1,
+                        "online": True,
+                    }
+                },
+                upsert=True,
+            )
+        except Exception as e:
+            logger.error(f"Failed to persist miner info to DB: {e}")
     
     async def handle_submit(self, msg_id, params):
         """
