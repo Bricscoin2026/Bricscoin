@@ -16,18 +16,7 @@ export default function Mining() {
   const [stats, setStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
   const [activeMiners, setActiveMiners] = useState([]);
-
-  const fetchActiveMiners = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/mining/miners`);
-      if (res.ok) {
-        const data = await res.json();
-        setActiveMiners(data.miners || []);
-      }
-    } catch (err) {
-      console.error("Error loading miners", err);
-    }
-  };
+  const [activeMinersCount, setActiveMinersCount] = useState(null);
 
   const fetchStats = async () => {
     try {
@@ -41,14 +30,45 @@ export default function Mining() {
     }
   };
 
+  const fetchActiveMiners = async () => {
+    // Primo tentativo: endpoint dettagliato (se disponibile)
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/mining/miners`);
+      if (res.ok) {
+        const data = await res.json();
+        setActiveMiners(data.miners || []);
+        if (typeof data.count === "number") {
+          setActiveMinersCount(data.count);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading detailed miners", err);
+    }
+
+    // Fallback: endpoint semplificato /api/miners/stats (solo conteggio), se esiste
+    try {
+      const resStats = await fetch(`${BACKEND_URL}/api/miners/stats`);
+      if (resStats.ok) {
+        const stats = await resStats.json();
+        if (typeof stats.active_miners === "number") {
+          setActiveMinersCount(stats.active_miners);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading miners stats", err);
+    }
+  };
+
   useEffect(() => {
-    fetchStats();
-    // Load wallet from localStorage
+    // Carica il wallet locale una sola volta al mount
     const saved = localStorage.getItem('bricscoin_web_wallet');
     if (saved) {
       const wallet = JSON.parse(saved);
       setWalletAddress(wallet.address || "");
     }
+
+    // Avvia fetch asincroni
+    fetchStats();
     fetchActiveMiners();
   }, []);
 
@@ -245,17 +265,31 @@ export default function Mining() {
       {/* Active Miners */}
       <Card className="bg-card border-white/10">
         <CardHeader className="border-b border-white/10 flex flex-row items-center justify-between">
-          <CardTitle className="font-heading text-lg">Active Miners</CardTitle>
+          <CardTitle className="font-heading text-lg">
+            Active Miners
+            {activeMinersCount != null && (
+              <span className="ml-2 text-xs text-muted-foreground">
+                ({activeMinersCount})
+              </span>
+            )}
+          </CardTitle>
           <Button variant="outline" size="sm" onClick={fetchActiveMiners}>
             Refresh
           </Button>
         </CardHeader>
         <CardContent className="p-4">
           {activeMiners.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No miners detected in the last few minutes. Once ASICs connect to the Stratum server
-              and start submitting shares, they will appear here.
-            </p>
+            activeMinersCount && activeMinersCount > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {activeMinersCount} miners are currently active according to the pool stats, but detailed
+                per-miner information is not yet available from the server.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No miners detected in the last few minutes. Once ASICs connect to the Stratum server
+                and start submitting shares, they will appear here.
+              </p>
+            )
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -272,20 +306,12 @@ export default function Mining() {
                   {activeMiners.map((m) => (
                     <tr key={m.id} className="border-b border-white/5 last:border-none">
                       <td className="py-2 pr-4 font-mono text-xs break-all">{m.id}</td>
+                      <td className="py-2 pr-4 text-xs text-muted-foreground">{m.worker || "-"}</td>
                       <td className="py-2 pr-4 text-xs text-muted-foreground">
-                        {m.worker || "-"}
+                        {m.connected_at ? new Date(m.connected_at).toLocaleTimeString() : "-"}
                       </td>
-                      <td className="py-2 pr-4 text-xs text-muted-foreground">
-                        {m.connected_at
-                          ? new Date(m.connected_at).toLocaleTimeString()
-                          : "-"}
-                      </td>
-                      <td className="py-2 pr-4 text-right text-xs">
-                        {m.shares ?? 0}
-                      </td>
-                      <td className="py-2 pr-4 text-right text-xs">
-                        {m.blocks ?? 0}
-                      </td>
+                      <td className="py-2 pr-4 text-right text-xs">{m.shares ?? 0}</td>
+                      <td className="py-2 pr-4 text-right text-xs">{m.blocks ?? 0}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -375,7 +401,7 @@ export default function Mining() {
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
               <span>
-                If the domain doesn't work, use the <strong>direct IP address</strong> as fallback
+                If the domain doesn&apos;t work, use the <strong>direct IP address</strong> as fallback
               </span>
             </li>
             <li className="flex items-start gap-2">
