@@ -18,6 +18,18 @@ export default function Mining() {
   const [activeMiners, setActiveMiners] = useState([]);
   const [activeMinersCount, setActiveMinersCount] = useState(null);
 
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/network/stats`);
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   const fetchActiveMiners = async () => {
     // Primo tentativo: endpoint dettagliato (se disponibile)
     try {
@@ -47,7 +59,6 @@ export default function Mining() {
     }
   };
 
-
   useEffect(() => {
     fetchStats();
     // Load wallet from localStorage
@@ -57,20 +68,7 @@ export default function Mining() {
       setWalletAddress(wallet.address || "");
     }
     fetchActiveMiners();
-
   }, []);
-
-  const fetchStats = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/network/stats`);
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
