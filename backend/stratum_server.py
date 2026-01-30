@@ -800,9 +800,22 @@ class StratumMiner:
             # Always accept shares to keep miner working
             self.respond(msg_id, True)
             self.shares += 1
-            
             if self.miner_id in miners:
                 miners[self.miner_id]['shares'] += 1
+
+            # Aggiorna last_seen e shares anche in DB
+            try:
+                now = datetime.now(timezone.utc).isoformat()
+                await db.miners.update_one(
+                    {"id": self.miner_id},
+                    {
+                        "$set": {"last_seen": now, "online": True},
+                        "$inc": {"shares": 1},
+                    },
+                    upsert=True,
+                )
+            except Exception as e:
+                logger.error(f"Failed to update miner shares in DB: {e}")
             
             if is_block:
                 logger.info(f"🎉 BLOCK FOUND by {self.worker_name}! Hash: {block_hash}")
