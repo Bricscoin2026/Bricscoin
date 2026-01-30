@@ -1020,6 +1020,15 @@ class StratumServer:
             if miner in self.miners:
                 self.miners.remove(miner)
             miners.pop(miner.miner_id, None)
+
+            # Segna il miner come offline nel database
+            try:
+                await db.miners.update_one(
+                    {"id": miner.miner_id},
+                    {"$set": {"online": False}},
+                )
+            except Exception as e:
+                logger.error(f"Failed to mark miner offline in DB: {e}")
             
             try:
                 writer.close()
