@@ -60,13 +60,15 @@ export default function Mining() {
   };
 
   useEffect(() => {
-    fetchStats();
-    // Load wallet from localStorage
+    // Carica il wallet locale una sola volta al mount
     const saved = localStorage.getItem('bricscoin_web_wallet');
     if (saved) {
       const wallet = JSON.parse(saved);
       setWalletAddress(wallet.address || "");
     }
+
+    // Avvia fetch asincroni senza aspettarli sincronicamente
+    fetchStats();
     fetchActiveMiners();
   }, []);
 
