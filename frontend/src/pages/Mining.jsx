@@ -167,9 +167,13 @@ export default function Mining() {
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">
-              {stats ? formatHashrate(stats.hashrate_estimate) : "-"}
+              {stats?.hashrate_from_shares > 0 
+                ? formatHashrate(stats.hashrate_from_shares) 
+                : (stats ? formatHashrate(stats.hashrate_estimate) : "-")}
             </p>
-            <p className="text-xs text-muted-foreground">Network Hashrate</p>
+            <p className="text-xs text-muted-foreground">
+              {stats?.hashrate_from_shares > 0 ? "Network Hashrate (Real)" : "Network Hashrate (Est.)"}
+            </p>
           </CardContent>
         </Card>
       </div>
