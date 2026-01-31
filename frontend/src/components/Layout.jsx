@@ -11,7 +11,8 @@ import {
   Server,
   Info,
   Github,
-  Twitter
+  Twitter,
+  Users
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -26,6 +27,8 @@ export default function Layout() {
     { to: "/wallet", icon: Wallet, label: "Wallet" },
     { to: "/network", icon: Network, label: "Network" },
     { to: "/mining", icon: Pickaxe, label: "Mining" },
+    { to: "/mining", icon: Pickaxe, label: "Mining" },
+    { to: "/pools", icon: Users, label: "Pools" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
@@ -153,7 +156,8 @@ export default function Layout() {
                 className="hover:text-foreground transition-colors flex items-center gap-1"
               >
                 <Twitter className="w-4 h-4" />
-                Twitter
+                Twitter,
+  Users
               </a>
             </div>
           </div>
