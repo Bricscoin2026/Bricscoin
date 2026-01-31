@@ -11,7 +11,8 @@ import {
   Server,
   Info,
   Code,
-  Twitter
+  Twitter,
+  Users
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -25,6 +26,8 @@ export default function Layout() {
     { to: "/explorer", icon: Search, label: "Explorer" },
     { to: "/wallet", icon: Wallet, label: "Wallet" },
     { to: "/network", icon: Network, label: "Network" },
+    { to: "/mining", icon: Pickaxe, label: "Mining" },
+    { to: "/pools", icon: Users, label: "Pools" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
