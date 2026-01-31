@@ -12,7 +12,6 @@ import Downloads from "./pages/Downloads";
 import RunNode from "./pages/RunNode";
 import About from "./pages/About";
 import Pools from "./pages/Pools";
-import Pools from "./pages/Pools";
 import "./App.css";
 
 function App() {
