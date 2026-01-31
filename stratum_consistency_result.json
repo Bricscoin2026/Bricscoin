@@ -2,5 +2,5 @@
   "timestamp": "2026-01-29T21:23:15.502188+00:00",
   "test": "stratum_api_consistency",
   "success": true,
-  "backend_url": "https://bricscoin-secure.preview.emergentagent.com"
+  "backend_url": "https://blockchain-mine-1.preview.emergentagent.com"
 }
