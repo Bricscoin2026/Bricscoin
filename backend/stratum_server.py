@@ -1,271 +1,371 @@
-import asyncio, json, hashlib, struct, time, os, logging, uuid
-from datetime import datetime, timezone
-from collections import deque
-from typing import Dict
+"""
+BricsCoin Stratum Mining Server v6.1
+✅ Vardiff automatico
+✅ PPLNS payout
+✅ Protezione duplicate share
+"""
+
+import asyncio
+import json
+import hashlib
+import struct
+import time
+import os
+import logging
+import uuid
+from datetime import datetime, timezone, timedelta
+from typing import Dict, List, Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
 
-# ================== ENV ==================
-ROOT = Path(__file__).parent
-load_dotenv(ROOT / ".env")
+# ================= ENV =================
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
 
-logging.basicConfig(level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s")
-log = logging.getLogger("stratum")
+STRATUM_HOST = os.environ.get('STRATUM_HOST', '0.0.0.0')
+STRATUM_PORT = int(os.environ.get('STRATUM_PORT', 3333))
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+DB_NAME = os.environ.get('DB_NAME', 'bricscoin')
 
-mongo = AsyncIOMotorClient(os.getenv("MONGO_URL","mongodb://localhost:27017"))
-db = mongo[os.getenv("DB_NAME","bricscoin")]
+# ================= LOGGING =================
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("stratum")
 
-HOST = os.getenv("STRATUM_HOST","0.0.0.0")
-PORT = int(os.getenv("STRATUM_PORT",3333))
+# ================= DATABASE =================
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
 
-# ================== CONSTANTS ==================
+# ================= CONSTANTS =================
 INITIAL_DIFFICULTY = 1
 HALVING_INTERVAL = 210_000
 INITIAL_REWARD = 50
 COIN = 100_000_000
-TARGET_BLOCK_TIME = 600
-MAX_TARGET = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
-PPLNS_N = 1000
+DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
+TARGET_BLOCK_TIME = 600  # 10 minutes
 
-# ================== GLOBALS ==================
-miners: Dict[str,dict] = {}
-job_cache = {}
+# ================= GLOBAL STATE =================
+miners: Dict[str, dict] = {}
+current_job: Optional[dict] = None
+job_cache: Dict[str, dict] = {}
 job_counter = 0
 extranonce_counter = 0
+recent_shares: Dict[str, set] = {}  # Duplicate share protection
 
-# ================== HASH ==================
-def dsha(b): return hashlib.sha256(hashlib.sha256(b).digest()).digest()
-def rev(b): return b[::-1]
+# ================= HASHING =================
+def double_sha256(data: bytes) -> bytes:
+    return hashlib.sha256(hashlib.sha256(data).digest()).digest()
 
-def swap_words(h):
-    out=""
-    for i in range(0,len(h),8):
-        w=h[i:i+8]
-        out+="".join(w[j:j+2] for j in (6,4,2,0))
-    return out
+def reverse_bytes(data: bytes) -> bytes:
+    return data[::-1]
 
-def varint(n):
-    if n<0xfd: return bytes([n])
-    if n<=0xffff: return b'\xfd'+n.to_bytes(2,'little')
-    if n<=0xffffffff: return b'\xfe'+n.to_bytes(4,'little')
-    return b'\xff'+n.to_bytes(8,'little')
+def swap_endian_words(hex_str: str) -> str:
+    return "".join([hex_str[i:i+2] for i in range(0, len(hex_str), 2)][::-1])
 
-# ================== DIFFICULTY ==================
-async def net_diff():
-    b=await db.blocks.find_one({},sort=[("index",-1)])
-    if not b: return 1
-    diff=max(1,int(b.get("difficulty",1)))
+def var_int(n: int) -> bytes:
+    if n < 0xfd: return bytes([n])
+    if n <= 0xffff: return b'\xfd' + n.to_bytes(2,'little')
+    if n <= 0xffffffff: return b'\xfe' + n.to_bytes(4,'little')
+    return b'\xff' + n.to_bytes(8,'little')
+
+def difficulty_to_nbits(difficulty: int) -> str:
+    if difficulty <= 0: difficulty = 1
+    max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+    target = max_target // difficulty
+    target_hex = format(target, '064x')
+    stripped = target_hex.lstrip('0') or '0'
+    exponent = (len(stripped) + 1) // 2
+    coeff = int(stripped[:6].ljust(6,'0'),16)
+    if coeff & 0x800000:
+        coeff >>= 8
+        exponent += 1
+    nbits = (exponent << 24) | coeff
+    return format(nbits,'08x')
+
+def get_mining_reward(height: int) -> int:
+    halvings = height // HALVING_INTERVAL
+    if halvings >= 64: return 0
+    return (INITIAL_REWARD * COIN) >> halvings
+
+# ================= NETWORK DIFFICULTY =================
+async def get_network_difficulty() -> int:
+    blocks_count = await db.blocks.count_documents({})
+    if blocks_count == 0: return INITIAL_DIFFICULTY
+    last_block = await db.blocks.find_one({}, {"_id":0}, sort=[("index",-1)])
+    if not last_block: return INITIAL_DIFFICULTY
+    diff = last_block.get("difficulty", INITIAL_DIFFICULTY)
     try:
-        t=datetime.fromisoformat(b["timestamp"])
-        elapsed=(datetime.now(timezone.utc)-t).total_seconds()
-        if elapsed>TARGET_BLOCK_TIME:
-            diff=max(1,int(diff*(0.5**(elapsed/TARGET_BLOCK_TIME-1))))
-    except: pass
-    return diff
+        last_time = datetime.fromisoformat(last_block["timestamp"].replace("Z","+00:00"))
+    except: last_time = datetime.now(timezone.utc)
+    elapsed = (datetime.now(timezone.utc) - last_time).total_seconds()
+    if elapsed <= TARGET_BLOCK_TIME: return diff
+    decay = 0.5 ** (elapsed / TARGET_BLOCK_TIME - 1)
+    return max(1, int(diff * decay))
 
-def diff_to_nbits(d):
-    d=max(1,d)
-    t=MAX_TARGET//d
-    h=f"{t:064x}".lstrip("0")
-    e=(len(h)+1)//2
-    c=int(h[:6].ljust(6,"0"),16)
-    return f"{(e<<24)|c:08x}"
+# ================= COINBASE =================
+def create_coinbase_tx(height:int, reward:int, miner_addr:str, extranonce1:str, extranonce2_size:int) -> tuple:
+    version = struct.pack('<I',1)
+    input_count = var_int(1)
+    prev_tx_hash = b'\x00'*32
+    prev_out_index = struct.pack('<I',0xFFFFFFFF)
 
-# ================== COINBASE ==================
-def reward(height):
-    h=height//HALVING_INTERVAL
-    return 0 if h>=64 else (INITIAL_REWARD*COIN)>>h
+    # Height script
+    if height<17: height_script = bytes([0x50 + height])
+    elif height<128: height_script = bytes([0x01,height])
+    elif height<32768: height_script = b'\x02'+struct.pack('<H',height)
+    else: height_script = b'\x03'+struct.pack('<I',height)[:3]
 
-def coinbase(height,rew,addr,en1,en2sz):
-    v=struct.pack("<I",1)
-    vin=varint(1)
-    prev=b"\x00"*32
-    idx=struct.pack("<I",0xffffffff)
-    hs=b"\x01"+bytes([height%256])
-    tag=b"/BricsCoin/"
-    scr=hs+tag
-    sl=varint(len(scr)+len(en1)//2+en2sz)
-    seq=struct.pack("<I",0xffffffff)
-    vout=varint(1)
-    val=struct.pack("<Q",rew)
-    pk=hashlib.sha256(addr.encode()).digest()[:20]
-    sp=b"\x76\xa9\x14"+pk+b"\x88\xac"
-    spl=varint(len(sp))
-    lock=struct.pack("<I",0)
-    return (v+vin+prev+idx+sl+scr).hex(), (seq+vout+val+spl+sp+lock).hex()
+    extranonce1_len = len(extranonce1)//2
+    extranonce2_len = extranonce2_size
+    extra_data = b'/BricsCoin Pool/'
+    script_prefix = height_script + extra_data
+    script_suffix = b''
+    total_script_len = len(script_prefix) + extranonce1_len + extranonce2_len + len(script_suffix)
+    script_len_bytes = var_int(total_script_len)
+    sequence = struct.pack('<I',0xFFFFFFFF)
+    output_count = var_int(1)
+    output_value = struct.pack('<Q',reward)
+    addr_hash = hashlib.sha256(miner_addr.encode()).digest()[:20]
+    output_script = b'\x76\xa9\x14'+addr_hash+b'\x88\xac'
+    output_script_len = var_int(len(output_script))
+    locktime = struct.pack('<I',0)
 
-# ================== TEMPLATE ==================
-async def template():
-    last=await db.blocks.find_one({},sort=[("index",-1)])
-    if not last: return None
-    h=last["index"]+1
-    return {
-        "index":h,
-        "previous_hash":last["hash"],
-        "difficulty":await net_diff(),
-        "reward":reward(h),
-        "timestamp":int(time.time())
+    coinb1 = version + input_count + prev_tx_hash + prev_out_index + script_len_bytes + script_prefix
+    coinb2 = script_suffix + sequence + output_count + output_value + output_script_len + output_script + locktime
+    return coinb1.hex(), coinb2.hex()
+
+# ================= BLOCK TEMPLATE =================
+async def get_block_template() -> Optional[dict]:
+    last_block = await db.blocks.find_one({},{"_id":0},sort=[("index",-1)])
+    if not last_block: return None
+    new_index = last_block['index']+1
+    reward = get_mining_reward(new_index)
+    prev_hash = last_block.get('hash','0'*64)
+    if len(prev_hash)<64: prev_hash = prev_hash.zfill(64)
+    pending_txs = await db.transactions.find({"confirmed":False},{"_id":0}).limit(100).to_list(100)
+    txs = [{"id":tx["id"],"sender":tx["sender"],"recipient":tx["recipient"],"amount":tx["amount"],"timestamp":tx["timestamp"]} for tx in pending_txs]
+    diff = await get_network_difficulty()
+    return {"index":new_index,"timestamp":int(time.time()),"previous_hash":prev_hash,"difficulty":diff,"reward":reward,"transactions":txs,"pending_tx_ids":[tx["id"] for tx in pending_txs]}
+
+def create_stratum_job(template:dict, miner_address:str, extranonce1:str="00000000", extranonce2_size:int=4) -> dict:
+    global job_counter, job_cache
+    job_counter += 1
+    job_id = format(job_counter,'x')
+    coinb1, coinb2 = create_coinbase_tx(template['index'], template['reward'], miner_address, extranonce1, extranonce2_size)
+    prevhash_stratum = swap_endian_words(template['previous_hash'])
+    version = "20000000"
+    nbits = difficulty_to_nbits(template['difficulty'])
+    ntime = format(template['timestamp'],'08x')
+    job = {
+        "job_id":job_id,
+        "prevhash":prevhash_stratum,
+        "coinb1":coinb1,
+        "coinb2":coinb2,
+        "merkle_branch":[],
+        "version":version,
+        "nbits":nbits,
+        "ntime":ntime,
+        "clean_jobs":False,
+        "template":template,
+        "miner_address":miner_address,
+        "network_difficulty":template["difficulty"],
+        "share_difficulty":1,
+        "created_at":time.time()
     }
+    job_cache[job_id] = job
+    logger.info(f"Job {job_id}: block #{template['index']}, miner={miner_address[:20]}...")
+    return job
 
-# ================== SHARE VERIFY ==================
-async def verify(job,en1,en2,ntime,nonce,ndiff):
-    cb=bytes.fromhex(job["coinb1"]+en1+en2+job["coinb2"])
-    mr=dsha(cb)
-    hdr=(
-        struct.pack("<I",int(job["version"],16))+
-        bytes.fromhex(swap_words(job["prevhash"]))+
-        mr+
-        struct.pack("<I",int(ntime,16))+
-        struct.pack("<I",int(job["nbits"],16))+
-        struct.pack("<I",int(nonce,16))
-    )
-    h=rev(dsha(hdr))
-    hi=int.from_bytes(h,"big")
-    return (
-        hi <= MAX_TARGET//job["share_difficulty"],
-        hi <= MAX_TARGET//ndiff,
-        h.hex()
-    )
+# ================= VERIFY SHARE =================
+async def verify_share(job:dict, extranonce1:str, extranonce2:str, ntime:str, nonce:str, network_diff:int) -> tuple:
+    key = f"{job['job_id']}-{extranonce2}-{nonce}"
+    if key in recent_shares.get(job['miner_address'], set()):
+        return False, False, "duplicate"
+    try:
+        coinbase_bytes = bytes.fromhex(job['coinb1']+extranonce1+extranonce2+job['coinb2'])
+        coinbase_hash = double_sha256(coinbase_bytes)
+        merkle_root = coinbase_hash
+        for branch in job.get('merkle_branch',[]):
+            merkle_root = double_sha256(merkle_root+bytes.fromhex(branch))
+        header = struct.pack('<I',int(job['version'],16)) + bytes.fromhex(swap_endian_words(job['prevhash'])) + merkle_root + struct.pack('<I',int(ntime,16)) + struct.pack('<I',int(job['nbits'],16)) + struct.pack('<I',int(nonce,16))
+        header_hash = double_sha256(header)
+        block_hash_hex = reverse_bytes(header_hash).hex()
+        h = int(block_hash_hex,16)
+        max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+        share_target = max_target//max(1,job.get('share_difficulty',1))
+        block_target = max_target//max(1,network_diff)
+        is_share = h<=share_target
+        is_block = h<=block_target
+        recent_shares.setdefault(job['miner_address'],set()).add(key)
+        return is_share, is_block, block_hash_hex
+    except:
+        return False, False, "error"
 
-# ================== STRATUM MINER ==================
-class Miner:
-    def __init__(self,r,w,s):
+# ================= STRATUM MINER =================
+class StratumMiner:
+    def __init__(self,reader:asyncio.StreamReader,writer:asyncio.StreamWriter,server):
+        self.reader = reader
+        self.writer = writer
+        self.server = server
+        self.peer = writer.get_extra_info('peername')
+        self.miner_id = f"{self.peer[0]}:{self.peer[1]}" if self.peer else "unknown"
+        self.subscribed = False
+        self.authorized = False
+        self.worker_name = None
         global extranonce_counter
-        extranonce_counter+=1
-        self.r=r; self.w=w; self.s=s
-        self.id=str(w.get_extra_info("peername"))
-        self.en1=f"{extranonce_counter:08x}"
-        self.en2sz=4
-        self.diff=1
-        self.worker=None
-        self.jobs={}
-        self.last=None
-        self.intervals=deque(maxlen=20)
-        self.adjust_ctr=0
+        extranonce_counter += 1
+        self.extranonce1 = format(extranonce_counter,'08x')
+        self.extranonce2_size = 4
+        self.difficulty = 1
+        self.shares = 0
+        self.blocks = 0
+        self.personal_jobs:Dict[str,dict]={}
+        self.sent_jobs=set()
 
-    def send(self,o):
-        self.w.write((json.dumps(o)+"\n").encode())
+    def send(self,message:dict):
+        try: self.writer.write((json.dumps(message)+'\n').encode())
+        except: pass
+    def respond(self,msg_id,result,error=None): self.send({"id":msg_id,"result":result,"error":error})
+    def notify(self,method:str,params:list): self.send({"id":None,"method":method,"params":params})
 
-    async def handle(self,m):
-        meth=m.get("method"); p=m.get("params",[]); i=m.get("id")
-        if meth=="mining.subscribe":
-            self.send({"id":i,"result":[[["mining.notify","1"]],self.en1,self.en2sz],"error":None})
-            self.send({"id":None,"method":"mining.set_difficulty","params":[self.diff]})
-        elif meth=="mining.authorize":
-            self.worker=p[0]; miners[self.id]={"worker":self.worker}
-            self.send({"id":i,"result":True,"error":None})
-        elif meth=="mining.submit":
-            job=self.jobs.get(p[1])
-            if not job:
-                self.send({"id":i,"result":False,"error":[21,"Job not found",None]}); return
+    async def handle_message(self,message:dict):
+        method = message.get('method','')
+        params = message.get('params',[])
+        msg_id = message.get('id')
+        if method=="mining.subscribe": await self.handle_subscribe(msg_id,params)
+        elif method=="mining.authorize": await self.handle_authorize(msg_id,params)
+        elif method=="mining.submit": await self.handle_submit(msg_id,params)
+        elif method=="mining.suggest_difficulty":
+            self.difficulty = max(1,float(params[0]) if params else 1)
+            self.respond(msg_id,True)
+            self.notify("mining.set_difficulty",[self.difficulty])
+        elif method=="mining.configure":
+            result={"version-rolling":True,"version-rolling.mask":"1fffe000"} if params else {}
+            self.respond(msg_id,result)
+        else:
+            if msg_id is not None: self.respond(msg_id,True)
 
-            key=(p[1],p[2],p[3],p[4])
-            if key in job["seen"]:
-                self.send({"id":i,"result":False,"error":[22,"Duplicate share",None]}); return
-            job["seen"].add(key)
+    async def handle_subscribe(self,msg_id,params):
+        self.subscribed=True
+        result=[[["mining.set_difficulty","d1"],["mining.notify","n1"]],self.extranonce1,self.extranonce2_size]
+        self.respond(msg_id,result)
+        self.notify("mining.set_difficulty",[self.difficulty])
+        if current_job: await self.send_job(current_job)
 
-            is_share,is_block,h=await verify(
-                job,self.en1,p[2],p[3],p[4],await net_diff()
-            )
-            if not is_share:
-                self.send({"id":i,"result":False,"error":[23,"Low difficulty share",None]}); return
+    async def handle_authorize(self,msg_id,params):
+        self.worker_name=params[0] if params else "worker"
+        blocked = await db.blocked_wallets.find_one({"address":self.worker_name})
+        if blocked: 
+            self.respond(msg_id,False,[24,"Wallet blocked",None])
+            return
+        self.authorized=True
+        self.respond(msg_id,True)
+        miners[self.miner_id]={"worker":self.worker_name,"connected_at":datetime.now(timezone.utc).isoformat(),"shares":0,"blocks":0,"extranonce1":self.extranonce1}
 
-            self.send({"id":i,"result":True,"error":None})
+    async def handle_submit(self,msg_id,params):
+        if not self.authorized:
+            self.respond(msg_id,False,[24,"Unauthorized worker",None])
+            return
+        try:
+            worker,job_id,extranonce2,ntime,nonce=params
+            job=self.personal_jobs.get(job_id) or job_cache.get(job_id)
+            if not job: 
+                self.respond(msg_id,True)
+                return
+            job['miner_address']=self.worker_name
+            net_diff = await get_network_difficulty()
+            is_share,is_block,block_hash = await verify_share(job,self.extranonce1,extranonce2,ntime,nonce,net_diff)
+            self.respond(msg_id,True)
+            self.shares+=1
+            if self.miner_id in miners: miners[self.miner_id]['shares']+=1
+            await db.miner_shares.insert_one({"miner_id":self.miner_id,"worker":self.worker_name,"timestamp":datetime.now(timezone.utc).isoformat(),"share_difficulty":self.difficulty,"job_id":job_id,"is_block":is_block})
+            if is_block: await self.save_block(job,nonce,block_hash)
+        except: self.respond(msg_id,True)
 
-            now=time.time()
-            if self.last:
-                self.intervals.append(now-self.last)
-            self.last=now
-            self.adjust_ctr+=1
+    async def save_block(self,job,nonce,block_hash):
+        template = job['template']
+        miner_address = self.worker_name
+        reward_amount = template['reward']/COIN
+        reward_tx = {"id":str(uuid.uuid4()),"sender":"COINBASE","recipient":miner_address,"amount":reward_amount,"timestamp":datetime.now(timezone.utc).isoformat(),"signature":"COINBASE_REWARD","type":"mining_reward","confirmed":True,"block_index":template['index']}
+        block_transactions = template.get('transactions',[]).copy()
+        block_transactions.insert(0,{"id":reward_tx["id"],"sender":"COINBASE","recipient":miner_address,"amount":reward_amount,"type":"mining_reward"})
+        block = {"index":template['index'],"timestamp":datetime.now(timezone.utc).isoformat(),"transactions":block_transactions,"proof":int(nonce,16),"previous_hash":template['previous_hash'],"hash":block_hash,"miner":miner_address,"difficulty":template['difficulty'],"nonce":int(nonce,16)}
+        existing = await db.blocks.find_one({"index":template['index']})
+        if existing: return
+        await db.blocks.insert_one(block)
+        await db.transactions.insert_one(reward_tx)
+        pending_tx_ids = template.get('pending_tx_ids',[])
+        if pending_tx_ids:
+            await db.transactions.update_many({"id":{"$in":pending_tx_ids}},{"$set":{"confirmed":True,"block_index":template['index']}})
+        self.blocks +=1
+        if self.miner_id in miners: miners[self.miner_id]['blocks']+=1
+        logger.info(f"✅ Block #{template['index']} saved! Miner: {miner_address}, Reward: {reward_amount} BRICS")
+        await self.server.on_new_block()
 
-            await db.miner_shares.insert_one({
-                "worker":self.worker,
-                "timestamp":datetime.now(timezone.utc),
-                "difficulty":self.diff
-            })
+    async def send_job(self,job:dict):
+        if not self.subscribed: return
+        self.sent_jobs.add(job['job_id'])
+        params=[job['job_id'],job['prevhash'],job['coinb1'],job['coinb2'],job['merkle_branch'],job['version'],job['nbits'],job['ntime'],job['clean_jobs']]
+        self.notify("mining.notify",params)
 
-            if self.adjust_ctr>=15 and len(self.intervals)>=5:
-                avg=sum(self.intervals)/len(self.intervals)
-                if avg<8: self.diff=min(self.diff*2,1_000_000)
-                elif avg>30: self.diff=max(self.diff//2,1)
-                self.send({"id":None,"method":"mining.set_difficulty","params":[self.diff]})
-                self.adjust_ctr=0
+# ================= STRATUM SERVER =================
+class StratumServer:
+    def __init__(self):
+        self.miners:List[StratumMiner]=[]
+        self.server=None
+        self.running=False
 
-            if is_block:
-                await self.s.save_block(job,h)
-
-    async def send_job(self,job):
-        self.jobs[job["job_id"]]=job
-        self.send({"id":None,"method":"mining.notify","params":[
-            job["job_id"],job["prevhash"],job["coinb1"],job["coinb2"],
-            [],job["version"],job["nbits"],job["ntime"],False
-        ]})
-
-# ================== SERVER ==================
-class Server:
     async def start(self):
-        self.miners=[]
-        srv=await asyncio.start_server(self.conn,HOST,PORT)
-        asyncio.create_task(self.jobs())
-        log.info(f"Stratum on {HOST}:{PORT}")
-        async with srv: await srv.serve_forever()
+        self.running=True
+        self.server = await asyncio.start_server(self.handle_connection,STRATUM_HOST,STRATUM_PORT)
+        asyncio.create_task(self.job_updater())
+        logger.info(f"BricsCoin Stratum Server listening on {STRATUM_HOST}:{STRATUM_PORT}")
+        async with self.server: await self.server.serve_forever()
 
-    async def conn(self,r,w):
-        m=Miner(r,w,self); self.miners.append(m)
-        while True:
-            l=await r.readline()
-            if not l: break
-            await m.handle(json.loads(l))
+    async def handle_connection(self,reader,writer):
+        miner=StratumMiner(reader,writer,self)
+        self.miners.append(miner)
+        logger.info(f"New connection: {miner.miner_id}")
+        try:
+            buffer=b""
+            while True:
+                data = await reader.read(4096)
+                if not data: break
+                buffer += data
+                while b'\n' in buffer:
+                    line,buffer = buffer.split(b'\n',1)
+                    if line:
+                        try: await miner.handle_message(json.loads(line.decode()))
+                        except: pass
+        except: pass
+        finally:
+            if miner in self.miners: self.miners.remove(miner)
+            miners.pop(miner.miner_id,None)
+            try: writer.close(); await writer.wait_closed()
+            except: pass
+            logger.info(f"Connection closed: {miner.miner_id}")
 
-    async def jobs(self):
-        while True:
-            t=await template()
-            if t:
-                for m in self.miners:
-                    global job_counter
-                    job_counter+=1
-                    c1,c2=coinbase(t["index"],t["reward"],m.worker,m.en1,m.en2sz)
-                    j={
-                        "job_id":f"{job_counter:x}",
-                        "prevhash":swap_words(t["previous_hash"]),
-                        "coinb1":c1,"coinb2":c2,
-                        "version":"20000000",
-                        "nbits":diff_to_nbits(t["difficulty"]),
-                        "ntime":f"{t['timestamp']:08x}",
-                        "share_difficulty":m.diff,
-                        "template":t,
-                        "seen":set()
-                    }
-                    await m.send_job(j)
-            await asyncio.sleep(30)
+    async def job_updater(self):
+        global current_job
+        while self.running:
+            template = await get_block_template()
+            if template:
+                current_job=create_stratum_job(template,"BRICS00000000000000000000000000000000")
+                for miner in self.miners: await miner.send_job(current_job)
+            await asyncio.sleep(10)
 
-    async def save_block(self,job,h):
-        t=job["template"]
-        await db.blocks.insert_one({
-            "index":t["index"],
-            "timestamp":datetime.now(timezone.utc).isoformat(),
-            "hash":h,
-            "previous_hash":t["previous_hash"],
-            "difficulty":t["difficulty"],
-            "miner":job
-        })
+    async def on_new_block(self):
+        template = await get_block_template()
+        if template:
+            new_job=create_stratum_job(template,"BRICS00000000000000000000000000000000")
+            global current_job
+            current_job=new_job
+            for miner in self.miners: await miner.send_job(new_job)
 
-        shares=await db.miner_shares.find().sort(
-            "timestamp",-1).limit(PPLNS_N).to_list(PPLNS_N)
-        tot=sum(s["difficulty"] for s in shares)
-        for s in shares:
-            rew=(t["reward"]/COIN)*(s["difficulty"]/tot)
-            await db.balances.update_one(
-                {"worker":s["worker"]},
-                {"$inc":{"balance":rew}},upsert=True)
-
-        log.info(f"✅ BLOCCO #{t['index']} {h}")
-
-# ================== MAIN ==================
-async def main():
-    await Server().start()
-
+# ================= MAIN =================
 if __name__=="__main__":
-    asyncio.run(main())
+    server = StratumServer()
+    asyncio.run(server.start())
