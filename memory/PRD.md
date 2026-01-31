@@ -1,190 +1,98 @@
 # BricsCoin - Product Requirements Document
 
 ## Original Problem Statement
-Create a Bitcoin-like cryptocurrency named "BricsCoin" with full security for production launch.
+Creare una criptovaluta Bitcoin-like chiamata "BricsCoin" con:
+- Blockchain Proof of Work con SHA256
+- Difficulty adjustment dinamico (~10 min target)
+- Supporto ASIC miners via Stratum protocol
+- Web wallet e desktop wallet
+- Explorer e dashboard
 
-## Security Audit Status: ✅ PASSED (v2.0)
+## User Persona
+- Crypto enthusiast con hardware mining (Bitaxe, NerdMiner, NerdQaxe)
+- Vuole una coin privata per esperimenti/community
 
-### Security Features Implemented (January 25, 2026)
-
-#### 1. Client-Side Transaction Signing ✅
-- Private keys NEVER sent to server
-- All signing done locally in browser using `elliptic` library
-- Server only receives pre-signed transactions
-- Signature verification on server side
-
-#### 2. CORS Restrictions ✅
-- Only `https://bricscoin26.org` and `https://www.bricscoin26.org` allowed
-- Removed wildcard `*` CORS
-
-#### 3. Rate Limiting ✅
-- `/transactions/secure`: 10 requests/minute
-- `/wallet/create`: 5 requests/minute
-- `/wallet/import/*`: 5 requests/minute
-- `/transactions` (GET): 60 requests/minute
-- Legacy endpoint `/transactions` (POST): 5 requests/minute (deprecated)
-
-#### 4. Input Validation ✅
-- Address format validation (BRICS + 40 hex chars)
-- Amount validation (positive, max supply, 8 decimal places)
-- Signature format validation
-- Public key format validation (128 hex chars)
-- Transaction ID format validation (UUID)
-
-#### 5. Security Headers ✅
-- X-Content-Type-Options: nosniff
-- X-Frame-Options: DENY
-- X-XSS-Protection: 1; mode=block
-- Strict-Transport-Security: max-age=31536000
-- Content-Security-Policy: default-src 'self'
-- Referrer-Policy: strict-origin-when-cross-origin
-- Permissions-Policy: geolocation=(), microphone=(), camera=()
-
-#### 6. IP Blocking & Blacklisting ✅
-- Automatic IP blacklisting after 10 failed attempts
-- 1 hour blacklist duration
-- Security logging for all suspicious activity
-
-#### 7. Replay Attack Prevention ✅
-- Timestamp validation (max 5 minutes old)
-- Duplicate signature detection
-- Unique transaction IDs
-
-#### 8. Address-Public Key Verification ✅
-- Server verifies public key matches sender address
-- Prevents unauthorized transactions
-
-#### 9. Security Logging ✅
-- Separate security logger for audit trail
-- Logs all failed attempts, blacklist events, suspicious activity
-
-#### 10. Production Mode ✅
-- API docs disabled in production
-- Enhanced error handling
-
----
-
-## Technical Stack
-
-| Component | Technology |
-|-----------|------------|
-| Backend API | Python (FastAPI) |
-| Stratum Server | Python (asyncio) |
-| Database | MongoDB |
-| Frontend | React + TailwindCSS |
-| Desktop Wallet | Electron |
-| Cryptography | ECDSA (secp256k1) |
-| Client Signing | elliptic, js-sha256 |
-| Rate Limiting | slowapi |
-| Deployment | Docker + Hetzner |
-
----
-
-## API Endpoints (Secure)
-
-### Transaction (NEW - Secure)
+## Current Architecture
 ```
-POST /api/transactions/secure
-Body: {
-  "sender_address": "BRICS...",
-  "recipient_address": "BRICS...",
-  "amount": 100.0,
-  "timestamp": "2026-01-25T12:00:00Z",
-  "signature": "...",  // Signed client-side
-  "public_key": "..."
-}
+/root/Bricscoin/
+├── backend/
+│   ├── server.py          # FastAPI API + blockchain logic
+│   ├── stratum_server.py  # Stratum v1 per ASIC miners
+│   └── .env
+├── frontend/
+│   └── src/pages/
+│       ├── Mining.jsx     # Stats mining con hashrate reale
+│       ├── Wallet.jsx     # Web wallet
+│       └── ...
+└── docker-compose.yml
 ```
 
-### Transaction (DEPRECATED - Insecure)
+## What's Been Implemented
+
+### 2026-01-31
+- ✅ **Real Hashrate Tracking**: Hashrate calcolato dalle shares invece che dai tempi blocco
+  - Nuova collezione MongoDB `miner_shares`
+  - Campo API `hashrate_from_shares` in `/api/network/stats`
+  - UI mostra hashrate reale (~8-12 TH/s vs vecchio 151 MH/s)
+- ✅ **Difficulty Clamping**: Ogni intervallo blocco limitato a max 10 min nel calcolo adjustment
+- ✅ **HTTPS**: Abilitato su bricscoin26.org via Nginx + Certbot
+- ✅ **Share Difficulty**: Default 512, accetta suggerimenti miner
+
+### Previous
+- ✅ Stratum server v5.2 Bitcoin-compatible
+- ✅ Personalized jobs per miner (reward address corretto)
+- ✅ Web wallet con generazione seed phrase
+- ✅ Block explorer
+- ✅ Desktop wallet downloads
+
+## Prioritized Backlog
+
+### P0 - Critical
+- (none currently)
+
+### P1 - High Priority  
+- [ ] Server-side wallet backup (encrypted in DB)
+- [ ] Warning "SAVE SEED PHRASE" on wallet creation
+- [ ] Monitor difficulty adjustment at block 300
+
+### P2 - Medium Priority
+- [ ] Active miners display improvements
+- [ ] Explorer block count consistency
+
+### P3 - Future
+- [ ] Mobile wallet iOS/Android
+- [ ] Exchange listings
+- [ ] Community mining pools page
+
+## Technical Notes
+
+### Hashrate Calculation Formula
+```python
+# Real hashrate from shares (last 5 minutes)
+hashrate = (total_shares * avg_share_difficulty * 2^32) / time_window_seconds
 ```
-POST /api/transactions
-⚠️ DEPRECATED - Sends private key over network
+
+### Difficulty Adjustment with Clamping
+```python
+# Each block interval clamped to max TARGET_BLOCK_TIME (600s)
+actual_time = sum(min(block_time, 600) for each interval)
+ratio = expected_time / actual_time
+new_difficulty = current_difficulty * ratio  # capped at 0.25x to 4x
 ```
 
----
+### Key Endpoints
+- `GET /api/network/stats` - Network stats with `hashrate_from_shares`
+- `GET /api/blocks` - Block list
+- `POST /api/transactions/send` - Send signed transaction
+- Stratum: `stratum+tcp://stratum.bricscoin26.org:3333`
 
-## Mining Configuration
-- **Stratum**: `stratum+tcp://5.161.254.163:3333`
-- **Difficulty**: 5 (5 leading hex zeros)
-- **Block Reward**: 50 BRICS
-- **Halving**: Every 210,000 blocks
+### Database Collections
+- `blocks` - Blockchain blocks
+- `transactions` - All transactions
+- `miner_shares` - Share submissions (cleaned hourly)
+- `miners` - Connected miners info
 
----
-
-## Network Status
-- **Live URL**: https://bricscoin26.org
-- **Blocks**: 200+
-- **Miners**: Bitaxe, NerdMiner compatible
-- **Supply**: ~11,000 BRICS mined
-
----
-
-## Known Limitations (Future Work)
-
-1. **TLS for Stratum** - Mining traffic is unencrypted (TCP)
-2. **True P2P** - Currently centralized on single node
-3. **Professional Audit** - Self-audited, not third-party
-
----
-
-## Changelog
-
-### v2.5.0 (2026-01-28) - Codeberg Migration & Difficulty Fix
-- ✅ Migrated all repository links from GitHub to Codeberg
-- ✅ Updated Downloads page with correct wallet-app URL
-- ✅ Updated About page links and Source Code section
-- ✅ Updated Layout footer links
-- ✅ Updated Network and RunNode git clone commands
-- ✅ Changed all GitHub icons to Code icons
-- ✅ Repository URL: https://codeberg.org/Bricscoin_26/Bricscoin
-- ✅ Wallet download: https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/wallet-app
-- ✅ **FIXED: Difficulty system** - Now properly calculates nBits from network difficulty
-- ✅ **FIXED: Faster difficulty adjustment** - Every 10 blocks for new chain (vs 2016 standard)
-- ✅ Difficulty formula: `target = max_target / difficulty` (Bitcoin-style)
-- ✅ nBits correctly computed: diff 1 → 1d00ffff, diff 1000 → 1b4188f5
-
-### v2.4.0 (2026-01-XX) - Security Audit Complete
-- ✅ Comprehensive security audit passed (27 tests)
-- ✅ Input validation tests: 8/8 passed
-- ✅ Signature verification tests: 2/2 passed
-- ✅ Replay attack prevention tests: 2/2 passed
-- ✅ Rate limiting configured and tested
-- ✅ Fixed bug: wallet import from private key (request.name → wallet_request.name)
-- ✅ Created test suite: `/app/backend/tests/test_security_audit.py`
-- ✅ Added "Security Audit Passed" badge on Dashboard
-- ✅ Added Security Audit section on About page
-- ✅ Updated README.md with security badges and audit details
-- ✅ Created SECURITY_AUDIT.md documentation
-
-### v2.3.0 (2026-01-25) - BricsCoin Core P2P Update
-- ✅ BricsCoin Core v2.1 with P2P network sync
-- ✅ Secure client-side transaction signing in desktop wallet
-- ✅ Network tab showing peers and sync status
-- ✅ Configurable server URL for custom nodes
-- ✅ GitHub repository structure prepared
-
-### v2.2.0 (2026-01-25) - Wallet Refresh Fix
-- ✅ Fixed wallet balance refresh bug
-- ✅ Added loading state indicator
-- ✅ Added auto-refresh every 30 seconds
-
-### v2.1.0 (2026-01-25) - No Fees Release
-- ✅ Removed transaction fees - transfers are FREE
-- ✅ Instant transactions (processed immediately)
-
-### v2.0.0 (2026-01-25) - Security Release
-- ✅ Client-side transaction signing
-- ✅ CORS restrictions
-- ✅ Rate limiting
-- ✅ Input validation with Pydantic
-- ✅ Security headers middleware
-- ✅ IP blacklisting
-- ✅ Replay attack prevention
-- ✅ Security logging
-- ✅ Deprecated insecure endpoints
-
-### v1.x (Previous)
-- Initial blockchain implementation
-- Web wallet
-- Hardware mining support
-- Desktop wallet (BricsCoin Core)
+## Server Info
+- Hetzner VPS: 5.161.254.163
+- Domain: bricscoin26.org
+- Git: https://codeberg.org/Bricscoin_26/Bricscoin
