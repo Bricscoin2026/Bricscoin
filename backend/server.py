@@ -219,6 +219,7 @@ class NetworkStats(BaseModel):
     total_blocks: int
     current_difficulty: int
     hashrate_estimate: float
+    hashrate_from_shares: float  # Hashrate reale calcolato dalle shares
     pending_transactions: int
     last_block_time: str
     next_halving_block: int
