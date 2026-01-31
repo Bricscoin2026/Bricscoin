@@ -479,8 +479,15 @@ class StratumMiner:
     
     async def handle_authorize(self, msg_id, params):
         self.worker_name = params[0] if params else "worker"
-        self.authorized = True
         
+        # Check if wallet is blocked
+        blocked = await db.blocked_wallets.find_one({"address": self.worker_name})
+        if blocked:
+            logger.warning(f"[{self.miner_id}] BLOCKED wallet tried to connect: {self.worker_name}")
+            self.respond(msg_id, False, [24, "Wallet blocked", None])
+            return
+        
+        self.authorized = True
         self.respond(msg_id, True)
         logger.info(f"[{self.miner_id}] Authorized as {self.worker_name}")
         
