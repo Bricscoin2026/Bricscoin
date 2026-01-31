@@ -1,3 +1,56 @@
+info
+
+code
+Code
+
+preview
+Preview
+
+Deploy
+Deploy
+Robot
+Hey Fabio, Quick input needed :
+La versione su Codeberg è v5.1 con il vecchio algoritmo di decay (il bug). Devi aggiornare il repository.
+
+🔧 Ecco cosa fare sul server:
+1. Aggiorna il file stratum_server.py su Codeberg
+Vai su: https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/backend/stratum_server.py
+
+Clicca "Edit" (matita) e sostituisci TUTTO il contenuto con la versione v6.1 che ti ho dato prima.
+
+2. Oppure aggiorna direttamente sul server:
+cd /root/Bricscoin
+
+# Modifica il file
+nano backend/stratum_server.py
+Cancella tutto (Ctrl+K ripetutamente) e incolla il nuovo codice v6.1.
+
+Poi:
+
+# Copia nel container
+docker cp backend/stratum_server.py bricscoin-node:/app/backend/stratum_server.py
+
+# Riavvia
+docker compose restart bricscoin-node
+
+# Verifica i log
+docker compose logs -f bricscoin-node
+Vuoi che ti fornisca il file completo in un formato più comodo da copiare?
+
+Jan 31, 10:33 PM
+
+Copy
+dovè la versione v6.1
+
+Jan 31, 10:36 PM
+
+Copy
+Robot
+Hey Fabio, Quick input needed :
+Ask Question
+Agent will continue working after your reply
+Eccola! Copia tutto questo:
+
 """
 BricsCoin Stratum Mining Server v6.1
 ✅ Vardiff automatico
@@ -92,24 +145,68 @@ def get_mining_reward(height: int) -> int:
 
 # ================= NETWORK DIFFICULTY =================
 async def get_network_difficulty() -> int:
+    """
+    Calcola la difficoltà per il PROSSIMO blocco.
+    
+    Bitcoin-style adjustment:
+    - Ogni 10 blocchi (o 2016 dopo 2016 blocchi), ricalcola la difficoltà
+    - Se i blocchi sono troppo veloci → aumenta difficoltà
+    - Se i blocchi sono troppo lenti → diminuisce difficoltà
+    - Limiti: max 4x aumento, min 0.25x diminuzione per adjustment
+    """
     blocks_count = await db.blocks.count_documents({})
-    if blocks_count == 0: return INITIAL_DIFFICULTY
-    last_block = await db.blocks.find_one({}, {"_id":0}, sort=[("index",-1)])
-    if not last_block: return INITIAL_DIFFICULTY
-    diff = last_block.get("difficulty", INITIAL_DIFFICULTY)
-    try:
-        last_time = datetime.fromisoformat(last_block["timestamp"].replace("Z","+00:00"))
-    except: last_time = datetime.now(timezone.utc)
-    elapsed = (datetime.now(timezone.utc) - last_time).total_seconds()
-    if elapsed <= TARGET_BLOCK_TIME: return diff
-    decay = 0.5 ** (elapsed / TARGET_BLOCK_TIME - 1)
-    return max(1, int(diff * decay))
+    
+    if blocks_count == 0:
+        return INITIAL_DIFFICULTY
+    
+    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+    if not last_block:
+        return INITIAL_DIFFICULTY
+    
+    current_difficulty = max(1, last_block.get("difficulty", INITIAL_DIFFICULTY))
+    current_index = last_block.get("index", 0)
+    
+    # Intervallo di adjustment: 10 blocchi all'inizio, poi 2016
+    adjustment_interval = 10 if blocks_count < 2016 else 2016
+    
+    # Calcola solo ai blocchi di adjustment
+    if current_index > 0 and current_index % adjustment_interval == 0:
+        last_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "index": 1}).sort("index", -1).limit(adjustment_interval + 1).to_list(adjustment_interval + 1)
+        
+        if len(last_blocks) >= 2:
+            last_blocks.sort(key=lambda x: x.get("index", 0))
+            
+            try:
+                first_time = datetime.fromisoformat(last_blocks[0]["timestamp"].replace("Z", "+00:00"))
+                last_time = datetime.fromisoformat(last_blocks[-1]["timestamp"].replace("Z", "+00:00"))
+                actual_time = (last_time - first_time).total_seconds()
+            except:
+                actual_time = TARGET_BLOCK_TIME * len(last_blocks)
+            
+            if actual_time <= 0:
+                actual_time = 1
+            
+            expected_time = TARGET_BLOCK_TIME * (len(last_blocks) - 1)
+            ratio = expected_time / actual_time
+            ratio = max(0.25, min(4.0, ratio))
+            
+            new_difficulty = max(1, int(current_difficulty * ratio))
+            
+            avg_block_time = actual_time / max(1, len(last_blocks) - 1)
+            logger.info(
+                "⚙️ DIFFICULTY ADJUSTMENT @ block %d: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
+                current_index, current_difficulty, avg_block_time, TARGET_BLOCK_TIME, ratio, new_difficulty
+            )
+            
+            return new_difficulty
+    
+    return current_difficulty
 
 # ================= COINBASE =================
 def create_coinbase_tx(height:int, reward:int, miner_addr:str, extranonce1:str, extranonce2_size:int) -> tuple:
     version = struct.pack('<I',1)
     input_count = var_int(1)
-    prev_tx_hash = b'\x00'*32
+    prev_tx_hash = b''*32
     prev_out_index = struct.pack('<I',0xFFFFFFFF)
 
     # Height script
