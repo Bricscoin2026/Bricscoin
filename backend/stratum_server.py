@@ -624,7 +624,10 @@ class StratumMiner:
         self.extranonce1 = format(extranonce_counter, '08x')
         self.extranonce2_size = 4
         
-        self.difficulty = 0.001  # Low difficulty for testing
+        # Share difficulty per questo miner
+        # Bitaxe/NerdMiner tipicamente usano difficoltà basse (0.001-1)
+        # Ma per calcolare l'hashrate reale, usiamo la difficoltà che il miner richiede
+        self.difficulty = 0.001  # Default, può essere aggiornato via mining.suggest_difficulty
         self.shares = 0
         self.blocks = 0
         
