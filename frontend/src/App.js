@@ -11,6 +11,7 @@ import TransactionDetail from "./pages/TransactionDetail";
 import Downloads from "./pages/Downloads";
 import RunNode from "./pages/RunNode";
 import About from "./pages/About";
+import Pools from "./pages/Pools";
 import "./App.css";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
             <Route path="downloads" element={<Downloads />} />
             <Route path="node" element={<RunNode />} />
             <Route path="about" element={<About />} />
+            <Route path="pools" element={<Pools />} />
           </Route>
         </Routes>
       </BrowserRouter>
