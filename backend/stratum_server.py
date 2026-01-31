@@ -105,7 +105,14 @@ async def get_network_difficulty() -> int:
             try:
                 first_time = datetime.fromisoformat(first_block["timestamp"].replace("Z", "+00:00"))
                 last_time = datetime.fromisoformat(last_block_data["timestamp"].replace("Z", "+00:00"))
-                actual_time = (last_time - first_time).total_seconds()
+                # CLAMPING: calcola tempo reale con limite max per blocco
+                actual_time = 0
+                for i in range(len(last_blocks) - 1):
+                    t1 = datetime.fromisoformat(last_blocks[i]["timestamp"].replace("Z", "+00:00"))
+                    t2 = datetime.fromisoformat(last_blocks[i+1]["timestamp"].replace("Z", "+00:00"))
+                    block_time = (t1 - t2).total_seconds()
+                    # Limita ogni intervallo a max TARGET_BLOCK_TIME
+                    actual_time += min(block_time, TARGET_BLOCK_TIME)
             except (ValueError, KeyError):
                 actual_time = TARGET_BLOCK_TIME * adjustment_interval
             if actual_time <= 0:
