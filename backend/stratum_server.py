@@ -1110,6 +1110,20 @@ class StratumServer:
         if template:
             await self.broadcast_personalized_jobs(template, clean_jobs=True)
 
+
+async def cleanup_old_shares():
+    """Pulisce le shares più vecchie di 1 ora per non riempire il database"""
+    while True:
+        try:
+            one_hour_ago = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            result = await db.miner_shares.delete_many({"timestamp": {"$lt": one_hour_ago}})
+            if result.deleted_count > 0:
+                logger.info(f"Pulite {result.deleted_count} shares vecchie")
+        except Exception as e:
+            logger.error(f"Errore pulizia shares: {e}")
+        await asyncio.sleep(300)  # Ogni 5 minuti
+
+
 async def main():
     """Main entry point"""
     server = StratumServer()
