@@ -11,7 +11,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import List, Optional, Dict, Any
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import hashlib
 import json
 import time
@@ -220,6 +220,8 @@ class NetworkStats(BaseModel):
     total_blocks: int
     current_difficulty: int
     hashrate_estimate: float
+    hashrate_from_shares: float
+    hashrate_from_shares: float  # Hashrate reale dalle shares
     pending_transactions: int
     last_block_time: str
     next_halving_block: int
@@ -808,6 +810,29 @@ async def get_network_stats():
     except:
         pass
     
+    # ============ HASHRATE REALE DALLE SHARES ============
+    hashrate_from_shares = 0.0
+    try:
+        five_min_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": five_min_ago}}},
+            {"$group": {
+                "_id": None,
+                "total_shares": {"$sum": 1},
+                "weighted_difficulty": {"$sum": "$share_difficulty"}
+            }}
+        ]
+        result = await db.miner_shares.aggregate(pipeline).to_list(1)
+        if result and len(result) > 0:
+            total_shares = result[0].get("total_shares", 0)
+            weighted_difficulty = result[0].get("weighted_difficulty", 0)
+            if total_shares > 0 and weighted_difficulty > 0:
+                time_window = 300
+                avg_share_diff = weighted_difficulty / total_shares
+                hashrate_from_shares = (total_shares * avg_share_diff * (2 ** 32)) / time_window
+    except:
+        pass
+    
     return NetworkStats(
         total_supply=MAX_SUPPLY,
         circulating_supply=circulating,
@@ -815,6 +840,7 @@ async def get_network_stats():
         total_blocks=blocks_count,
         current_difficulty=current_difficulty,
         hashrate_estimate=hashrate_estimate,
+        hashrate_from_shares=hashrate_from_shares,
         pending_transactions=pending_count,
         last_block_time=last_block_time,
         next_halving_block=next_halving,
