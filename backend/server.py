@@ -17,7 +17,6 @@ import json
 import time
 import secrets
 from ecdsa import SigningKey, VerifyingKey, SECP256k1, BadSignatureError
-from ecdsa.util import sigdecode_der
 import io
 import qrcode
 import base64
@@ -81,7 +80,7 @@ INITIAL_REWARD = 50
 HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
-INITIAL_DIFFICULTY = 1000000  # Bitcoin-style difficulty (higher = harder)
+INITIAL_DIFFICULTY = 1  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 TRANSACTION_FEE = 0.05  # Fee per transaction in BRICS
 
@@ -220,8 +219,7 @@ class NetworkStats(BaseModel):
     total_blocks: int
     current_difficulty: int
     hashrate_estimate: float
-    hashrate_from_shares: float
-    hashrate_from_shares: float  # Hashrate reale dalle shares
+    hashrate_from_shares: float  # Hashrate reale calcolato dalle shares
     pending_transactions: int
     last_block_time: str
     next_halving_block: int
@@ -286,107 +284,81 @@ def check_difficulty(hash_value: str, difficulty: int) -> bool:
     return hash_int <= target
 
 async def get_current_difficulty() -> int:
-    """Calcola la difficoltà corrente per il **prossimo blocco**.
-
-    Logica:
-    - Base: aggiustamento Bitcoin-style sui tempi medi degli ultimi N blocchi
-      (N = 10 fino a 2016 blocchi, poi 2016).
-    - Time-decay: se l'ultimo blocco è più vecchio di TARGET_BLOCK_TIME,
-      la difficoltà viene ridotta in modo esponenziale per evitare blocchi infiniti.
+    """
+    Calcola la difficoltà per il PROSSIMO blocco.
+    
+    Bitcoin-style adjustment:
+    - Ogni 10 blocchi (o 2016 dopo 2016 blocchi), ricalcola la difficoltà
+    - Se i blocchi sono troppo veloci → aumenta difficoltà
+    - Se i blocchi sono troppo lenti → diminuisce difficoltà
+    - Limiti: max 4x aumento, min 0.25x diminuzione per adjustment
+    - NO decay temporale (causa il bug difficulty=1)
     """
     blocks_count = await db.blocks.count_documents({})
-
-    # Catena molto giovane:
-    # - per il blocco 0 (genesis) usiamo una difficoltà fissa "genesis difficulty"
-    # - dal blocco 1 in poi permettiamo già al time-decay di agire se serve
+    
+    # Primo blocco: difficoltà iniziale
     if blocks_count == 0:
         return INITIAL_DIFFICULTY
-
-    if blocks_count == 1:
-        # Catena appena nata, primo blocco dopo il genesis: applichiamo già il decay
-        last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
-        if not last_block:
-            return INITIAL_DIFFICULTY
-        try:
-            last_time = datetime.fromisoformat(last_block["timestamp"].replace("Z", "+00:00"))
-        except (ValueError, KeyError):
-            last_time = datetime.now(timezone.utc)
-        now = datetime.now(timezone.utc)
-        elapsed = (now - last_time).total_seconds()
-        if elapsed <= TARGET_BLOCK_TIME:
-            return INITIAL_DIFFICULTY
-        delay_units = elapsed / TARGET_BLOCK_TIME
-        decay_factor = 0.5 ** (delay_units - 1)
-        new_difficulty = int(INITIAL_DIFFICULTY * decay_factor)
-        if new_difficulty < 1:
-            new_difficulty = 1
-        logging.info(
-            "⚙️ API difficulty (genesis decay): base=%s, elapsed=%.1fs, decay_factor=%.4f, final=%s",
-            INITIAL_DIFFICULTY,
-            elapsed,
-            decay_factor,
-            new_difficulty,
-        )
-        return new_difficulty
-
+    
+    # Prendi l'ultimo blocco
     last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
     if not last_block:
         return INITIAL_DIFFICULTY
-
-    current_difficulty = last_block.get("difficulty", INITIAL_DIFFICULTY)
-
-    # ================= BASE DIFFICULTY (media ultimi N blocchi) =================
-    adjustment_interval = 10 if blocks_count < DIFFICULTY_ADJUSTMENT_INTERVAL else DIFFICULTY_ADJUSTMENT_INTERVAL
-
-    if blocks_count % adjustment_interval == 0:
-        last_blocks = await db.blocks.find({}, {"_id": 0}).sort("index", -1).limit(adjustment_interval).to_list(adjustment_interval)
-        if len(last_blocks) == adjustment_interval:
-            first_block = last_blocks[-1]
-            last_block_data = last_blocks[0]
+    
+    # Difficoltà corrente dall'ultimo blocco
+    current_difficulty = max(1, last_block.get("difficulty", INITIAL_DIFFICULTY))
+    current_index = last_block.get("index", 0)
+    
+    # Intervallo di adjustment: 10 blocchi all'inizio, poi 2016
+    adjustment_interval = 10 if blocks_count < 2016 else 2016
+    
+    # Calcola solo ai blocchi di adjustment (es: 10, 20, 30... o 2016, 4032...)
+    if current_index > 0 and current_index % adjustment_interval == 0:
+        # Prendi gli ultimi N blocchi per calcolare il tempo medio
+        last_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}).sort("index", -1).limit(adjustment_interval + 1).to_list(adjustment_interval + 1)
+        
+        if len(last_blocks) >= 2:
+            # Ordina per index crescente
+            last_blocks.sort(key=lambda x: x.get("index", 0))
+            
             try:
-                first_time = datetime.fromisoformat(first_block["timestamp"].replace("Z", "+00:00"))
-                last_time = datetime.fromisoformat(last_block_data["timestamp"].replace("Z", "+00:00"))
+                first_time = datetime.fromisoformat(last_blocks[0]["timestamp"].replace("Z", "+00:00"))
+                last_time = datetime.fromisoformat(last_blocks[-1]["timestamp"].replace("Z", "+00:00"))
                 actual_time = (last_time - first_time).total_seconds()
             except (ValueError, KeyError):
-                actual_time = TARGET_BLOCK_TIME * adjustment_interval
+                actual_time = TARGET_BLOCK_TIME * len(last_blocks)
+            
             if actual_time <= 0:
                 actual_time = 1
-            expected_time = TARGET_BLOCK_TIME * adjustment_interval
+            
+            # Tempo previsto per N blocchi
+            expected_time = TARGET_BLOCK_TIME * (len(last_blocks) - 1)
+            
+            # Ratio: se actual < expected, blocchi veloci → aumenta diff
+            # se actual > expected, blocchi lenti → diminuisce diff
             ratio = expected_time / actual_time
+            
+            # Limiti Bitcoin: max 4x, min 0.25x
             ratio = max(0.25, min(4.0, ratio))
-            base_difficulty = max(1, int(current_difficulty * ratio))
-        else:
-            base_difficulty = current_difficulty
-    else:
-        base_difficulty = current_difficulty
-
-    # ================= TIME DECAY (catena ferma) =================
-    try:
-        last_time = datetime.fromisoformat(last_block["timestamp"].replace("Z", "+00:00"))
-    except (ValueError, KeyError):
-        last_time = datetime.now(timezone.utc)
-    now = datetime.now(timezone.utc)
-    elapsed = (now - last_time).total_seconds()
-
-    if elapsed <= TARGET_BLOCK_TIME:
-        return base_difficulty
-
-    delay_units = elapsed / TARGET_BLOCK_TIME
-    decay_factor = 0.5 ** (delay_units - 1)
-    new_difficulty = int(base_difficulty * decay_factor)
-    if new_difficulty < 1:
-        new_difficulty = 1
-
-    logging.info(
-        "⚙️ API difficulty: base=%s, elapsed=%.1fs, decay_factor=%.4f, final=%s",
-        base_difficulty,
-        elapsed,
-        decay_factor,
-        new_difficulty,
-    )
-
-    return new_difficulty
-
+            
+            new_difficulty = max(1, int(current_difficulty * ratio))
+            
+            avg_block_time = actual_time / max(1, len(last_blocks) - 1)
+            
+            logging.info(
+                "⚙️ DIFFICULTY ADJUSTMENT @ block %d: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
+                current_index,
+                current_difficulty,
+                avg_block_time,
+                TARGET_BLOCK_TIME,
+                ratio,
+                new_difficulty
+            )
+            
+            return new_difficulty
+    
+    # Non siamo a un blocco di adjustment: mantieni la difficoltà corrente
+    return current_difficulty
 
 async def get_circulating_supply() -> float:
     """Calculate total circulating supply (premine + mining rewards)"""
@@ -678,49 +650,12 @@ def sign_transaction(private_key_hex: str, transaction_data: str) -> str:
     return signature.hex()
 
 def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: str) -> bool:
-    """Verifica della firma della transazione - tenta più metodi"""
+    """Verify transaction signature"""
     try:
         public_key = VerifyingKey.from_string(bytes.fromhex(public_key_hex), curve=SECP256k1)
-        sig_bytes = bytes.fromhex(signature_hex)
-        
-        # Metodo 1: verify_digest con DER (frontend firma hash direttamente)
-        try:
-            msg_hash = hashlib.sha256(transaction_data.encode()).digest()
-            if public_key.verify_digest(sig_bytes, msg_hash, sigdecode=sigdecode_der):
-                logging.info("Firma OK (metodo 1: verify_digest + DER)")
-                return True
-        except: pass
-        
-        # Metodo 2: verify con DER
-        try:
-            if public_key.verify(sig_bytes, transaction_data.encode(), sigdecode=sigdecode_der):
-                logging.info("Firma OK (metodo 2: verify + DER)")
-                return True
-        except: pass
-        
-        # Metodo 3: doppio hash
-        try:
-            hex_hash = hashlib.sha256(transaction_data.encode()).hexdigest()
-            msg_hash2 = hashlib.sha256(hex_hash.encode()).digest()
-            if public_key.verify_digest(sig_bytes, msg_hash2, sigdecode=sigdecode_der):
-                logging.info("Firma OK (metodo 3: doppio hash)")
-                return True
-        except: pass
-        
-        # Metodo 4: firma raw
-        try:
-            msg_hash = hashlib.sha256(transaction_data.encode()).digest()
-            if public_key.verify_digest(sig_bytes, msg_hash):
-                logging.info("Firma OK (metodo 4: raw)")
-                return True
-        except: pass
-        
-        logging.error("Tutti i metodi di verifica della firma sono falliti")
+        return public_key.verify(bytes.fromhex(signature_hex), transaction_data.encode())
+    except BadSignatureError:
         return False
-    except Exception as e:
-        logging.error(f"Errore firma: {e}")
-        return False
-
 
 def generate_address_from_public_key(public_key_hex: str) -> str:
     """Generate BRICS address from public key - used to verify sender owns the address"""
@@ -746,6 +681,52 @@ async def get_balance(address: str) -> float:
 
 # ==================== API ENDPOINTS ====================
 
+
+# Mining / Stratum endpoints
+
+@api_router.get("/mining/miners")
+async def get_active_miners():
+    """Return active miners based on database state.
+
+    IMPORTANTO:
+    - Non legge più lo stato in-memory del processo Stratum (che vive in un
+      container/processo separato), ma utilizza la collezione `miners` su MongoDB.
+    - I miner sono considerati *online* se:
+      - non sono marcati come offline, e
+      - l'ultimo `last_seen` è recente (es. ultimi 10 minuti).
+    """
+    # Finestra di attività (in secondi) oltre la quale un miner è considerato offline
+    activity_window_seconds = 600  # 10 minuti
+
+    # Recupera tutti i miner salvati in DB (la quantità è comunque molto piccola)
+    docs = await db.miners.find({}, {"_id": 0}).to_list(1000)
+
+    now = datetime.now(timezone.utc)
+    active_miners = []
+
+    for doc in docs:
+        last_seen_str = doc.get("last_seen")
+        online_flag = doc.get("online", True)
+
+        # Se manca last_seen o è marcato esplicitamente offline, salta
+        if not last_seen_str or not online_flag:
+            continue
+
+        try:
+            last_seen = datetime.fromisoformat(last_seen_str.replace("Z", "+00:00"))
+        except ValueError:
+            # Formato non valido: meglio saltare questo record
+            continue
+
+        elapsed = (now - last_seen).total_seconds()
+        if elapsed > activity_window_seconds:
+            # Troppo vecchio, consideralo offline
+            continue
+
+        active_miners.append(doc)
+
+    return {"miners": active_miners, "count": len(active_miners)}
+
 @api_router.get("/")
 async def root():
     return {"message": "BricsCoin API", "version": "1.0.0"}
@@ -768,52 +749,49 @@ async def get_network_stats():
     halvings_done = current_height // HALVING_INTERVAL
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
-    # Estimate hashrate (Bitcoin-style: hashrate = difficulty * 2^32 / block_time)
-    # Calcola l'hashrate REALE basato sui tempi effettivi dei blocchi
-    real_hashrate = 0
-    try:
-        # Prendi gli ultimi 10 blocchi per calcolare la media dei tempi
-        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1}).sort("index", -1).limit(10).to_list(10)
-        if len(recent_blocks) >= 2:
-            from datetime import datetime
-            times = []
-            for b in recent_blocks:
-                t = datetime.fromisoformat(b['timestamp'].replace('Z', '+00:00'))
-                times.append(t)
-            
-            # Calcola il tempo medio tra i blocchi
-            total_seconds = (times[0] - times[-1]).total_seconds()
-            avg_block_time = total_seconds / (len(times) - 1) if len(times) > 1 else TARGET_BLOCK_TIME
-            
-            # Hashrate = difficoltà * 2^32 / tempo_medio_effettivo
-            if avg_block_time > 0:
-                real_hashrate = (current_difficulty * (2 ** 32)) / avg_block_time
-    except:
-        pass
-    
-    # Hashrate REALE - Esclude gap > 5 minuti (miner spenti)
+    # Calculate REAL hashrate based on actual block times (last 20 blocks)
     hashrate_estimate = 0.0
-    try:
-        recent = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(20).to_list(20)
-        if len(recent) >= 2:
-            intervals = []
-            for i in range(len(recent) - 1):
-                t1 = datetime.fromisoformat(recent[i]['timestamp'].replace('Z', '+00:00'))
-                t2 = datetime.fromisoformat(recent[i+1]['timestamp'].replace('Z', '+00:00'))
-                diff = (t1 - t2).total_seconds()
-                if 0 < diff <= 300:
-                    intervals.append(diff)
-            if intervals:
-                avg_time = sum(intervals) / len(intervals)
-                avg_diff = sum(b.get("difficulty", 1) for b in recent) / len(recent)
-                hashrate_estimate = (avg_diff * (2 ** 32)) / avg_time
-    except:
-        pass
+    if blocks_count >= 2:
+        # Get last 20 blocks (or all if less than 20)
+        num_blocks = min(20, blocks_count)
+        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(num_blocks).to_list(num_blocks)
+        
+        if len(recent_blocks) >= 2:
+            try:
+                # Calculate average time between blocks
+                first_block = recent_blocks[-1]  # Oldest
+                last_block_data = recent_blocks[0]  # Newest
+                
+                first_time = datetime.fromisoformat(first_block["timestamp"].replace("Z", "+00:00"))
+                last_time = datetime.fromisoformat(last_block_data["timestamp"].replace("Z", "+00:00"))
+                
+                total_time = (last_time - first_time).total_seconds()
+                num_intervals = len(recent_blocks) - 1
+                
+                if total_time > 0 and num_intervals > 0:
+                    avg_block_time = total_time / num_intervals
+                    # Bitcoin formula: hashrate = difficulty * 2^32 / actual_block_time
+                    avg_difficulty = sum(b.get("difficulty", 1) for b in recent_blocks) / len(recent_blocks)
+                    hashrate_estimate = (avg_difficulty * (2 ** 32)) / avg_block_time
+                else:
+                    # Fallback to theoretical
+                    hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+            except (ValueError, KeyError):
+                # Fallback to theoretical
+                hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+        else:
+            hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+    else:
+        hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
     
     # ============ HASHRATE REALE DALLE SHARES ============
+    # Calcola l'hashrate basandosi sulle shares ricevute negli ultimi 5 minuti
+    # Formula: hashrate = (num_shares * share_difficulty * 2^32) / time_window
     hashrate_from_shares = 0.0
     try:
         five_min_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+        
+        # Conta le shares degli ultimi 5 minuti raggruppate per difficoltà
         pipeline = [
             {"$match": {"timestamp": {"$gte": five_min_ago}}},
             {"$group": {
@@ -822,15 +800,22 @@ async def get_network_stats():
                 "weighted_difficulty": {"$sum": "$share_difficulty"}
             }}
         ]
+        
         result = await db.miner_shares.aggregate(pipeline).to_list(1)
+        
         if result and len(result) > 0:
             total_shares = result[0].get("total_shares", 0)
             weighted_difficulty = result[0].get("weighted_difficulty", 0)
+            
             if total_shares > 0 and weighted_difficulty > 0:
+                # Tempo finestra in secondi (5 minuti)
                 time_window = 300
+                # Difficoltà media per share
                 avg_share_diff = weighted_difficulty / total_shares
+                # Hashrate = shares * difficulty * 2^32 / tempo
                 hashrate_from_shares = (total_shares * avg_share_diff * (2 ** 32)) / time_window
-    except:
+    except Exception as e:
+        # Se la collezione non esiste ancora o c'è un errore, ignora
         pass
     
     return NetworkStats(
@@ -1030,10 +1015,7 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
         raise HTTPException(status_code=400, detail="Public key does not match sender address")
     
     # Create transaction data for verification (same format as client-side signing)
-    amount_str = str(tx_request.amount)
-    if amount_str.endswith('.0'):
-        amount_str = amount_str[:-2]
-    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{amount_str}{tx_request.timestamp}"
+    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{tx_request.timestamp}"
     
     # CRITICAL: Verify the signature
     try:
@@ -1177,7 +1159,7 @@ async def get_mining_template():
         raise HTTPException(status_code=500, detail="No genesis block")
     
     # Get pending transactions (max 100 per block)
-    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(10).to_list(10)
+    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(100).to_list(100)
     
     new_index = last_block['index'] + 1
     difficulty = await get_current_difficulty()
@@ -1235,7 +1217,7 @@ async def submit_mined_block(submission: MiningSubmit):
         raise HTTPException(status_code=409, detail="Block already mined")
     
     # Get pending transactions
-    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(10).to_list(10)
+    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(100).to_list(100)
     
     # Create the new block
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -1658,17 +1640,6 @@ security_handler.setLevel(logging.WARNING)
 security_handler.setFormatter(logging.Formatter('%(asctime)s - SECURITY - %(levelname)s - %(message)s'))
 security_logger.addHandler(security_handler)
 
-
-@app.get("/api/miners/stats")
-async def get_miners_stats():
-    """Get mining stats including active miners count"""
-    try:
-        with open('/tmp/miners_count.txt', 'r') as f:
-            count = int(f.read().strip())
-    except:
-        count = 0
-    return {"active_miners": count}
-
 @app.on_event("startup")
 async def startup_event():
     await create_genesis_block()
@@ -1684,35 +1655,3 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
-
-# Endpoint per miner connessi (comunicazione con stratum)
-connected_miners_count = 0
-
-
-@api_router.get("/miners/stats")
-async def get_miners_stats():
-    """Get connected miners statistics from stratum"""
-    try:
-        import aiohttp
-        async with aiohttp.ClientSession() as session:
-            async with session.get("http://localhost:3334/stats", timeout=aiohttp.ClientTimeout(total=2)) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-    except:
-        pass
-
-@api_router.get("/miners/count")
-async def get_miners_count():
-    try:
-        with open('/tmp/miners_count.txt', 'r') as f:
-            return {"connected_miners": int(f.read().strip())}
-    except:
-        return {"connected_miners": 0}
-
-@api_router.get("/miners/count")  
-async def get_connected_miners():
-    try:
-        with open('/tmp/miners_count.txt', 'r') as f:
-            return {"connected_miners": int(f.read().strip())}
-    except:
-        return {"connected_miners": 0}
