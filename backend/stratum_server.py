@@ -625,10 +625,10 @@ class StratumMiner:
         self.extranonce2_size = 4
         
         # Share difficulty per questo miner
-        # Per ASIC miners (Bitaxe ~1TH/s), usiamo difficoltà più alta per ridurre le shares
-        # Difficulty 1000 = circa 1 share ogni ~4.3 secondi per 1 TH/s
-        # Difficulty 10000 = circa 1 share ogni ~43 secondi per 1 TH/s
-        self.difficulty = 1000  # Difficoltà base, può essere aggiornata via mining.suggest_difficulty
+        # Default basso per compatibilità con tutti i miner (NerdMiner, Bitaxe)
+        # I miner ASIC suggeriscono la loro difficoltà via mining.suggest_difficulty
+        # Il valore sarà usato per calcolare l'hashrate reale
+        self.difficulty = 512  # Default bilanciato: ~1 share/8sec per 1 TH/s
         self.shares = 0
         self.blocks = 0
         
