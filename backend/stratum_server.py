@@ -1127,6 +1127,8 @@ async def cleanup_old_shares():
 async def main():
     """Main entry point"""
     server = StratumServer()
+    # Avvia task di pulizia shares
+    asyncio.create_task(cleanup_old_shares())
     await server.start()
 
 if __name__ == "__main__":
