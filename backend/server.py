@@ -773,8 +773,40 @@ async def get_network_stats():
     halvings_done = current_height // HALVING_INTERVAL
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
-    # Estimate hashrate (Bitcoin-style: hashrate = difficulty * 2^32 / block_time)
-    hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+    # Calculate REAL hashrate based on actual block times (last 20 blocks)
+    hashrate_estimate = 0.0
+    if blocks_count >= 2:
+        # Get last 20 blocks (or all if less than 20)
+        num_blocks = min(20, blocks_count)
+        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(num_blocks).to_list(num_blocks)
+        
+        if len(recent_blocks) >= 2:
+            try:
+                # Calculate average time between blocks
+                first_block = recent_blocks[-1]  # Oldest
+                last_block_data = recent_blocks[0]  # Newest
+                
+                first_time = datetime.fromisoformat(first_block["timestamp"].replace("Z", "+00:00"))
+                last_time = datetime.fromisoformat(last_block_data["timestamp"].replace("Z", "+00:00"))
+                
+                total_time = (last_time - first_time).total_seconds()
+                num_intervals = len(recent_blocks) - 1
+                
+                if total_time > 0 and num_intervals > 0:
+                    avg_block_time = total_time / num_intervals
+                    # Bitcoin formula: hashrate = difficulty * 2^32 / actual_block_time
+                    avg_difficulty = sum(b.get("difficulty", 1) for b in recent_blocks) / len(recent_blocks)
+                    hashrate_estimate = (avg_difficulty * (2 ** 32)) / avg_block_time
+                else:
+                    # Fallback to theoretical
+                    hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+            except (ValueError, KeyError):
+                # Fallback to theoretical
+                hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+        else:
+            hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+    else:
+        hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
     
     return NetworkStats(
         total_supply=MAX_SUPPLY,
