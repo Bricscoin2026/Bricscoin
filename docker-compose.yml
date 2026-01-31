@@ -1,11 +1,9 @@
-# BricsCoin Node - Docker Compose
+# BricsCoin Node - Docker Compose (aggiornato)
 # Run your own BricsCoin node and join the network!
-
-version: '3.8'
 
 services:
   # MongoDB database
-  mongo:
+  bricscoin-db:
     image: mongo:7
     container_name: bricscoin-db
     volumes:
@@ -17,20 +15,17 @@ services:
     build: .
     container_name: bricscoin-node
     ports:
-      - "8001:8001"
-      - "3333:3333"
+      - "8001:8001"   # Node API
+      - "3333:3333"   # Stratum mining port
     environment:
-      - MONGO_URL=mongodb://mongo:27017
+      - MONGO_URL=mongodb://bricscoin-db:27017
       - DB_NAME=bricscoin
-      # Generate a unique node ID or leave empty for auto-generation
       - NODE_ID=${NODE_ID:-}
-      # Your node's public URL (required for P2P)
       - NODE_URL=${NODE_URL:-}
-      # Comma-separated list of seed nodes to connect to
       - SEED_NODES=${SEED_NODES:-https://brics-chain.preview.emergentagent.com}
       - CORS_ORIGINS=*
     depends_on:
-      - mongo
+      - bricscoin-db
     restart: unless-stopped
 
   # Optional: BricsCoin Frontend (Web UI)
