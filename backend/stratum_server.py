@@ -814,6 +814,19 @@ class StratumMiner:
                     },
                     upsert=True,
                 )
+                
+                # Salva la share per il calcolo hashrate reale
+                # La difficoltà della share è quella impostata per questo miner
+                share_difficulty = self.difficulty
+                await db.miner_shares.insert_one({
+                    "miner_id": self.miner_id,
+                    "worker": self.worker_name,
+                    "timestamp": now,
+                    "share_difficulty": share_difficulty,
+                    "job_id": job_id,
+                    "is_block": is_block
+                })
+                
             except Exception as e:
                 logger.error(f"Failed to update miner shares in DB: {e}")
             
