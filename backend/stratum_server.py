@@ -300,14 +300,37 @@ class StratumMiner:
         if current_job: await self.send_job(current_job)
 
     async def handle_authorize(self,msg_id,params):
-        self.worker_name=params[0] if params else "worker"
-        blocked = await db.blocked_wallets.find_one({"address":self.worker_name})
-        if blocked: 
-            self.respond(msg_id,False,[24,"Wallet blocked",None])
+        self.worker_name = params[0] if params else "worker"
+        blocked = await db.blocked_wallets.find_one({"address": self.worker_name})
+        if blocked:
+            self.respond(msg_id, False, [24, "Wallet blocked", None])
             return
-        self.authorized=True
-        self.respond(msg_id,True)
-        miners[self.miner_id]={"worker":self.worker_name,"connected_at":datetime.now(timezone.utc).isoformat(),"shares":0,"blocks":0,"extranonce1":self.extranonce1}
+        self.authorized = True
+        self.respond(msg_id, True)
+        # Stato in‑memory
+        miners[self.miner_id] = {
+            "worker": self.worker_name,
+            "connected_at": datetime.now(timezone.utc).isoformat(),
+            "shares": 0,
+            "blocks": 0,
+            "extranonce1": self.extranonce1
+        }
+        # Stato persistente per /api/mining/miners
+        now_iso = datetime.now(timezone.utc).isoformat()
+        await db.miners.update_one(
+            {"miner_id": self.miner_id},
+            {"$set": {
+                "miner_id": self.miner_id,
+                "worker": self.worker_name,
+                "connected_at": now_iso,
+                "last_seen": now_iso,
+                "online": True,
+                "shares": 0,
+                "blocks": 0,
+                "extranonce1": self.extranonce1
+            }},
+            upsert=True
+        )
 
     async def handle_submit(self,msg_id,params):
         if not self.authorized:
@@ -323,11 +346,28 @@ class StratumMiner:
             net_diff = await get_network_difficulty()
             is_share,is_block,block_hash = await verify_share(job,self.extranonce1,extranonce2,ntime,nonce,net_diff)
             self.respond(msg_id,True)
-            self.shares+=1
-            if self.miner_id in miners: miners[self.miner_id]['shares']+=1
-            await db.miner_shares.insert_one({"miner_id":self.miner_id,"worker":self.worker_name,"timestamp":datetime.now(timezone.utc).isoformat(),"share_difficulty":self.difficulty,"job_id":job_id,"is_block":is_block})
-            if is_block: await self.save_block(job,nonce,block_hash)
-        except: self.respond(msg_id,True)
+            self.shares += 1
+            if self.miner_id in miners:
+                miners[self.miner_id]['shares'] += 1
+            now_iso = datetime.now(timezone.utc).isoformat()
+            await db.miner_shares.insert_one({
+                "miner_id": self.miner_id,
+                "worker": self.worker_name,
+                "timestamp": now_iso,
+                "share_difficulty": self.difficulty,
+                "job_id": job_id,
+                "is_block": is_block
+            })
+            # Aggiorna last_seen e shares nel DB per /api/mining/miners
+            await db.miners.update_one(
+                {"miner_id": self.miner_id},
+                {"$set": {"last_seen": now_iso, "online": True}, "$inc": {"shares": 1}},
+                upsert=True
+            )
+            if is_block:
+                await self.save_block(job, nonce, block_hash)
+        except:
+            self.respond(msg_id, True)
 
     async def save_block(self,job,nonce,block_hash):
         template = job['template']
@@ -384,12 +424,27 @@ class StratumServer:
                     if line:
                         try: await miner.handle_message(json.loads(line.decode()))
                         except: pass
-        except: pass
+        except:
+            pass
         finally:
-            if miner in self.miners: self.miners.remove(miner)
-            miners.pop(miner.miner_id,None)
-            try: writer.close(); await writer.wait_closed()
-            except: pass
+            if miner in self.miners:
+                self.miners.remove(miner)
+            miners.pop(miner.miner_id, None)
+            # Marca il miner come offline in DB
+            try:
+                now_iso = datetime.now(timezone.utc).isoformat()
+                await db.miners.update_one(
+                    {"miner_id": miner.miner_id},
+                    {"$set": {"online": False, "last_seen": now_iso}},
+                    upsert=True
+                )
+            except Exception:
+                pass
+            try:
+                writer.close()
+                await writer.wait_closed()
+            except Exception:
+                pass
             logger.info(f"Connection closed: {miner.miner_id}")
 
     async def job_updater(self):
