@@ -669,8 +669,13 @@ class StratumMiner:
         elif method == 'mining.submit':
             await self.handle_submit(msg_id, params)
         elif method == 'mining.suggest_difficulty':
-            self.difficulty = float(params[0]) if params else 0.001
+            suggested = float(params[0]) if params else 512
+            # Accetta la difficoltà suggerita dal miner (min 1 per evitare spam)
+            self.difficulty = max(1, suggested)
+            logger.info(f"[{self.miner_id}] Difficulty set to {self.difficulty}")
             self.respond(msg_id, True)
+            # Notifica il miner della difficoltà impostata
+            self.notify("mining.set_difficulty", [self.difficulty])
         elif method == 'mining.configure':
             # Handle mining configuration (version rolling, etc.)
             result = {}
