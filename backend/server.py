@@ -809,6 +809,40 @@ async def get_network_stats():
     else:
         hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
     
+    # ============ HASHRATE REALE DALLE SHARES ============
+    # Calcola l'hashrate basandosi sulle shares ricevute negli ultimi 5 minuti
+    # Formula: hashrate = (num_shares * share_difficulty * 2^32) / time_window
+    hashrate_from_shares = 0.0
+    try:
+        five_min_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+        
+        # Conta le shares degli ultimi 5 minuti raggruppate per difficoltà
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": five_min_ago}}},
+            {"$group": {
+                "_id": None,
+                "total_shares": {"$sum": 1},
+                "weighted_difficulty": {"$sum": "$share_difficulty"}
+            }}
+        ]
+        
+        result = await db.miner_shares.aggregate(pipeline).to_list(1)
+        
+        if result and len(result) > 0:
+            total_shares = result[0].get("total_shares", 0)
+            weighted_difficulty = result[0].get("weighted_difficulty", 0)
+            
+            if total_shares > 0 and weighted_difficulty > 0:
+                # Tempo finestra in secondi (5 minuti)
+                time_window = 300
+                # Difficoltà media per share
+                avg_share_diff = weighted_difficulty / total_shares
+                # Hashrate = shares * difficulty * 2^32 / tempo
+                hashrate_from_shares = (total_shares * avg_share_diff * (2 ** 32)) / time_window
+    except Exception as e:
+        # Se la collezione non esiste ancora o c'è un errore, ignora
+        pass
+    
     return NetworkStats(
         total_supply=MAX_SUPPLY,
         circulating_supply=circulating,
@@ -816,6 +850,7 @@ async def get_network_stats():
         total_blocks=blocks_count,
         current_difficulty=current_difficulty,
         hashrate_estimate=hashrate_estimate,
+        hashrate_from_shares=hashrate_from_shares,
         pending_transactions=pending_count,
         last_block_time=last_block_time,
         next_halving_block=next_halving,
