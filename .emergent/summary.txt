@@ -1,4 +1,11 @@
-<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project involves a full-stack application with a web wallet, hardware mining support via Stratum, and a dynamic difficulty adjustment mechanism. The project initially suffered from a stalled blockchain. After a reset, the chain started producing blocks, but new issues arose with the user interface, specifically on the Mining and Downloads pages. The user wants the UI to accurately reflect the blockchain's status, including active miners and network hashrate, and provide downloadable desktop wallet applications. The latest requests were to secure the production website by enabling HTTPS and to improve the hashrate estimation formula to be more realistic.
+<analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project involves a full-stack application with a web wallet, hardware mining support via Stratum, and a dynamic difficulty adjustment mechanism. The core requirements include a Proof of Work (PoW) blockchain, client-side signed transactions, a secure web wallet, downloadable desktop wallets, and a UI that displays real-time network statistics.
+
+Recent user requests included:
+- Implementing a realistic network hashrate calculation.
+- Investigating a discrepancy in wallet balances, which was traced back to mining rewards being sent to old wallet addresses.
+- Creating a community Mining Pools page.
+- Fixing the blockchain, which has stalled and is not producing new blocks.
+- Translating the new Pools page to English.
 
 **PRODUCT REQUIREMENTS:**
 - **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty adjustment and a ~10-minute block time target.
@@ -6,226 +13,184 @@
 - **Mining:** Support for hardware ASIC miners via a Bitcoin-compliant Stratum protocol.
 - **Wallets:** A secure web wallet and downloadable desktop wallets for Windows, macOS, and Linux.
 - **UI Features:**
-    - The mining page must display real-time network statistics, including difficulty, block reward, total blocks, the number of active miners, and an estimated network hashrate.
-    - The downloads page must provide working links to download the desktop wallet applications.
-- **Security:** The production website must be served over HTTPS.
-- **Hashrate Estimation:** The displayed network hashrate should reflect the real-world performance of connected miners, not a theoretical value.
+    - The mining page must display real-time network statistics.
+    - A new Mining Pools page should list community pools.
+- **Security:**
+    - The production website must be served over HTTPS.
+    - A blacklist must prevent lost/old wallets from receiving mining rewards.
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack BricsCoin application (FastAPI backend, React frontend, MongoDB) is running on a Hetzner server managed via Docker. The blockchain is active. HTTPS has been successfully enabled on the production domain () using Nginx and Certbot. The agent guided the user to modify the backend code to provide a more realistic hashrate estimation. This change was applied directly to the running Docker container, and the user has verified the new estimation logic is active and yielding better results.
+A full-stack BricsCoin application (FastAPI backend, React frontend, MongoDB) is running on the user's server. The application features a web wallet, an explorer, and several informational pages. The backend includes a FastAPI server for the API and a separate -based Stratum server for mining. A major refactoring of the Stratum server was just completed to fix a critical bug causing the blockchain to stall. A blacklist for old wallets is in place, and a new Mining Pools page has been created.
 
 **Last working item**:
-- Last item agent was working: Improving the network hashrate estimation formula in . The agent guided the user through multiple attempts to apply the code change on their production server, eventually succeeding by copying the updated file directly into the running Docker container at the correct path (). The new formula calculates hashrate based on the average time of the last 20 blocks, but excludes time gaps longer than 5 minutes to avoid skewed results when miners are offline.
+- Last item agent was working: The agent was debugging a stalled blockchain. No new blocks had been produced for over an hour despite a high hashrate. The agent identified a critical bug in  where share difficulty and network difficulty were being confused, leading to invalid block submissions. A completely rewritten  with corrected validation logic was deployed to fix this.
 - Status: USER VERIFICATION PENDING
 - Agent Testing Done: Y
-- Which testing method agent to use? Manual verification by user via .
-- User Testing Done: Y
+- Which testing method agent to use? Manual testing by user via logs and explorer. The agent and user need to monitor the server to see if a new block (index > 304) is found.
+- User Testing Done: N
 
 **All Pending/In progress Issue list**:
-- Issue 1: Make hashrate calculation change permanent (P0)
-- Issue 2: Network Hashrate on the mining page is still lower than nominal hardware power (P1)
-- Issue 3: Blockchain performance is slower than user expects (P2)
-- Issue 4: Explorer UI block count discrepancy (P3 - On Hold)
+- Issue 1: Blockchain is stalled at block #304 (P0)
+- Issue 2: Difficulty adjustment is not increasing (P1)
+- Issue 3: Pools page UI text is in Italian, user requested English (P2)
+- Issue 4: Merkle Root calculation is incorrect, preventing blocks with transactions from being mined (P0 - Newly Identified)
+- Issue 5: Active Miners feature on UI may not be working correctly (P3)
 
 Issues Detail:
 - Issue 1:
-  - Attempted fixes: The agent successfully updated the  file *inside* the running  container. However, the agent noted this change is not permanent and will be lost if the container is rebuilt.
+  - Attempted fixes: The agent deployed a heavily refactored  that correctly separates the validation logic for pool shares and network blocks. Logs show the new logic is running and accepting shares, but it's not yet confirmed if this will produce a valid block.
   - Next debug checklist:
-    1. Guide the user to  the modified  file on their server.
-    2. Guide the user to On branch main
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-	modified:   frontend/.env
-	modified:   frontend/yarn.lock
-
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-	bricscoin-core/yarn.lock
-
-no changes added to commit (use "git add" and/or "git commit -a") the change with a descriptive message.
-    3. Guide the user to  the change to their  branch on Codeberg.
-    4. Explain that this will make the fix permanent for future deployments.
-  - Why fix this issue and what will be achieved with the fix?: To ensure the improved hashrate formula persists after container restarts or redeployments, preventing the issue from recurring.
-  - Status: NOT STARTED
-  - Is recurring issue? N
-  - Should Test frontend/backend/both after fix? Backend (verify the fix is still active after a  and container restart).
+    1.  Monitor logs for BLOCK FOUND: .
+    2.  Check the database for a new block: .
+    3.  If no blocks are found, investigate the Merkle Root bug (Issue #4) as the next most likely cause.
+  - Why fix this issue and what will be achieved with the fix?: This is a critical failure. The blockchain is the core of the project and must be functional.
+  - Status: IN PROGRESS
+  - Is recurring issue? Y
+  - Should Test frontend/backend/both after fix? Backend
   - Blocked on other issue: None
 
 - Issue 2:
-  - Attempted fixes: The estimation formula was improved to be more realistic (0.15 GH/s vs the old 0.02 GH/s). However, this is still far from the user's nominal hardware power of ~2.4 TH/s.
-  - Next debug checklist: Monitor the value. Explain to the user that with difficulty at 1, the network is not challenging enough for their hardware to perform at its maximum potential. The true hashrate will become more apparent as difficulty increases.
-  - Why fix this issue and what will be achieved with the fix?: To manage user expectations and provide a better understanding of how hashrate, block time, and difficulty interact in a PoW system.
-  - Status: IN PROGRESS
+  - Attempted fixes: The agent implemented clamping in the difficulty adjustment algorithm, but this cannot work if no new blocks are being mined.
+  - Next debug checklist: Once the blockchain is producing blocks again (Issue 1 is fixed), monitor the difficulty at the next adjustment interval (block #310) to see if it increases as expected.
+  - Why fix this issue and what will be achieved with the fix?: Ensures long-term stability and security of the blockchain.
+  - Status: BLOCKED
   - Is recurring issue? Y
-  - Should Test frontend/backend/both after fix? Backend.
-  - Blocked on other issue: None.
+  - Should Test frontend/backend/both after fix? Backend
+  - Blocked on other issue: Issue 1: Blockchain is stalled
 
 - Issue 3:
-  - Attempted fixes: The agent explained PoW variance. The user accepted this.
-  - Next debug checklist: Monitor the chain's health. The improved hashrate estimation will provide better data for diagnosis.
-  - Why fix this issue and what will be achieved with the fix?: Increases user confidence in the system's stability.
-  - Status: USER VERIFICATION PENDING
-  - Is recurring issue? Y
-  - Should Test frontend/backend/both after fix? Backend.
-  - Blocked on other issue: None.
+  - Attempted fixes: The agent provided a shell command to overwrite  with English text, but the user ran into other UI issues (duplicate links) and it's unclear if the translation was completed.
+  - Next debug checklist:
+    1.  Verify the content of  on the user's server.
+    2.  If it's still in Italian, provide the command to update it with the English version.
+    3.  Guide the user to rebuild the frontend if their setup requires it.
+  - Why fix this issue and what will be achieved with the fix?: Fulfills an explicit user request.
+  - Status: NOT STARTED
+  - Is recurring issue? N
+  - Should Test frontend/backend/both after fix? Frontend
+  - Blocked on other issue: None
 
 - Issue 4:
-  - Attempted fixes: Previously, duplicate blocks were deleted from the database.
-  - Next debug checklist: This issue is on hold until the core functionality is stable and verified by the user.
-  - Why fix this issue and what will be achieved with the fix?: Ensures data consistency and user trust in the explorer.
-  - Status: USER VERIFICATION PENDING
+  - Attempted fixes: None. This is a newly identified bug.
+  - Next debug checklist:
+    1.  In , locate the  function.
+    2.  The  is currently hardcoded to . This logic needs to be replaced.
+    3.  A proper Merkle Tree must be constructed from the list of pending transaction IDs included in the block template.
+    4.  The  for the coinbase transaction must then be calculated and included in the job.
+  - Why fix this issue and what will be achieved with the fix?: This bug prevents any user transactions from ever being included in a block. Fixing it is critical for the cryptocurrency to have any utility beyond coinbase rewards. It may also be contributing to the stalled chain if templates are being generated with pending transactions.
+  - Status: NOT STARTED
+  - Is recurring issue? N
+  - Should Test frontend/backend/both after fix? Backend
+  - Blocked on other issue: Potentially blocked by Issue 1, but could also be the cause of Issue 1. Should be investigated concurrently.
+
+- Issue 5:
+  - Attempted fixes: None in this session.
+  - Next debug checklist: Revisit this once the critical blockchain issues are resolved.
+  - Why fix this issue and what will be achieved with the fix?: Provides accurate UI information to users.
+  - Status: NOT STARTED
   - Is recurring issue? Y
-  - Should Test frontend/backend/both after fix? Frontend.
-  - Blocked on other issue: Issue 1, 2, 3.
+  - Should Test frontend/backend/both after fix? Frontend
+  - Blocked on other issue: Issue 1, Issue 2, Issue 4
 
 **In progress Task List**:
 None.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
+  - **P0: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation. This is critical as the user has already lost funds.
   - **P1: Server-side Wallet Backup:** Implement a feature to save wallets (encrypted) in the database.
-  - **P1: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation.
-
 - **Future Tasks:**
-  - Re-implement real-time network hashrate calculation (this is related to the upcoming task but could be expanded).
   - Develop a mobile wallet for iOS/Android.
   - Pursue exchange listings.
-  - Create a dedicated page for community mining pools.
+  - Enhance the Mining Pools page to allow dynamic submission of external pools.
 
 **Completed work in this session**
-- **HTTPS Enabled on Production:**
-  - Guided the user to configure their existing Nginx server with Certbot to enable HTTPS for .
-  - Verified the SSL certificate installation and automatic HTTP-to-HTTPS redirection.
-  - Confirmed the frontend  was already correctly set to the  URL.
-- **Improved Hashrate Estimation Formula:**
-  - Modified the  function in  to calculate hashrate based on the average time of recent blocks, while excluding anomalous gaps (>5 minutes) to provide a more realistic value when miners are active.
-  - The change was applied directly to the running container and verified by the user.
+- **Major Stratum Server Refactor:** Rewrote the  function in  to correctly separate share difficulty and network difficulty, in an attempt to fix the stalled blockchain.
+- **Lost Coins Investigation & Wallet Blacklist:** Investigated missing funds, identified they were mined to old wallet addresses, and implemented a server-side blacklist to block these wallets from mining again.
+- **Community Mining Pools Page:** Created a new page (), added it to the router (), and navigation menu ().
+- **UI Fixes:** Corrected duplicate navigation links in  and a duplicate import in .
+- **Difficulty Algorithm Tweak:** Lowered the default share difficulty in  to better support low-power miners like NerdMiners.
 
 **Earlier issues found/mentioned but not fixed**
-None that are not already listed in the pending/upcoming sections.
+- **Issue 1:** Merkle Root calculation is wrong.
+  - **Debug checklist:** In , the  function does not correctly compute the  for blocks that include pending transactions. The  is hardcoded as an empty list (), which is only valid if the coinbase transaction is the only transaction in the block.
+  - **Why to solve this issue and what will be achieved with this?** This is a critical bug that prevents the blockchain from processing any user-to-user transactions. It may also be a root cause of the currently stalled chain.
+  - **Should Test frontend/backend/both after fix:** Backend
+  - **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
-- **Active Miners feature not working:** This was not addressed in this session but has been a recurring problem.
-- **Hashrate estimation confusion:** This was the main focus of this session. While the formula is improved, the discrepancy between the estimated value and the user's nominal hardware power remains a point of confusion.
+- **Blockchain is stalled:** This is the primary issue of the current and previous sessions.
+- **Active Miners feature not working:** This remains a low-priority pending issue.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Hashrate Estimation:** Changed from a theoretical formula () to a practical one based on actual block times (), excluding outliers.
-- **Docker :** Used as a workaround to update code inside a running container when a volume mount was not properly configured for live updates.
-- **Server Environment:** The user's server uses  (with a space) and not . The main application container is named  and the main server file is located at  inside the container.
+- **Share vs. Network Difficulty:** The core bug revolved around confusing the difficulty target for a valid pool share with the much higher difficulty target for a valid network block. The latest fix separates these two concepts.
+- **Asyncio in Python:** The Stratum server is built with , and functions like  were made  to fetch the latest network state.
+- **Docker Deployment:** The user's workflow is to edit files on the server's host filesystem, then use  to copy them into the running container, followed by . This implies volumes are not correctly configured for live code updates.
 
 **key DB schema**
 - : 
 - : 
+- : (New) 
+- : (New) 
 
 **changes in tech stack**
-- None. HTTPS was enabled using the existing Nginx on the host.
+- None.
 
 **All files of reference**
-- : The local file on the user's server that was modified.
-- : The path *inside the  container* where the updated file was copied to.
-- : The Nginx configuration file on the user's server, modified by Certbot.
-- : The file defining the services. The agent discovered that it does not seem to mount the backend code in a way that allows for hot-reloading from the host.
+-  (Created/Updated): Major refactoring to fix core mining logic.
+-  (Updated): Logic added to calculate hashrate from shares.
+-  (Created): New UI page for mining pools.
+-  (Updated): Added route for the Pools page.
+-  (Updated): Added navigation link for the Pools page.
+-  (Updated): Changed to display the new hashrate value.
 
 **Areas that need refactoring**:
-- The deployment process is brittle. The  file should be reviewed to properly mount the  directory into the  directory of the  container. This would eliminate the need for manual  commands and make development much smoother.
+- **Merkle Root Calculation:** The logic in  must be fixed to handle blocks with more than the coinbase transaction. This is a critical bug.
+- **Deployment Process:** The  should be reviewed to properly mount the backend/frontend code directories to avoid the error-prone  workflow.
 
 **key api endpoints**
-- : Modified to return the new .
-- : Provides .
+- : Returns network statistics, including .
 
 **Critical Info for New Agent**
-- **Your immediate task is to guide the user to make the  changes permanent via usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
-           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
-           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
-           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
-           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
-           <command> [<args>]
-
-These are common Git commands used in various situations:
-
-start a working area (see also: git help tutorial)
-   clone     Clone a repository into a new directory
-   init      Create an empty Git repository or reinitialize an existing one
-
-work on the current change (see also: git help everyday)
-   add       Add file contents to the index
-   mv        Move or rename a file, a directory, or a symlink
-   restore   Restore working tree files
-   rm        Remove files from the working tree and from the index
-
-examine the history and state (see also: git help revisions)
-   bisect    Use binary search to find the commit that introduced a bug
-   diff      Show changes between commits, commit and working tree, etc
-   grep      Print lines matching a pattern
-   log       Show commit logs
-   show      Show various types of objects
-   status    Show the working tree status
-
-grow, mark and tweak your common history
-   branch    List, create, or delete branches
-   commit    Record changes to the repository
-   merge     Join two or more development histories together
-   rebase    Reapply commits on top of another base tip
-   reset     Reset current HEAD to the specified state
-   switch    Switch branches
-   tag       Create, list, delete or verify a tag object signed with GPG
-
-collaborate (see also: git help workflows)
-   fetch     Download objects and refs from another repository
-   pull      Fetch from and integrate with another repository or a local branch
-   push      Update remote refs along with associated objects
-
-'git help -a' and 'git help -g' list available subcommands and some
-concept guides. See 'git help <command>' or 'git help <concept>'
-to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system..** The file is updated on the server, but not in the Codeberg repository.
-- **Communicate in Italian.**
-- **The user's server environment has specific quirks:**
-    - The command is  (with a space), not .
-    - The main backend application container is named .
-    - The code inside that container runs from , not . Updates must be copied to  inside the container.
-- Be prepared for a lot of back-and-forth debugging with the user, interpreting terminal output. The previous agent's attempts to modify the file failed multiple times due to not understanding the container's file structure.
+- **The blockchain is STALLED at block #304.** This is the highest priority (P0). The latest attempt to fix this was a major refactor of , but it's not yet verified if it worked.
+- **There is a critical bug in the Merkle Root calculation** in . The code currently assumes blocks only contain the coinbase transaction, which will invalidate any block that tries to include user transactions. This is a very strong candidate for the cause of the stalled chain.
+- **Communicate in Italian.** The user is Italian and appreciates communication in their native language.
+- The user has **lost access to ~12,000 BRICS** because they did not save the seed phrases for their old wallets. Adding a prominent warning on the wallet creation page is now a high-priority task.
 
 **documents and test reports created in this job**
-None.
+-  (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1. **User:** Asks to improve the hashrate formula to show real, not fake, hashrates. (IN PROGRESS)
-2. **Agent:** Confirms it's possible with minimal changes to a single function (). (ADDRESSED)
-3. **User:** Agrees, noting that blocks are found every few seconds, not 10 minutes. (ACKNOWLEDGED)
-4. **Agent/User:** A long and difficult debugging session begins to apply the code change to the user's server. Multiple attempts fail:
-    - User is told to  but the agent's changes were local. (FAILED)
-    -  command not found. (FAILED)
-    - Manual editing with  appears to fail or not be saved. (FAILED)
-    - A Python script to replace the code fails, corrupting the file. (FAILED)
-    - The backup is restored. (SUCCESS)
-5. **Agent:** Realizes the issue is the file path inside the container.
-6. **Agent:** Provides the correct  command to copy the updated  to . (ADDRESSED)
-7. **User:** Runs the command, but the API call fails due to a temporary server error. (FAILED)
-8. **Agent:** Asks for logs, sees the server is running, and asks the user to re-run the verification . (ADDRESSED)
-9. **User:** Runs the verification  command. (PENDING)
-10. **User:** Confirms the new hashrate is  and the new code is present in the container. (COMPLETE)
+1. **User:** Asks why difficulty is still 1 after block 300.
+2. **Agent:** Explains the calculation shows the average block time is still too high.
+3. **User:** Asks to implement a more aggressive difficulty adjustment.
+4. **User:** States miners are always on, questioning the long block times.
+5. **Agent:** Discovers the chain is stalled (no new blocks) and that logs show 425 accepted shares but 0 BLOCK FOUND.
+6. **Agent:** Adds debug logging and finds that submitted share hashes are much larger than the required block target ( vs ).
+7. **User:** Confirms which miners (and wallets) are currently active.
+8. **Agent:** Realizes the share difficulty (512) is too high for low-power NerdMiners and lowers it to 1.
+9. **Agent:** Receives a detailed analysis from the user explaining the core conceptual bug: confusing share difficulty with network difficulty.
+10. **User:** Asks for the complete, corrected code and steps to apply the fix for the share vs. network difficulty bug. The agent provided this, and the user deployed it. The last action was to wait and see if it solved the stall.
 
 **Project Health Check:**
 - **Broken:**
-  - None.
+  - The blockchain is stalled and not producing new blocks. This is a critical failure.
 - **Mocked:**
   - None.
 
 **3rd Party Integrations**
-- **Codeberg:** Source control and hosting for downloadable wallet binaries.
+- **Codeberg:** Source code hosting.
 
 **Testing status**
 - Testing agent used after significant changes: NO
 - Troubleshoot agent used after agent stuck in loop: NO
 - Test files created: None
-- Known regressions: None in this session.
+- Known regressions: The blockchain has stopped producing blocks.
 
 **Credentials to test flow:**
 - **Hetzner Server SSH:**
@@ -234,4 +199,4 @@ None.
 - **Codeberg Repo:** 
 
 **What agent forgot to execute**
-The agent initially struggled to apply the code changes to the user's production server. It failed to identify that the code in the running container was not directly mapped to the host filesystem, leading to a long, frustrating loop of failed attempts using , , and incorrect  paths. The agent should have investigated the container's file structure and  volume mappings earlier.</analysis>
+- The agent did not identify the incorrect Merkle Root calculation in . This calculation is only valid for blocks with no pending transactions and is a likely cause of the stalled chain. All debugging efforts have focused on other parts of the validation logic, but this remains a critical, unaddressed bug.</analysis>
