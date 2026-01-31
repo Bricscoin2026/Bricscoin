@@ -29,6 +29,8 @@ export default function Layout() {
     { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/pools", icon: Users, label: "Pools" },
+    { to: "/mining", icon: Pickaxe, label: "Mining" },
+    { to: "/pools", icon: Users, label: "Pools" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];

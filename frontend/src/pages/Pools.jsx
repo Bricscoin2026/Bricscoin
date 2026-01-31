@@ -94,7 +94,7 @@ export default function Pools() {
       <Card className="bg-gradient-to-r from-primary/10 to-transparent border-primary/20">
         <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3"><Plus className="w-8 h-8 text-primary" /><div><h3 className="font-heading font-bold">Gestisci un Pool?</h3><p className="text-sm text-muted-foreground">Contattaci per essere aggiunto!</p></div></div>
-          <a href="https://twitter.com/bricscoin" target="_blank" rel="noopener noreferrer"><Button variant="outline" className="border-primary/50 hover:bg-primary/10"><ExternalLink className="w-4 h-4 mr-2" />Contattaci</Button></a>
+          <a href="https://x.com/Bricscoin26" target="_blank" rel="noopener noreferrer"><Button variant="outline" className="border-primary/50 hover:bg-primary/10"><ExternalLink className="w-4 h-4 mr-2" />Contattaci su X</Button></a>
         </CardContent>
       </Card>
     </div>
