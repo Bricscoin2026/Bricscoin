@@ -651,3 +651,4 @@ class StratumServer:
 if __name__ == "__main__":
     server = StratumServer()
     asyncio.run(server.start())
+  
