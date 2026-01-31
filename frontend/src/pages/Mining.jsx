@@ -43,47 +43,7 @@ export default function Mining() {
     }
   };
 
-  const fetchActiveMiners = async () => {
-    // Costruisce la base URL partendo da REACT_APP_BACKEND_URL,
-    // ma forza HTTPS se la pagina è servita in HTTPS per evitare Mixed Content.
-    let base = BACKEND_URL || (typeof window !== "undefined" ? window.location.origin : "");
-
-    if (typeof window !== "undefined" && window.location.protocol === "https:" && base.startsWith("http://")) {
-      base = "https://" + base.slice("http://".length);
-    }
-
-    if (!base) {
-      console.error("Nessuna base URL disponibile per /api/miners/stats");
-      return;
-    }
-
-    // Primo tentativo: endpoint dettagliato (se disponibile)
-    try {
-      const res = await fetch(`${base}/api/mining/miners`);
-      if (res.ok) {
-        const data = await res.json();
-        setActiveMiners(data.miners || []);
-        if (typeof data.count === "number") {
-          setActiveMinersCount(data.count);
-        }
-      }
-    } catch (err) {
-      console.error("Error loading detailed miners", err);
-    }
-
-    // Fallback: endpoint semplificato /api/miners/stats (solo conteggio), se esiste
-    try {
-      const resStats = await fetch(`${base}/api/miners/stats`);
-      if (resStats.ok) {
-        const stats = await resStats.json();
-        if (typeof stats.active_miners === "number") {
-          setActiveMinersCount(stats.active_miners);
-        }
-      }
-    } catch (err) {
-      console.error("Error loading miners stats", err);
-    }
-  };
+  // Removed active miners UI as per request
 
   useEffect(() => {
     // Carica il wallet locale una sola volta al mount
