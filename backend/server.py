@@ -789,22 +789,24 @@ async def get_network_stats():
     except:
         pass
     
-    # Hashrate REALE = difficoltà * 2^32 / tempo_medio_blocco
+    # Hashrate REALE - Esclude gap > 5 minuti (miner spenti)
+    hashrate_estimate = 0.0
     try:
-        recent = await db.blocks.find({}, {"_id": 0, "timestamp": 1}).sort("index", -1).limit(10).to_list(10)
+        recent = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(20).to_list(20)
         if len(recent) >= 2:
-            from datetime import datetime
-            t1 = datetime.fromisoformat(recent[-1]['timestamp'].replace('Z', '+00:00'))
-            t2 = datetime.fromisoformat(recent[0]['timestamp'].replace('Z', '+00:00'))
-            avg_time = (t2 - t1).total_seconds() / (len(recent) - 1)
-            if avg_time > 0:
-                hashrate_estimate = (current_difficulty * (2 ** 32)) / avg_time
-            else:
-                hashrate_estimate = 0
-        else:
-            hashrate_estimate = 0
+            intervals = []
+            for i in range(len(recent) - 1):
+                t1 = datetime.fromisoformat(recent[i]['timestamp'].replace('Z', '+00:00'))
+                t2 = datetime.fromisoformat(recent[i+1]['timestamp'].replace('Z', '+00:00'))
+                diff = (t1 - t2).total_seconds()
+                if 0 < diff <= 300:
+                    intervals.append(diff)
+            if intervals:
+                avg_time = sum(intervals) / len(intervals)
+                avg_diff = sum(b.get("difficulty", 1) for b in recent) / len(recent)
+                hashrate_estimate = (avg_diff * (2 ** 32)) / avg_time
     except:
-        hashrate_estimate = 0
+        pass
     
     return NetworkStats(
         total_supply=MAX_SUPPLY,
