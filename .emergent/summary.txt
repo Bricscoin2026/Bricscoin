@@ -2,10 +2,11 @@
 
 Recent user requests included:
 - Implementing a realistic network hashrate calculation.
-- Investigating a discrepancy in wallet balances, which was traced back to mining rewards being sent to old wallet addresses.
+- Investigating a discrepancy in wallet balances.
 - Creating a community Mining Pools page.
 - Fixing the blockchain, which has stalled and is not producing new blocks.
-- Translating the new Pools page to English.
+- Fixing the difficulty adjustment, which is always stuck at 1.
+- Translating the Pools page to English.
 
 **PRODUCT REQUIREMENTS:**
 - **Blockchain Core:** Proof of Work (PoW) consensus with a Bitcoin-style difficulty adjustment and a ~10-minute block time target.
@@ -22,38 +23,44 @@ Recent user requests included:
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack BricsCoin application (FastAPI backend, React frontend, MongoDB) is running on the user's server. The application features a web wallet, an explorer, and several informational pages. The backend includes a FastAPI server for the API and a separate -based Stratum server for mining. A major refactoring of the Stratum server was just completed to fix a critical bug causing the blockchain to stall. A blacklist for old wallets is in place, and a new Mining Pools page has been created.
+A full-stack BricsCoin application (FastAPI backend, React frontend, MongoDB) is running. The application features a web wallet, an explorer, and several informational pages. The backend includes a FastAPI server () and a separate -based Stratum server (). The user and agent have been iteratively updating both  and  to fix a stalled blockchain and a broken difficulty adjustment algorithm. The latest versions of the code include logic for PPLNS, vardiff, and a Bitcoin-style difficulty adjustment, but the implementation is flawed due to copy-paste errors.
 
 **Last working item**:
-- Last item agent was working: The agent was debugging a stalled blockchain. No new blocks had been produced for over an hour despite a high hashrate. The agent identified a critical bug in  where share difficulty and network difficulty were being confused, leading to invalid block submissions. A completely rewritten  with corrected validation logic was deployed to fix this.
-- Status: USER VERIFICATION PENDING
-- Agent Testing Done: Y
-- Which testing method agent to use? Manual testing by user via logs and explorer. The agent and user need to monitor the server to see if a new block (index > 304) is found.
+- Last item agent was working: The agent and user were debugging why the blockchain's difficulty was always stuck at 1. The agent correctly identified that the  function in  was using a flawed time decay logic. The user provided new code to fix this, but pasted it incorrectly into the file, leaving behind conflicting old code. The agent was trying to guide the user to correctly replace the entire function.
+- Status: IN PROGRESS
+- Agent Testing Done: N
+- Which testing method agent to use? backend testing agent
 - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-- Issue 1: Blockchain is stalled at block #304 (P0)
-- Issue 2: Difficulty adjustment is not increasing (P1)
-- Issue 3: Pools page UI text is in Italian, user requested English (P2)
-- Issue 4: Merkle Root calculation is incorrect, preventing blocks with transactions from being mined (P0 - Newly Identified)
+- Issue 1: Blockchain is stalled at block #304 (P0 - CRITICAL BLOCKER)
+- Issue 2: Difficulty adjustment is not working (stuck at 1) (P0)
+- Issue 3: Merkle Root calculation is incorrect (P0)
+- Issue 4: Pools page UI text is in Italian, user requested English (P2)
 - Issue 5: Active Miners feature on UI may not be working correctly (P3)
 
 Issues Detail:
 - Issue 1:
-  - Attempted fixes: The agent deployed a heavily refactored  that correctly separates the validation logic for pool shares and network blocks. Logs show the new logic is running and accepting shares, but it's not yet confirmed if this will produce a valid block.
+  - Attempted fixes: The user provided multiple versions of , which the agent deployed. However, user logs from after the updates still show  for all submitted shares. The blockchain is not progressing. This issue was not the focus of the last session, but it remains the most critical problem.
   - Next debug checklist:
-    1.  Monitor logs for BLOCK FOUND: .
-    2.  Check the database for a new block: .
-    3.  If no blocks are found, investigate the Merkle Root bug (Issue #4) as the next most likely cause.
-  - Why fix this issue and what will be achieved with the fix?: This is a critical failure. The blockchain is the core of the project and must be functional.
+    1.  **Stop investigating other issues and focus exclusively on this.**
+    2.  Investigate and fix the Merkle Root calculation (Issue #3), which is the most likely cause. The  in  is almost certainly still hardcoded as .
+    3.  Implement a proper Merkle Tree construction from pending transactions.
+    4.  Update  to include the correct coinbase merkle branch.
+    5.  Deploy and monitor logs for  or  messages.
+  - Why fix this issue and what will be achieved with the fix?: The entire project is non-functional without a working blockchain. This is the root problem that must be solved.
   - Status: IN PROGRESS
   - Is recurring issue? Y
   - Should Test frontend/backend/both after fix? Backend
-  - Blocked on other issue: None
+  - Blocked on other issue: None. This issue blocks all other progress.
 
 - Issue 2:
-  - Attempted fixes: The agent implemented clamping in the difficulty adjustment algorithm, but this cannot work if no new blocks are being mined.
-  - Next debug checklist: Once the blockchain is producing blocks again (Issue 1 is fixed), monitor the difficulty at the next adjustment interval (block #310) to see if it increases as expected.
+  - Attempted fixes: The agent provided a correct Bitcoin-style difficulty adjustment algorithm to replace the flawed time-decay logic in . However, the user repeatedly failed to paste the code correctly, leaving conflicting old code in the file.
+  - Next debug checklist:
+    1.  This issue is **BLOCKED** by the stalled blockchain (Issue #1). Do not work on this until blocks are being produced.
+    2.  Once the chain is moving, provide the user with the complete, correct  file again.
+    3.  Instruct the user to replace the entire file content.
+    4.  Restart the node and monitor the difficulty value via the  endpoint at the next adjustment interval (e.g., block #310).
   - Why fix this issue and what will be achieved with the fix?: Ensures long-term stability and security of the blockchain.
   - Status: BLOCKED
   - Is recurring issue? Y
@@ -61,45 +68,40 @@ Issues Detail:
   - Blocked on other issue: Issue 1: Blockchain is stalled
 
 - Issue 3:
-  - Attempted fixes: The agent provided a shell command to overwrite  with English text, but the user ran into other UI issues (duplicate links) and it's unclear if the translation was completed.
+  - Attempted fixes: None in this session. This critical bug, identified in the previous handoff, was completely ignored.
+  - Next debug checklist: See Next debug checklist for Issue 1. This is the same problem.
+  - Why fix this issue and what will be achieved with the fix?: This bug prevents any transactions from being included in blocks, rendering the cryptocurrency useless. It is also the most probable cause of the stalled blockchain.
+  - Status: NOT STARTED
+  - Is recurring issue? N
+  - Should Test frontend/backend/both after fix? Backend
+  - Blocked on other issue: None.
+
+- Issue 4:
+  - Attempted fixes: None.
   - Next debug checklist:
-    1.  Verify the content of  on the user's server.
-    2.  If it's still in Italian, provide the command to update it with the English version.
-    3.  Guide the user to rebuild the frontend if their setup requires it.
+    1.  Verify the content of .
+    2.  If still in Italian, provide the correct English version.
   - Why fix this issue and what will be achieved with the fix?: Fulfills an explicit user request.
   - Status: NOT STARTED
   - Is recurring issue? N
   - Should Test frontend/backend/both after fix? Frontend
-  - Blocked on other issue: None
-
-- Issue 4:
-  - Attempted fixes: None. This is a newly identified bug.
-  - Next debug checklist:
-    1.  In , locate the  function.
-    2.  The  is currently hardcoded to . This logic needs to be replaced.
-    3.  A proper Merkle Tree must be constructed from the list of pending transaction IDs included in the block template.
-    4.  The  for the coinbase transaction must then be calculated and included in the job.
-  - Why fix this issue and what will be achieved with the fix?: This bug prevents any user transactions from ever being included in a block. Fixing it is critical for the cryptocurrency to have any utility beyond coinbase rewards. It may also be contributing to the stalled chain if templates are being generated with pending transactions.
-  - Status: NOT STARTED
-  - Is recurring issue? N
-  - Should Test frontend/backend/both after fix? Backend
-  - Blocked on other issue: Potentially blocked by Issue 1, but could also be the cause of Issue 1. Should be investigated concurrently.
+  - Blocked on other issue: None.
 
 - Issue 5:
-  - Attempted fixes: None in this session.
-  - Next debug checklist: Revisit this once the critical blockchain issues are resolved.
+  - Attempted fixes: None.
+  - Next debug checklist: Revisit once the critical blockchain issues are resolved.
   - Why fix this issue and what will be achieved with the fix?: Provides accurate UI information to users.
   - Status: NOT STARTED
   - Is recurring issue? Y
   - Should Test frontend/backend/both after fix? Frontend
-  - Blocked on other issue: Issue 1, Issue 2, Issue 4
+  - Blocked on other issue: Issue 1, Issue 2, Issue 3
 
 **In progress Task List**:
 None.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-  - **P0: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation. This is critical as the user has already lost funds.
+  - **P0: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation.
   - **P1: Server-side Wallet Backup:** Implement a feature to save wallets (encrypted) in the database.
 - **Future Tasks:**
   - Develop a mobile wallet for iOS/Android.
@@ -107,79 +109,76 @@ None.
   - Enhance the Mining Pools page to allow dynamic submission of external pools.
 
 **Completed work in this session**
-- **Major Stratum Server Refactor:** Rewrote the  function in  to correctly separate share difficulty and network difficulty, in an attempt to fix the stalled blockchain.
-- **Lost Coins Investigation & Wallet Blacklist:** Investigated missing funds, identified they were mined to old wallet addresses, and implemented a server-side blacklist to block these wallets from mining again.
-- **Community Mining Pools Page:** Created a new page (), added it to the router (), and navigation menu ().
-- **UI Fixes:** Corrected duplicate navigation links in  and a duplicate import in .
-- **Difficulty Algorithm Tweak:** Lowered the default share difficulty in  to better support low-power miners like NerdMiners.
+- Multiple updates to  using new code versions provided by the user.
+- Multiple attempts to update the difficulty algorithm in .
+- Updated  based on user's code.
+- Located and displayed the content of  files for the user.
 
 **Earlier issues found/mentioned but not fixed**
 - **Issue 1:** Merkle Root calculation is wrong.
-  - **Debug checklist:** In , the  function does not correctly compute the  for blocks that include pending transactions. The  is hardcoded as an empty list (), which is only valid if the coinbase transaction is the only transaction in the block.
-  - **Why to solve this issue and what will be achieved with this?** This is a critical bug that prevents the blockchain from processing any user-to-user transactions. It may also be a root cause of the currently stalled chain.
+  - **Debug checklist:** In , the  function hardcodes  as , which is only valid for blocks without transactions. This needs to be replaced with a proper Merkle Tree calculation.
+  - **Why to solve this issue and what will be achieved with this?** This is a critical bug that prevents transactions from being mined and is the most likely cause of the stalled blockchain.
   - **Should Test frontend/backend/both after fix:** Backend
   - **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
-- **Blockchain is stalled:** This is the primary issue of the current and previous sessions.
-- **Active Miners feature not working:** This remains a low-priority pending issue.
+- **Blockchain is stalled**: This remains the primary, unresolved issue.
+- **Difficulty adjustment is not working**: This was the focus of the session but is also unresolved and blocked.
+- **Active Miners feature not working**: This remains a low-priority pending issue.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Share vs. Network Difficulty:** The core bug revolved around confusing the difficulty target for a valid pool share with the much higher difficulty target for a valid network block. The latest fix separates these two concepts.
-- **Asyncio in Python:** The Stratum server is built with , and functions like  were made  to fetch the latest network state.
-- **Docker Deployment:** The user's workflow is to edit files on the server's host filesystem, then use  to copy them into the running container, followed by . This implies volumes are not correctly configured for live code updates.
+- **Difficulty Adjustment Algorithm:** The session was heavily focused on fixing a flawed time-decay algorithm by replacing it with a Bitcoin-style adjustment based on average block times. The implementation is currently broken due to user copy-paste errors.
+- **User-Provided Code:** The agent's workflow was driven by the user pasting entire code files. This led to versioning confusion and incomplete fixes.
+- **Merkle Root:** A critical concept that was identified as a bug in the previous fork but completely ignored in this session. It is the most likely reason the chain is stalled.
 
 **key DB schema**
 - : 
 - : 
-- : (New) 
-- : (New) 
+- : 
+- : 
+- :  (newly added by user's latest stratum server code)
 
 **changes in tech stack**
 - None.
 
 **All files of reference**
--  (Created/Updated): Major refactoring to fix core mining logic.
--  (Updated): Logic added to calculate hashrate from shares.
--  (Created): New UI page for mining pools.
--  (Updated): Added route for the Pools page.
--  (Updated): Added navigation link for the Pools page.
--  (Updated): Changed to display the new hashrate value.
+-  (Updated): Updated multiple times with user-provided code to fix mining logic.
+-  (Updated): Updated multiple times to fix the difficulty algorithm, but is currently in a broken state with mixed old/new code.
+-  (Updated): Updated once with user-provided code.
+-  (Viewed)
+-  (Viewed)
 
 **Areas that need refactoring**:
-- **Merkle Root Calculation:** The logic in  must be fixed to handle blocks with more than the coinbase transaction. This is a critical bug.
-- **Deployment Process:** The  should be reviewed to properly mount the backend/frontend code directories to avoid the error-prone  workflow.
+- **Merkle Root Calculation:** The hardcoded  in  is a critical bug and must be fixed.
+- **Difficulty Calculation Logic:** The  function in  is currently broken due to a copy-paste error. It contains both the old and new logic.
+- **Unified Difficulty Source:** The difficulty is calculated independently in  and . This should be unified into a single source of truth to prevent future bugs.
 
 **key api endpoints**
-- : Returns network statistics, including .
+- : Used to check network statistics, including the broken difficulty value.
 
 **Critical Info for New Agent**
-- **The blockchain is STALLED at block #304.** This is the highest priority (P0). The latest attempt to fix this was a major refactor of , but it's not yet verified if it worked.
-- **There is a critical bug in the Merkle Root calculation** in . The code currently assumes blocks only contain the coinbase transaction, which will invalidate any block that tries to include user transactions. This is a very strong candidate for the cause of the stalled chain.
-- **Communicate in Italian.** The user is Italian and appreciates communication in their native language.
-- The user has **lost access to ~12,000 BRICS** because they did not save the seed phrases for their old wallets. Adding a prominent warning on the wallet creation page is now a high-priority task.
+- **THE BLOCKCHAIN IS STALLED. THIS IS PRIORITY ZERO.** Do not work on anything else until blocks are being produced. The user and previous agent were sidetracked by a secondary issue.
+- **The most likely cause is the Merkle Root bug** in , which was identified in the previous handoff but completely ignored in this session. You must investigate and fix the hardcoded  in the  function.
+- The user will likely want to continue discussing the **difficulty algorithm**. You must steer the conversation back to the stalled chain. Explain that difficulty is irrelevant if no new blocks are being mined.
+- **Communicate in Italian.**
+- The user provides complete code files. **Be cautious.** The user has previously introduced errors by incorrectly pasting code. You must verify and guide the user to replace files completely, not just patch them.
 
 **documents and test reports created in this job**
--  (updated)
+- None.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1. **User:** Asks why difficulty is still 1 after block 300.
-2. **Agent:** Explains the calculation shows the average block time is still too high.
-3. **User:** Asks to implement a more aggressive difficulty adjustment.
-4. **User:** States miners are always on, questioning the long block times.
-5. **Agent:** Discovers the chain is stalled (no new blocks) and that logs show 425 accepted shares but 0 BLOCK FOUND.
-6. **Agent:** Adds debug logging and finds that submitted share hashes are much larger than the required block target ( vs ).
-7. **User:** Confirms which miners (and wallets) are currently active.
-8. **Agent:** Realizes the share difficulty (512) is too high for low-power NerdMiners and lowers it to 1.
-9. **Agent:** Receives a detailed analysis from the user explaining the core conceptual bug: confusing share difficulty with network difficulty.
-10. **User:** Asks for the complete, corrected code and steps to apply the fix for the share vs. network difficulty bug. The agent provided this, and the user deployed it. The last action was to wait and see if it solved the stall.
+- The last several messages are a back-and-forth where the user provides a full  file containing a broken  function (with old and new code mixed).
+- The agent correctly identifies the issue and provides the correct version of the function to replace the broken one.
+- The user provides the full file again, which still contains the error.
+- The user's last messages are asking for confirmation about exactly which parts of the code to delete, indicating they are still confused about how to apply the fix.
 
 **Project Health Check:**
 - **Broken:**
-  - The blockchain is stalled and not producing new blocks. This is a critical failure.
+  - The blockchain is completely stalled and not producing blocks.
+  - The difficulty adjustment algorithm is non-functional.
 - **Mocked:**
   - None.
 
@@ -190,7 +189,7 @@ None.
 - Testing agent used after significant changes: NO
 - Troubleshoot agent used after agent stuck in loop: NO
 - Test files created: None
-- Known regressions: The blockchain has stopped producing blocks.
+- Known regressions: The blockchain remains stalled, which is the most critical regression.
 
 **Credentials to test flow:**
 - **Hetzner Server SSH:**
@@ -199,4 +198,4 @@ None.
 - **Codeberg Repo:** 
 
 **What agent forgot to execute**
-- The agent did not identify the incorrect Merkle Root calculation in . This calculation is only valid for blocks with no pending transactions and is a likely cause of the stalled chain. All debugging efforts have focused on other parts of the validation logic, but this remains a critical, unaddressed bug.</analysis>
+The agent completely failed to address the **Merkle Root calculation bug** mentioned in the initial handoff summary. It got sidetracked by the user's focus on the secondary issue of the difficulty algorithm. Fixing the stalled blockchain should have been the top priority, and the Merkle Root bug was the most likely culprit. This was a critical oversight.</analysis>

@@ -10,7 +10,7 @@
 
 ## Risultati Test Difficoltà BricsCoin
 
-**Backend URL testato:** https://cryptomining-3.preview.emergentagent.com
+**Backend URL testato:** https://brics-crypto.preview.emergentagent.com
 
 ### ✅ Tutti i test superati (7/7)
 
