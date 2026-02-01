@@ -105,7 +105,6 @@ async def get_network_difficulty() -> int:
     Calcola la difficoltà per il PROSSIMO blocco (stessa logica di server.py).
     """
     blocks_count = await db.blocks.count_documents({})
-
     if blocks_count == 0:
         return INITIAL_DIFFICULTY
 
