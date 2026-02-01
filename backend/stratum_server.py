@@ -5,9 +5,7 @@ BricsCoin Stratum Mining Server v6.2
 ✅ Protezione duplicate share
 ✅ Tracking miner attivi su MongoDB
 
-ATTENZIONE: QUESTA VERSIONE È IN MODALITÀ DIAGNOSTICA
-- Il PoW è reso estremamente facile (ogni share può diventare blocco).
-- NON usare in produzione, solo per testare che la pipeline blocchi funzioni.
+VERSIONE PRODUZIONE (PoW normale, allineato al backend)
 """
 
 import asyncio
@@ -80,6 +78,7 @@ def var_int(n: int) -> bytes:
     return b'\xff' + n.to_bytes(8, 'little')
 
 def difficulty_to_nbits(difficulty: int) -> str:
+    # Usato solo per compatibilità con i miner (Stratum header)
     if difficulty <= 0:
         difficulty = 1
     max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
@@ -287,7 +286,7 @@ def create_stratum_job(
     logger.info(f"Job {job_id}: block #{template['index']}, miner={miner_address[:20]}...")
     return job
 
-# ================= VERIFY SHARE (MODALITÀ DIAGNOSTICA) =================
+# ================= VERIFY SHARE (PRODUZIONE) =================
 async def verify_share(
     job: dict,
     extranonce1: str,
@@ -300,10 +299,9 @@ async def verify_share(
     """
     Verifica di uno share e, se abbastanza buono, di un blocco valido di rete.
 
-    MODALITÀ DIAGNOSTICA:
-    - Il target è il massimo possibile (2^256 - 1).
-    - share_diff e network_diff vengono forzati a 1.
-    - Praticamente ogni hash è sia share che blocco.
+    - Usa lo stesso max_target del backend (check_difficulty in server.py).
+    - network_diff controlla la difficoltà di rete (blocchi).
+    - share_diff controlla la difficoltà delle shares inviate dal miner.
     """
     key = f"{job['job_id']}-{extranonce2}-{nonce}"
     if key in recent_shares.get(job['miner_address'], set()):
@@ -329,13 +327,14 @@ async def verify_share(
         block_hash_hex = reverse_bytes(header_hash).hex()
         hash_int = int(block_hash_hex, 16)
 
-        # ========= DIAGNOSTICA: target MASSIMO =========
-        max_target = (1 << 256) - 1
-        effective_share_diff = 1
-        effective_network_diff = 1
-        share_target = max_target // effective_share_diff
-        block_target = max_target // effective_network_diff
-        # ===============================================
+        # Stesso max_target del backend (server.py check_difficulty)
+        max_target = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
+        share_difficulty = max(1, int(share_diff))
+        network_difficulty = max(1, int(network_diff))
+
+        share_target = max_target // share_difficulty
+        block_target = max_target // network_difficulty
 
         is_share = hash_int <= share_target
         is_block = hash_int <= block_target
@@ -344,9 +343,9 @@ async def verify_share(
             recent_shares.setdefault(job['miner_address'], set()).add(key)
 
         logger.info(
-            f"POW_DEBUG_DIAG: hash={hash_int:x}, share_target={share_target:x}, "
-            f"block_target={block_target:x}, share_diff_input={share_diff}, "
-            f"net_diff_input={network_diff}, is_share={is_share}, is_block={is_block}"
+            f"POW_DEBUG: hash={hash_int:x}, share_target={share_target:x}, "
+            f"block_target={block_target:x}, share_diff={share_difficulty}, "
+            f"net_diff={network_difficulty}, is_share={is_share}, is_block={is_block}"
         )
 
         return is_share, is_block, block_hash_hex
@@ -428,7 +427,6 @@ class StratumMiner:
             return
         self.authorized = True
         self.respond(msg_id, True)
-        # Stato in‑memory
         miners[self.miner_id] = {
             "worker": self.worker_name,
             "connected_at": datetime.now(timezone.utc).isoformat(),
@@ -436,7 +434,6 @@ class StratumMiner:
             "blocks": 0,
             "extranonce1": self.extranonce1,
         }
-        # Stato persistente per /api/mining/miners
         now_iso = datetime.now(timezone.utc).isoformat()
         await db.miners.update_one(
             {"miner_id": self.miner_id},
