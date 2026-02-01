@@ -1,8 +1,9 @@
 """
-BricsCoin Stratum Mining Server v6.1
+BricsCoin Stratum Mining Server v6.2
 ✅ Vardiff automatico
 ✅ PPLNS payout
 ✅ Protezione duplicate share
+✅ Tracking miner attivi su MongoDB
 """
 
 import asyncio
