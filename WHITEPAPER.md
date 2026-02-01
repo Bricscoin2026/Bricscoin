@@ -39,7 +39,7 @@ BricsCoin's mission is to create a truly decentralized currency that:
 | **Halving Interval** | Every 210,000 blocks |
 | **Target Block Time** | ~10 minutes |
 | **Difficulty Adjustment** | Dynamic |
-| **Initial Difficulty** | 10,000 |
+| **Initial Difficulty** | 1 |
 | **Transaction Fees** | 0.05 BRICS (burned) |
 | **Premine** | 1,000,000 BRICS (4.76%) |
 | **Address Prefix** | BRICS |
