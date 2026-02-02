@@ -1,14 +1,14 @@
 # BricsCoin Whitepaper
 ## A Decentralized SHA256 Proof-of-Work Cryptocurrency
 
-**Version 1.0 - January 2026**  
+**Version 1.0 - February 2026**  
 **Author: Jabo86**
 
 ---
 
 ## Abstract
 
-BricsCoin (BRICS) is a decentralized cryptocurrency built on the proven SHA256 Proof-of-Work consensus mechanism. Designed for hardware mining compatibility, BricsCoin enables anyone with ASIC mining equipment to participate in securing the network and earning rewards. With a fixed supply of 21 million coins and zero transaction fees, BricsCoin aims to be a fair, transparent, and community-driven digital currency.
+BricsCoin (BRICS) is a decentralized cryptocurrency built on the proven SHA256 Proof-of-Work consensus mechanism. Designed for hardware mining compatibility, BricsCoin enables anyone with ASIC mining equipment to participate in securing the network and earning rewards. With a fixed supply of 21 million coins and transaction fees of 0.05 BRICS that are burned, BricsCoin aims to be a fair, transparent, and community-driven digital currency.
 
 ---
 
@@ -22,7 +22,7 @@ Since Bitcoin's inception in 2009, Proof-of-Work has proven to be the most secur
 
 BricsCoin's mission is to create a truly decentralized currency that:
 - Remains accessible to hardware miners worldwide
-- Maintains zero transaction fees for all users
+- Maintains low transaction fees for all users (0.05 BRICS, burned)
 - Provides transparent, verifiable transactions
 - Operates as a fully open-source project
 
@@ -198,16 +198,28 @@ All wallets use:
 
 ## 8. Status: LAUNCHED ✅
 
-### Completed (January 2026)
+### Completed (February 2026)
 - [x] Mainnet launch
 - [x] Web wallet with instant transactions
 - [x] Block explorer
 - [x] Hardware mining support (Stratum protocol)
 - [x] Desktop wallet (BricsCoin Core) - Linux, Windows, macOS
-- [x] Open source code on GitHub
+- [x] Open source code on Codeberg
 - [x] Security audit completed
-- [x] Transaction fee: 0.05 BRICS
-- [x] Bitcoin-style difficulty (1000)
+- [x] Transaction fee: 0.05 BRICS (burned)
+- [x] Dynamic difficulty adjustment
+
+### 8.1 Genesis Block
+
+- **Block Height**: 0
+- **Block Hash**: `bc49816bc68faa70357d753091fc917bd1c121aa4c86d660bf25a3f0679d3e4c`
+- **Previous Hash**: `0000000000000000000000000000000000000000000000000000000000000000`
+- **Timestamp**: 02/02/2026, 01:24:10 (UTC)
+- **Miner**: genesis
+- **Nonce**: 0
+- **Difficulty**: 1,000,000
+- **Mining Reward**: 50 BRICS
+- **Transactions**: 1
 
 ### Future Enhancements
 - [ ] Exchange listings
@@ -225,7 +237,7 @@ All wallets use:
 Anonymous developer passionate about decentralization and cryptocurrency. Building BricsCoin as a community-driven, open-source project.
 
 **Contact**: 
-- GitHub: [@bricscoin26](https://github.com/bricscoin26)
+- Codeberg: [@Bricscoin_26](https://codeberg.org/Bricscoin_26)
 - Twitter: [@Bricscoin26](https://x.com/Bricscoin26)
 
 ---
@@ -234,7 +246,7 @@ Anonymous developer passionate about decentralization and cryptocurrency. Buildi
 
 BricsCoin is fully open source under the MIT License.
 
-**Repository**: https://github.com/bricscoin26/Bricscoin26
+**Repository**: https://codeberg.org/Bricscoin_26/Bricscoin
 
 Anyone can:
 - Review the code
@@ -257,7 +269,7 @@ This whitepaper is for informational purposes only. Cryptocurrency investments c
 ---
 
 **Website**: https://bricscoin26.org  
-**GitHub**: https://github.com/bricscoin26/Bricscoin26  
+**Codeberg**: https://codeberg.org/Bricscoin_26/Bricscoin  
 **License**: MIT
 
 *© 2026 BricsCoin Project. All rights reserved.*
