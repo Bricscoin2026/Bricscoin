@@ -17,6 +17,7 @@ import json
 import time
 import secrets
 from ecdsa import SigningKey, VerifyingKey, SECP256k1, BadSignatureError
+from ecdsa.util import sigdecode_der
 import io
 import qrcode
 import base64
@@ -653,9 +654,10 @@ def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: 
     """Verify transaction signature"""
     try:
         public_key = VerifyingKey.from_string(bytes.fromhex(public_key_hex), curve=SECP256k1)
-        return public_key.verify(bytes.fromhex(signature_hex), transaction_data.encode())
-    except BadSignatureError:
-        return False
+        tx_hash = hashlib.sha256(transaction_data.encode()).digest(); return public_key.verify_digest(bytes.fromhex(signature_hex), tx_hash, sigdecode=sigdecode_der)
+    except BadSignatureError as e:
+        print(f"BadSignatureError: {e}")
+        print(f"verify_signature returning False"); return False
 
 def generate_address_from_public_key(public_key_hex: str) -> str:
     """Generate BRICS address from public key - used to verify sender owns the address"""
@@ -727,6 +729,22 @@ async def get_active_miners():
 
     return {"miners": active_miners, "count": len(active_miners)}
 
+
+@api_router.get("/miners/stats")
+async def get_miners_stats():
+    from datetime import timedelta
+    activity_window = timedelta(minutes=5)
+    cutoff_time = (datetime.now(timezone.utc) - activity_window).isoformat()
+    active_workers = await db.miner_shares.distinct("worker", {"timestamp": {"$gte": cutoff_time}})
+    cutoff_24h = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    pipeline = [
+        {"$match": {"timestamp": {"$gte": cutoff_24h}}},
+        {"$group": {"_id": "$worker", "shares": {"$sum": 1}, "blocks": {"$sum": {"$cond": ["$is_block", 1, 0]}}, "last_seen": {"$max": "$timestamp"}}},
+        {"$sort": {"shares": -1}}
+    ]
+    stats = await db.miner_shares.aggregate(pipeline).to_list(100)
+    return {"active_miners": len(active_workers), "total_miners_24h": len(stats), "total_shares_24h": sum(m["shares"] for m in stats), "total_blocks_24h": sum(m["blocks"] for m in stats), "miners": [{"worker": m["_id"], "shares": m["shares"], "blocks": m["blocks"]} for m in stats[:20]]}
+
 @api_router.get("/")
 async def root():
     return {"message": "BricsCoin API", "version": "1.0.0"}
@@ -772,17 +790,17 @@ async def get_network_stats():
                     avg_block_time = total_time / num_intervals
                     # Bitcoin formula: hashrate = difficulty * 2^32 / actual_block_time
                     avg_difficulty = sum(b.get("difficulty", 1) for b in recent_blocks) / len(recent_blocks)
-                    hashrate_estimate = (avg_difficulty * (2 ** 32)) / avg_block_time
+                    hashrate_estimate = (avg_difficulty * (2 ** 41)) / avg_block_time
                 else:
                     # Fallback to theoretical
-                    hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+                    hashrate_estimate = (current_difficulty * (2 ** 41)) / TARGET_BLOCK_TIME
             except (ValueError, KeyError):
                 # Fallback to theoretical
-                hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+                hashrate_estimate = (current_difficulty * (2 ** 41)) / TARGET_BLOCK_TIME
         else:
-            hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+            hashrate_estimate = (current_difficulty * (2 ** 41)) / TARGET_BLOCK_TIME
     else:
-        hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+        hashrate_estimate = (current_difficulty * (2 ** 41)) / TARGET_BLOCK_TIME
     
     # ============ HASHRATE REALE DALLE SHARES ============
     # Calcola l'hashrate basandosi sulle shares ricevute negli ultimi 5 minuti
@@ -813,7 +831,7 @@ async def get_network_stats():
                 # Difficoltà media per share
                 avg_share_diff = weighted_difficulty / total_shares
                 # Hashrate = shares * difficulty * 2^32 / tempo
-                hashrate_from_shares = (total_shares * avg_share_diff * (2 ** 32)) / time_window
+                hashrate_from_shares = (total_shares * avg_share_diff * (2 ** 41)) / time_window
     except Exception as e:
         # Se la collezione non esiste ancora o c'è un errore, ignora
         pass
@@ -1015,7 +1033,7 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
         raise HTTPException(status_code=400, detail="Public key does not match sender address")
     
     # Create transaction data for verification (same format as client-side signing)
-    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{tx_request.timestamp}"
+    amount_str = str(int(tx_request.amount)) if tx_request.amount == int(tx_request.amount) else str(tx_request.amount); tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{amount_str}{tx_request.timestamp}"
     
     # CRITICAL: Verify the signature
     try:
@@ -1024,13 +1042,14 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
             failed_attempts[client_ip] += 1
             security_logger.warning(f"Invalid signature from {client_ip} for address {tx_request.sender_address}")
             raise HTTPException(status_code=400, detail="Invalid transaction signature")
-    except BadSignatureError:
+    except BadSignatureError as e:
+        print(f"BadSignatureError: {e}")
         failed_attempts[client_ip] += 1
         security_logger.warning(f"Bad signature from {client_ip}")
         raise HTTPException(status_code=400, detail="Invalid transaction signature")
     except Exception as e:
         security_logger.error(f"Signature verification error: {e}")
-        raise HTTPException(status_code=400, detail="Signature verification failed")
+        print("SIGNATURE VERIFICATION FAILED"); raise HTTPException(status_code=400, detail="Signature verification failed")
     
     # Check for replay attacks - timestamp must be recent (within 5 minutes)
     try:

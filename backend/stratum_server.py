@@ -82,7 +82,7 @@ def difficulty_to_nbits(difficulty: int) -> str:
     if difficulty <= 0:
         difficulty = 1
     # MAX TARGET USATO PER NBIT (lo stesso che useremo in verify_share)
-    max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+    max_target = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     target = max_target // difficulty
     target_hex = format(target, '064x')
     stripped = target_hex.lstrip('0') or '0'
@@ -327,7 +327,7 @@ async def verify_share(
         hash_int = int(block_hash_hex, 16)
 
         # Usa LO STESSO max_target di difficulty_to_nbits
-        max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+        max_target = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
         share_difficulty = max(1, int(share_diff))
         network_difficulty = max(1, int(network_diff))
@@ -343,7 +343,6 @@ async def verify_share(
 
         # Log dettagliato con 64 cifre hex (inclusi zeri iniziali)
         logger.info(
-            "POW_DEBUG | hash=%064x, share_target=%064x, block_target=%064x, "
             "share_diff=%d, net_diff=%d, is_share=%s, is_block=%s",
             hash_int,
             share_target,
@@ -402,7 +401,7 @@ class StratumMiner:
         elif method == "mining.submit":
             await self.handle_submit(msg_id, params)
         elif method == "mining.suggest_difficulty":
-            self.difficulty = max(1, float(params[0]) if params else 1)
+            self.difficulty = 1
             self.respond(msg_id, True)
             self.notify("mining.set_difficulty", [self.difficulty])
         elif method == "mining.configure":
