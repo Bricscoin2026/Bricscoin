@@ -96,11 +96,7 @@ Total Supply: 21,000,000 BRICS
 
 ### 3.3 Premine Justification
 
-The 4.76% premine is allocated for:
-- **Development** (40%): Ongoing protocol improvements
-- **Marketing** (30%): Community growth and adoption
-- **Liquidity** (20%): Exchange listings and market making
-- **Team** (10%): Core contributor compensation
+The 4.76% premine (1,000,000 BRICS) is allocated to development and marketing of the BricsCoin project.
 
 ---
 
