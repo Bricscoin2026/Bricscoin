@@ -226,6 +226,12 @@ def create_stratum_job(template:dict, miner_address:str, extranonce1:str="000000
 
 # ================= VERIFY SHARE =================
 async def verify_share(job:dict, extranonce1:str, extranonce2:str, ntime:str, nonce:str, network_diff:int) -> tuple:
+    """
+    Verifica se l'hash della share soddisfa il target di difficoltà.
+    
+    IMPORTANTE: Usa max_target = 2^256 - 1 per permettere QUALSIASI hash valido
+    quando la difficoltà è 1. La difficoltà scala linearmente da lì.
+    """
     key = f"{job['job_id']}-{extranonce2}-{nonce}"
     if key in recent_shares.get(job['miner_address'], set()):
         return False, False, "duplicate"
@@ -238,15 +244,31 @@ async def verify_share(job:dict, extranonce1:str, extranonce2:str, ntime:str, no
         header = struct.pack('<I',int(job['version'],16)) + bytes.fromhex(swap_endian_words(job['prevhash'])) + merkle_root + struct.pack('<I',int(ntime,16)) + struct.pack('<I',int(job['nbits'],16)) + struct.pack('<I',int(nonce,16))
         header_hash = double_sha256(header)
         block_hash_hex = reverse_bytes(header_hash).hex()
-        h = int(block_hash_hex,16)
-        max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
-        share_target = max_target//max(1,job.get('share_difficulty',1))
-        block_target = max_target//max(1,network_diff)
-        is_share = h<=share_target
-        is_block = h<=block_target
+        
+        # Converti hash in intero
+        hash_int = int(block_hash_hex, 16)
+        
+        # MAX_TARGET = 2^256 - 1 (massimo valore hash possibile)
+        # Con difficulty=1, QUALSIASI hash è valido
+        # Con difficulty=N, il target diventa MAX_TARGET/N
+        MAX_TARGET = (2 ** 256) - 1
+        
+        share_diff = max(1, job.get('share_difficulty', 1))
+        network_difficulty = max(1, network_diff)
+        
+        share_target = MAX_TARGET // share_diff
+        block_target = MAX_TARGET // network_difficulty
+        
+        is_share = hash_int <= share_target
+        is_block = hash_int <= block_target
+        
+        # Log per debug (rimuovere in produzione)
+        logger.debug(f"POW_DEBUG: hash={block_hash_hex[:16]}..., hash_int={hash_int}, share_target={share_target}, block_target={block_target}, is_share={is_share}, is_block={is_block}")
+        
         recent_shares.setdefault(job['miner_address'],set()).add(key)
         return is_share, is_block, block_hash_hex
-    except:
+    except Exception as e:
+        logger.error(f"verify_share error: {e}")
         return False, False, "error"
 
 # ================= STRATUM MINER =================
