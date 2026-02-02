@@ -9,7 +9,7 @@ A decentralized cryptocurrency powered by SHA256 Proof-of-Work.
 
 ## 🛡️ Security Audit Status
 
-**✅ SECURITY AUDIT PASSED** - January 2026
+**✅ SECURITY AUDIT PASSED** - February 2026
 
 | Category | Status | Tests |
 |----------|--------|-------|
@@ -47,7 +47,7 @@ A decentralized cryptocurrency powered by SHA256 Proof-of-Work.
 | Block Reward | 50 BRICS (halving every 210,000 blocks) |
 | Block Time | ~10 minutes |
 | Premine | 1,000,000 BRICS |
-| Transaction Fees | Free |
+| Transaction Fees | 0.05 BRICS (burned |
 
 ## Project Structure
 
@@ -181,7 +181,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## Links
 
 - **Website**: [bricscoin26.org](https://bricscoin26.org)
-- **GitHub**: [github.com/bricscoin26/Bricscoin26](https://github.com/bricscoin26/Bricscoin26)
+- **Codeberg**: [codeberg.org/Bricscoin_26/Bricscoin)
 
 ## Disclaimer
 
