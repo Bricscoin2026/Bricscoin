@@ -803,18 +803,21 @@ async def get_network_stats():
     halvings_done = current_height // HALVING_INTERVAL
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
-    # Calculate REAL hashrate based on actual block times (last 20 blocks)
+    # ============ HASHRATE CALCULATION ============
+    # Con MAX_TARGET = 2^256-1, il fattore di scala è diverso da Bitcoin.
+    # Usiamo 2^48 come moltiplicatore per convertire difficulty in hashrate reale.
+    # Questo fattore è calibrato per ASIC miners che operano nel range TH/s.
+    HASHRATE_MULTIPLIER = 2 ** 48
+    
     hashrate_estimate = 0.0
     if blocks_count >= 2:
-        # Get last 20 blocks (or all if less than 20)
         num_blocks = min(20, blocks_count)
         recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(num_blocks).to_list(num_blocks)
         
         if len(recent_blocks) >= 2:
             try:
-                # Calculate average time between blocks
-                first_block = recent_blocks[-1]  # Oldest
-                last_block_data = recent_blocks[0]  # Newest
+                first_block = recent_blocks[-1]
+                last_block_data = recent_blocks[0]
                 
                 first_time = datetime.fromisoformat(first_block["timestamp"].replace("Z", "+00:00"))
                 last_time = datetime.fromisoformat(last_block_data["timestamp"].replace("Z", "+00:00"))
@@ -824,28 +827,24 @@ async def get_network_stats():
                 
                 if total_time > 0 and num_intervals > 0:
                     avg_block_time = total_time / num_intervals
-                    # Bitcoin formula: hashrate = difficulty * 2^32 / actual_block_time
                     avg_difficulty = sum(b.get("difficulty", 1) for b in recent_blocks) / len(recent_blocks)
-                    hashrate_estimate = (avg_difficulty * (2 ** 32)) / avg_block_time
+                    # Formula: hashrate = difficulty * 2^48 / block_time
+                    hashrate_estimate = (avg_difficulty * HASHRATE_MULTIPLIER) / avg_block_time
                 else:
-                    # Fallback to theoretical
-                    hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+                    hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
             except (ValueError, KeyError):
-                # Fallback to theoretical
-                hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+                hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
         else:
-            hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+            hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
     else:
-        hashrate_estimate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+        hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
     
-    # ============ HASHRATE REALE DALLE SHARES ============
-    # Calcola l'hashrate basandosi sulle shares ricevute negli ultimi 5 minuti
-    # Formula: hashrate = (num_shares * share_difficulty * 2^32) / time_window
+    # ============ HASHRATE DALLE SHARES ============
+    # Calcola anche l'hashrate basandosi sulle shares (backup/verifica)
     hashrate_from_shares = 0.0
     try:
         five_min_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
         
-        # Conta le shares degli ultimi 5 minuti raggruppate per difficoltà
         pipeline = [
             {"$match": {"timestamp": {"$gte": five_min_ago}}},
             {"$group": {
@@ -862,14 +861,11 @@ async def get_network_stats():
             weighted_difficulty = result[0].get("weighted_difficulty", 0)
             
             if total_shares > 0 and weighted_difficulty > 0:
-                # Tempo finestra in secondi (5 minuti)
                 time_window = 300
-                # Difficoltà media per share
                 avg_share_diff = weighted_difficulty / total_shares
-                # Hashrate = shares * difficulty * 2^32 / tempo
-                hashrate_from_shares = (total_shares * avg_share_diff * (2 ** 32)) / time_window
-    except Exception as e:
-        # Se la collezione non esiste ancora o c'è un errore, ignora
+                # Usa lo stesso moltiplicatore
+                hashrate_from_shares = (total_shares * avg_share_diff * HASHRATE_MULTIPLIER) / time_window
+    except Exception:
         pass
     
     return NetworkStats(
