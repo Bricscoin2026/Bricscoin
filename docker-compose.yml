@@ -30,6 +30,7 @@ services:
 
   # Optional: BricsCoin Frontend (Web UI)
   bricscoin-frontend:
+    restart: unless-stopped
     image: node:20-alpine
     container_name: bricscoin-frontend
     working_dir: /app
