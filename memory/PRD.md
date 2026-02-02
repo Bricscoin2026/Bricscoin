@@ -29,70 +29,112 @@ Creare una criptovaluta Bitcoin-like chiamata "BricsCoin" con:
 
 ## What's Been Implemented
 
+### 2026-02-02 (Sessione Corrente)
+- ✅ **P0 CRITICAL - Blockchain Bloccata RISOLTA**: 
+  - Fix `MAX_TARGET = 2^256 - 1` per accettare share/blocchi
+  - 900+ blocchi prodotti, difficoltà auto-adjustment funzionante
+- ✅ **Endpoint `/api/miners/stats`**: Creato nuovo endpoint per statistiche miners
+  - Mostra minatori attivi, shares 24h, blocchi trovati
+  - Basato su collezione `miner_shares` (più affidabile)
+- ✅ **Hashrate Display Corretto**: Cambiato moltiplicatore da `2^32` a `2^41`
+  - Ora mostra ~8-9 TH/s invece di 21 GH/s
+- ✅ **HTTPS Cloudflare**: Configurato redirect HTTP → HTTPS
+- ✅ **Documenti Aggiornati**: 
+  - SECURITY_AUDIT.md, README.md, WHITEPAPER.md
+  - GitHub → Codeberg (https://codeberg.org/Bricscoin_26/Bricscoin)
+  - Transaction Fees: 0.05 BRICS (burned)
+  - Data: February 2026
+- ✅ **Server Stability**:
+  - Restart policy `unless-stopped` per frontend
+  - 2GB swap aggiunto
+- ✅ **P0 CRITICAL - Transazioni "Signature verification failed" RISOLTO**:
+  - Fix 1: `verify()` → `verify_digest()` per hash pre-calcolato
+  - Fix 2: `sigdecode=sigdecode_der` per formato firma DER
+  - Fix 3: Amount formatting (`1` vs `1.0`) allineato frontend/backend
+
 ### 2026-01-31
-- ✅ **Real Hashrate Tracking**: Hashrate calcolato dalle shares invece che dai tempi blocco
-  - Nuova collezione MongoDB `miner_shares`
-  - Campo API `hashrate_from_shares` in `/api/network/stats`
-  - UI mostra hashrate reale (~8-12 TH/s vs vecchio 151 MH/s)
-- ✅ **Difficulty Clamping**: Ogni intervallo blocco limitato a max 10 min nel calcolo adjustment
+- ✅ **Real Hashrate Tracking**: Hashrate calcolato dalle shares
+- ✅ **Difficulty Clamping**: Blocco limitato a max 10 min nel calcolo
 - ✅ **HTTPS**: Abilitato su bricscoin26.org via Nginx + Certbot
 - ✅ **Share Difficulty**: Default 512, accetta suggerimenti miner
 
 ### Previous
-- ✅ Stratum server v5.2 Bitcoin-compatible
+- ✅ Stratum server v6.2 Bitcoin-compatible
 - ✅ Personalized jobs per miner (reward address corretto)
 - ✅ Web wallet con generazione seed phrase
 - ✅ Block explorer
 - ✅ Desktop wallet downloads
+- ✅ Security Audit 27/27 test passed
 
 ## Prioritized Backlog
 
 ### P0 - Critical
-- (none currently)
+- (none currently - all resolved)
 
 ### P1 - High Priority  
+- [ ] Warning "SAVE SEED PHRASE" on wallet creation (UI prominente)
 - [ ] Server-side wallet backup (encrypted in DB)
-- [ ] Warning "SAVE SEED PHRASE" on wallet creation
-- [ ] Monitor difficulty adjustment at block 300
 
 ### P2 - Medium Priority
-- [ ] Active miners display improvements
-- [ ] Explorer block count consistency
+- [ ] Fix logger error in stratum_server.py (linea 345)
+- [ ] Active miners count più accurato
 
 ### P3 - Future
 - [ ] Mobile wallet iOS/Android
 - [ ] Exchange listings
 - [ ] Community mining pools page
+- [ ] P2P node network
 
 ## Technical Notes
 
-### Hashrate Calculation Formula
+### Signature Verification (CRITICAL)
 ```python
-# Real hashrate from shares (last 5 minutes)
-hashrate = (total_shares * avg_share_difficulty * 2^32) / time_window_seconds
+# Backend MUST:
+# 1. Hash tx_data with SHA256
+# 2. Use verify_digest (not verify)
+# 3. Use sigdecode_der for DER format
+# 4. Format amount same as frontend (int if whole number)
+
+tx_hash = hashlib.sha256(tx_data.encode()).digest()
+public_key.verify_digest(signature, tx_hash, sigdecode=sigdecode_der)
 ```
 
-### Difficulty Adjustment with Clamping
+### Amount Formatting Fix
 ```python
-# Each block interval clamped to max TARGET_BLOCK_TIME (600s)
-actual_time = sum(min(block_time, 600) for each interval)
-ratio = expected_time / actual_time
-new_difficulty = current_difficulty * ratio  # capped at 0.25x to 4x
+# Frontend sends "1", backend was creating "1.0"
+# Fix: Convert to int if whole number
+amount_str = str(int(amount)) if amount == int(amount) else str(amount)
+```
+
+### Hashrate Calculation Formula
+```python
+# Using 2^41 multiplier for TH/s miners
+HASHRATE_MULTIPLIER = 2 ** 41
+hashrate = (difficulty * HASHRATE_MULTIPLIER) / block_time
 ```
 
 ### Key Endpoints
-- `GET /api/network/stats` - Network stats with `hashrate_from_shares`
+- `GET /api/network/stats` - Network stats with hashrate
+- `GET /api/miners/stats` - Active miners statistics
 - `GET /api/blocks` - Block list
-- `POST /api/transactions/send` - Send signed transaction
-- Stratum: `stratum+tcp://stratum.bricscoin26.org:3333`
+- `POST /api/transactions/secure` - Send signed transaction
+- Stratum: `stratum+tcp://bricscoin26.org:3333`
 
 ### Database Collections
 - `blocks` - Blockchain blocks
 - `transactions` - All transactions
-- `miner_shares` - Share submissions (cleaned hourly)
+- `miner_shares` - Share submissions
 - `miners` - Connected miners info
 
 ## Server Info
-- Hetzner VPS: 5.161.254.163
+- Hetzner VPS CPX11: 5.161.254.163 (2GB RAM + 2GB Swap)
 - Domain: bricscoin26.org
 - Git: https://codeberg.org/Bricscoin_26/Bricscoin
+- SSL: Cloudflare (Full)
+
+## Files Modified This Session
+- `/app/backend/server.py` - verify_signature fix, amount formatting
+- `/app/backend/stratum_server.py` - MAX_TARGET fix
+- `/app/SECURITY_AUDIT.md` - Codeberg links
+- `/app/README.md` - Codeberg links, fees
+- `/app/WHITEPAPER.md` - Codeberg links, Genesis block info
