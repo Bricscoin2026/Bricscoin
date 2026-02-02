@@ -285,7 +285,7 @@ def create_stratum_job(
     logger.info(f"Job {job_id}: block #{template['index']}, miner={miner_address[:20]}...")
     return job
 
-# ================= VERIFY SHARE (PRODUZIONE) =================
+# ================= VERIFY SHARE =================
 async def verify_share(
     job: dict,
     extranonce1: str,
@@ -295,25 +295,24 @@ async def verify_share(
     network_diff: int,
     share_diff: float,
 ) -> tuple:
-    """
-    Verifica di uno share e, se abbastanza buono, di un blocco valido di rete.
+    """Verifica di uno share e, se abbastanza buono, di un blocco valido di rete.
 
-    - Usa lo stesso max_target del backend (check_difficulty in server.py).
-    - network_diff controlla la difficoltà di rete (blocchi).
-    - share_diff controlla la difficoltà delle shares inviate dal miner.
+    - Usa una logica di difficoltà Bitcoin-style allineata a quella del backend (`check_difficulty`).
+    - `network_diff` controlla la difficoltà di rete (blocchi).
+    - `share_diff` controlla la difficoltà delle shares inviate dal miner.
     """
     key = f"{job['job_id']}-{extranonce2}-{nonce}"
     if key in recent_shares.get(job['miner_address'], set()):
         return False, False, "duplicate"
     try:
-        coinbase_bytes = bytes.fromhex(
-            job['coinb1'] + extranonce1 + extranonce2 + job['coinb2']
-        )
+        # Ricostruisci coinbase e merkle root (stile Bitcoin)
+        coinbase_bytes = bytes.fromhex(job['coinb1'] + extranonce1 + extranonce2 + job['coinb2'])
         coinbase_hash = double_sha256(coinbase_bytes)
         merkle_root = coinbase_hash
         for branch in job.get('merkle_branch', []):
             merkle_root = double_sha256(merkle_root + bytes.fromhex(branch))
 
+        # Header di blocco stile Bitcoin
         header = (
             struct.pack('<I', int(job['version'], 16))
             + bytes.fromhex(swap_endian_words(job['prevhash']))
@@ -326,7 +325,7 @@ async def verify_share(
         block_hash_hex = reverse_bytes(header_hash).hex()
         hash_int = int(block_hash_hex, 16)
 
-        # Stesso max_target del backend (server.py check_difficulty)
+        # Usa lo stesso max_target del backend (check_difficulty in server.py)
         max_target = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
         share_difficulty = max(1, int(share_diff))
@@ -342,14 +341,12 @@ async def verify_share(
             recent_shares.setdefault(job['miner_address'], set()).add(key)
 
         logger.info(
-            f"POW_DEBUG: hash={hash_int:x}, share_target={share_target:x}, "
-            f"block_target={block_target:x}, share_diff={share_difficulty}, "
-            f"net_diff={network_difficulty}, is_share={is_share}, is_block={is_block}"
+            f"POW_DEBUG: hash={hash_int:x}, share_target={share_target:x}, block_target={block_target:x}, "
+            f"share_diff={share_difficulty}, net_diff={network_difficulty}, is_share={is_share}, is_block={is_block}"
         )
 
         return is_share, is_block, block_hash_hex
-    except Exception as e:
-        logger.error(f"verify_share error: {e}")
+    except Exception:
         return False, False, "error"
 
 # ================= STRATUM MINER =================
