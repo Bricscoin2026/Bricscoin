@@ -186,6 +186,7 @@ All wallets use:
 - **Rate Limiting**: Protection against DDoS attacks
 - **Input Validation**: All inputs sanitized server-side
 - **Replay Attack Prevention**: Timestamped, signed transactions
+- **Fee Burning**: Transaction fees are burned, permanently removing them from circulation
 - **Client-Side Signing**: Private keys never exposed
 
 ### 7.2 Cryptographic Standards
