@@ -727,6 +727,60 @@ async def get_active_miners():
 
     return {"miners": active_miners, "count": len(active_miners)}
 
+
+@api_router.get("/miners/stats")
+async def get_miners_stats():
+    """
+    Statistiche sui minatori attivi basate sulla collezione miner_shares.
+    Più affidabile rispetto alla collezione miners perché traccia l'attività reale.
+    """
+    # Finestra di attività: ultimi 5 minuti
+    activity_window = timedelta(minutes=5)
+    cutoff_time = (datetime.now(timezone.utc) - activity_window).isoformat()
+    
+    # Conta minatori unici che hanno inviato share negli ultimi 5 minuti
+    active_workers = await db.miner_shares.distinct(
+        "worker",
+        {"timestamp": {"$gte": cutoff_time}}
+    )
+    
+    # Statistiche aggregate
+    total_shares_24h_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    
+    pipeline = [
+        {"$match": {"timestamp": {"$gte": total_shares_24h_cutoff}}},
+        {"$group": {
+            "_id": "$worker",
+            "shares": {"$sum": 1},
+            "blocks": {"$sum": {"$cond": ["$is_block", 1, 0]}},
+            "last_seen": {"$max": "$timestamp"}
+        }},
+        {"$sort": {"shares": -1}}
+    ]
+    
+    miner_stats = await db.miner_shares.aggregate(pipeline).to_list(100)
+    
+    # Calcola hashrate stimato (approssimativo basato sulle share)
+    total_shares = sum(m.get("shares", 0) for m in miner_stats)
+    total_blocks = sum(m.get("blocks", 0) for m in miner_stats)
+    
+    return {
+        "active_miners": len(active_workers),
+        "total_miners_24h": len(miner_stats),
+        "total_shares_24h": total_shares,
+        "total_blocks_24h": total_blocks,
+        "miners": [
+            {
+                "worker": m["_id"],
+                "shares": m["shares"],
+                "blocks": m["blocks"],
+                "last_seen": m["last_seen"]
+            }
+            for m in miner_stats[:20]  # Top 20 miners
+        ]
+    }
+
+
 @api_router.get("/")
 async def root():
     return {"message": "BricsCoin API", "version": "1.0.0"}
