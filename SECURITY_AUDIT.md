@@ -149,10 +149,10 @@ tests/test_security_audit.py::TestInputValidation::test_invalid_brics_address_to
 ## Contact
 
 - **Website**: [bricscoin26.org](https://bricscoin26.org)
-- **GitHub**: [github.com/bricscoin26/Bricscoin26](https://github.com/bricscoin26/Bricscoin26)
-- **Security Issues**: Open an issue on GitHub with `[SECURITY]` tag
+- **Codeberg**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)
+- **Security Issues**: Open an issue on Codeberg with `[SECURITY]` tag
 
 ---
 
 **Audit conducted by**: BricsCoin Development Team  
-**Last Updated**: January 2026
+**Last Updated**: February 2026

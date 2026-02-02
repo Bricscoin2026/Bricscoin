@@ -47,7 +47,7 @@ A decentralized cryptocurrency powered by SHA256 Proof-of-Work.
 | Block Reward | 50 BRICS (halving every 210,000 blocks) |
 | Block Time | ~10 minutes |
 | Premine | 1,000,000 BRICS |
-| Transaction Fees | Free |
+| Transaction Fees | 0.05 BRICS (burned) |
 
 ## Project Structure
 
@@ -74,8 +74,8 @@ bricscoin/
 
 ```bash
 # Clone the repository
-git clone https://github.com/bricscoin26/Bricscoin26.git
-cd Bricscoin26
+git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
+cd Bricscoin
 
 # Copy environment files
 cp backend/.env.example backend/.env
@@ -181,7 +181,8 @@ This project is open source and available under the [MIT License](LICENSE).
 ## Links
 
 - **Website**: [bricscoin26.org](https://bricscoin26.org)
-- **GitHub**: [github.com/bricscoin26/Bricscoin26](https://github.com/bricscoin26/Bricscoin26)
+- **Codeberg**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)
+- **Twitter**: [@Bricscoin26](https://x.com/Bricscoin26)
 
 ## Disclaimer
 
