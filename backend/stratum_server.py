@@ -81,6 +81,7 @@ def difficulty_to_nbits(difficulty: int) -> str:
     # Usato solo per compatibilità con i miner (Stratum header)
     if difficulty <= 0:
         difficulty = 1
+    # MAX TARGET USATO PER NBIT (lo stesso che useremo in verify_share)
     max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
     target = max_target // difficulty
     target_hex = format(target, '064x')
@@ -325,8 +326,8 @@ async def verify_share(
         block_hash_hex = reverse_bytes(header_hash).hex()
         hash_int = int(block_hash_hex, 16)
 
-        # Usa lo stesso max_target del backend (check_difficulty in server.py)
-        max_target = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        # Usa LO STESSO max_target di difficulty_to_nbits
+        max_target = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
 
         share_difficulty = max(1, int(share_diff))
         network_difficulty = max(1, int(network_diff))
@@ -340,9 +341,17 @@ async def verify_share(
         if is_share:
             recent_shares.setdefault(job['miner_address'], set()).add(key)
 
+        # Log dettagliato con 64 cifre hex (inclusi zeri iniziali)
         logger.info(
-            f"POW_DEBUG: hash={hash_int:x}, share_target={share_target:x}, block_target={block_target:x}, "
-            f"share_diff={share_difficulty}, net_diff={network_difficulty}, is_share={is_share}, is_block={is_block}"
+            "POW_DEBUG | hash=%064x, share_target=%064x, block_target=%064x, "
+            "share_diff=%d, net_diff=%d, is_share=%s, is_block=%s",
+            hash_int,
+            share_target,
+            block_target,
+            share_difficulty,
+            network_difficulty,
+            is_share,
+            is_block,
         )
 
         return is_share, is_block, block_hash_hex
@@ -658,4 +667,4 @@ class StratumServer:
 # ================= MAIN =================
 if __name__ == "__main__":
     server = StratumServer()
-    asyncio.run(server.start()) 
+    asyncio.run(server.start())
