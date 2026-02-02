@@ -197,9 +197,9 @@ All wallets use:
 ### 8.1 Genesis Block
 
 - Block Height: 0  
-- Block Hash: `77a7bab2aa8817c749007d880678d1ecb3311b90b0eb7d5d0eb029050b4449f5`  
+- Block Hash: `bc49816bc68faa70357d753091fc917bd1c121aa4c86d660bf25a3f0679d3e4c`  
 - Previous Hash: `0000000000000000000000000000000000000000000000000000000000000000`  
-- Timestamp: 2026-02-01 22:20:20 (UTC)  
+- Timestamp: 02/02/2026, 01:24:10 (UTC)  
 - Miner: `genesis`  
 - Nonce: 0  
 - Difficulty: 1,000,000  
