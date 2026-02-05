@@ -21,71 +21,19 @@ BricsCoin seeks to deliver:
 
 ## 2. Technical Specifications
 
-|
- Parameter              
-|
- Value                              
-|
-|
-------------------------
-|
-------------------------------------
-|
-|
- Consensus Algorithm    
-|
- SHA-256 Proof-of-Work (double hash)
-|
-|
- Maximum Supply         
-|
- 21,000,000 BRICS                   
-|
-|
- Initial Block Reward   
-|
- 50 BRICS                           
-|
-|
- Halving Interval       
-|
- Every 210,000 blocks               
-|
-|
- Target Block Time      
-|
- 10 minutes                         
-|
-|
- Difficulty Adjustment  
-|
- Dynamic (Bitcoin-style retargeting)
-|
-|
- Initial Difficulty     
-|
- 1                                  
-|
-|
- Transaction Fee        
-|
- 0.05 BRICS (burned)                
-|
-|
- Premine                
-|
- 1,000,000 BRICS (≈4.76%)           
-|
-|
- Address Format         
-|
- Starts with "BRICS"                
-|
-|
- Cryptography           
-|
- ECDSA secp256k1 (signatures)       
-|
+| Parameter                  | Value                                      |
+|----------------------------|--------------------------------------------|
+| Consensus Algorithm        | SHA-256 Proof-of-Work (double hash)        |
+| Maximum Supply             | 21,000,000 BRICS                           |
+| Initial Block Reward       | 50 BRICS                                   |
+| Halving Interval           | Every 210,000 blocks                       |
+| Target Block Time          | 10 minutes                                 |
+| Difficulty Adjustment      | Dynamic (Bitcoin-style retargeting)        |
+| Initial Difficulty         | 1                                          |
+| Transaction Fee            | 0.05 BRICS (burned)                        |
+| Premine                    | 1,000,000 BRICS (≈4.76%)                   |
+| Address Format             | Starts with "BRICS"                        |
+| Cryptography               | ECDSA secp256k1 (signatures)               |
 
 ### 2.1 Block Structure
 Blocks follow Bitcoin-compatible format:
@@ -111,69 +59,13 @@ Difficulty adjusts every 2016 blocks (≈2 weeks at target) to maintain ~10-minu
 ### 3.2 Emission Schedule
 Halving occurs every 210,000 blocks (~4 years at target pace):
 
-|
- Phase 
-|
- Blocks              
-|
- Reward per Block 
-|
- Cumulative Mined 
-|
-|
--------
-|
----------------------
-|
-------------------
-|
-------------------
-|
-|
- 1     
-|
- 0 – 210,000         
-|
- 50 BRICS         
-|
- 10,500,000       
-|
-|
- 2     
-|
- 210,001 – 420,000   
-|
- 25 BRICS         
-|
- 15,750,000       
-|
-|
- 3     
-|
- 420,001 – 630,000   
-|
- 12.5 BRICS       
-|
- 18,375,000       
-|
-|
- 4     
-|
- 630,001 – 840,000   
-|
- 6.25 BRICS       
-|
- 19,687,500       
-|
-|
- ...   
-|
- ...                 
-|
- Halving continues
-|
- → 21,000,000     
-|
+| Phase | Blocks              | Reward per Block | Cumulative Mined   |
+|-------|---------------------|------------------|--------------------|
+| 1     | 0 – 210,000         | 50 BRICS         | 10,500,000         |
+| 2     | 210,001 – 420,000   | 25 BRICS         | 15,750,000         |
+| 3     | 420,001 – 630,000   | 12.5 BRICS       | 18,375,000         |
+| 4     | 630,001 – 840,000   | 6.25 BRICS       | 19,687,500         |
+| ...   | ...                 | Halving continues| → 21,000,000       |
 
 ### 3.3 Fee Burning Mechanism
 Every transaction incurs a fixed 0.05 BRICS fee, which is permanently removed from circulation (sent to a provably unspendable address), creating deflationary pressure over time.
