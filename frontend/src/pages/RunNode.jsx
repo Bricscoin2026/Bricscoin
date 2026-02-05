@@ -211,6 +211,35 @@ curl http://localhost:8001/api/network/stats`,
         )}
       </Card>
 
+      {/* Cost Estimate */}
+      <Card className="bg-card border-white/10">
+        <CardHeader className="border-b border-white/10">
+          <CardTitle className="font-heading flex items-center gap-2">
+            <Server className="w-5 h-5 text-primary" />
+            Estimated Cost
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-black/30 rounded-sm border border-white/10">
+              <h4 className="font-medium text-primary">Hetzner</h4>
+              <p className="text-2xl font-bold mt-1">€4-5/mo</p>
+              <p className="text-xs text-muted-foreground">CPX11 - 2GB RAM</p>
+            </div>
+            <div className="p-4 bg-black/30 rounded-sm border border-white/10">
+              <h4 className="font-medium text-primary">DigitalOcean</h4>
+              <p className="text-2xl font-bold mt-1">$6/mo</p>
+              <p className="text-xs text-muted-foreground">Basic Droplet - 1GB RAM</p>
+            </div>
+            <div className="p-4 bg-black/30 rounded-sm border border-white/10">
+              <h4 className="font-medium text-primary">Vultr</h4>
+              <p className="text-2xl font-bold mt-1">$5/mo</p>
+              <p className="text-xs text-muted-foreground">Cloud Compute - 1GB RAM</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Download */}
       <Card className="bg-card border-white/10">
         <CardContent className="p-6">
