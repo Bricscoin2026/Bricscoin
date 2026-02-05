@@ -1,0 +1,68 @@
+# BricsCoin Node - Docker Compose
+# Run your own BricsCoin node and join the network!
+#
+# Quick Start:
+#   docker compose up -d
+#
+# With Stratum Mining:
+#   docker compose --profile with-stratum up -d
+
+services:
+  # MongoDB database
+  bricscoin-db:
+    image: mongo:7
+    container_name: bricscoin-db
+    volumes:
+      - bricscoin-data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: mongosh --eval "db.adminCommand('ping')"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # BricsCoin Node
+  bricscoin-node:
+    build: .
+    container_name: bricscoin-node
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URL=mongodb://bricscoin-db:27017
+      - DB_NAME=bricscoin
+      - NODE_ID=${NODE_ID:-}
+      - NODE_URL=${NODE_URL:-}
+      - SEED_NODES=${SEED_NODES:-https://bricscoin26.org}
+      - CORS_ORIGINS=*
+    depends_on:
+      bricscoin-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:8001/api/network/stats || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Stratum Mining Server (optional)
+  bricscoin-stratum:
+    build: .
+    container_name: bricscoin-stratum
+    ports:
+      - "3333:3333"
+    environment:
+      - MONGO_URL=mongodb://bricscoin-db:27017
+      - DB_NAME=bricscoin
+      - NODE_URL=${NODE_URL:-}
+    command: python3 stratum_server.py
+    depends_on:
+      bricscoin-db:
+        condition: service_healthy
+      bricscoin-node:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - with-stratum
+
+volumes:
+  bricscoin-data:
