@@ -1,255 +1,254 @@
 # BricsCoin Whitepaper
-## A Decentralized SHA256 Proof-of-Work Cryptocurrency
 
-**Version 1.0 - February 2026**  
-**Author: Jabo86**
-
----
+**A Decentralized SHA-256 Proof-of-Work Cryptocurrency**  
+**Version 1.1 – February 2026**  
+**Author: Jabo86 (Founder & Lead Developer)**
 
 ## Abstract
-
-BricsCoin (BRICS) is a decentralized cryptocurrency built on the proven SHA256 Proof-of-Work consensus mechanism. Designed for hardware mining compatibility, BricsCoin enables anyone with ASIC mining equipment to participate in securing the network and earning rewards. With a fixed supply of 21 million coins and transaction fees of 0.05 BRICS that are burned, BricsCoin aims to be a fair, transparent, and community-driven digital currency.
-
----
+BricsCoin (ticker: BRICS) is a decentralized, open-source cryptocurrency implementing the SHA-256 Proof-of-Work consensus mechanism. It is designed for compatibility with existing ASIC mining hardware, enabling broad participation in network security and reward distribution. With a capped supply of 21,000,000 coins, a fixed transaction fee of 0.05 BRICS (permanently burned), and a transparent premine allocation, BricsCoin prioritizes fairness, verifiability, and long-term sustainability as a community-driven digital asset.
 
 ## 1. Introduction
 
 ### 1.1 Background
+Proof-of-Work, as pioneered by Bitcoin in 2009, remains the most battle-tested mechanism for achieving decentralized consensus in permissionless networks. BricsCoin adopts this model without modification to the core consensus rules, using SHA-256 hashing to ensure cryptographic security and hardware compatibility.
 
-Since Bitcoin's inception in 2009, Proof-of-Work has proven to be the most secure and decentralized consensus mechanism for digital currencies. BricsCoin builds upon this foundation, implementing a clean SHA256-based blockchain optimized for modern ASIC mining hardware.
-
-### 1.2 Vision
-
-BricsCoin's mission is to create a truly decentralized currency that:
-- Remains accessible to hardware miners worldwide
-- Maintains low transaction fees for all users
-- Provides transparent, verifiable transactions
-- Operates as a fully open-source project
-
----
+### 1.2 Objectives
+BricsCoin seeks to deliver:
+- Accessible mining for SHA-256 ASIC owners worldwide
+- Predictable, low transaction costs via burned fees
+- Full transparency through open-source code and verifiable parameters
+- No central authority, no ICO, no pre-sale – pure code-driven issuance
 
 ## 2. Technical Specifications
 
-| Parameter | Value |
-|-----------|-------|
-| **Algorithm** | SHA256 (Double SHA256) |
-| **Consensus** | Proof-of-Work |
-| **Max Supply** | 21,000,000 BRICS |
-| **Block Reward** | 50 BRICS |
-| **Halving Interval** | Every 210,000 blocks |
-| **Target Block Time** | ~10 minutes |
-| **Difficulty Adjustment** | Dynamic |
-| **Initial Difficulty** | 1 |
-| **Transaction Fees** | 0.05 BRICS (burned) |
-| **Premine** | 1,000,000 BRICS (4.76%) |
-| **Address Prefix** | BRICS |
+|
+ Parameter              
+|
+ Value                              
+|
+|
+------------------------
+|
+------------------------------------
+|
+|
+ Consensus Algorithm    
+|
+ SHA-256 Proof-of-Work (double hash)
+|
+|
+ Maximum Supply         
+|
+ 21,000,000 BRICS                   
+|
+|
+ Initial Block Reward   
+|
+ 50 BRICS                           
+|
+|
+ Halving Interval       
+|
+ Every 210,000 blocks               
+|
+|
+ Target Block Time      
+|
+ 10 minutes                         
+|
+|
+ Difficulty Adjustment  
+|
+ Dynamic (Bitcoin-style retargeting)
+|
+|
+ Initial Difficulty     
+|
+ 1                                  
+|
+|
+ Transaction Fee        
+|
+ 0.05 BRICS (burned)                
+|
+|
+ Premine                
+|
+ 1,000,000 BRICS (≈4.76%)           
+|
+|
+ Address Format         
+|
+ Starts with "BRICS"                
+|
+|
+ Cryptography           
+|
+ ECDSA secp256k1 (signatures)       
+|
 
-### 2.1 SHA256 Algorithm
-
-BricsCoin uses the same SHA256 hashing algorithm as Bitcoin, ensuring:
-- Proven security with over 15 years of real-world testing
-- Compatibility with existing ASIC mining hardware (Bitaxe, Antminer, etc.)
-- Well-understood cryptographic properties
-
-### 2.2 Block Structure
-
-Each block contains:
-- Block index (height)
-- Timestamp (Unix epoch)
-- List of transactions
-- Proof (nonce)
+### 2.1 Block Structure
+Blocks follow Bitcoin-compatible format:
+- Version
 - Previous block hash
-- Merkle root of transactions
-- Miner address
-- Difficulty target
+- Merkle root
+- Timestamp (Unix)
+- Difficulty bits
+- Nonce
+- List of transactions
+- Coinbase transaction (reward to miner address)
 
-### 2.3 Difficulty Adjustment
-
-The network automatically adjusts mining difficulty to maintain consistent block times:
-- Target: 1 block per ~10 minutes
-- Adjustment: Based on recent block times
-- This ensures stable block production regardless of total network hashrate
-
----
+### 2.2 Difficulty Retargeting
+Difficulty adjusts every 2016 blocks (≈2 weeks at target) to maintain ~10-minute intervals, based on actual time taken for the previous period.
 
 ## 3. Tokenomics
 
 ### 3.1 Supply Distribution
-
-Total Supply: 21,000,000 BRICS ├── Premine: 1,000,000 BRICS (4.76%) │ └── Development, marketing, liquidity └── Mining Rewards: 20,000,000 BRICS (95.24%) └── Distributed to miners over time
-
+- **Total Supply**: 21,000,000 BRICS
+- **Premine**: 1,000,000 BRICS (allocated transparently for development, marketing, and initial liquidity; held in public addresses)
+- **Mined Supply**: 20,000,000 BRICS (distributed exclusively via block rewards to miners)
 
 ### 3.2 Emission Schedule
+Halving occurs every 210,000 blocks (~4 years at target pace):
 
-| Phase | Blocks | Reward | Total Mined |
-|-------|--------|--------|-------------|
-| 1 | 0 - 210,000 | 50 BRICS | 10,500,000 |
-| 2 | 210,001 - 420,000 | 25 BRICS | 5,250,000 |
-| 3 | 420,001 - 630,000 | 12.5 BRICS | 2,625,000 |
-| 4 | 630,001 - 840,000 | 6.25 BRICS | 1,312,500 |
-| ... | ... | Halving continues | ... |
+|
+ Phase 
+|
+ Blocks              
+|
+ Reward per Block 
+|
+ Cumulative Mined 
+|
+|
+-------
+|
+---------------------
+|
+------------------
+|
+------------------
+|
+|
+ 1     
+|
+ 0 – 210,000         
+|
+ 50 BRICS         
+|
+ 10,500,000       
+|
+|
+ 2     
+|
+ 210,001 – 420,000   
+|
+ 25 BRICS         
+|
+ 15,750,000       
+|
+|
+ 3     
+|
+ 420,001 – 630,000   
+|
+ 12.5 BRICS       
+|
+ 18,375,000       
+|
+|
+ 4     
+|
+ 630,001 – 840,000   
+|
+ 6.25 BRICS       
+|
+ 19,687,500       
+|
+|
+ ...   
+|
+ ...                 
+|
+ Halving continues
+|
+ → 21,000,000     
+|
 
-### 3.3 Premine Justification
-
-The 4.76% premine (1,000,000 BRICS) is allocated to development and marketing of the BricsCoin project.
-
----
+### 3.3 Fee Burning Mechanism
+Every transaction incurs a fixed 0.05 BRICS fee, which is permanently removed from circulation (sent to a provably unspendable address), creating deflationary pressure over time.
 
 ## 4. Mining
 
-### 4.1 Hardware Requirements
-
-BricsCoin is optimized for SHA256 ASIC miners:
-- **Recommended**: Bitaxe, Antminer S19/S21, Whatsminer M50/M60
-- **Minimum**: Any SHA256-capable ASIC
-- **Not Recommended**: CPU/GPU mining (inefficient)
+### 4.1 Hardware Compatibility
+Optimized for SHA-256 ASICs:
+- Recommended: Bitaxe, Antminer S-series, Whatsminer M-series
+- Inefficient: CPU/GPU mining (not viable)
 
 ### 4.2 Stratum Protocol
+Miners connect via standard Stratum:
+- Pool: `stratum+tcp://bricscoin26.org:3333`
+- Username: Your BRICS wallet address
+- Password: `x` (arbitrary)
 
-Miners connect via the standard Stratum protocol:
-Pool: stratum+tcp://bricscoin26.org:3333 Username: <your_BRICS_address> Password: x
+Solo mining and future decentralized pools (e.g., P2Pool) are planned.
 
-
-### 4.3 Solo vs Pool Mining
-
-Currently, BricsCoin operates with a central mining pool. Future developments include:
-- Decentralized pool protocols
-- P2Pool support
-- Solo mining node software
-
----
-
-## 5. Wallet
+## 5. Wallets
 
 ### 5.1 Web Wallet
-
-Available at https://bricscoin26.org/wallet
-- Create new wallets
-- Import existing wallets via seed phrase
-- Send and receive BRICS
-- View transaction history
+- Hosted at https://bricscoin26.org/wallet
+- Progressive Web App (PWA) support
+- Client-side key generation and signing (private keys never leave device)
 
 ### 5.2 Desktop Wallet (BricsCoin Core)
+- Electron-based full node
+- Platforms: Windows, macOS, Linux
+- P2P synchronization, block validation, secure signing
 
-Full-featured desktop application:
-- Available for Linux, Windows, macOS
-- P2P network synchronization
-- Secure client-side transaction signing
-- Private keys never leave your device
-
-### 5.3 Security Model
-
-All wallets use:
-- **ECDSA (secp256k1)**: Same elliptic curve as Bitcoin
-- **Client-side signing**: Private keys never transmitted
-- **12-word seed phrases**: BIP39-compatible recovery
-
----
+### 5.3 Key Security Features
+- ECDSA secp256k1 signatures
+- BIP-39 12-word mnemonics
+- Client-side transaction construction and signing
 
 ## 6. Network Architecture
+Current: Centralized bootstrap node + Stratum pool + API layer  
+Future Roadmap:
+- Multiple independent full nodes
+- P2P node discovery and gossip
+- Decentralized mining pools
+- Enhanced resilience against central points
 
-### 6.1 Current Architecture
+## 7. Security Overview
+- Client-side signing
+- Server-side input validation (Pydantic)
+- Rate limiting & IP blacklisting
+- CORS restrictions
+- Security headers (HSTS, CSP, X-Frame-Options, etc.)
+- Replay protection via timestamps
+- Comprehensive audit passed (27/27 tests, February 2026) – see SECURITY_AUDIT.md
 
-[Miners] <--Stratum--> [Pool Server] <--API--> [Blockchain Node] | [Web Wallet] <----------- HTTPS -------------------->[API] [Desktop Wallet] <----------------------------------->[API]
+## 8. Launch & Status
+- **Mainnet Launch**: February 2026
+- **Genesis Block**: Timestamp ≈ February 2, 2026 (exact details in blockchain)
+- **Current Features**: Web/desktop wallets, block explorer, Stratum mining pool, open-source code
+- **Codebase**: Fully auditable on Codeberg
 
-
-### 6.2 Future Decentralization Roadmap
-
-1. **Phase 1** (Current): Centralized node + pool  
-2. **Phase 2**: Multiple independent nodes  
-3. **Phase 3**: P2P node discovery  
-4. **Phase 4**: Full decentralization  
-
----
-
-## 7. Security
-
-### 7.1 Implemented Measures
-
-- **CORS Protection**: API restricted to authorized origins
-- **Rate Limiting**: Protection against DDoS attacks
-- **Input Validation**: All inputs sanitized server-side
-- **Replay Attack Prevention**: Timestamped, signed transactions
-- **Fee Burning**: Transaction fees are burned, permanently removing them from circulation
-- **Client-Side Signing**: Private keys never exposed
-
-### 7.2 Cryptographic Standards
-
-- SHA256 for block hashing
-- ECDSA (secp256k1) for transaction signatures
-- Merkle trees for transaction verification
-
----
-
-## 8. Status: LAUNCHED ✅
-
-### Completed (February 2026)
-
-- [x] Mainnet launch
-- [x] Web wallet with instant transactions
-- [x] Block explorer
-- [x] Hardware mining support (Stratum protocol)
-- [x] Desktop wallet (BricsCoin Core) - Linux, Windows, macOS
-- [x] Open source code on Codeberg
-- [x] Security audit completed
-- [x] Transaction fee: 0.05 BRICS (burned)
-
-### 8.1 Genesis Block
-
-- Block Height: 0  
-- Block Hash: `bc49816bc68faa70357d753091fc917bd1c121aa4c86d660bf25a3f0679d3e4c`  
-- Previous Hash: `0000000000000000000000000000000000000000000000000000000000000000`  
-- Timestamp: 02/02/2026, 01:24:10 (UTC)  
-- Miner: `genesis`  
-- Nonce: 0  
-- Difficulty: 1,000,000  
-- Mining Reward: 50 BRICS  
-- Transactions: 1  
-
-- [x] Bitcoin-style difficulty (1000)
-
----
-
-## 9. Team
-
-### Jabo86 - Founder & Lead Developer
-
-Anonymous developer passionate about decentralization and cryptocurrency. Building BricsCoin as a community-driven, open-source project.
-
-**Contact**: 
-- Codeberg: [@Bricscoin_26](https://codeberg.org/Bricscoin_26)
-- Twitter: [@Bricscoin26](https://x.com/Bricscoin26)
-
----
+## 9. Team & Governance
+- **Founder & Lead Developer**: Jabo86 – Independent developer focused on decentralization and open-source PoW systems.
+- Governance: Code-driven; no central team or foundation. Community contributions via pull requests.
 
 ## 10. Open Source
-
-BricsCoin is fully open source under the MIT License.
-
-**Repository**: https://codeberg.org/Bricscoin_26/Bricscoin
-
-Anyone can:
-- Review the code
-- Submit improvements
-- Fork the project
-- Run their own node
-
----
+Licensed under the **MIT License**.  
+Repository: https://codeberg.org/Bricscoin_26/Bricscoin  
+Anyone may review, fork, modify, or run nodes.
 
 ## 11. Conclusion
-
-BricsCoin represents a return to the fundamental principles of cryptocurrency: decentralization, transparency, and community ownership. By leveraging proven SHA256 technology and maintaining an open-source approach, we aim to build a sustainable digital currency for the future.
-
----
+BricsCoin revives the core cypherpunk principles of cryptocurrency: sound money through Proof-of-Work, fixed supply, and absolute decentralization. By building directly on proven SHA-256 technology while adding modern tooling (web/desktop wallets, audited security), it offers a transparent platform for experimentation and value transfer.
 
 ## 12. Disclaimer
-
-This whitepaper is for informational purposes only. Cryptocurrency investments carry significant risk. BricsCoin makes no guarantees regarding future value or returns. Always do your own research before participating in any cryptocurrency project.
-
----
+BricsCoin is an experimental, open-source protocol for educational and technical purposes. It carries no promises of value, adoption, or returns. There is no central entity, no ICO, and no affiliation with any organization, state, or geopolitical group. Participation (mining, holding, transacting) is voluntary and at your own risk. The code is the sole authority—always verify independently. No warranties are provided.
 
 **Website**: https://bricscoin26.org  
-**Codeberg**: https://codeberg.org/Bricscoin_26/Bricscoin  
-**License**: MIT
-
-*© 2026 BricsCoin Project. All rights reserved.*
+**Repository**: https://codeberg.org/Bricscoin_26/Bricscoin  
+**License**: MIT  
+**© 2026 Jabo86 / BricsCoin Project**
