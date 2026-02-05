@@ -1,3 +1,15 @@
+**Note**: This is a mirror of the main repository at https://codeberg.org/Bricscoin_26/Bricscoin.  
+Primary development, issues, and pull requests happen on Codeberg.  
+Thank you for your support!
+
+# BricsCoin
+
+A decentralized cryptocurrency powered by **SHA256 Proof-of-Work**.
+
+🛡️ **Security Audit Status**  
+✅ **SECURITY AUDIT PASSED** – February 2026  
+
+... (rest of your README continues here)
 # BricsCoin
 
 A decentralized cryptocurrency powered by **SHA256 Proof-of-Work**.
