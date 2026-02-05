@@ -43,12 +43,14 @@ export default function RunNode() {
 
   const commands = {
     clone: `git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
-cd Bricscoin26`,
-    start: `docker compose -f docker-compose.node.yml up -d`,
-    startWithMining: `docker compose -f docker-compose.node.yml --profile with-mining up -d`,
-    checkStatus: `docker compose -f docker-compose.node.yml ps`,
-    viewLogs: `docker compose -f docker-compose.node.yml logs -f`,
-    stop: `docker compose -f docker-compose.node.yml down`,
+cd Bricscoin/bricscoin-node
+cp .env.example .env`,
+    start: `docker compose up -d`,
+    startWithMining: `docker compose --profile with-stratum up -d`,
+    checkStatus: `docker compose ps
+curl http://localhost:8001/api/network/stats`,
+    viewLogs: `docker compose logs -f`,
+    stop: `docker compose down`,
   };
 
   return (
