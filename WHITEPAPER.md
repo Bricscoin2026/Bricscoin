@@ -1,7 +1,7 @@
 # BricsCoin Whitepaper
 
 **A Decentralized SHA-256 Proof-of-Work Cryptocurrency**  
-**Version 1.1 – February 2026**  
+**Version 1.2 – February 2026**  
 **Author: Jabo86 (Founder & Lead Developer)**
 
 ## Abstract
@@ -227,11 +227,23 @@ Future Roadmap:
 - Replay protection via timestamps
 - Comprehensive audit passed (27/27 tests, February 2026) – see SECURITY_AUDIT.md
 
-## 8. Launch & Status
+## 8. Genesis Block & Launch Details
 - **Mainnet Launch**: February 2026
-- **Genesis Block**: Timestamp ≈ February 2, 2026 (exact details in blockchain)
-- **Current Features**: Web/desktop wallets, block explorer, Stratum mining pool, open-source code
-- **Codebase**: Fully auditable on Codeberg
+- **Genesis Block (Height #0)**:
+
+  | Field              | Value                                      |
+  |--------------------|--------------------------------------------|
+  | Block Height       | 0                                          |
+  | Block Hash         | bc49816bc68faa70357d753091fc917bd1c121aa4c86d660bf25a3f0679d3e4c |
+  | Previous Hash      | 0000000000000000000000000000000000000000000000000000000000000000 |
+  | Timestamp          | 02/02/2026, 01:24:10 (UTC)                 |
+  | Miner              | genesis                                    |
+  | Nonce              | 0                                          |
+  | Difficulty         | 1                                          |
+  | Mining Reward      | 50 BRICS                                   |
+  | Transactions       | 1 (coinbase transaction)                   |
+
+These details are hardcoded in the genesis block and verifiable on the blockchain via the explorer at https://bricscoin26.org/explorer.
 
 ## 9. Team & Governance
 - **Founder & Lead Developer**: Jabo86 – Independent developer focused on decentralization and open-source PoW systems.
