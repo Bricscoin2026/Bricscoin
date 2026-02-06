@@ -12,7 +12,8 @@ import {
   Info,
   Code,
   Twitter,
-  Users
+  Users,
+  Trophy
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -28,7 +29,7 @@ export default function Layout() {
     { to: "/network", icon: Network, label: "Network" },
     { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/pools", icon: Users, label: "Pools" },
-    { to: "/node", icon: Server, label: "Run Node" },
+    { to: "/richlist", icon: Trophy, label: "Rich List" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
