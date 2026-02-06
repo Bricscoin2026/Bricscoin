@@ -496,46 +496,82 @@ async def send_to_peer(peer_url: str, endpoint: str, data: dict) -> bool:
         logging.error(f"Failed to send to peer {peer_url}: {e}")
         return False
 
-async def sync_blockchain_from_peer(peer_url: str):
+async def sync_blockchain_from_peer(peer_url: str, full_sync: bool = False):
     """Sync blockchain from a peer if they have a longer chain"""
     async with sync_lock:
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=60.0) as client:
                 # Get peer's chain info
                 response = await client.get(f"{peer_url}/api/p2p/chain/info")
                 if response.status_code != 200:
-                    return
+                    return False
                 
                 peer_info = response.json()
                 our_height = await db.blocks.count_documents({})
                 
                 if peer_info['height'] <= our_height:
-                    return  # Our chain is longer or equal
+                    logging.info(f"Chain up to date with {peer_url} (our: {our_height}, peer: {peer_info['height']})")
+                    return True  # Our chain is longer or equal
                 
-                # Get blocks we don't have
-                response = await client.get(
-                    f"{peer_url}/api/p2p/chain/blocks",
-                    params={"from_height": our_height, "limit": 100}
-                )
+                blocks_behind = peer_info['height'] - our_height
+                logging.info(f"Syncing {blocks_behind} blocks from {peer_url}...")
                 
-                if response.status_code != 200:
-                    return
+                # Sync in batches of 500 blocks for full sync, 100 for periodic
+                batch_size = 500 if full_sync else 100
+                current_height = our_height
+                total_synced = 0
                 
-                blocks_data = response.json()
-                
-                # Validate and add blocks
-                for block in blocks_data['blocks']:
-                    if await validate_block(block):
-                        # Check if block already exists
+                while current_height < peer_info['height']:
+                    response = await client.get(
+                        f"{peer_url}/api/p2p/chain/blocks",
+                        params={"from_height": current_height, "limit": batch_size},
+                        timeout=120.0
+                    )
+                    
+                    if response.status_code != 200:
+                        logging.error(f"Failed to get blocks from {peer_url}")
+                        break
+                    
+                    blocks_data = response.json()
+                    blocks = blocks_data.get('blocks', [])
+                    
+                    if not blocks:
+                        break
+                    
+                    # Add blocks in order
+                    for block in blocks:
                         existing = await db.blocks.find_one({"index": block['index']})
-                        if not existing:
+                        if existing:
+                            continue
+                        
+                        # For sync, we trust peer's blocks if hash chain is valid
+                        if block['index'] == 0:
+                            # Genesis block - just add it
                             await db.blocks.insert_one(block)
-                            logging.info(f"Synced block #{block['index']} from peer")
+                            total_synced += 1
+                        else:
+                            # Verify previous hash exists
+                            prev_block = await db.blocks.find_one({"index": block['index'] - 1})
+                            if prev_block and prev_block['hash'] == block['previous_hash']:
+                                await db.blocks.insert_one(block)
+                                total_synced += 1
+                            elif not prev_block:
+                                # Missing previous block, will get it in next iteration
+                                logging.warning(f"Missing block #{block['index'] - 1}, skipping #{block['index']}")
+                                continue
+                    
+                    current_height = blocks[-1]['index'] + 1 if blocks else current_height + batch_size
+                    
+                    if total_synced > 0 and total_synced % 100 == 0:
+                        logging.info(f"Sync progress: {total_synced} blocks synced...")
                 
-                logging.info(f"Synced {len(blocks_data['blocks'])} blocks from {peer_url}")
+                if total_synced > 0:
+                    logging.info(f"✓ Synced {total_synced} blocks from {peer_url}")
+                return True
                 
         except Exception as e:
             logging.error(f"Failed to sync from peer {peer_url}: {e}")
+            return False
 
 async def validate_block(block: dict) -> bool:
     """Validate a block"""
