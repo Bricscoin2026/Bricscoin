@@ -1492,12 +1492,22 @@ async def get_address_info(address: str):
 @api_router.post("/p2p/register")
 async def register_peer(peer: PeerRegister):
     """Register a new peer node"""
-    connected_peers[peer.node_id] = {
+    peer_data = {
         "url": peer.url,
         "node_id": peer.node_id,
         "version": peer.version,
         "last_seen": datetime.now(timezone.utc).isoformat()
     }
+    
+    # Save to memory
+    connected_peers[peer.node_id] = peer_data
+    
+    # Save to database for persistence
+    await db.peers.update_one(
+        {"node_id": peer.node_id},
+        {"$set": peer_data},
+        upsert=True
+    )
     
     logging.info(f"Peer registered: {peer.node_id} at {peer.url}")
     
