@@ -53,7 +53,7 @@ A decentralized cryptocurrency powered by **SHA256 Proof-of-Work**.
 | Halving            | Every 210,000 blocks           |
 | Block Time         | ~10 minutes                    |
 | Premine            | 1,000,000 BRICS (transparent, for dev/marketing) |
-| Transaction Fees   | 0.05 BRICS (burned – deflationary) |
+| Transaction Fees   | 0.000005 BRICS (burned – deflationary) |
 
 ### Project Structure
 
