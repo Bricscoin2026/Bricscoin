@@ -1755,12 +1755,27 @@ async def startup_event():
     await create_genesis_block()
     logger.info(f"BricsCoin node started - ID: {NODE_ID}")
     
+    # Load peers from database
+    await load_peers_from_db()
+    
     # Discover and connect to seed peers
     if SEED_NODES:
         asyncio.create_task(discover_peers())
     
     # Start periodic sync task
     asyncio.create_task(periodic_sync())
+
+async def load_peers_from_db():
+    """Load saved peers from database on startup"""
+    try:
+        saved_peers = await db.peers.find({}, {"_id": 0}).to_list(100)
+        for peer in saved_peers:
+            if peer.get('node_id') and peer.get('url'):
+                connected_peers[peer['node_id']] = peer
+                logger.info(f"Loaded peer from DB: {peer['node_id']} at {peer['url']}")
+        logger.info(f"Loaded {len(saved_peers)} peers from database")
+    except Exception as e:
+        logger.error(f"Failed to load peers from database: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
