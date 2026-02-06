@@ -610,12 +610,23 @@ async def validate_block(block: dict) -> bool:
         return False
 
 async def discover_peers():
-    """Discover peers from seed nodes"""
+    """Discover peers from seed nodes and perform initial sync"""
+    logging.info("Starting peer discovery and initial blockchain sync...")
+    
     for seed_url in SEED_NODES:
         if seed_url and seed_url.strip():
-            await register_with_peer(seed_url.strip())
-            # Also sync blockchain from seed
-            await sync_blockchain_from_peer(seed_url.strip())
+            seed_url = seed_url.strip()
+            logging.info(f"Connecting to seed node: {seed_url}")
+            
+            # Register with seed
+            registered = await register_with_peer(seed_url)
+            if registered:
+                # Perform full initial sync from seed
+                logging.info(f"Starting full blockchain sync from {seed_url}...")
+                await sync_blockchain_from_peer(seed_url, full_sync=True)
+    
+    our_height = await db.blocks.count_documents({})
+    logging.info(f"Initial sync complete. Local blockchain height: {our_height}")
 
 async def periodic_sync():
     """Periodically sync with peers"""
