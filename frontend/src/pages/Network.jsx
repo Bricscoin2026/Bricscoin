@@ -636,40 +636,51 @@ export default function Network() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {peers.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                <Globe className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No peers connected yet</p>
-                <p className="text-sm mt-2">
-                  Run your own node and connect to expand the network!
-                </p>
+            <div className="divide-y divide-white/5">
+              {/* Stratum Pool - Always visible */}
+              <div
+                className="flex items-center justify-between p-4 table-row-hover bg-orange-500/5"
+                data-testid="peer-stratum-pool"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-sm bg-orange-500/20 flex items-center justify-center">
+                    <Pickaxe className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="font-mono text-sm text-orange-500">Stratum Mining Pool</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      stratum+tcp://stratum.bricscoin26.org:3333
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="confirmed-badge">Active</span>
+                </div>
               </div>
-            ) : (
-              <div className="divide-y divide-white/5">
-                {peers.map((peer, idx) => (
-                  <div
-                    key={peer.node_id || idx}
-                    className="flex items-center justify-between p-4 table-row-hover"
-                    data-testid={`peer-${peer.node_id}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-sm bg-secondary/20 flex items-center justify-center">
-                        <Server className="w-5 h-5 text-secondary" />
-                      </div>
-                      <div>
-                        <p className="font-mono text-sm">{peer.node_id}</p>
-                        <p className="text-xs text-muted-foreground font-mono">
-                          {peer.url}
-                        </p>
-                      </div>
+              {/* Dynamic Peers */}
+              {peers.map((peer, idx) => (
+                <div
+                  key={peer.node_id || idx}
+                  className="flex items-center justify-between p-4 table-row-hover"
+                  data-testid={`peer-${peer.node_id}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-sm bg-secondary/20 flex items-center justify-center">
+                      <Server className="w-5 h-5 text-secondary" />
                     </div>
-                    <div className="text-right">
-                      <span className="confirmed-badge">Connected</span>
+                    <div>
+                      <p className="font-mono text-sm">{peer.node_id}</p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {peer.url}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="text-right">
+                    <span className="confirmed-badge">Connected</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </motion.div>
