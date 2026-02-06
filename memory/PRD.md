@@ -86,17 +86,21 @@ Creare una criptovaluta Bitcoin-like chiamata "BricsCoin" con:
 
 ### P1 - High Priority  
 - [ ] Warning "SAVE SEED PHRASE" on wallet creation (UI prominente)
+- [ ] Hashrate display verification (confermare ~9 TH/s vs ~1437 TH/s)
 - [ ] Server-side wallet backup (encrypted in DB)
 
 ### P2 - Medium Priority
+- [ ] Conteggio blocchi Explorer (off-by-one error)
+- [ ] Active miners count più accurato (estendere finestra 5 → 15/30 min)
 - [ ] Fix logger error in stratum_server.py (linea 345)
-- [ ] Active miners count più accurato
+- [ ] Frontend production build (attualmente dev mode)
 
 ### P3 - Future
+- [ ] Automated P2P block sync (no manual mongoimport)
 - [ ] Mobile wallet iOS/Android
 - [ ] Exchange listings
 - [ ] Community mining pools page
-- [ ] P2P node network
+- [ ] Stratum v2 / P2Pool
 
 ## Technical Notes
 
