@@ -28,6 +28,7 @@ export default function Layout() {
     { to: "/network", icon: Network, label: "Network" },
     { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/pools", icon: Users, label: "Pools" },
+    { to: "/node", icon: Server, label: "Run Node" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
