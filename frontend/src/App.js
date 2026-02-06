@@ -12,6 +12,7 @@ import Downloads from "./pages/Downloads";
 import RunNode from "./pages/RunNode";
 import About from "./pages/About";
 import Pools from "./pages/Pools";
+import RichList from "./pages/RichList";
 import "./App.css";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
             <Route path="network" element={<Network />} />
             <Route path="downloads" element={<Downloads />} />
             <Route path="node" element={<RunNode />} />
+            <Route path="richlist" element={<RichList />} />
             <Route path="about" element={<About />} />
             <Route path="pools" element={<Pools />} />
           </Route>
