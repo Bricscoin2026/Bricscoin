@@ -29,7 +29,20 @@ Creare una criptovaluta Bitcoin-like chiamata "BricsCoin" con:
 
 ## What's Been Implemented
 
-### 2026-02-02 (Sessione Corrente)
+### 2026-02-06 (Sessione Corrente)
+- ✅ **Stratum Pool Address su Network Page**: 
+  - Aggiunta card "Official Mining Pool" con indirizzo `stratum+tcp://stratum.bricscoin26.org:3333`
+  - Pulsante copia, info algoritmo (SHA256), porta (3333), protocollo (Stratum v1)
+  - File modificato: `/app/frontend/src/pages/Network.jsx`
+
+### 2026-02-05
+- ✅ **Rete P2P Decentralizzata (3 nodi)**:
+  - Nodo principale: 5.161.254.163 (bricscoin26.org)
+  - Nodo 2: 167.235.133.118
+  - Nodo 3: 46.225.104.63
+  - Package standalone: `/app/bricscoin-node/`
+
+### 2026-02-02
 - ✅ **P0 CRITICAL - Blockchain Bloccata RISOLTA**: 
   - Fix `MAX_TARGET = 2^256 - 1` per accettare share/blocchi
   - 900+ blocchi prodotti, difficoltà auto-adjustment funzionante
