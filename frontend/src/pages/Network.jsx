@@ -565,63 +565,6 @@ export default function Network() {
         </Card>
       </motion.div>
 
-      {/* Stratum Mining Pool */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.3 }}
-      >
-        <Card className="bg-gradient-to-r from-orange-500/10 to-primary/10 border-orange-500/30" data-testid="stratum-pool-card">
-          <CardHeader className="border-b border-white/10">
-            <CardTitle className="font-heading flex items-center gap-2">
-              <Pickaxe className="w-5 h-5 text-orange-500" />
-              Official Mining Pool
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-2">Stratum Pool Address</p>
-                <div className="flex items-center gap-3 bg-background/50 rounded-sm border border-white/10 p-3">
-                  <code className="font-mono text-lg text-orange-500 flex-1 break-all" data-testid="stratum-address">
-                    stratum+tcp://stratum.bricscoin26.org:3333
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0 hover:bg-orange-500/20"
-                    onClick={() => {
-                      navigator.clipboard.writeText("stratum+tcp://stratum.bricscoin26.org:3333");
-                      toast.success("Stratum address copied!");
-                    }}
-                    data-testid="copy-stratum-btn"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Connect your ASIC miners or mining software to this address. Use your BricsCoin wallet address as username.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-white/10">
-              <div className="text-center">
-                <p className="text-lg font-heading font-bold text-orange-500">SHA256</p>
-                <p className="text-xs text-muted-foreground">Algorithm</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-heading font-bold">3333</p>
-                <p className="text-xs text-muted-foreground">Default Port</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-heading font-bold text-secondary">Stratum v1</p>
-                <p className="text-xs text-muted-foreground">Protocol</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
       {/* Connected Peers */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
