@@ -678,7 +678,7 @@ export default function Network() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.4 }}
+        transition={{ delay: 1.5 }}
       >
         <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30" data-testid="run-node-cta">
           <CardContent className="p-6">
