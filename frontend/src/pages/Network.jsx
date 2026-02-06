@@ -632,7 +632,7 @@ export default function Network() {
           <CardHeader className="border-b border-white/10">
             <CardTitle className="font-heading flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />
-              Connected Peers ({peers.length})
+              Connected Peers ({peers.length + 1})
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
