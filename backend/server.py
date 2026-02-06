@@ -965,6 +965,65 @@ async def get_tokenomics():
         }
     }
 
+@api_router.get("/richlist")
+async def get_rich_list(limit: int = 100):
+    """Get list of wallets sorted by balance (Rich List)"""
+    try:
+        # Get all unique addresses from transactions
+        pipeline = [
+            {"$group": {
+                "_id": None,
+                "senders": {"$addToSet": "$sender"},
+                "recipients": {"$addToSet": "$recipient"}
+            }}
+        ]
+        
+        result = await db.transactions.aggregate(pipeline).to_list(1)
+        
+        addresses = set()
+        if result:
+            addresses.update(result[0].get("senders", []))
+            addresses.update(result[0].get("recipients", []))
+        
+        # Also get miners from blocks
+        miner_addresses = await db.blocks.distinct("miner")
+        addresses.update(miner_addresses)
+        
+        # Remove empty/None addresses
+        addresses = {a for a in addresses if a and a.startswith("BRICS")}
+        
+        # Calculate balance for each address
+        wallets = []
+        circulating = await get_circulating_supply()
+        
+        for address in addresses:
+            balance = await get_balance(address)
+            if balance > 0:
+                wallets.append({
+                    "address": address,
+                    "balance": balance,
+                    "percentage": round((balance / circulating) * 100, 4) if circulating > 0 else 0
+                })
+        
+        # Sort by balance descending
+        wallets.sort(key=lambda x: x["balance"], reverse=True)
+        
+        # Limit results
+        wallets = wallets[:limit]
+        
+        # Add rank
+        for i, wallet in enumerate(wallets):
+            wallet["rank"] = i + 1
+        
+        return {
+            "wallets": wallets,
+            "total_holders": len(addresses),
+            "circulating_supply": circulating
+        }
+    except Exception as e:
+        logging.error(f"Rich list error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate rich list")
+
 @api_router.get("/genesis-wallet")
 async def get_genesis_wallet_info():
     """Get genesis wallet public info (for transparency)"""
