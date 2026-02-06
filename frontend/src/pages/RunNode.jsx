@@ -184,16 +184,16 @@ export default function RunNode() {
               Vai su <a href="https://www.hetzner.com/cloud" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Hetzner Cloud</a> e crea un account.
             </p>
             <ol className="list-decimal list-inside space-y-2 text-sm">
-              <li>Clicca su <strong>"Add Server"</strong></li>
-              <li>Scegli la location <strong>"Europe"</strong> (più vicina = più veloce)</li>
-              <li>Seleziona <strong>"Ubuntu 22.04"</strong> come sistema operativo</li>
-              <li>Scegli il piano <strong>"CPX11"</strong> (€4.15/mese)</li>
-              <li>Clicca su <strong>"Create & Buy Now"</strong></li>
-              <li>Riceverai via email l'<strong>indirizzo IP</strong> e la <strong>password</strong></li>
+              <li>Clicca su <strong>&quot;Add Server&quot;</strong></li>
+              <li>Scegli la location <strong>&quot;Europe&quot;</strong> (più vicina = più veloce)</li>
+              <li>Seleziona <strong>&quot;Ubuntu 22.04&quot;</strong> come sistema operativo</li>
+              <li>Scegli il piano <strong>&quot;CPX11&quot;</strong> (€4.15/mese)</li>
+              <li>Clicca su <strong>&quot;Create &amp; Buy Now&quot;</strong></li>
+              <li>Riceverai via email l&apos;<strong>indirizzo IP</strong> e la <strong>password</strong></li>
             </ol>
             <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-sm flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
-              <p className="text-sm">Salva l'indirizzo IP e la password - ti serviranno per connetterti!</p>
+              <p className="text-sm">Salva l&apos;indirizzo IP e la password - ti serviranno per connetterti!</p>
             </div>
           </div>
         </StepCard>
