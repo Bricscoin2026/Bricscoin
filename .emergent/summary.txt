@@ -1,134 +1,177 @@
 <analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project involves a full-stack application with a web wallet, hardware mining support via Stratum, and a dynamic difficulty adjustment mechanism.
 
-Recent user requests included:
-- A recurring issue where the blockchain stalls and stops producing new blocks, despite high hashrate (9+ TH/s) and low difficulty (1).
-- Investigating why the active miner count was not being tracked correctly.
+Over the course of the session, the user's requests evolved to address several critical issues and new features:
+1.  Fix a recurring bug where the blockchain stalled and stopped producing new blocks.
+2.  Fix a bug where secure transactions were failing with a Signature verification failed error.
+3.  Fix an endpoint () that was returning a 404 error.
+4.  Address discrepancies in the displayed network hashrate and active miner count.
+5.  Enable HTTPS for the main website.
+6.  Update all project documentation (, , ) to replace GitHub links with Codeberg and align content.
+7.  Set up a decentralized P2P network by configuring two new servers as additional nodes.
+8.  Add the Stratum pool address to the network status page.
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack BricsCoin application (FastAPI backend, React frontend, MongoDB) is running. The core functionality is severely impaired by a recurring critical bug that causes the blockchain to stall for long periods (hours) without producing new blocks.
+A full-stack BricsCoin application is running across a decentralized 3-node network. The main server () runs the primary node and mining pool, and two additional servers run independent nodes that are successfully synchronized with the main chain.
 
-The agent and user went through an extensive and circular debugging process, which revealed two core problems:
-1.  **File Sync Issue:** For a long time, the agent was instructing the user to modify files on the host machine, but these changes were not being reflected inside the  Docker container due to caching or deployment issues. This led to significant confusion and wasted effort. The agent has now realized this and is targeting the files directly inside the container.
-2.  **Share Verification Bug:** The root cause of the stalled chain is that the  function in  is incorrectly rejecting every single submitted share, marking them all as  and .
-
-The agent has just guided the user through a series of direct-container modifications to  to debug this verification logic.
+The most critical bugs from the start of the session (stalled blockchain, failing transactions) have been resolved. The application is functional: it produces blocks, processes transactions, and the network is distributed. HTTPS is enabled via Cloudflare. Project documentation has been updated. However, some data discrepancies (hashrate, active miners) and minor bugs persist. The frontend on the main server is still running in development mode (yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.), which was identified as a potential cause of instability.
 
 **Last working item**:
--   Last item agent was working: The agent was debugging the share verification logic in . The logs showed that even with the share difficulty and network difficulty set to 1, the comparison  was consistently returning . A manual Python test confirmed that the large integer comparison was failing unexpectedly. The agent's last action was to instruct the user to change  to the absolute maximum possible value () to see if the comparison logic is fundamentally broken or if the target value itself was the issue.
--   Status: IN PROGRESS
--   Agent Testing Done: N
--   Which testing method agent to use? manual testing by curl
--   User Testing Done: N
+-   Last item agent was working: The agent successfully guided the user to set up and configure two new servers as BricsCoin nodes, forming a 3-node P2P network. The last user request was to add the Stratum pool address () to the network status page.
+-   Status: NOT STARTED
+-   Agent Testing Done: N/A
+-   Which testing method agent to use? screenshot tool
+-   User Testing Done: N/A
 
 **All Pending/In progress Issue list**:
--   Issue 1: Blockchain Stalls - Share Verification Fails (P0 - CRITICAL, RECURRING)
--   Issue 2: Active Miner Count in  Collection is Incorrect (P2)
+-   Issue 1: Incorrect Hashrate Display (P1)
+-   Issue 2: Blocker Count on Frontend (P2)
+-   Issue 3: Explorer Block Count Bug (P2)
+-   Issue 4: Inaccurate Active Miner Count (P2)
 
 Issues Detail:
 -   Issue 1:
-    -   Attempted fixes:
-        -   Forcing  to 1. This worked, but shares were still rejected.
-        -   Increasing the  value. This also did not resolve the issue.
-        -   The last attempt involved setting  to  to see if the comparison  would ever evaluate to .
+    -   Attempted fixes: The agent identified that the hashrate calculation was incorrect due to the  and  values. Several multiplier adjustments were tried ( ->  -> ). The last proposed multiplier was , but the user never confirmed if this corrected the display from the erroneous  to the expected .
     -   Next debug checklist:
-        1.  The user has just restarted the  container with the latest  change.
-        2.  Monitor the logs for the  output: 
-        3.  **Primary goal:** Confirm if  or  ever becomes .
-        4.  If the comparison still fails, the problem lies in the Python integer comparison itself () or how  is being generated/converted. The agent must re-examine this specific line and the variables involved within  inside the container.
-    -   Why fix this issue and what will be achieved with the fix?: This is the most critical bug. Fixing it will unstall the blockchain and allow it to produce blocks at a rate proportional to the network's hashrate, making the cryptocurrency functional.
+        1.  Ask the user to check the current hashrate displayed on the frontend.
+        2.  If it's still incorrect, view the current calculation logic in  within the  endpoint.
+        3.  Refine the multiplier  based on the current network difficulty and block time to achieve a realistic hashrate value.
+    -   Why fix this issue and what will be achieved with the fix?: The explorer shows a wildly inaccurate network hashrate, which misleads users about the network's security and activity. Fixing it provides an accurate and trustworthy metric.
     -   Status: IN PROGRESS
     -   Is recurring issue? Y
     -   Should Test frontend/backend/both after fix? Backend
     -   Blocked on other issue: None
 
 -   Issue 2:
-    -   Attempted fixes: None in this session. A working command was provided as a workaround.
+    -   Attempted fixes: None.
     -   Next debug checklist:
-        1.  This is a low-priority issue as a reliable workaround exists ().
-        2.  The fix involves correcting the database update logic within the  and  functions in the true, running version of .
-    -   Why fix this issue and what will be achieved with the fix?: This will make the active miner tracking feature work as intended, allowing for a correct response from the  endpoint.
+        1.  Inspect the frontend code for the explorer page.
+        2.  Identify the API call or logic that fetches the total block count.
+        3.  The issue is likely an off-by-one error, where the genesis block (index 0) is being counted incorrectly, leading to a display of  blocks. Adjust the frontend logic to show the correct count (i.e., ).
+    -   Why fix this issue and what will be achieved with the fix?: The block explorer shows a total block count that is one higher than the latest block index, causing confusion. This fix will ensure data consistency.
     -   Status: NOT STARTED
-    -   Is recurring issue? Y
+    -   Is recurring issue? N
+    -   Should Test frontend/backend/both after fix? Frontend
+    -   Blocked on other issue: None
+
+-   Issue 3:
+    -   Attempted fixes: The agent created the  endpoint. The user then reported a discrepancy (4 miners shown vs. 7 expected). The agent's investigation revealed that only 3-4 miners were actively submitting shares within the 5-minute window, while others had a hashrate too low to submit shares frequently.
+    -   Next debug checklist:
+        1.  The current endpoint is technically correct but the user expectation is different.
+        2.  Consider modifying the  endpoint in .
+        3.  Propose to the user to either a) lengthen the activity window (e.g., to 15 or 30 minutes) to catch more low-hashrate miners, or b) add a separate list of recently seen miners alongside the active ones.
+    -   Why fix this issue and what will be achieved with the fix?: The user feels the active miners count is wrong because it doesn't include all connected workers. Adjusting the logic will better align the stats with user perception.
+    -   Status: IN PROGRESS
+    -   Is recurring issue? N
     -   Should Test frontend/backend/both after fix? Backend
     -   Blocked on other issue: None
 
 **In progress Task List**:
-None.
+-   Task 1:
+    -   Where to resume: The agent has confirmed that all three nodes are online and synchronized. The user has access to all three servers.
+    -   What will be achieved with this?: BricsCoin will be a decentralized network, resilient to single-server failures and no longer reliant on a single point of control.
+    -   Status: USER VERIFICATION PENDING
+    -   Should Test frontend/backend/both after fix? NA
+    -   Blocked on something: None
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-    - **P1: Wallet Creation Warning:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation.
-- **Future Tasks:**
-    - Develop a mobile wallet for iOS/Android.
-    - Pursue exchange listings.
-    - Enhance the Mining Pools page to allow dynamic submission of external pools.
+-   **Upcoming Tasks:**
+    -   **P0:** Add the Stratum pool address () to the  status page.
+    -   **P1:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation in the frontend.
+-   **Future Tasks:**
+    -   Investigate and plan for Stratum v2 or P2Pool implementation for further decentralization.
+    -   Develop a mobile wallet for iOS/Android.
+    -   Pursue exchange listings.
+    -   Enhance the Mining Pools page to allow dynamic submission of external pools.
 
 **Completed work in this session**
--   Confirmed that several issues from the previous handoff (blockchain difficulty, UI changes) were resolved.
--   Diagnosed that the active miner count in the  collection was not working and provided a reliable workaround by querying the  collection.
--   Identified and resolved a major source of confusion: file changes on the host were not being applied inside the Docker container. The workflow now correctly targets files inside the container.
--   Narrowed down the critical stalled blockchain bug to a specific failure in the  function's comparison logic ().
+-   **Blockchain Stalled Bug (RESOLVED):** Fixed the critical bug where the blockchain was stalled by correcting the  value in  to .
+-   **Transaction Signature Bug (RESOLVED):** Fixed the Signature verification failed error by correcting two issues in :
+    1.  Made the backend hash the transaction data before verification () to match the frontend's behavior.
+    2.  Fixed a float vs. integer string formatting mismatch for the  field.
+-   **Miners Stats Endpoint (RESOLVED):** Created the  endpoint in  to fix the 404 error and provide miner statistics.
+-   **HTTPS Enabled (RESOLVED):** Guided the user to enable Always Use HTTPS in their Cloudflare settings.
+-   **Documentation Update (RESOLVED):** Updated , , and  to replace all GitHub links with Codeberg links and align content with project updates.
+-   **Server Stability (RESOLVED):** Addressed frontend container crashes on the main server by adding a  policy to  and creating a 2GB swap file.
+-   **Decentralization - Phase 1 (COMPLETED):** Guided the user to set up and synchronize two new servers (167.235.133.118, 46.225.104.63) as BricsCoin nodes, creating a 3-node P2P network.
 
 **Earlier issues found/mentioned but not fixed**
--   Issue 1: Pools page UI text is in Italian.
-    - **Status:** RESOLVED (as per user confirmation in chat).
--   Issue 2: Remove Active Miners Card from Production UI.
-    - **Status:** RESOLVED (as per user confirmation in chat).
+-   All major issues from this session were either fixed or are listed in the pending issues section above.
 
 **Known issue recurrence from previous fork**
--   **Blockchain is stalled**: RECURRED. This issue, although appearing fixed, has returned. The root cause has now been traced to the share verification logic, whereas the previous fix was for the Merkle Tree calculation.
+-   **Blockchain is stalled**: RECURRED and RESOLVED. The previous handoff mentioned this was a recurring issue. The agent successfully diagnosed a new root cause (incorrect ) and applied a permanent fix.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Proof of Work (PoW):** The  function is failing to correctly validate hashes against the network target.
--   **Docker Build Context & Cache:** A major recurring problem was the Docker environment running stale code. The agent must now operate with the assumption that changes must be made *directly inside the container* () or that builds must be aggressively cache-busted.
--   **Python Integer Comparison:** The core of the current bug seems to be an issue with comparing two very large integers, where  returns  unexpectedly.
+-   **Proof of Work:** The blockchain stall was fixed by changing  to , allowing any valid hash to be a block when difficulty is 1.
+-   **ECDSA Signature Verification:** Transaction failures were fixed by ensuring both frontend and backend use the same data hashing process () before signing/verifying. A subtle bug related to float-to-string conversion ( vs ) was also fixed.
+-   **P2P Node Synchronization:** The agent guided the user through bootstrapping new nodes. This involved a manual database import () of the existing blockchain data to ensure the new nodes started from the correct genesis block.
+-   **Docker Environment Variables:** A key issue was that Docker containers were not reading the  file. The fix was to explicitly use  to load the environment variables.
+-   **Server Administration:** The agent provided commands for installing Docker, cloning git repos, managing firewalls (), and creating swap files on new Debian-based servers.
 
 **key DB schema**
 -   : 
--   :  (Crucial for the active miner workaround).
--   :  (Not being updated correctly).
+-   : 
+-   :  (Used for P2P network)
 
 **changes in tech stack**
--   None.
+-   None. The architecture has expanded to a multi-node setup.
 
 **All files of reference**
--   : This is the file with the critical bug in the  function. The agent must interact with the version inside the container at .
--   : The main FastAPI application file.
+-   : Modified to fix transaction signature verification and add the  endpoint.
+-   : Modified to fix the stalled blockchain bug.
+-   : Modified on the user's main server to add .
+-   : A new directory containing a full standalone package for deploying new nodes.
+-   : Updated with new instructions and cost estimates.
+-   , , : All updated with Codeberg links and project info.
 
 **Areas that need refactoring**:
--   The deployment process is extremely fragile. The reliance on  and  to patch files directly in a running container is a temporary solution. The  or  should be reviewed to ensure code is reliably copied on builds.
+-   **P2P Sync:** The current method of syncing new nodes is manual and brittle (dumping and importing the DB). A proper, automated block-by-block sync protocol should be implemented in .
+-   **Production Frontend:** The frontend on the main server is running in development mode (yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.). This is inefficient and was the likely cause of crashes. It should be converted to a production build (yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.) and served statically, likely via nginx.
 
 **key api endpoints**
--   : Used to monitor blockchain health.
--   : The endpoint for the (currently broken) active miner count.
+-   : For submitting new transactions. (Now fixed).
+-   : Provides network-wide statistics.
+-   : Provides miner statistics. (Now fixed).
+-   : Returns the list of known peers in the network.
+-   : Allows a new node to register itself with a peer.
 
 **Critical Info for New Agent**
--   **DO NOT EDIT FILES ON THE HOST.** Assume all file changes must be made directly inside the  container using  commands, followed by a . The previous agent wasted significant time because local file edits were not being deployed.
--   The primary, critical bug is that  is always  in . The current debug path is focused on the  comparison.
--   The  collection for tracking active miners is not being updated. A working workaround is to query the  collection: 
+-   The project is now a **3-node network**. Do not assume all work happens on one server. The user has access to  (main),  (node 2), and  (node 3).
+-   When starting containers on the new nodes, you **MUST** use . Otherwise, the  and  will be incorrect, and the node will not register properly.
+-   File edits are **NOT** automatically synced to the user's servers. Changes must be applied by guiding the user to run commands (, , , etc.) directly on their servers via SSH.
+-   The user has a history of copy-pasting entire blocks of text, including the agent's instructions, into the terminal. Provide commands that are robust and can be copied one at a time.
 
 **documents and test reports created in this job**
--   None.
+-    (Updated)
+-    (Updated)
+-    (Updated)
+-    (Updated)
+-    (New)
+-    (New)
+-    (New)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Provided logs showing the  after a faulty debug line was inserted.
-2.  **Agent:** Identified the error, removed the bad debug line, and restarted.
-3.  **User:** Provided logs showing the server restarted but  is still always false.
-4.  **Agent:** Proposed adding the debug line in the correct place to see the hash and target values.
-5.  **User:** Showed logs with the correct debug output, revealing .
-6.  **Agent:** Identified that miners were suggesting a high share difficulty and proposed forcing it to 1.
-7.  **User:** Showed logs where  was now 1, but shares were still being rejected.
-8.  **Agent:** Identified that the  value was too low and proposed increasing it.
-9.  **User:** Showed logs where  was larger, but an example hash  was still being rejected when it should have been accepted.
-10. **Agent:** Proposed setting  to the absolute maximum value () to test the comparison logic itself. The user ran the command to apply this final change.
+1.  **User:** Asks how to add the two new servers they created.
+2.  **Agent:** Provides instructions to SSH into the first new server and install the BricsCoin node software.
+3.  **User:** Struggles with SSH password. Agent advises on how to reset it via Hetzner console.
+4.  **User:** Successfully logs in and runs the installation commands. The new node starts with its own genesis block.
+5.  **Agent:** Diagnoses the genesis block mismatch and provides a command sequence to manually import the correct blockchain data via .
+6.  **User:** Runs the commands, and the first new node is successfully synchronized.
+7.  **Agent:** Guides the user through the same process on the second new server, which is also successful.
+8.  **User:** Asks why the nodes are not showing up with friendly names on the network page.
+9.  **Agent:** Explains the  file is not being read and provides the correct command (). Guides the user to apply this to both new nodes.
+10. **User:** Confirms both nodes are now configured and asks if the Stratum pool URL can be added to the network list.
 
 **Project Health Check:**
--   **Broken:** The core function of block production is non-functional due to a recurring bug in share verification. The blockchain is stalled.
+-   **Working**: The core functionality (block production, transactions, P2P networking) is operational.
+-   **Issues**: Data display for hashrate and miner counts remains inaccurate. The P2P sync process is manual and not robust. The frontend is not running a production build.
 
 **3rd Party Integrations**
 -   None.
@@ -137,10 +180,12 @@ None.
 -   Testing agent used after significant changes: NO
 -   Troubleshoot agent used after agent stuck in loop: NO
 -   Test files created: None
--   Known regressions: The blockchain stalling issue has recurred.
+-   Known regressions: None in this session; several major bugs were fixed.
 
 **Credentials to test flow:**
--   None required by the agent. The user is executing all commands on their server.
+-   The user executes all commands on their servers. The agent must provide SSH commands (e.g., ) and the user will provide their own credentials. Do not ask for passwords.
 
 **What agent forgot to execute**
--   The agent got stuck in a long debugging loop and did not make progress on any of the originally planned upcoming tasks, such as the seed phrase warning UI enhancement. This was appropriate given the critical nature of the bug.</analysis>
+-   The agent did not implement the Save Seed Phrase warning UI enhancement (P1 task from handoff).
+-   The agent identified that the frontend should be a production build but did not implement this change.
+-   The success of the final hashrate calculation fix () was never confirmed.</analysis>
