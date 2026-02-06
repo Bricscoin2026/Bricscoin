@@ -1533,12 +1533,15 @@ async def get_chain_info():
     }
 
 @api_router.get("/p2p/chain/blocks")
-async def get_chain_blocks(from_height: int = 0, limit: int = 100):
+async def get_chain_blocks(from_height: int = 0, limit: int = 500):
     """Get blocks for synchronization"""
+    # Cap limit to prevent abuse but allow larger syncs
+    actual_limit = min(limit, 1000)
+    
     blocks = await db.blocks.find(
         {"index": {"$gte": from_height}},
         {"_id": 0}
-    ).sort("index", 1).limit(limit).to_list(limit)
+    ).sort("index", 1).limit(actual_limit).to_list(actual_limit)
     
     return {
         "blocks": blocks,
