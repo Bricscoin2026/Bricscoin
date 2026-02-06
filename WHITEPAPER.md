@@ -5,7 +5,7 @@
 **Author: Jabo86 (Founder & Lead Developer)**
 
 ## Abstract
-BricsCoin (ticker: BRICS) is a decentralized, open-source cryptocurrency implementing the SHA-256 Proof-of-Work consensus mechanism. It is designed for compatibility with existing ASIC mining hardware, enabling broad participation in network security and reward distribution. With a capped supply of 21,000,000 coins, a fixed transaction fee of 0.05 BRICS (permanently burned), and a transparent premine allocation, BricsCoin prioritizes fairness, verifiability, and long-term sustainability as a community-driven digital asset.
+BricsCoin (ticker: BRICS) is a decentralized, open-source cryptocurrency implementing the SHA-256 Proof-of-Work consensus mechanism. It is designed for compatibility with existing ASIC mining hardware, enabling broad participation in network security and reward distribution. With a capped supply of 21,000,000 coins, a fixed transaction fee of 0.000005 BRICS (permanently burned), and a transparent premine allocation, BricsCoin prioritizes fairness, verifiability, and long-term sustainability as a community-driven digital asset.
 
 ## 1. Introduction
 
@@ -30,7 +30,7 @@ BricsCoin seeks to deliver:
 | Target Block Time          | 10 minutes                                 |
 | Difficulty Adjustment      | Dynamic (Bitcoin-style retargeting)        |
 | Initial Difficulty         | 1                                          |
-| Transaction Fee            | 0.05 BRICS (burned)                        |
+| Transaction Fee            | 0.000005 BRICS (burned)                    |
 | Premine                    | 1,000,000 BRICS (≈4.76%)                   |
 | Address Format             | Starts with "BRICS"                        |
 | Cryptography               | ECDSA secp256k1 (signatures)               |
