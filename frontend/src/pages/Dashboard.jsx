@@ -93,7 +93,7 @@ export default function Dashboard() {
           getBlocks(5)
         ]);
         setStats(statsRes.data);
-        setBlocks(blocksRes.data.blocks);
+        setBlocks(blocksRes.data?.blocks || []);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
