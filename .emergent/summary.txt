@@ -1,177 +1,216 @@
 <analysis>**original_problem_statement:** The user requested to create a Bitcoin-like cryptocurrency named BricsCoin. The project involves a full-stack application with a web wallet, hardware mining support via Stratum, and a dynamic difficulty adjustment mechanism.
 
 Over the course of the session, the user's requests evolved to address several critical issues and new features:
-1.  Fix a recurring bug where the blockchain stalled and stopped producing new blocks.
-2.  Fix a bug where secure transactions were failing with a Signature verification failed error.
-3.  Fix an endpoint () that was returning a 404 error.
-4.  Address discrepancies in the displayed network hashrate and active miner count.
-5.  Enable HTTPS for the main website.
-6.  Update all project documentation (, , ) to replace GitHub links with Codeberg and align content.
-7.  Set up a decentralized P2P network by configuring two new servers as additional nodes.
-8.  Add the Stratum pool address to the network status page.
+1.  Add the Stratum pool address to the network status page.
+2.  Implement an automatic P2P synchronization mechanism so new nodes can join the network without manual database imports.
+3.  Fix a critical server issue where the disk was 100% full, causing MongoDB to crash.
+4.  Resolve extreme slowness of the web application by converting the frontend to a production build and adding database indexes.
+5.  Change the transaction fee from 0.05 to 0.000005 BRICS across the entire application.
+6.  Implement peer persistence so that connected nodes are not lost when the main server restarts.
+7.  Create a new Rich List page to display the wealthiest wallets on the network.
+8.  Update the Run a Node page with clearer, step-by-step instructions.
+9.  Debug a Cloudflare issue that made the main domain  inaccessible.
+10. Resolve a critical bug where the website page would load for a second and then turn black, making it unusable.
 
 **User's preferred language**: Italian
 
 **what currently exists?**
-A full-stack BricsCoin application is running across a decentralized 3-node network. The main server () runs the primary node and mining pool, and two additional servers run independent nodes that are successfully synchronized with the main chain.
+A full-stack BricsCoin application is running on the user's server (), with two additional peer nodes on separate servers. The core backend and mining functionalities are operational. Major performance issues have been resolved by converting the frontend to a production build and adding database indexes. A peer persistence mechanism has been implemented, saving node information in MongoDB to survive restarts.
 
-The most critical bugs from the start of the session (stalled blockchain, failing transactions) have been resolved. The application is functional: it produces blocks, processes transactions, and the network is distributed. HTTPS is enabled via Cloudflare. Project documentation has been updated. However, some data discrepancies (hashrate, active miners) and minor bugs persist. The frontend on the main server is still running in development mode (yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.), which was identified as a potential cause of instability.
+However, the main domain () is inactive due to a Cloudflare configuration issue, forcing the application to run via direct IP address. The most critical issue is that the frontend is unusable, displaying a black screen after a brief load. This is likely due to a JavaScript error when fetching data.
 
 **Last working item**:
--   Last item agent was working: The agent successfully guided the user to set up and configure two new servers as BricsCoin nodes, forming a 3-node P2P network. The last user request was to add the Stratum pool address () to the network status page.
--   Status: NOT STARTED
--   Agent Testing Done: N/A
--   Which testing method agent to use? screenshot tool
--   User Testing Done: N/A
+-   Last item agent was working: Debugging a critical bug where the frontend page turns black after loading. The agent identified that multiple frontend components were not safely handling potentially undefined API responses. The last action was to apply optional chaining ( and ) to , , and  to prevent these crashes, and then trigger a rebuild of the production frontend.
+-   Status: USER VERIFICATION PENDING
+-   Agent Testing Done: N
+-   Which testing method agent to use? Manual testing by user. The agent should first ask the user to test the direct IP link () in an incognito window. If it still fails, the agent should ask for a screenshot of the browser's developer console (F12 -> Console tab) to see the specific JavaScript error.
+-   User Testing Done: N
 
 **All Pending/In progress Issue list**:
--   Issue 1: Incorrect Hashrate Display (P1)
--   Issue 2: Blocker Count on Frontend (P2)
--   Issue 3: Explorer Block Count Bug (P2)
--   Issue 4: Inaccurate Active Miner Count (P2)
+-   Issue 1: Frontend page turns black after loading (P0)
+-   Issue 2: Cloudflare domain is parked/suspended (P1)
+-   Issue 3: Incorrect Hashrate Display (P2)
+-   Issue 4: Blocker Count on Frontend is off-by-one (P2)
+-   Issue 5: TypeError in  logs (P3)
 
 Issues Detail:
 -   Issue 1:
-    -   Attempted fixes: The agent identified that the hashrate calculation was incorrect due to the  and  values. Several multiplier adjustments were tried ( ->  -> ). The last proposed multiplier was , but the user never confirmed if this corrected the display from the erroneous  to the expected .
+    -   Attempted fixes:
+        1. Changed  to use the direct server IP ().
+        2. Set backend CORS policy to allow all origins ().
+        3. Added optional chaining ( and ) to , , , and  to prevent crashes on undefined data from API calls.
     -   Next debug checklist:
-        1.  Ask the user to check the current hashrate displayed on the frontend.
-        2.  If it's still incorrect, view the current calculation logic in  within the  endpoint.
-        3.  Refine the multiplier  based on the current network difficulty and block time to achieve a realistic hashrate value.
-    -   Why fix this issue and what will be achieved with the fix?: The explorer shows a wildly inaccurate network hashrate, which misleads users about the network's security and activity. Fixing it provides an accurate and trustworthy metric.
+        1. Ask the user to clear their browser cache and test the site at .
+        2. If it fails, ask for a screenshot of the browser's developer console to identify the exact JavaScript error.
+        3. Based on the error, inspect the relevant frontend component ( file) and the API endpoint it calls.
+    -   Why fix this issue and what will be achieved with the fix?: The website is completely unusable. Fixing this will restore access to the application.
     -   Status: IN PROGRESS
+    -   Is recurring issue? Y
+    -   Should Test frontend/backend/both after fix? Frontend
+    -   Blocked on other issue: None
+
+-   Issue 2:
+    -   Attempted fixes: The agent correctly diagnosed that the domain  is pointing to a Cloudflare parking page. The workaround was to switch the application to use the server's direct IP.
+    -   Next debug checklist: This issue must be resolved by the user in their Cloudflare account. The agent should guide the user to:
+        1. Log in to Cloudflare and select .
+        2. Check the **DNS** records to ensure an 'A' record points to .
+        3. Check the **Overview** page for any Suspended or Parked status and resolve it.
+    -   Why fix this issue and what will be achieved with the fix?: The official domain is down. Fixing this will make the site professionally accessible and enable HTTPS.
+    -   Status: BLOCKED
+    -   Is recurring issue? N
+    -   Should Test frontend/backend/both after fix? Frontend
+    -   Blocked on other issue: User action required.
+
+-   Issue 3:
+    -   Attempted fixes: None in this session. (From previous handoff).
+    -   Next debug checklist: Review hashrate calculation in  inside the  endpoint and adjust the multiplier.
+    -   Why fix this issue and what will be achieved with the fix?: The hashrate is a key network metric. An accurate value builds trust and provides a correct measure of network security.
+    -   Status: NOT STARTED
     -   Is recurring issue? Y
     -   Should Test frontend/backend/both after fix? Backend
     -   Blocked on other issue: None
 
--   Issue 2:
-    -   Attempted fixes: None.
-    -   Next debug checklist:
-        1.  Inspect the frontend code for the explorer page.
-        2.  Identify the API call or logic that fetches the total block count.
-        3.  The issue is likely an off-by-one error, where the genesis block (index 0) is being counted incorrectly, leading to a display of  blocks. Adjust the frontend logic to show the correct count (i.e., ).
-    -   Why fix this issue and what will be achieved with the fix?: The block explorer shows a total block count that is one higher than the latest block index, causing confusion. This fix will ensure data consistency.
+-   Issue 4:
+    -   Attempted fixes: None in this session. (From previous handoff).
+    -   Next debug checklist: Inspect the frontend explorer page to find the off-by-one error in displaying the total block count.
+    -   Why fix this issue and what will be achieved with the fix?: Ensures data consistency and avoids user confusion.
     -   Status: NOT STARTED
     -   Is recurring issue? N
     -   Should Test frontend/backend/both after fix? Frontend
     -   Blocked on other issue: None
 
--   Issue 3:
-    -   Attempted fixes: The agent created the  endpoint. The user then reported a discrepancy (4 miners shown vs. 7 expected). The agent's investigation revealed that only 3-4 miners were actively submitting shares within the 5-minute window, while others had a hashrate too low to submit shares frequently.
+-   Issue 5:
+    -   Attempted fixes: None. The agent observed a recurring  in the  logs but dismissed it as non-critical.
     -   Next debug checklist:
-        1.  The current endpoint is technically correct but the user expectation is different.
-        2.  Consider modifying the  endpoint in .
-        3.  Propose to the user to either a) lengthen the activity window (e.g., to 15 or 30 minutes) to catch more low-hashrate miners, or b) add a separate list of recently seen miners alongside the active ones.
-    -   Why fix this issue and what will be achieved with the fix?: The user feels the active miners count is wrong because it doesn't include all connected workers. Adjusting the logic will better align the stats with user perception.
-    -   Status: IN PROGRESS
-    -   Is recurring issue? N
+        1. View the file .
+        2. Locate the  call around line 345 within the  function.
+        3. The log message has four  placeholders but is being passed a mix of integers, floats, and booleans. Correct the format specifiers (e.g., use  for float,  for string/bool) to match the arguments being passed.
+    -   Why fix this issue and what will be achieved with the fix?: Fixes a recurring error in the logs, improving code quality and preventing potential hidden bugs in share verification.
+    -   Status: NOT STARTED
+    -   Is recurring issue? Y
     -   Should Test frontend/backend/both after fix? Backend
     -   Blocked on other issue: None
 
 **In progress Task List**:
--   Task 1:
-    -   Where to resume: The agent has confirmed that all three nodes are online and synchronized. The user has access to all three servers.
-    -   What will be achieved with this?: BricsCoin will be a decentralized network, resilient to single-server failures and no longer reliant on a single point of control.
-    -   Status: USER VERIFICATION PENDING
-    -   Should Test frontend/backend/both after fix? NA
-    -   Blocked on something: None
+- None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P0:** Add the Stratum pool address () to the  status page.
-    -   **P1:** Add a prominent UI warning to SAVE THE SEED PHRASE upon wallet creation in the frontend.
+    -   **P1:** Add the Run Node link to the main navigation menu in .
+    -   **P2:** Re-attempt the implementation of the Rich List feature (API endpoint and frontend page), which previously failed and was reverted.
 -   **Future Tasks:**
-    -   Investigate and plan for Stratum v2 or P2Pool implementation for further decentralization.
-    -   Develop a mobile wallet for iOS/Android.
+    -   Investigate Stratum v2 or P2Pool implementation.
+    -   Develop a mobile wallet.
     -   Pursue exchange listings.
     -   Enhance the Mining Pools page to allow dynamic submission of external pools.
 
 **Completed work in this session**
--   **Blockchain Stalled Bug (RESOLVED):** Fixed the critical bug where the blockchain was stalled by correcting the  value in  to .
--   **Transaction Signature Bug (RESOLVED):** Fixed the Signature verification failed error by correcting two issues in :
-    1.  Made the backend hash the transaction data before verification () to match the frontend's behavior.
-    2.  Fixed a float vs. integer string formatting mismatch for the  field.
--   **Miners Stats Endpoint (RESOLVED):** Created the  endpoint in  to fix the 404 error and provide miner statistics.
--   **HTTPS Enabled (RESOLVED):** Guided the user to enable Always Use HTTPS in their Cloudflare settings.
--   **Documentation Update (RESOLVED):** Updated , , and  to replace all GitHub links with Codeberg links and align content with project updates.
--   **Server Stability (RESOLVED):** Addressed frontend container crashes on the main server by adding a  policy to  and creating a 2GB swap file.
--   **Decentralization - Phase 1 (COMPLETED):** Guided the user to set up and synchronize two new servers (167.235.133.118, 46.225.104.63) as BricsCoin nodes, creating a 3-node P2P network.
+-   **Peer Persistence (DONE):** Implemented logic to save and load P2P nodes from a MongoDB  collection, so they are no longer lost on server restart.
+-   **Server Performance (DONE):** Resolved critical performance issues by:
+    -   Converting the frontend to a production build (yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. + ).
+    -   Adding database indexes to , , and , reducing API latency from ~2s to ~0.05s.
+-   **Server Stability (DONE):** Fixed a crash loop by freeing up disk space (from 100% full) using  and cleaning up MongoDB diagnostic data.
+-   **Transaction Fee Update (DONE):** Changed the transaction fee from  to  in the backend () and all relevant frontend pages (, ).
+-   **Run a Node Page (DONE):** Overhauled the page with clearer step-by-step instructions and removed a broken download button.
+-   **Stratum Pool Address (DONE):** Added the official Stratum pool address to the Connected Peers list on the Network page.
 
 **Earlier issues found/mentioned but not fixed**
--   All major issues from this session were either fixed or are listed in the pending issues section above.
+-   **Inaccurate Active Miner Count:** (From previous handoff) The  endpoint logic doesn't align with user expectations for active miners.
+-   The user has significant difficulty copy-pasting multi-line commands. The agent should prioritize providing simple, single-line commands.
 
 **Known issue recurrence from previous fork**
--   **Blockchain is stalled**: RECURRED and RESOLVED. The previous handoff mentioned this was a recurring issue. The agent successfully diagnosed a new root cause (incorrect ) and applied a permanent fix.
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Proof of Work:** The blockchain stall was fixed by changing  to , allowing any valid hash to be a block when difficulty is 1.
--   **ECDSA Signature Verification:** Transaction failures were fixed by ensuring both frontend and backend use the same data hashing process () before signing/verifying. A subtle bug related to float-to-string conversion ( vs ) was also fixed.
--   **P2P Node Synchronization:** The agent guided the user through bootstrapping new nodes. This involved a manual database import () of the existing blockchain data to ensure the new nodes started from the correct genesis block.
--   **Docker Environment Variables:** A key issue was that Docker containers were not reading the  file. The fix was to explicitly use  to load the environment variables.
--   **Server Administration:** The agent provided commands for installing Docker, cloning git repos, managing firewalls (), and creating swap files on new Debian-based servers.
+-   **Production Frontend Build:** The app was switched from a yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. development server to a production-optimized static build served with the  package. A new container, , was created for this.
+-   **Database Indexing:**  was used on MongoDB collections (, , ) to resolve severe API latency.
+-   **P2P Peer Persistence:** Peer connection data is now stored in a  collection in MongoDB ( with ) and loaded on application startup to survive restarts.
+-   **CORS Configuration:** The FastAPI  was modified to debug frontend connectivity issues, eventually being set to  as a temporary measure.
+-   **Live Server Debugging:** The agent extensively guided the user through debugging on their production server using , , , , , Active Internet connections (w/o servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+tcp        0      0 localhost:27017         localhost:35364         ESTABLISHED
+tcp        0      0 localhost:27017         localhost:35378         ESTABLISHED
+tcp        0      0 agent-env-fefb6dbd:8010 10.64.131.197:48556     ESTABLISHED
+tcp        0      0 localhost:35364         localhost:27017         ESTABLISHED
+tcp        0      0 localhost:35394         localhost:27017         ESTABLISHED
+tcp        0      0 localhost:27017         localhost:35394         ESTABLISHED
+tcp        0      0 agent-env-fefb6dbd:8010 10.64.128.8:36796       ESTABLISHED
+tcp        0      0 agent-env-fefb6dbd:8010 10.64.131.197:48576     ESTABLISHED
+tcp        0      0 agent-env-fefb6dbd:8010 10.64.130.8:52220       ESTABLISHED
+tcp        0      0 agent-env-fefb6dbd:8010 10.64.131.197:48568     ESTABLISHED
+tcp        0      0 localhost:35378         localhost:27017         ESTABLISHED
+tcp        0      0 agent-env-fefb6dbd:8010 10.64.128.16:37724      ESTABLISHED
+tcp        0      0 agent-env-fefb6db:54250 0.203.102.34.bc.g:https ESTABLISHED
+Active UNIX domain sockets (w/o servers)
+Proto RefCnt Flags       Type       State         I-Node   Path
+unix  3      [ ]         STREAM     CONNECTED     28097450 
+unix  3      [ ]         STREAM     CONNECTED     28099775 
+unix  3      [ ]         STREAM     CONNECTED     28099791 
+unix  3      [ ]         STREAM     CONNECTED     28097451 
+unix  3      [ ]         STREAM     CONNECTED     28099790 
+unix  3      [ ]         STREAM     CONNECTED     28099774 , and .
 
 **key DB schema**
--   : 
--   : 
--   :  (Used for P2P network)
+-   :  (Indexed on , )
+-   :  (Indexed on )
+-   :  (Indexed on )
+-   :  (NEW: Persisted collection)
 
 **changes in tech stack**
--   None. The architecture has expanded to a multi-node setup.
+-   The frontend deployment process has changed. It is no longer run with yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.. Instead, the code is built with yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. and the resulting static files in the  directory are served by a new, separate production container () using .
 
 **All files of reference**
--   : Modified to fix transaction signature verification and add the  endpoint.
--   : Modified to fix the stalled blockchain bug.
--   : Modified on the user's main server to add .
--   : A new directory containing a full standalone package for deploying new nodes.
--   : Updated with new instructions and cost estimates.
--   , , : All updated with Codeberg links and project info.
+-   : Major changes for peer persistence, CORS configuration, transaction fee, and a failed Rich List implementation that was reverted.
+-   : Patched with  optional chaining to prevent crashes.
+-   : Patched with  optional chaining.
+-   : Patched with  optional chaining.
+-   : Patched with  optional chaining.
+-   : Content completely rewritten.
+-   : Needs to be modified to add a link to the  page.
+-   :  was changed to .
 
 **Areas that need refactoring**:
--   **P2P Sync:** The current method of syncing new nodes is manual and brittle (dumping and importing the DB). A proper, automated block-by-block sync protocol should be implemented in .
--   **Production Frontend:** The frontend on the main server is running in development mode (yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.). This is inefficient and was the likely cause of crashes. It should be converted to a production build (yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.) and served statically, likely via nginx.
+-   The temporary CORS fix () in  should be replaced with a specific list of allowed domains once the Cloudflare issue is resolved.
+-   The P2P node discovery logic in  appears to have a bug where a node gets stuck in a sync loop. This needs to be investigated.
 
 **key api endpoints**
--   : For submitting new transactions. (Now fixed).
--   : Provides network-wide statistics.
--   : Provides miner statistics. (Now fixed).
--   : Returns the list of known peers in the network.
--   : Allows a new node to register itself with a peer.
+-   : Modified to save peers to MongoDB.
+-   : Modified to fetch peers from memory, which is loaded from the database on startup.
+-   : Performance was improved with DB indexing.
+-   : Performance was improved with DB indexing.
 
 **Critical Info for New Agent**
--   The project is now a **3-node network**. Do not assume all work happens on one server. The user has access to  (main),  (node 2), and  (node 3).
--   When starting containers on the new nodes, you **MUST** use . Otherwise, the  and  will be incorrect, and the node will not register properly.
--   File edits are **NOT** automatically synced to the user's servers. Changes must be applied by guiding the user to run commands (, , , etc.) directly on their servers via SSH.
--   The user has a history of copy-pasting entire blocks of text, including the agent's instructions, into the terminal. Provide commands that are robust and can be copied one at a time.
+-   **The domain  is DOWN.** It points to a Cloudflare parking page. All frontend API calls and user access must use the direct server IP:  for the site and  for the API.
+-   **The frontend is BROKEN.** It loads and then turns into a black screen. This is the highest priority bug. Your first action should be to verify if the last fix (adding optional chaining) worked. If not, get the browser console logs from the user.
+-   **Frontend Deployment:** The frontend runs in a production container named . To apply frontend changes, you must instruct the user to run yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. and then .
+-   **User Command Execution:** The user struggles with multi-line copy-paste. Provide simple, single-line commands.  is more reliable than python patch scripts or large  blocks.
 
 **documents and test reports created in this job**
--    (Updated)
--    (Updated)
--    (Updated)
--    (Updated)
--    (New)
--    (New)
--    (New)
+-   None.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks how to add the two new servers they created.
-2.  **Agent:** Provides instructions to SSH into the first new server and install the BricsCoin node software.
-3.  **User:** Struggles with SSH password. Agent advises on how to reset it via Hetzner console.
-4.  **User:** Successfully logs in and runs the installation commands. The new node starts with its own genesis block.
-5.  **Agent:** Diagnoses the genesis block mismatch and provides a command sequence to manually import the correct blockchain data via .
-6.  **User:** Runs the commands, and the first new node is successfully synchronized.
-7.  **Agent:** Guides the user through the same process on the second new server, which is also successful.
-8.  **User:** Asks why the nodes are not showing up with friendly names on the network page.
-9.  **Agent:** Explains the  file is not being read and provides the correct command (). Guides the user to apply this to both new nodes.
-10. **User:** Confirms both nodes are now configured and asks if the Stratum pool URL can be added to the network list.
+1.  **User:** The page loads for 1 second then turns black.
+2.  **Agent:** Asks to check browser console for errors.
+3.  **User:** Provides screenshot of console showing an  error in .
+4.  **Agent:** Provides a  command to patch  with optional chaining.
+5.  **User:** It opens, but all values are 0, then it closes again (turns black).
+6.  **Agent:** Suspects CORS, provides a  command to set  in .
+7.  **User:** It's still not working.
+8.  **Agent:** Asks for backend logs and verifies CORS change was applied.
+9.  **Agent:** Provides  commands to patch , , and  with optional chaining as a broader fix.
+10. **User:** Asks for the current block height and number of miners, interrupting the debugging flow.
 
 **Project Health Check:**
--   **Working**: The core functionality (block production, transactions, P2P networking) is operational.
--   **Issues**: Data display for hashrate and miner counts remains inaccurate. The P2P sync process is manual and not robust. The frontend is not running a production build.
+-   **Broken**: The frontend is unusable (displays a black screen). The primary domain name is inaccessible.
+-   **Mocked**: None.
 
 **3rd Party Integrations**
 -   None.
@@ -180,12 +219,15 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 -   Testing agent used after significant changes: NO
 -   Troubleshoot agent used after agent stuck in loop: NO
 -   Test files created: None
--   Known regressions: None in this session; several major bugs were fixed.
+-   Known regressions: The frontend is now completely broken for the user, which is a major regression from the start of the session.
 
 **Credentials to test flow:**
--   The user executes all commands on their servers. The agent must provide SSH commands (e.g., ) and the user will provide their own credentials. Do not ask for passwords.
+-   Agent must provide SSH commands to the user, who has root access to the servers.
+-   Main server: 
+-   Node 2: 
+-   Node 3: 
 
 **What agent forgot to execute**
--   The agent did not implement the Save Seed Phrase warning UI enhancement (P1 task from handoff).
--   The agent identified that the frontend should be a production build but did not implement this change.
--   The success of the final hashrate calculation fix () was never confirmed.</analysis>
+-   Did not add the Run Node link to the navigation menu in .
+-   The Rich List feature implementation failed and was reverted, but not re-attempted.
+-   Did not update  with the significant work completed in the session.</analysis>
