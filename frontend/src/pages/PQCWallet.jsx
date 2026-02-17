@@ -116,7 +116,7 @@ export default function PQCWallet() {
   const [sendOpen, setSendOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newWalletData, setNewWalletData] = useState(null);
-  const [importForm, setImportForm] = useState({ ecdsa_key: "", dilithium_key: "", name: "" });
+  const [importForm, setImportForm] = useState({ ecdsa_key: "", dilithium_sk: "", dilithium_pk: "", name: "" });
   const [sendForm, setSendForm] = useState({ recipient: "", amount: "" });
   const [sending, setSending] = useState(false);
 
