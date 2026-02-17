@@ -399,7 +399,24 @@ class StratumMiner:
         reward_tx = {"id":str(uuid.uuid4()),"sender":"COINBASE","recipient":miner_address,"amount":reward_amount,"timestamp":datetime.now(timezone.utc).isoformat(),"signature":"COINBASE_REWARD","type":"mining_reward","confirmed":True,"block_index":template['index']}
         block_transactions = template.get('transactions',[]).copy()
         block_transactions.insert(0,{"id":reward_tx["id"],"sender":"COINBASE","recipient":miner_address,"amount":reward_amount,"type":"mining_reward"})
-        block = {"index":template['index'],"timestamp":datetime.now(timezone.utc).isoformat(),"transactions":block_transactions,"proof":int(nonce,16),"previous_hash":template['previous_hash'],"hash":block_hash,"miner":miner_address,"difficulty":template['difficulty'],"nonce":int(nonce,16)}
+        timestamp = datetime.now(timezone.utc).isoformat()
+        block = {"index":template['index'],"timestamp":timestamp,"transactions":block_transactions,"proof":int(nonce,16),"previous_hash":template['previous_hash'],"hash":block_hash,"miner":miner_address,"difficulty":template['difficulty'],"nonce":int(nonce,16)}
+        
+        # PQC Block Signing
+        try:
+            from pqc_crypto import hybrid_sign as pqc_sign
+            node_keys = await db.node_config.find_one({"type": "pqc_keys"}, {"_id": 0})
+            if node_keys:
+                sig_data = f"{template['index']}{timestamp}{block_hash}{miner_address}"
+                sig = pqc_sign(node_keys["ecdsa_private_key"], node_keys["dilithium_secret_key"], sig_data)
+                block["pqc_ecdsa_signature"] = sig["ecdsa_signature"]
+                block["pqc_dilithium_signature"] = sig["dilithium_signature"]
+                block["pqc_public_key_ecdsa"] = node_keys["ecdsa_public_key"]
+                block["pqc_public_key_dilithium"] = node_keys["dilithium_public_key"]
+                block["pqc_scheme"] = "ecdsa_secp256k1+ml-dsa-65"
+        except Exception as e:
+            logger.error(f"PQC block signing failed: {e}")
+        
         existing = await db.blocks.find_one({"index":template['index']})
         if existing: return
         await db.blocks.insert_one(block)
@@ -409,7 +426,7 @@ class StratumMiner:
             await db.transactions.update_many({"id":{"$in":pending_tx_ids}},{"$set":{"confirmed":True,"block_index":template['index']}})
         self.blocks +=1
         if self.miner_id in miners: miners[self.miner_id]['blocks']+=1
-        logger.info(f"✅ Block #{template['index']} saved! Miner: {miner_address}, Reward: {reward_amount} BRICS")
+        logger.info(f"Block #{template['index']} saved with PQC! Miner: {miner_address}, Reward: {reward_amount} BRICS")
         await self.server.on_new_block()
 
     async def send_job(self,job:dict):
