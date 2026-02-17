@@ -85,4 +85,25 @@ export const getWalletQR = (address) =>
 // Address
 export const getAddressInfo = (address) => api.get(`/address/${address}`);
 
+// PQC (Post-Quantum Cryptography)
+export const createPQCWallet = (name = "PQC Wallet") =>
+  api.post("/pqc/wallet/create", { name });
+
+export const importPQCWallet = (ecdsa_private_key, dilithium_secret_key, name = "Imported PQC Wallet") =>
+  api.post("/pqc/wallet/import", { ecdsa_private_key, dilithium_secret_key, name });
+
+export const getPQCWalletInfo = (address) =>
+  api.get(`/pqc/wallet/${address}`);
+
+export const getPQCStats = () => api.get("/pqc/stats");
+
+export const verifyPQCSignature = (data) =>
+  api.post("/pqc/verify", data);
+
+export const createPQCTransaction = (data) =>
+  api.post("/pqc/transaction/secure", data);
+
+export const listPQCWallets = (limit = 50) =>
+  api.get(`/pqc/wallets/list?limit=${limit}`);
+
 export default api;
