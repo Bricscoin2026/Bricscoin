@@ -339,10 +339,11 @@ export default function PQCWallet() {
 
       {/* PQC Stats Banner */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
             { label: "Wallet PQC", value: stats.total_pqc_wallets, color: "text-emerald-400" },
             { label: "TX Quantistiche", value: stats.total_pqc_transactions, color: "text-cyan-400" },
+            { label: "Blocchi Firmati", value: `${stats.total_pqc_blocks || 0}/${stats.total_blocks || 0}`, color: "text-amber-400" },
             { label: "Schema Firma", value: "Ibrido", color: "text-amber-400" },
             { label: "Stato", value: stats.status === "active" ? "Attivo" : "N/A", color: "text-emerald-400" },
           ].map((s, i) => (
