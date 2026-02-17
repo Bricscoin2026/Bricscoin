@@ -40,10 +40,31 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with blockchain, mining,
 - Updated Dockerfile and Dockerfile.frontend for PQC dependencies
 - Disk cleanup cron job installed (weekly, Sunday 3AM)
 
+### Wallet Migration Fix (Feb 17, 2026)
+- **Address validator**: Updated regex to accept both `BRICS[hex]{40}` and `BRICSPQ[hex]{38}`
+- **No fee migration**: Created `/api/pqc/migrate` endpoint - zero fee for legacy→PQC migration
+- **Amount precision**: Round to 8 decimal places before sending (Bitcoin precision)
+- **Signature compatibility (CRITICAL FIX)**:
+  - Fixed SHA-1→SHA-256 hash mismatch between JS frontend and Python backend
+  - Added DER signature format detection (JS uses DER ~144 hex, Python raw 128 hex)
+  - `verify_signature()` now handles both DER and raw formats with SHA-256
+  - `sign_transaction()` updated to use SHA-256 for consistency
+  - `build_tx_data()` helper to format numbers like JavaScript (no trailing .0)
+  - Fixed `isValidAddress()` in frontend to accept PQC addresses
+
+### Quantum Security Dashboard Widget (Feb 17, 2026)
+- Widget "Quantum Security" on main Dashboard showing:
+  - ML-DSA-65 Active status (animated pulse)
+  - PQC Block Coverage percentage with progress bar
+  - PQC Wallets count, PQC Transactions count, Signature scheme
+  - Node ID, link to Quantum-Safe Wallet page
+- "Quantum-Safe" badge added next to "Security Audit Passed" in hero section
+
 ### Bug Fixes (Feb 2026)
 - Hashrate: 2^48 → 2^32 (realistic values)
 - Stratum logger: f-strings, PQC block signing added
 - Disk cleanup: script + cron installed on production
+- Error handling: Pydantic validation errors properly serialized in frontend
 
 ## Key API Endpoints
 - `/api/pqc/wallet/create` - Create PQC wallet
@@ -53,11 +74,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with blockchain, mining,
 - `/api/pqc/block/{index}/verify` - Block signature verification
 - `/api/pqc/verify` - Hybrid signature verification
 - `/api/pqc/transaction/secure` - PQC transaction
-
-## DB Schema
-- **blocks**: + pqc_ecdsa_signature, pqc_dilithium_signature, pqc_public_key_*, pqc_scheme
-- **pqc_wallets**: address, wallet_type, ecdsa_public_key, dilithium_public_key, created_at
-- **node_config**: type="pqc_keys", ecdsa/dilithium key pairs
+- `/api/pqc/migrate` - Legacy→PQC migration (NO FEE)
 
 ## Remaining Backlog
 
