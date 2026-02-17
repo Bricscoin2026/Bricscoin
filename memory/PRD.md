@@ -76,7 +76,16 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with blockchain, mining,
 - `/api/pqc/transaction/secure` - PQC transaction
 - `/api/pqc/migrate` - Legacy→PQC migration (NO FEE)
 
+### PQC Transaction Hotfix (Feb 17, 2026)
+- **Fix**: `/api/pqc/transaction/secure` ora imposta `confirmed: True` immediatamente
+- **Database fix**: Script deploy corregge automaticamente le transazioni PQC bloccate in "Pending"
+- **Deploy archive**: `bricscoin-hotfix.tar.gz` con `deploy.sh` automatizzato
+- Backup automatico, rebuild Docker, test API inclusi nello script
+
 ## Remaining Backlog
+
+### P1 - Aggiornamento Repository Codeberg
+- Committare e pushare tutte le modifiche al repository pubblico
 
 ### P2 (Investigated, not reproducible in test env)
 - Active miner count: uses 2 collections with different time windows
