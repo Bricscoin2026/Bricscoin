@@ -81,7 +81,11 @@ export default function WalletMigration() {
       setStep(4);
       toast.success("Migrazione completata con successo!");
     } catch (err) {
-      toast.error("Errore migrazione: " + (err.response?.data?.detail || err.message));
+      const detail = err.response?.data?.detail;
+      const msg = Array.isArray(detail)
+        ? detail.map(d => d.msg || JSON.stringify(d)).join(', ')
+        : detail || err.message;
+      toast.error("Errore migrazione: " + msg);
     } finally {
       setMigrating(false);
     }
