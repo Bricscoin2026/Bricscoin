@@ -232,7 +232,7 @@ export default function PQCWallet() {
             Wallet Quantum-Safe
           </h1>
           <p className="text-muted-foreground mt-1">
-            Firma ibrida ECDSA + ML-DSA (Dilithium2) resistente ai computer quantistici
+            Firma ibrida ECDSA + ML-DSA-65 (FIPS 204) - Le chiavi private non lasciano mai il browser
           </p>
         </div>
         <div className="flex gap-2">
