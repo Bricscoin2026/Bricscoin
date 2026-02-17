@@ -2024,6 +2024,7 @@ security_logger.addHandler(security_handler)
 @app.on_event("startup")
 async def startup_event():
     await create_genesis_block()
+    await init_node_pqc_keys()
     logger.info(f"BricsCoin node started - ID: {NODE_ID}")
     
     # Load peers from database
