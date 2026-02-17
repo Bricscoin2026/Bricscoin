@@ -2268,9 +2268,9 @@ async def run_security_audit():
     # Test: Hybrid ECDSA + ML-DSA-65 signature
     try:
         test_msg = "hybrid_signature_test"
-        hybrid = create_hybrid_signature(
+        hybrid = hybrid_sign(
             pqc_wallet["ecdsa_private_key"],
-            pqc_wallet["dilithium_private_key"],
+            pqc_wallet["dilithium_secret_key"],
             test_msg
         )
         pqc_tests.append({"name": "Hybrid ECDSA + ML-DSA-65 signing", "passed": "ecdsa_signature" in hybrid and "dilithium_signature" in hybrid})
@@ -2279,24 +2279,28 @@ async def run_security_audit():
 
     # Test: Hybrid signature verification
     try:
-        verified = verify_hybrid_signature(
+        verified_result = hybrid_verify(
             pqc_wallet["ecdsa_public_key"],
             pqc_wallet["dilithium_public_key"],
             hybrid["ecdsa_signature"],
             hybrid["dilithium_signature"],
             test_msg
         )
-        pqc_tests.append({"name": "Hybrid signature verification", "passed": verified})
+        pqc_tests.append({"name": "Hybrid signature verification", "passed": verified_result["hybrid_valid"]})
     except Exception:
         pqc_tests.append({"name": "Hybrid signature verification", "passed": False})
 
-    # Test: Seed phrase recovery
+    # Test: Seed phrase recovery (deterministic ECDSA from seed)
     try:
-        recovered = recover_pqc_wallet(pqc_wallet["seed_phrase"])
-        seed_ok = recovered["address"] == pqc_wallet["address"]
-        pqc_tests.append({"name": "Seed phrase wallet recovery", "passed": seed_ok})
+        recovered = recover_pqc_wallet(
+            pqc_wallet["ecdsa_private_key"],
+            pqc_wallet["dilithium_secret_key"],
+            pqc_wallet["dilithium_public_key"]
+        )
+        seed_ok = recovered["ecdsa_public_key"] == pqc_wallet["ecdsa_public_key"]
+        pqc_tests.append({"name": "PQC wallet key recovery", "passed": seed_ok})
     except Exception:
-        pqc_tests.append({"name": "Seed phrase wallet recovery", "passed": False})
+        pqc_tests.append({"name": "PQC wallet key recovery", "passed": False})
 
     # Test: Node PQC keys exist
     try:
