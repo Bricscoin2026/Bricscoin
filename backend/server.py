@@ -100,6 +100,9 @@ SEED_NODES = os.environ.get('SEED_NODES', '').split(',') if os.environ.get('SEED
 connected_peers: Dict[str, Dict] = {}
 sync_lock = asyncio.Lock()
 
+# Node PQC keypair for block signing (loaded on startup)
+node_pqc_keys: Dict[str, str] = {}
+
 # ==================== MODELS ====================
 class Transaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
