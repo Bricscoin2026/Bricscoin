@@ -890,6 +890,16 @@ async def get_miners_stats():
     }
 
 
+@api_router.get("/miners/count")
+async def get_miners_count():
+    """Get connected miners count (backward compatible)"""
+    try:
+        with open('/tmp/miners_count.txt', 'r') as f:
+            return {"connected_miners": int(f.read().strip())}
+    except Exception:
+        return {"connected_miners": 0}
+
+
 @api_router.get("/")
 async def root():
     return {"message": "BricsCoin API", "version": "1.0.0"}
