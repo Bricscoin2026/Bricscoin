@@ -1,163 +1,188 @@
-<analysis>**original_problem_statement:** The user's initial request was to create a Bitcoin-like cryptocurrency called BricsCoin. Over time, this evolved into a series of debugging and feature enhancement tasks.
+<analysis>**original_problem_statement:** The user's initial request was to create a Bitcoin-like cryptocurrency called BricsCoin. The project has since evolved through multiple debugging and feature-enhancement sessions.
 
-In this session, the user's focus was on:
-1.  Fixing the main domain , which was showing a blank/incorrect page.
-2.  Resolving data inconsistencies where the frontend showed old data (65 blocks) instead of live data (800+ blocks).
-3.  Fixing the transaction fee, which had reverted to  instead of the correct .
-4.  Resolving a server crash (Error 502) caused by the server running out of disk space after a memory upgrade.
-5.  Setting up a new, separate BricsCoin node on their local Mac computer.
-6.  When the local node setup proved too difficult due to synchronization issues, the user requested a much simpler, automated way for new users to set up a node.
+In this session, the primary goals were to enhance the project's decentralization and security. This involved:
+1.  Creating a simple, one-command shell script () for new users to deploy a BricsCoin node. This script automates downloading the code, restoring the blockchain from a backup, and registering the new node on the network.
+2.  Implementing a daily cron job on the server to automatically create an up-to-date blockchain backup for new nodes.
+3.  Updating the backend API to make peer registrations persistent in the database, so the node list survives server restarts.
+4.  Redesigning the Run Node webpage to focus on deploying nodes on 24/7 cloud servers (Hetzner, DigitalOcean, Vultr) to ensure the network's survival even if the main server goes down.
+5.  Adding a new Rich List feature to display the top wallet holders.
+6.  Adding a new Community page to link to the user's external chat server.
+7.  Starting a major security upgrade to implement **Post-Quantum Cryptography (PQC)** using a hybrid  signature scheme. This work is being done in a separate, isolated development environment to avoid disrupting the live application.
 
-**User's preferred language**: Italian
+**User's preferred language**: Italian. The next agent MUST respond in Italian.
 
 **what currently exists?**
--   The main production server at  is fully operational. The frontend is accessible at , serving live data from the backend. The critical issues from the previous session (black screen, domain down, performance, disk space) have been resolved.
--   The user has a local development environment on their Mac where they are attempting to run a second BricsCoin node. This local node is currently unable to synchronize with the main blockchain.
--   The project's source code is hosted on Codeberg ().
+-   A fully operational BricsCoin blockchain on the production server (), accessible at .
+-   An automated, one-command node setup script () that allows anyone to deploy a new, synchronized node.
+-   A cron job that updates the blockchain backup for the setup script daily.
+-   The backend now uses MongoDB to store a persistent list of network peers.
+-   The Run Node page provides detailed, step-by-step instructions for deploying an always-online node on cloud providers.
+-   A Rich List and Community page are live on the site.
+-   A separate PQC development environment exists at . This contains the backend logic and newly created frontend React components for the PQC wallet system, but they are not yet integrated into a runnable application.
 
 **Last working item**:
--   Last item agent was working: The agent was guiding the user to create a database backup on the main server. This is the first step towards creating an automated setup script () that will allow new users to easily deploy a node by restoring from a recent snapshot, as requested by the user who found the manual sync process too complex.
+-   Last item agent was working: Creating the frontend React components for the Post-Quantum Cryptography (PQC) feature. Specifically, the agent created  (for creating new PQC and legacy wallets) and  (for migrating from a legacy wallet to a PQC wallet). These files are located in the isolated development directory .
 -   Status: IN PROGRESS
 -   Agent Testing Done: N
--   Which testing method agent to use? Manual testing by user. The agent has provided  commands for the user to execute on the main server to create and move the backup file. The agent must verify the user's output.
+-   Which testing method agent to use? The next step is to build a minimal React application within the  directory to render and test these components. Initial verification can be done with the screenshot tool.
 -   User Testing Done: N
 
 **All Pending/In progress Issue list**:
--   Issue 1: Simplify Node Setup (P0)
--   Issue 2: Incorrect Hashrate Display (P2)
--   Issue 3: Blocker Count on Frontend is off-by-one (P2)
--   Issue 4: TypeError in  logs (P3)
+-   Issue 1: Implement Post-Quantum Cryptography (P0)
+-   Issue 2: Automate Disk Cleanup (P1)
+-   Issue 3: Incorrect Hashrate Display (P2)
+-   Issue 4: Blocker Count Mismatch on Frontend (P2)
+-   Issue 5: TypeError in  logs (P3)
 
 Issues Detail:
 -   Issue 1:
-    -   Attempted fixes: The agent tried to debug the P2P synchronization logic on the user's Mac node. This involved multiple attempts to reset the database, modify the source code to bypass validation, and force syncs. The process was too complex and failed, leading the user to request a simpler solution. The new approach is to use a database backup/restore method.
+    -   Attempted fixes: The core backend logic (, , ) and initial frontend components (, ) have been created in the  dev environment.
     -   Next debug checklist:
-        1.  Confirm the user has successfully created the database backup () on the main server.
-        2.  Confirm the backup has been moved to the  directory so it's publicly accessible.
-        3.  Create the  script on the user's Mac. This script should automate downloading the backup, setting up Docker containers, and restoring the database.
-    -   Why fix this issue and what will be achieved with the fix?: The current node setup process is too difficult for non-technical users, which hinders network growth. An automated script will make it easy for anyone to run a node, increasing decentralization.
+        1.  Inside , create a basic React application structure (, , ).
+        2.  Import and render the  and  components within this test app.
+        3.  Ensure the components can successfully communicate with the PQC test API server ().
+        4.  Proceed with implementing PQC block signing and creating an automated test suite.
+    -   Why fix this issue and what will be achieved with the fix?: To make the BricsCoin blockchain secure against future attacks from quantum computers, a critical long-term security upgrade.
     -   Status: IN PROGRESS
-    -   Is recurring issue? Y
-    -   Should Test frontend/backend/both after fix? Backend
+    -   Is recurring issue? N
+    -   Should Test frontend/backend/both after fix? Both
     -   Blocked on other issue: None
 
 -   Issue 2:
     -   Attempted fixes: None.
+    -   Next debug checklist:
+        1.  Create a cron job on the server ().
+        2.  The script for the cron job should run  and  periodically (e.g., weekly).
+    -   Why fix this issue and what will be achieved with the fix?: The server disk has filled up to 100% twice, causing the database and the entire site to crash. An automated cleanup will prevent future outages.
+    -   Status: NOT STARTED
+    -   Is recurring issue? Y
+    -   Should Test frontend/backend/both after fix? Backend (verify cron job is set up)
+    -   Blocked on other issue: None
+
+-   Issue 3:
+    -   Attempted fixes: None.
     -   Next debug checklist: Review hashrate calculation in  ( endpoint).
-    -   Why fix this issue and what will be achieved with the fix?: Key network metric is inaccurate.
+    -   Why fix this issue and what will be achieved with the fix?: A key network metric is inaccurate.
     -   Status: NOT STARTED
     -   Is recurring issue? Y
     -   Should Test frontend/backend/both after fix? Backend
     -   Blocked on other issue: None
 
--   Issue 3:
+-   Issue 4:
     -   Attempted fixes: None.
-    -   Next debug checklist: Inspect the frontend explorer page to find the off-by-one error.
-    -   Why fix this issue and what will be achieved with the fix?: Minor data consistency fix.
+    -   Next debug checklist: Inspect the frontend explorer page to identify the source of the off-by-one error in the block count display.
+    -   Why fix this issue and what will be achieved with the fix?: Minor data consistency fix on the UI.
     -   Status: NOT STARTED
     -   Is recurring issue? N
     -   Should Test frontend/backend/both after fix? Frontend
     -   Blocked on other issue: None
 
--   Issue 4:
+-   Issue 5:
     -   Attempted fixes: None.
     -   Next debug checklist: Check  around line 345 for a  in a  call and correct the format specifiers.
-    -   Why fix this issue and what will be achieved with the fix?: Cleans up error logs and improves code quality.
+    -   Why fix this issue and what will be achieved with the fix?: Cleans up error logs.
     -   Status: NOT STARTED
     -   Is recurring issue? Y
     -   Should Test frontend/backend/both after fix? Backend
     -   Blocked on other issue: None
 
 **In progress Task List**:
--   Task 1: Create an automated node setup script () (P0)
-    -   Where to resume: The agent is waiting for the user to confirm the database backup has been created and moved on the main server. The next step is to write the  script for the user to run on their Mac.
-    -   What will be achieved with this?: A one-click setup for new nodes.
+-   Task 1: Complete the PQC Frontend Implementation (P0)
+    -   Where to resume: The React components  and  have been created in . The next step is to build a minimal, runnable React app around them for testing.
+    -   What will be achieved with this?: A user interface for creating quantum-safe wallets and migrating legacy funds.
     -   Status: IN PROGRESS
-    -   Should Test frontend/backend/both after fix? Backend
-    -   Blocked on something: User action to create the database backup.
+    -   Should Test frontend/backend/both after fix? Frontend
+    -   Blocked on something: None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1:** Implement the Rich List feature (API endpoint and frontend page).
+    -   **P0:** Implement PQC Block Signing: Modify the block creation logic in  to include hybrid signatures.
+    -   **P0:** Create PQC Automated Test Suite: Write tests for all PQC functions in .
+    -   **P1:** Deploy PQC to Production: After all development and testing, merge the PQC code into the main production directory and deploy.
 -   **Future Tasks:**
-    -   Investigate Stratum v2 or P2Pool.
-    -   Develop a mobile wallet.
-    -   Enhance the Mining Pools page.
+    -   Investigate Stratum v2 or P2Pool for mining.
+    -   Develop a mobile wallet application.
 
 **Completed work in this session**
--   **Production Site Restored (DONE):** Fixed , which was showing a blank/incorrect page due to Cloudflare issues and incorrect frontend build configurations. The site now points to the server IP and serves live data correctly.
--   **Nginx Reverse Proxy (DONE):** Configured Nginx on the server to handle traffic for the domain, routing requests to the frontend () and backend ( to ) containers.
--   **Disk Full Crash (DONE):** Resolved a critical server crash (100% disk usage) by guiding the user to prune Docker resources and clean system logs, freeing up over 20GB of space.
--   **Transaction Fee Corrected (DONE):** Changed the transaction fee back to  in , , and .
--   **Frontend Menu Fixed (DONE):** Restored the full navigation menu in  by pulling the correct version from the Codeberg repository and adding the Mining and Run Node links.
--   **Codebase Synced (DONE):** Switched the server's git remote from GitHub to the user's preferred Codeberg repository and pushed all fixes.
--   **Difficulty Drop Explained (DONE):** Diagnosed that the dramatic drop in difficulty was a correct, automatic adjustment by the algorithm in response to the server downtime and explained it to the user.
--   **Node Sync Debugged (DONE):** Diagnosed why the local Mac node was failing to sync (conflicting genesis block, hash calculation mismatch, incomplete sync logic) before pivoting to a simpler backup/restore strategy at the user's request.
+-   **Automated Node Setup Script (DONE):** Created  v3.0, which automates node deployment and registration.
+-   **Persistent Peer Storage (DONE):** Modified backend to store the peer list in MongoDB, surviving restarts.
+-   **P2P Backup Distribution (DONE):** Added an endpoint  to allow any node to serve the blockchain backup.
+-   **Daily Backup Cron Job (DONE):** Automated the daily update of the blockchain backup file.
+-   **Run Node Page Overhaul (DONE):** Redesigned the page to focus on deploying 24/7 nodes on cloud platforms (Hetzner, etc.) with detailed instructions.
+-   **Rich List Feature (DONE):** Implemented the backend API and frontend page for displaying top wallet holders.
+-   **Community Page (DONE):** Added a new page linking to the user's external chat community.
+-   **Server Crash Recovery (DONE):** Resolved a critical server crash caused by 100% disk usage.
+-   **PQC Backend Foundation (DONE):** In a separate dev environment, created and tested the core Python modules for PQC wallets, hybrid signatures, and legacy integration (, , ).
 
 **Earlier issues found/mentioned but not fixed**
--   Inaccurate Active Miner Count: The logic in  may not meet user expectations.
+-   Inaccurate Active Miner Count: The logic in  may not correctly reflect the number of active miners as the user expects.
 
 **Known issue recurrence from previous fork**
--   The disk full issue is a recurring problem on the server, indicating that logs or Docker artifacts accumulate over time and require periodic cleaning.
+-   **Issue recurrence:** The server disk filling to 100% and crashing the database.
+-   **Recurrence count:** 2
+-   **Status:** NOT STARTED (for the automated fix). A manual cleanup was performed. A cron job for automatic cleanup is a high-priority task.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Nginx Reverse Proxy**: Nginx was installed on the server to listen on port 80 and proxy requests to the correct Docker containers (frontend on , API on ). This is essential for using a domain name.
--   **Cloudflare DNS & Proxy**: The session involved extensive debugging of Cloudflare DNS 'A' records and ensuring the proxy status (orange cloud) was active. The SSL/TLS mode was set to Flexible.
--   **Frontend Build Process**: Environment variables () are baked into the static files at build time (yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.). Any change to  requires a rebuild and redeployment of the frontend container.
--   **Disk Space Management**: Identified that Docker logs and system journals were filling the disk. Used , , and  to free space.
--   **Node Synchronization**: Debugged why a new node fails to sync, identifying issues with conflicting genesis blocks and mismatched hash calculations between different versions of the code. This led to the new strategy of database export/import.
--   **Database Backup/Restore**: The new strategy for node setup involves  and .
+-   **Post-Quantum Cryptography (PQC):** Implementing a hybrid signature scheme using  (for backward compatibility) and  (for quantum resistance).
+-   **Isolated Development Environment:** All PQC work is performed in a separate directory () to ensure the live production application is not affected during development.
+-   **Python Virtual Environment (venv):** Used to manage PQC-specific dependencies (, To use the fastapi command, please install "fastapi[standard]":
+
+	pip install "fastapi[standard]") without polluting the system's Python packages.
+-   **Cron Job:** A system scheduler task was created to run a bash script () automatically every day to keep the public blockchain backup fresh.
+-   **Persistent vs. In-Memory Data:** The agent fixed an issue where the peer list was stored in memory and lost on restart. The code was refactored to use MongoDB for persistent storage.
+
+**key DB schema**
+-   **peers**: . This collection is now the source of truth for the network peer list.
 
 **changes in tech stack**
--   **Nginx** was added to the production server to act as a reverse proxy.
+-   **PQC Libraries:** , To use the fastapi command, please install "fastapi[standard]":
+
+	pip install "fastapi[standard]",  were installed into a Python virtual environment in the PQC development directory.  was installed at the system level to support this.
 
 **All files of reference**
--   : Transaction fee was corrected.
--   : Transaction fee was corrected.
--   : Transaction fee was corrected.
--   : Navigation menu was fixed.
--   : The hardcoded backend URL was replaced with .
--   : Updated multiple times to switch between IP and domain for debugging, finally set to .
--   : New Nginx configuration file.
--    (on Mac): Configuration file for running the local node.
-
-**Areas that need refactoring**:
--   The P2P sync logic in  is buggy and complex. It was patched with  to force sync on the local node. The new backup/restore strategy avoids this code, but the underlying P2P sync logic remains flawed for bootstrapping a new node from scratch.
+-    (Production API)
+-    (Production Run Node Page)
+-    (Production Rich List Page)
+-    (Production Setup Script)
+-    (PQC Dev: Core logic)
+-    (PQC Dev: Compatibility logic)
+-    (PQC Dev: Test API)
+-    (PQC Dev: React Component)
+-    (PQC Dev: React Component)
 
 **key api endpoints**
--   : Used extensively for checking block height and hashrate.
--   : Used to debug the transaction fee display issue.
--   : Used repeatedly to attempt to sync the local node.
--   : Used to manually register peers for the local node.
+-   : (GET) Provides the list of top wallet holders.
+-   : (GET) Allows any node to serve a fresh database backup.
+-   : (POST) Now saves peer data to the database.
+-   : (GET) Now fetches peer data from the database.
+-   : A new set of PQC-related test endpoints created in  and run on  during development.
 
 **Critical Info for New Agent**
--   The user wants a simple, one-click script () for new users to set up a BricsCoin node. The current task is to create this script.
--   The chosen strategy is database backup/restore, not fixing the complex P2P sync code.
--   You must first confirm with the user that they have successfully created the  file and placed it in the  directory on the main server ().
--   The disk full issue on the server is a recurring problem. Be prepared to guide the user on how to clean up space again if necessary.
--   The user needs very simple, clear, and single-line commands. Differentiate clearly between commands for the **server** and for the **local Mac**.
+-   **Development Isolation is Key:** All Post-Quantum Cryptography (PQC) work must be strictly confined to the  directory. Do not modify any files in the production  directory until the user explicitly approves the final deployment of the PQC feature.
+-   **Activate Virtual Environment:** Before running any Python scripts or installing packages for the PQC work, you must activate the virtual environment: .
+-   **Disk Space is a Recurring Threat:** The server has crashed twice due to a full disk. Prioritize creating a cron job for automated cleanup (, ) to prevent future outages.
+-   **User's Goal is Decentralization:** The user is highly focused on making the network resilient and independent of the main server. Frame all suggestions and implementations around this goal. The PQC upgrade is a major part of this long-term vision.
 
 **documents and test reports created in this job**
 -   None.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Creating a new node is too complicated. We need a simple method for users.
-2.  **Agent**: Proposes two options: 1) Manual DB export/import, or 2) An automated setup script.
-3.  **User**: Chooses Option 2, the automated script.
-4.  **Agent**: Instructs the user to create a database backup on the main server and move it to the  folder as the first step.
-5.  **User**: *No response yet, waiting for user to perform the backup.* (This is where the last message from the user left off).
-6.  **User**: Previously asked about the node sync status and why it wasn't showing as 10 nodes on the website.
-7.  **User**: Confirmed that the database on their Mac needed to be reset, and clarified that this would not affect the main server.
-8.  **User**: Reported the local node was still stuck after multiple sync attempts.
-9.  **User**: Reported that the local node was stuck on 99 blocks.
-10. **User**: Reported the local node was stuck on 1 block.
+1.  **User:** Asks to continue PQC development with the API endpoints.
+2.  **Agent:** Creates , tests it, and fixes a missing dependency issue.
+3.  **Agent:** Confirms all PQC backend API tests pass.
+4.  **User:** Asks to continue with the frontend part.
+5.  **Agent:** Creates  for creating PQC wallets.
+6.  **User:** Confirms.
+7.  **Agent:** Creates  for migrating legacy wallets.
+8.  **User:** Confirms.
+9.  **User:** Asks to continue tonight.
+10. **User:** Returns and confirms they want to proceed with the frontend (b).
 
 **Project Health Check:**
--   **Broken**: The manual P2P synchronization process for new nodes is broken/unreliable.
+-   **Broken**: The original P2P sync logic (now bypassed with a backup/restore method).
 -   **Mocked**: None.
 
 **3rd Party Integrations**
@@ -166,12 +191,11 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 **Testing status**
 -   Testing agent used after significant changes: NO
 -   Troubleshoot agent used after agent stuck in loop: NO
--   Test files created: None
--   Known regressions: None. The main site is stable.
+-   Test files created: None. The PQC test suite is a pending task.
+-   Known regressions: The database () has crashed due to a full disk, which is a recurring issue.
 
 **Credentials to test flow:**
 -   Main server: 
--   Local node: Commands are executed directly on the user's Mac terminal.
 
 **What agent forgot to execute**
--   The agent successfully pivoted from fixing the complex P2P sync logic to creating a simpler script-based solution, as per the user's request. No tasks were forgotten; the current task is simply paused pending user action.</analysis>
+-   The agent identified the recurring disk full issue and discussed solutions like a cleanup cron job but did not implement it. This remains a pending high-priority task to ensure server stability.</analysis>
