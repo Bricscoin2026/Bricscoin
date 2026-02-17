@@ -1253,7 +1253,7 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
         raise HTTPException(status_code=400, detail="Public key does not match sender address")
     
     # Create transaction data for verification (same format as client-side signing)
-    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{tx_request.timestamp}"
+    tx_data = build_tx_data(tx_request.sender_address, tx_request.recipient_address, tx_request.amount, tx_request.timestamp)
     
     # CRITICAL: Verify the signature
     try:
@@ -1339,7 +1339,7 @@ async def create_transaction_legacy(request: Request, tx_request: TransactionReq
     # Create transaction data for signing
     tx_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()
-    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{timestamp}"
+    tx_data = build_tx_data(tx_request.sender_address, tx_request.recipient_address, tx_request.amount, timestamp)
     
     # Sign transaction
     try:
@@ -1707,7 +1707,7 @@ async def create_pqc_transaction(request: Request, tx: PQCSecureTransactionReque
         raise HTTPException(status_code=400, detail="Sender must be a PQC address")
 
     # Verify the hybrid signature
-    tx_data = f"{tx.sender_address}{tx.recipient_address}{tx.amount}{tx.timestamp}"
+    tx_data = build_tx_data(tx.sender_address, tx.recipient_address, tx.amount, tx.timestamp)
     verification = hybrid_verify(
         tx.ecdsa_public_key,
         tx.dilithium_public_key,
@@ -1809,7 +1809,7 @@ async def migrate_to_pqc(request: Request, tx_request: SecureTransactionRequest)
         raise HTTPException(status_code=400, detail="La chiave pubblica non corrisponde all'indirizzo")
 
     # Verify signature
-    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{tx_request.timestamp}"
+    tx_data = build_tx_data(tx_request.sender_address, tx_request.recipient_address, tx_request.amount, tx_request.timestamp)
     try:
         is_valid = verify_signature(tx_request.public_key, tx_request.signature, tx_data)
         if not is_valid:
