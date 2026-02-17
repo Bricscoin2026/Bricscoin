@@ -106,4 +106,6 @@ export const createPQCTransaction = (data) =>
 export const listPQCWallets = (limit = 50) =>
   api.get(`/pqc/wallets/list?limit=${limit}`);
 
+export const getPQCNodeKeys = () => api.get("/pqc/node/keys");
+
 export default api;
