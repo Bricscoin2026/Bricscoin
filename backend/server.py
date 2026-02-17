@@ -1756,12 +1756,61 @@ async def get_pqc_stats():
     """Get PQC network statistics"""
     total_pqc_wallets = await db.pqc_wallets.count_documents({})
     total_pqc_txs = await db.transactions.count_documents({"signature_scheme": "ecdsa_secp256k1+ml-dsa-65"})
+    total_pqc_blocks = await db.blocks.count_documents({"pqc_scheme": {"$exists": True}})
+    total_blocks = await db.blocks.count_documents({})
     return {
         "total_pqc_wallets": total_pqc_wallets,
         "total_pqc_transactions": total_pqc_txs,
+        "total_pqc_blocks": total_pqc_blocks,
+        "total_blocks": total_blocks,
         "signature_scheme": "ECDSA (secp256k1) + ML-DSA-65 (FIPS 204)",
         "quantum_resistant": True,
         "status": "active"
+    }
+
+
+@api_router.get("/pqc/node/keys")
+async def get_node_pqc_public_keys():
+    """Get this node's PQC public keys for block signature verification"""
+    if not node_pqc_keys:
+        raise HTTPException(status_code=503, detail="Node PQC keys not initialized")
+    return {
+        "node_id": NODE_ID,
+        "ecdsa_public_key": node_pqc_keys["ecdsa_public_key"],
+        "dilithium_public_key": node_pqc_keys["dilithium_public_key"],
+        "scheme": "ecdsa_secp256k1+ml-dsa-65"
+    }
+
+
+@api_router.get("/pqc/block/{block_index}/verify")
+async def verify_block_pqc_signature(block_index: int):
+    """Verify the PQC signature of a specific block"""
+    block = await db.blocks.find_one({"index": block_index}, {"_id": 0})
+    if not block:
+        raise HTTPException(status_code=404, detail="Block not found")
+    
+    if not block.get("pqc_ecdsa_signature"):
+        return {
+            "block_index": block_index,
+            "has_pqc_signature": False,
+            "message": "Block was mined before PQC signing was enabled"
+        }
+    
+    block_sig_data = f"{block['index']}{block['timestamp']}{block['hash']}{block.get('miner', '')}"
+    result = hybrid_verify(
+        block["pqc_public_key_ecdsa"],
+        block["pqc_public_key_dilithium"],
+        block["pqc_ecdsa_signature"],
+        block["pqc_dilithium_signature"],
+        block_sig_data
+    )
+    return {
+        "block_index": block_index,
+        "has_pqc_signature": True,
+        "ecdsa_valid": result["ecdsa_valid"],
+        "dilithium_valid": result["dilithium_valid"],
+        "hybrid_valid": result["hybrid_valid"],
+        "scheme": block.get("pqc_scheme", "unknown")
     }
 
 # Address lookup
