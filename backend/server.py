@@ -250,6 +250,46 @@ class BroadcastTransaction(BaseModel):
     transaction: Dict[str, Any]
     sender_node_id: str
 
+# ==================== PQC MODELS ====================
+class PQCWalletCreate(BaseModel):
+    name: Optional[str] = "PQC Wallet"
+
+class PQCWalletImportKeys(BaseModel):
+    ecdsa_private_key: str
+    dilithium_secret_key: str
+    name: Optional[str] = "Imported PQC Wallet"
+
+class PQCSecureTransactionRequest(BaseModel):
+    sender_address: str
+    recipient_address: str
+    amount: float
+    timestamp: str
+    ecdsa_signature: str
+    dilithium_signature: str
+    ecdsa_public_key: str
+    dilithium_public_key: str
+
+    @field_validator('amount')
+    @classmethod
+    def validate_amount(cls, v):
+        if v <= 0:
+            raise ValueError('Amount must be positive')
+        if v > 21_000_000:
+            raise ValueError('Amount exceeds maximum supply')
+        return v
+
+class PQCVerifyRequest(BaseModel):
+    message: str
+    ecdsa_public_key: str
+    dilithium_public_key: str
+    ecdsa_signature: str
+    dilithium_signature: str
+
+class MigrationRequest(BaseModel):
+    legacy_private_key: str
+    pqc_address: str
+    amount: float
+
 # ==================== BLOCKCHAIN LOGIC ====================
 def sha256_hash(data: str) -> str:
     """Calculate SHA256 hash"""
