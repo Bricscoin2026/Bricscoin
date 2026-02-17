@@ -173,6 +173,47 @@ export default function BlockDetail() {
         </Card>
       </motion.div>
 
+      {/* PQC Block Signature */}
+      {block.pqc_scheme && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <Card className="bg-card border-emerald-500/20" data-testid="block-pqc-card">
+            <CardHeader className="border-b border-emerald-500/10">
+              <CardTitle className="font-heading flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                Firma Quantum-Safe
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 ml-2">
+                  <Lock className="w-3 h-3" /> ML-DSA-65
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-white/5 gap-2">
+                <span className="text-muted-foreground text-sm">Schema</span>
+                <span className="text-sm text-emerald-400 font-medium">{block.pqc_scheme}</span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-white/5 gap-2">
+                <span className="text-muted-foreground text-sm">Firma ECDSA</span>
+                <code className="text-[10px] font-mono text-muted-foreground max-w-[300px] truncate">{block.pqc_ecdsa_signature}</code>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-white/5 gap-2">
+                <span className="text-muted-foreground text-sm">Firma ML-DSA-65</span>
+                <code className="text-[10px] font-mono text-muted-foreground max-w-[300px] truncate">{block.pqc_dilithium_signature?.slice(0, 80)}...</code>
+              </div>
+              <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/10">
+                <p className="text-xs text-muted-foreground">
+                  Questo blocco e protetto da una firma ibrida ECDSA + ML-DSA-65 (FIPS 204), 
+                  resistente agli attacchi dei computer quantistici.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Transactions */}
       {block.transactions && block.transactions.length > 0 && (
         <motion.div
