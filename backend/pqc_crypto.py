@@ -4,6 +4,9 @@ Hybrid signature scheme: ECDSA (secp256k1) + ML-DSA-65 (FIPS 204)
 
 Uses the NIST standardized ML-DSA-65 algorithm for quantum resistance,
 compatible with @noble/post-quantum in the browser.
+
+ECDSA signatures use SHA-256 hashing with raw r||s format (128 hex chars)
+to ensure cross-platform compatibility with the browser's elliptic library.
 """
 
 import hashlib
@@ -79,13 +82,13 @@ def recover_pqc_wallet(ecdsa_private_key_hex: str, dilithium_secret_key_hex: str
 def hybrid_sign(ecdsa_private_key_hex: str, dilithium_secret_key_hex: str, message: str) -> dict:
     """
     Create a hybrid signature using both ECDSA and ML-DSA-65.
-    Both signatures must verify for the transaction to be valid.
+    ECDSA uses SHA-256 hashing for cross-platform compatibility.
     """
     msg_bytes = message.encode()
 
-    # ECDSA signature
+    # ECDSA signature with explicit SHA-256
     ecdsa_sk = SigningKey.from_string(bytes.fromhex(ecdsa_private_key_hex), curve=SECP256k1)
-    ecdsa_sig = ecdsa_sk.sign(msg_bytes)
+    ecdsa_sig = ecdsa_sk.sign(msg_bytes, hashfunc=hashlib.sha256)
 
     # ML-DSA-65 signature
     dil_sk = bytes.fromhex(dilithium_secret_key_hex)
@@ -107,14 +110,17 @@ def hybrid_verify(
 ) -> dict:
     """
     Verify a hybrid signature. Both ECDSA and ML-DSA-65 must pass.
+    ECDSA uses SHA-256 digest verification for browser compatibility.
     """
     msg_bytes = message.encode()
     result = {"ecdsa_valid": False, "dilithium_valid": False, "hybrid_valid": False}
 
-    # Verify ECDSA
+    # Verify ECDSA - use SHA-256 digest verification
     try:
         ecdsa_pk = VerifyingKey.from_string(bytes.fromhex(ecdsa_public_key_hex), curve=SECP256k1)
-        result["ecdsa_valid"] = ecdsa_pk.verify(bytes.fromhex(ecdsa_signature_hex), msg_bytes)
+        ecdsa_sig_bytes = bytes.fromhex(ecdsa_signature_hex)
+        msg_digest = hashlib.sha256(msg_bytes).digest()
+        result["ecdsa_valid"] = ecdsa_pk.verify_digest(ecdsa_sig_bytes, msg_digest)
     except (BadSignatureError, Exception):
         result["ecdsa_valid"] = False
 
