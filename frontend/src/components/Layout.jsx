@@ -32,7 +32,6 @@ export default function Layout() {
     { to: "/migrate", icon: ArrowRight, label: "Migrazione" },
     { to: "/network", icon: Network, label: "Network" },
     { to: "/mining", icon: Pickaxe, label: "Mining" },
-    { to: "/pools", icon: Users, label: "Pools" },
     { to: "/richlist", icon: Trophy, label: "Rich List" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
