@@ -89,8 +89,8 @@ export const getAddressInfo = (address) => api.get(`/address/${address}`);
 export const createPQCWallet = (name = "PQC Wallet") =>
   api.post("/pqc/wallet/create", { name });
 
-export const importPQCWallet = (ecdsa_private_key, dilithium_secret_key, name = "Imported PQC Wallet") =>
-  api.post("/pqc/wallet/import", { ecdsa_private_key, dilithium_secret_key, name });
+export const importPQCWallet = (ecdsa_private_key, dilithium_secret_key, dilithium_public_key, name = "Imported PQC Wallet") =>
+  api.post("/pqc/wallet/import", { ecdsa_private_key, dilithium_secret_key, dilithium_public_key, name });
 
 export const getPQCWalletInfo = (address) =>
   api.get(`/pqc/wallet/${address}`);
