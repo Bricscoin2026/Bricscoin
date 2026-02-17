@@ -27,8 +27,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with a fully operational
 
 ### Mining (DONE)
 - Stratum protocol server for ASIC miners
-- Mining pools support
-- Active miner tracking
+- Mining pools support, active miner tracking
 
 ### Pages & Features (DONE)
 - Dashboard, Explorer, Block Detail, Transaction Detail
@@ -36,28 +35,33 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with a fully operational
 - Rich List, Downloads, Run Node (cloud deployment guide), About
 
 ### Post-Quantum Cryptography - PQC (DONE - Feb 2026)
-- **Backend module**: `/app/backend/pqc_crypto.py` - Hybrid ECDSA + ML-DSA (Dilithium2)
-- **PQC API endpoints**: wallet create/import/info, signature verify, transaction, stats
-- **Frontend**: PQC Wallet page (`/pqc-wallet`) and Migration page (`/migrate`)
-- **Address format**: `BRICSPQ...` (45 chars) for PQC wallets vs `BRICS...` for legacy
-- **Wallet import**: Requires ECDSA private key + Dilithium secret key + Dilithium public key
+- **Backend**: `pqc_crypto.py` using ML-DSA-65 (NIST FIPS 204)
+- **Frontend**: `@noble/post-quantum` for client-side ML-DSA-65 signing
+- **Hybrid scheme**: ECDSA (secp256k1) + ML-DSA-65
+- **Client-side signing**: Private keys NEVER leave the browser
+- **ECDSA format**: SHA-256 hash + raw r||s (128 hex chars) for cross-platform compatibility
+- **ML-DSA-65 sizes**: PK=1952 bytes, SK=4032 bytes, SIG=3309 bytes
+- **Address format**: `BRICSPQ...` (45 chars) for PQC wallets
+- **Pages**: PQC Wallet (`/pqc-wallet`) + Migration Wizard (`/migrate`)
+
+### Client-Side ML-DSA-65 WASM Signing (DONE - Feb 2026)
+- Installed `@noble/post-quantum` v0.5.4 for browser ML-DSA-65
+- Cross-platform compatibility verified: JS signatures validated by Python backend
+- `preparePQCTransaction()` signs locally with ECDSA + ML-DSA-65
+- Backend `hybrid_verify()` uses `verify_digest()` with SHA-256 for ECDSA
 
 ## Key API Endpoints
-- `/api/network/stats` - Network statistics
-- `/api/blocks`, `/api/transactions` - Blockchain data
-- `/api/wallet/create`, `/api/wallet/import/*` - Legacy wallet
-- `/api/pqc/wallet/create` - Create PQC hybrid wallet
-- `/api/pqc/wallet/import` - Import PQC wallet (requires 3 keys)
-- `/api/pqc/wallet/{address}` - PQC wallet info
-- `/api/pqc/stats` - PQC network stats
+- `/api/pqc/wallet/create` - Create PQC hybrid wallet (ML-DSA-65)
+- `/api/pqc/wallet/import` - Import with 3 keys (ECDSA sk + ML-DSA sk + ML-DSA pk)
+- `/api/pqc/wallet/{address}` - PQC wallet info and balance
+- `/api/pqc/stats` - PQC network statistics
 - `/api/pqc/verify` - Verify hybrid signature
 - `/api/pqc/transaction/secure` - PQC signed transaction
-- `/api/richlist` - Top wallet holders
-- `/api/p2p/register`, `/api/p2p/peers` - Peer management
+- `/api/pqc/wallets/list` - List registered PQC wallets
 
 ## DB Schema
 - **blocks**: index, hash, previous_hash, transactions, proof, nonce, difficulty, timestamp, miner
-- **transactions**: tx_id, sender, recipient, amount, timestamp, signature, confirmed
+- **transactions**: tx_id, sender, recipient, amount, timestamp, signature, confirmed, signature_scheme
 - **peers**: node_id, url, version, last_seen
 - **pqc_wallets**: address, wallet_type, ecdsa_public_key, dilithium_public_key, created_at
 
@@ -65,11 +69,12 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with a fully operational
 
 ### P0 (Critical)
 - ~~PQC Wallet Backend + Frontend~~ DONE
+- ~~Client-side ML-DSA-65 signing~~ DONE
 - PQC Block Signing: Sign blocks with hybrid signatures
-- PQC Automated Test Suite
+- PQC Automated Test Suite (comprehensive)
 
 ### P1 (High)
-- Automated Disk Cleanup cron job (server has crashed 2x from full disk)
+- Automated Disk Cleanup cron job (server crashed 2x from full disk)
 - Deploy PQC to production server (5.161.254.163)
 
 ### P2 (Medium)
@@ -79,8 +84,8 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with a fully operational
 
 ### P3 (Low)
 - TypeError in stratum_server.py logs
-- Stratum v2 / P2Pool investigation
 
 ### Future
+- PQC block signing integration
 - Mobile wallet application
-- Client-side Dilithium signing (WASM)
+- Stratum v2 / P2Pool investigation
