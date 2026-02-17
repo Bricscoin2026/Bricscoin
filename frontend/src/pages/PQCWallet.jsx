@@ -285,7 +285,7 @@ export default function PQCWallet() {
               <DialogHeader>
                 <DialogTitle>Nuovo Wallet Quantum-Safe</DialogTitle>
                 <DialogDescription>
-                  Genera un wallet con firma ibrida ECDSA + Dilithium2
+                  Genera un wallet con firma ibrida ECDSA + ML-DSA-65 (FIPS 204)
                 </DialogDescription>
               </DialogHeader>
               {!newWalletData ? (
@@ -296,7 +296,7 @@ export default function PQCWallet() {
                     </h4>
                     <ul className="text-sm text-muted-foreground space-y-1">
                       <li>Coppia di chiavi ECDSA (secp256k1) - compatibilita legacy</li>
-                      <li>Coppia di chiavi ML-DSA (Dilithium2) - resistenza quantistica</li>
+                      <li>Coppia di chiavi ML-DSA-65 (FIPS 204) - resistenza quantistica</li>
                       <li>Indirizzo ibrido BRICSPQ... derivato da entrambe le chiavi</li>
                       <li>Seed phrase da 12 parole per il backup</li>
                     </ul>
@@ -362,7 +362,7 @@ export default function PQCWallet() {
             <ShieldCheck className="w-16 h-16 text-emerald-500/30 mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">Nessun Wallet PQC</h3>
             <p className="text-sm text-muted-foreground max-w-sm mb-6">
-              Crea il tuo primo wallet quantum-safe con firma ibrida ECDSA + Dilithium2
+              Crea il tuo primo wallet quantum-safe con firma ibrida ECDSA + ML-DSA-65
             </p>
             <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setCreateOpen(true)}
               data-testid="pqc-empty-create-btn">
