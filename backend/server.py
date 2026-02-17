@@ -181,8 +181,9 @@ class SecureTransactionRequest(BaseModel):
     def validate_address(cls, v):
         if not v.startswith('BRICS') or len(v) < 40:
             raise ValueError('Invalid BRICS address format')
-        if not re.match(r'^BRICS[a-fA-F0-9]{40}$', v):
-            raise ValueError('Address must be BRICS followed by 40 hex characters')
+        # Accept both legacy (BRICS + 40 hex) and PQC (BRICSPQ + 38 hex) addresses
+        if not re.match(r'^BRICS(PQ)?[a-fA-F0-9]{38,40}$', v):
+            raise ValueError('Invalid address format')
         return v
     
     @field_validator('amount')
