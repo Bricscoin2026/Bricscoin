@@ -767,6 +767,16 @@ def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: 
     except BadSignatureError:
         return False
 
+def js_number_str(n):
+    """Format number like JavaScript does (no trailing .0 for integers)"""
+    if isinstance(n, float) and n == int(n):
+        return str(int(n))
+    return str(n)
+
+def build_tx_data(sender, recipient, amount, timestamp):
+    """Build transaction data string matching JavaScript format"""
+    return f"{sender}{recipient}{js_number_str(amount)}{timestamp}"
+
 def generate_address_from_public_key(public_key_hex: str) -> str:
     """Generate BRICS address from public key - used to verify sender owns the address"""
     address_hash = sha256_hash(public_key_hex)
