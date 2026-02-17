@@ -857,20 +857,31 @@ async def get_active_miners():
 @api_router.get("/miners/stats")
 async def get_miners_stats():
     """
-    Statistiche sui minatori attivi basate sulla collezione miner_shares.
-    Più affidabile rispetto alla collezione miners perché traccia l'attività reale.
+    Statistiche sui minatori attivi.
+    Legge prima da /tmp/miners_count.txt (scritto dallo Stratum server),
+    poi integra con dati da miner_shares MongoDB.
     """
-    # Finestra di attività: ultimi 5 minuti
+    # Prima prova a leggere il conteggio dal file Stratum (più affidabile)
+    stratum_count = 0
+    try:
+        with open('/tmp/miners_count.txt', 'r') as f:
+            stratum_count = int(f.read().strip())
+    except Exception:
+        pass
+    
+    # Conta anche da miner_shares MongoDB (ultimi 5 minuti)
     activity_window = timedelta(minutes=5)
     cutoff_time = (datetime.now(timezone.utc) - activity_window).isoformat()
     
-    # Conta minatori unici che hanno inviato share negli ultimi 5 minuti
     active_workers = await db.miner_shares.distinct(
         "worker",
         {"timestamp": {"$gte": cutoff_time}}
     )
     
-    # Statistiche aggregate
+    # Usa il massimo tra Stratum e MongoDB
+    active_count = max(stratum_count, len(active_workers))
+    
+    # Statistiche aggregate 24h
     total_shares_24h_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
     
     pipeline = [
@@ -886,12 +897,11 @@ async def get_miners_stats():
     
     miner_stats = await db.miner_shares.aggregate(pipeline).to_list(100)
     
-    # Calcola hashrate stimato (approssimativo basato sulle share)
     total_shares = sum(m.get("shares", 0) for m in miner_stats)
     total_blocks = sum(m.get("blocks", 0) for m in miner_stats)
     
     return {
-        "active_miners": len(active_workers),
+        "active_miners": active_count,
         "total_miners_24h": len(miner_stats),
         "total_shares_24h": total_shares,
         "total_blocks_24h": total_blocks,
@@ -902,7 +912,7 @@ async def get_miners_stats():
                 "blocks": m["blocks"],
                 "last_seen": m["last_seen"]
             }
-            for m in miner_stats[:20]  # Top 20 miners
+            for m in miner_stats[:20]
         ]
     }
 
