@@ -1598,7 +1598,8 @@ async def import_pqc_wallet(request: Request, wallet_request: PQCWalletImportKey
     try:
         wallet_data = recover_pqc_wallet(
             wallet_request.ecdsa_private_key,
-            wallet_request.dilithium_secret_key
+            wallet_request.dilithium_secret_key,
+            wallet_request.dilithium_public_key
         )
         wallet_data["name"] = wallet_request.name
         wallet_data["created_at"] = datetime.now(timezone.utc).isoformat()
