@@ -361,7 +361,7 @@ export default function About() {
           {/* Transaction Fee */}
           <div className="p-4 bg-blue-500/5 rounded-lg border border-blue-500/20">
             <h4 className="font-bold text-blue-500 mb-2">Transaction Fee</h4>
-            <p className="text-2xl font-bold">{tokenomics?.fees?.transaction_fee || 0.05} BRICS</p>
+            <p className="text-2xl font-bold">{tokenomics?.fees?.transaction_fee || 0.000005} BRICS</p>
             <p className="text-sm text-muted-foreground">
               {tokenomics?.fees?.note || "Fees are collected by miners who include transactions in blocks."}
             </p>
