@@ -25,10 +25,17 @@ from pqc_crypto import (
     create_migration_transaction,
 )
 
-API_URL = os.environ.get(
-    "TEST_API_URL",
-    open("/app/frontend/.env").read().split("REACT_APP_BACKEND_URL=")[1].strip(),
-)
+def _get_api_url():
+    try:
+        with open("/app/frontend/.env") as f:
+            for line in f:
+                if line.startswith("REACT_APP_BACKEND_URL="):
+                    return line.split("=", 1)[1].strip()
+    except FileNotFoundError:
+        pass
+    return "http://localhost:8001"
+
+API_URL = os.environ.get("TEST_API_URL", _get_api_url())
 
 
 # ==================== UNIT TESTS: pqc_crypto ====================
