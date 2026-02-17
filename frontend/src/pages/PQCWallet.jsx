@@ -38,6 +38,7 @@ import {
   getPQCStats,
   createPQCTransaction
 } from "../lib/api";
+import { preparePQCTransaction, isValidPQCAddress } from "../lib/pqc-crypto";
 
 function PQCWalletCard({ wallet, onSelect, isSelected }) {
   const [balance, setBalance] = useState(null);
