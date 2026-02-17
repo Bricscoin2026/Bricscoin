@@ -1086,10 +1086,10 @@ async def get_rich_list(limit: int = 100):
         
         for address in addresses:
             balance = await get_balance(address)
-            if balance > 0:
+            if balance > 0.001:  # Filter dust/rounding errors
                 wallets.append({
                     "address": address,
-                    "balance": balance,
+                    "balance": round(balance, 8),
                     "percentage": round((balance / circulating) * 100, 4) if circulating > 0 else 0
                 })
         
@@ -1105,7 +1105,7 @@ async def get_rich_list(limit: int = 100):
         
         return {
             "wallets": wallets,
-            "total_holders": len(addresses),
+            "total_holders": len(wallets),
             "circulating_supply": circulating
         }
     except Exception as e:
