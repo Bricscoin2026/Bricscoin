@@ -1754,17 +1754,20 @@ async def create_pqc_transaction(request: Request, tx: PQCSecureTransactionReque
     ).hexdigest()
 
     transaction = {
+        "id": tx_id,
         "tx_id": tx_id,
         "sender": tx.sender_address,
         "recipient": tx.recipient_address,
         "amount": tx.amount,
+        "fee": TRANSACTION_FEE,
         "timestamp": tx.timestamp,
         "ecdsa_signature": tx.ecdsa_signature,
         "dilithium_signature": tx.dilithium_signature,
         "ecdsa_public_key": tx.ecdsa_public_key,
         "dilithium_public_key": tx.dilithium_public_key,
         "signature_scheme": "ecdsa_secp256k1+ml-dsa-65",
-        "confirmed": False,
+        "confirmed": True,
+        "block_index": None,
     }
     await db.transactions.insert_one(transaction)
     transaction.pop("_id", None)
