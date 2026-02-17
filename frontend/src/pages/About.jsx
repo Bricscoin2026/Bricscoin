@@ -187,7 +187,7 @@ export default function About() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             BricsCoin aims to create a truly decentralized currency that remains accessible to hardware miners worldwide, 
-            with minimal transaction fees (0.05 BRICS), and operates with full transparency as an open-source project.
+            with minimal transaction fees (0.000005 BRICS), and operates with full transparency as an open-source project.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
