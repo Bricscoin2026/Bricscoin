@@ -261,6 +261,7 @@ class PQCWalletCreate(BaseModel):
 class PQCWalletImportKeys(BaseModel):
     ecdsa_private_key: str
     dilithium_secret_key: str
+    dilithium_public_key: str
     name: Optional[str] = "Imported PQC Wallet"
 
 class PQCSecureTransactionRequest(BaseModel):
