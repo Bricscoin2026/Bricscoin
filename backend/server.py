@@ -1874,13 +1874,22 @@ async def migrate_to_pqc(request: Request, tx_request: SecureTransactionRequest)
 @api_router.get("/pqc/stats")
 async def get_pqc_stats():
     """Get PQC network statistics"""
-    total_pqc_wallets = await db.pqc_wallets.count_documents({})
+    # Count only wallets with balance > 0 (active wallets)
+    all_pqc_wallets = await db.pqc_wallets.find({}, {"_id": 0, "address": 1}).to_list(1000)
+    active_count = 0
+    for w in all_pqc_wallets:
+        bal = await get_balance(w["address"])
+        if bal > 0:
+            active_count += 1
+    
     total_pqc_txs = await db.transactions.count_documents({"signature_scheme": "ecdsa_secp256k1+ml-dsa-65"})
+    # Count migration transactions too
+    total_migrations = await db.transactions.count_documents({"migration": True})
     total_pqc_blocks = await db.blocks.count_documents({"pqc_scheme": {"$exists": True}})
     total_blocks = await db.blocks.count_documents({})
     return {
-        "total_pqc_wallets": total_pqc_wallets,
-        "total_pqc_transactions": total_pqc_txs,
+        "total_pqc_wallets": active_count,
+        "total_pqc_transactions": total_pqc_txs + total_migrations,
         "total_pqc_blocks": total_pqc_blocks,
         "total_blocks": total_blocks,
         "signature_scheme": "ECDSA (secp256k1) + ML-DSA-65 (FIPS 204)",
