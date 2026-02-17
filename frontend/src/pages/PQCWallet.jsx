@@ -459,6 +459,12 @@ export default function PQCWallet() {
             <DialogTitle>Invia BRICS (PQC)</DialogTitle>
             <DialogDescription>Transazione firmata con schema ibrido quantum-safe</DialogDescription>
           </DialogHeader>
+          <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/20 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <p className="text-xs text-emerald-400">
+              <strong>Firmato Localmente</strong> — La firma ECDSA + ML-DSA-65 avviene nel tuo browser. Le chiavi private non lasciano mai il dispositivo.
+            </p>
+          </div>
           <div className="space-y-3">
             <div>
               <Label>Destinatario</Label>
