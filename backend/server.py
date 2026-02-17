@@ -29,6 +29,10 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from collections import defaultdict
 import ipaddress
+from pqc_crypto import (
+    generate_pqc_wallet, recover_pqc_wallet,
+    hybrid_sign, hybrid_verify, create_migration_transaction
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
