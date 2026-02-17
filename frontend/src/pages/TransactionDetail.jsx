@@ -9,7 +9,9 @@ import {
   Clock,
   Blocks,
   CheckCircle,
-  Clock3
+  Clock3,
+  ShieldCheck,
+  Lock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
