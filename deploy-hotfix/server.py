@@ -1209,8 +1209,8 @@ async def get_transactions(request: Request, limit: int = 20, offset: int = 0, c
 @limiter.limit("120/minute")
 async def get_transaction(request: Request, tx_id: str):
     """Get specific transaction"""
-    # Validate tx_id format (UUID)
-    if not re.match(r'^[a-fA-F0-9-]{36}$', tx_id):
+    # Validate tx_id format (UUID 36 chars or SHA-256 hex 64 chars for PQC transactions)
+    if not re.match(r'^[a-fA-F0-9-]{36,64}$', tx_id):
         raise HTTPException(status_code=400, detail="Invalid transaction ID format")
     
     tx = await db.transactions.find_one({"id": tx_id}, {"_id": 0})
