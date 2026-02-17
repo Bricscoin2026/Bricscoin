@@ -441,10 +441,10 @@ export default function PQCWallet() {
 
               {/* Signature Info */}
               <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/10">
-                <h4 className="text-sm font-semibold text-emerald-400 mb-1">Schema di Firma</h4>
+                <h4 className="text-sm font-semibold text-emerald-400 mb-1">Schema di Firma Client-Side</h4>
                 <p className="text-xs text-muted-foreground">
-                  ECDSA (secp256k1) + ML-DSA (Dilithium2) - Ogni transazione richiede entrambe le firme valide.
-                  Resistente agli attacchi quantistici mantenendo la compatibilita con la blockchain esistente.
+                  ECDSA (secp256k1) + ML-DSA-65 (FIPS 204) - Le chiavi private non lasciano MAI il browser.
+                  Ogni transazione viene firmata localmente con entrambi gli algoritmi e solo le firme vengono inviate al server.
                 </p>
               </div>
             </CardContent>
