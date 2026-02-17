@@ -108,4 +108,6 @@ export const listPQCWallets = (limit = 50) =>
 
 export const getPQCNodeKeys = () => api.get("/pqc/node/keys");
 
+export const migrateToPQC = (data) => api.post("/pqc/migrate", data);
+
 export default api;
