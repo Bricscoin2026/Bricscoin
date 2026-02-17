@@ -1770,11 +1770,20 @@ async def create_pqc_transaction(request: Request, tx: PQCSecureTransactionReque
 
 @api_router.get("/pqc/wallets/list")
 async def list_pqc_wallets(limit: int = 50):
-    """List all registered PQC wallets (public info only)"""
-    wallets = await db.pqc_wallets.find(
+    """List PQC wallets with balance > 0"""
+    all_wallets = await db.pqc_wallets.find(
         {}, {"_id": 0, "address": 1, "wallet_type": 1, "created_at": 1}
-    ).sort("created_at", -1).to_list(limit)
-    return {"wallets": wallets, "total": len(wallets)}
+    ).sort("created_at", -1).to_list(500)
+    
+    active_wallets = []
+    for w in all_wallets:
+        bal = await get_balance(w["address"])
+        if bal > 0:
+            w["balance"] = bal
+            active_wallets.append(w)
+    
+    active_wallets.sort(key=lambda x: x["balance"], reverse=True)
+    return {"wallets": active_wallets[:limit], "total": len(active_wallets)}
 
 
 @api_router.post("/pqc/migrate")
