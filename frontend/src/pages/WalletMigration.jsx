@@ -15,7 +15,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { getWalletBalance, createPQCWallet, createSecureTransaction } from "../lib/api";
+import { getWalletBalance, createPQCWallet, migrateToPQC } from "../lib/api";
 import { prepareSecureTransaction } from "../lib/crypto";
 import { Link } from "react-router-dom";
 
