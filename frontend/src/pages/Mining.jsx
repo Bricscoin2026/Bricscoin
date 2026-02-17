@@ -24,22 +24,23 @@ const formatHashrate = (value) => {
 
 export default function Mining() {
   const [stats, setStats] = useState(null);
+  const [minerStats, setMinerStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
 
   const fetchStats = async () => {
     try {
-      // Usa sempre HTTPS se la pagina è servita in HTTPS per evitare Mixed Content
       let base = BACKEND_URL || (typeof window !== "undefined" ? window.location.origin : "");
       if (typeof window !== "undefined" && window.location.protocol === "https:" && base.startsWith("http://")) {
         base = "https://" + base.slice("http://".length);
       }
-      const response = await fetch(`${base}/api/network/stats`);
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const [netRes, minRes] = await Promise.all([
+        fetch(`${base}/api/network/stats`),
+        fetch(`${base}/api/miners/stats`)
+      ]);
+      if (netRes.ok) setStats(await netRes.json());
+      if (minRes.ok) setMinerStats(await minRes.json());
     } catch (error) {
-      console.error("Error loading network stats:", error);
+      console.error("Error loading stats:", error);
     }
   };
 
