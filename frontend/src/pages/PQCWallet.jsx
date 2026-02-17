@@ -154,12 +154,13 @@ export default function PQCWallet() {
     try {
       const res = await importPQCWallet(
         importForm.ecdsa_key,
-        importForm.dilithium_key,
+        importForm.dilithium_sk,
+        importForm.dilithium_pk,
         importForm.name || "Imported PQC Wallet"
       );
       saveWallets([...wallets, res.data]);
       setImportOpen(false);
-      setImportForm({ ecdsa_key: "", dilithium_key: "", name: "" });
+      setImportForm({ ecdsa_key: "", dilithium_sk: "", dilithium_pk: "", name: "" });
       toast.success("Wallet PQC importato!");
     } catch (err) {
       toast.error("Errore import: " + (err.response?.data?.detail || err.message));
