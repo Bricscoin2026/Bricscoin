@@ -514,15 +514,27 @@ export default function Network() {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Signature Algorithm</p>
-                <p className="font-mono">ECDSA (secp256k1)</p>
+                <p className="font-mono">ECDSA + ML-DSA-65 (Hybrid PQC)</p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Address Format</p>
-                <p className="font-mono">BRICS + SHA256 prefix</p>
+                <p className="font-mono">BRICS / BRICSPQ (PQC)</p>
               </div>
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Mining</p>
-                <p className="font-mono">Open to everyone</p>
+                <p className="text-sm text-muted-foreground">TX Fees</p>
+                <p className="font-mono">0.000005 BRICS (burned)</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Quantum Security</p>
+                <p className="font-mono">ML-DSA-65 (FIPS 204)</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Client Signing</p>
+                <p className="font-mono">Browser-side (keys never leave device)</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">License</p>
+                <p className="font-mono">MIT Open Source</p>
               </div>
             </div>
           </CardContent>
