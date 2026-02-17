@@ -240,14 +240,23 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-8"
       >
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center gap-3 mb-4">
           <Link to="/about">
             <Badge 
               className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 cursor-pointer px-3 py-1"
               data-testid="security-audit-badge"
             >
               <ShieldCheck className="w-4 h-4 mr-2" />
-              Security Audit Passed ✓
+              Security Audit Passed
+            </Badge>
+          </Link>
+          <Link to="/pqc-wallet">
+            <Badge 
+              className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 cursor-pointer px-3 py-1"
+              data-testid="quantum-safe-badge"
+            >
+              <Atom className="w-4 h-4 mr-2" />
+              Quantum-Safe
             </Badge>
           </Link>
         </div>
