@@ -187,17 +187,23 @@ function QuantumSecurityWidget({ pqcStats, nodeKeys, delay = 0 }) {
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [blocks, setBlocks] = useState([]);
+  const [pqcStats, setPqcStats] = useState(null);
+  const [nodeKeys, setNodeKeys] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [statsRes, blocksRes] = await Promise.all([
+        const [statsRes, blocksRes, pqcRes, nodeRes] = await Promise.all([
           getNetworkStats(),
-          getBlocks(5)
+          getBlocks(5),
+          getPQCStats().catch(() => null),
+          getPQCNodeKeys().catch(() => null)
         ]);
         setStats(statsRes.data);
         setBlocks(blocksRes.data?.blocks || []);
+        if (pqcRes) setPqcStats(pqcRes.data);
+        if (nodeRes) setNodeKeys(nodeRes.data);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
