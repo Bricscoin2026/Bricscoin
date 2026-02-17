@@ -74,10 +74,10 @@ export default function WalletMigration() {
     if (!selectedLegacy || !newPQCWallet || legacyBalance <= 0) return;
     setMigrating(true);
     try {
-      // Round to 8 decimal places (Bitcoin precision)
+      // Send full balance - no fee for migration
       const amount = Math.floor(legacyBalance * 1e8) / 1e8;
       const txData = prepareSecureTransaction(selectedLegacy, newPQCWallet.address, amount);
-      await createSecureTransaction(txData);
+      await migrateToPQC(txData);
       setMigrationComplete(true);
       setStep(4);
       toast.success("Migrazione completata con successo!");
