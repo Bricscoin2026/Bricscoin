@@ -224,6 +224,12 @@ export default function TransactionDetail() {
                 link={`/block/${transaction.block_index}`}
               />
             )}
+            {transaction.signature_scheme && (
+              <InfoRow 
+                label="Signature Scheme" 
+                value={transaction.signature_scheme}
+              />
+            )}
           </CardContent>
         </Card>
       </motion.div>
