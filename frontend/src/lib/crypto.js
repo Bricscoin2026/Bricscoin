@@ -117,9 +117,12 @@ export function prepareSecureTransaction(wallet, recipientAddress, amount) {
 export function isValidAddress(address) {
   if (!address || typeof address !== 'string') return false;
   if (!address.startsWith('BRICS')) return false;
-  if (address.length !== 45) return false; // BRICS + 40 hex chars
-  const hexPart = address.slice(5);
-  return /^[a-fA-F0-9]{40}$/.test(hexPart);
+  // Accept legacy (BRICS + 40 hex = 45) and PQC (BRICSPQ + 38 hex = 45)
+  if (address.startsWith('BRICSPQ')) {
+    return address.length === 45 && /^[a-fA-F0-9]{38}$/.test(address.slice(7));
+  }
+  if (address.length !== 45) return false;
+  return /^[a-fA-F0-9]{40}$/.test(address.slice(5));
 }
 
 /**
