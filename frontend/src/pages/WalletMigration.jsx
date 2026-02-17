@@ -183,7 +183,7 @@ export default function WalletMigration() {
 
             <div className="p-4 rounded bg-emerald-500/10 border border-emerald-500/20">
               <p className="text-sm text-emerald-400 font-medium mb-2">
-                Verra creato un nuovo wallet PQC con firma ibrida ECDSA + Dilithium2.
+                Verra creato un nuovo wallet PQC con firma ibrida ECDSA + ML-DSA-65 (FIPS 204).
                 I tuoi fondi verranno trasferiti automaticamente.
               </p>
             </div>
@@ -289,9 +289,8 @@ export default function WalletMigration() {
           </h3>
           <p className="text-sm text-muted-foreground">
             I wallet legacy usano solo ECDSA (secp256k1), che e vulnerabile ai futuri computer quantistici. 
-            Il wallet PQC aggiunge una seconda firma con ML-DSA (Dilithium2), un algoritmo resistente agli attacchi 
-            quantistici approvato dal NIST. Il processo e semplice: seleziona il wallet da migrare, genera un nuovo 
-            indirizzo quantum-safe e trasferisci automaticamente tutti i fondi.
+            Il wallet PQC aggiunge una seconda firma con ML-DSA-65 (FIPS 204), un algoritmo resistente agli attacchi 
+            quantistici approvato dal NIST. La firma avviene interamente nel browser: le chiavi private non lasciano mai il tuo dispositivo.
           </p>
         </CardContent>
       </Card>
