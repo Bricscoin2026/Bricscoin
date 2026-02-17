@@ -263,8 +263,13 @@ export default function PQCWallet() {
                 </div>
                 <div>
                   <Label>Chiave segreta Dilithium (hex)</Label>
-                  <Input value={importForm.dilithium_key} onChange={e => setImportForm(p => ({...p, dilithium_key: e.target.value}))}
-                    placeholder="Chiave segreta Dilithium hex" className="font-mono text-xs" data-testid="pqc-import-dilithium" />
+                  <Input value={importForm.dilithium_sk} onChange={e => setImportForm(p => ({...p, dilithium_sk: e.target.value}))}
+                    placeholder="Chiave segreta Dilithium hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-sk" />
+                </div>
+                <div>
+                  <Label>Chiave pubblica Dilithium (hex)</Label>
+                  <Input value={importForm.dilithium_pk} onChange={e => setImportForm(p => ({...p, dilithium_pk: e.target.value}))}
+                    placeholder="Chiave pubblica Dilithium hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-pk" />
                 </div>
               </div>
               <DialogFooter>
