@@ -496,8 +496,8 @@ export default function PQCWallet() {
             </div>
             <div>
               <h4 className="text-foreground font-medium mb-1">La Soluzione</h4>
-              <p>Schema di firma ibrido: ECDSA (classico) + ML-DSA Dilithium2 (quantistico). 
-                Ogni transazione richiede entrambe le firme, garantendo sicurezza oggi e domani.</p>
+              <p>Schema di firma ibrido: ECDSA (classico) + ML-DSA-65 (quantistico, FIPS 204). 
+                Ogni transazione viene firmata nel browser con entrambi gli algoritmi. Le chiavi private non lasciano mai il tuo dispositivo.</p>
             </div>
           </div>
         </CardContent>
