@@ -84,7 +84,7 @@ INITIAL_REWARD = 50
 HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
-INITIAL_DIFFICULTY = 1  # Bitcoin-style difficulty (higher = harder)
+INITIAL_DIFFICULTY = 1000000  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
 TRANSACTION_FEE = 0.05  # Fee per transaction in BRICS
 
@@ -2041,9 +2041,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = "default-src 'self'"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         
         # Remove server header
         if "server" in response.headers:
