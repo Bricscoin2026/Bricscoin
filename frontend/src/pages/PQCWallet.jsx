@@ -497,7 +497,7 @@ export default function PQCWallet() {
                 Ogni transazione richiede entrambe le firme, garantendo sicurezza oggi e domani.</p>
             </div>
           </div>
-        </DialogContent>
+        </CardContent>
       </Card>
     </div>
   );
