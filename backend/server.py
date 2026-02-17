@@ -86,7 +86,7 @@ DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
 INITIAL_DIFFICULTY = 1000000  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
-TRANSACTION_FEE = 0.05  # Fee per transaction in BRICS
+TRANSACTION_FEE = 0.000005  # Fee per transaction in BRICS
 
 # Genesis wallet for premine (will be created on first run)
 GENESIS_WALLET_ADDRESS = None  # Set dynamically when genesis block is created
