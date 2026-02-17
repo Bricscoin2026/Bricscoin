@@ -857,20 +857,31 @@ async def get_active_miners():
 @api_router.get("/miners/stats")
 async def get_miners_stats():
     """
-    Statistiche sui minatori attivi basate sulla collezione miner_shares.
-    Più affidabile rispetto alla collezione miners perché traccia l'attività reale.
+    Statistiche sui minatori attivi.
+    Legge prima da /tmp/miners_count.txt (scritto dallo Stratum server),
+    poi integra con dati da miner_shares MongoDB.
     """
-    # Finestra di attività: ultimi 5 minuti
+    # Prima prova a leggere il conteggio dal file Stratum (più affidabile)
+    stratum_count = 0
+    try:
+        with open('/tmp/miners_count.txt', 'r') as f:
+            stratum_count = int(f.read().strip())
+    except Exception:
+        pass
+    
+    # Conta anche da miner_shares MongoDB (ultimi 5 minuti)
     activity_window = timedelta(minutes=5)
     cutoff_time = (datetime.now(timezone.utc) - activity_window).isoformat()
     
-    # Conta minatori unici che hanno inviato share negli ultimi 5 minuti
     active_workers = await db.miner_shares.distinct(
         "worker",
         {"timestamp": {"$gte": cutoff_time}}
     )
     
-    # Statistiche aggregate
+    # Usa il massimo tra Stratum e MongoDB
+    active_count = max(stratum_count, len(active_workers))
+    
+    # Statistiche aggregate 24h
     total_shares_24h_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
     
     pipeline = [
@@ -886,12 +897,11 @@ async def get_miners_stats():
     
     miner_stats = await db.miner_shares.aggregate(pipeline).to_list(100)
     
-    # Calcola hashrate stimato (approssimativo basato sulle share)
     total_shares = sum(m.get("shares", 0) for m in miner_stats)
     total_blocks = sum(m.get("blocks", 0) for m in miner_stats)
     
     return {
-        "active_miners": len(active_workers),
+        "active_miners": active_count,
         "total_miners_24h": len(miner_stats),
         "total_shares_24h": total_shares,
         "total_blocks_24h": total_blocks,
@@ -902,7 +912,7 @@ async def get_miners_stats():
                 "blocks": m["blocks"],
                 "last_seen": m["last_seen"]
             }
-            for m in miner_stats[:20]  # Top 20 miners
+            for m in miner_stats[:20]
         ]
     }
 
@@ -939,39 +949,33 @@ async def get_network_stats():
     halvings_done = current_height // HALVING_INTERVAL
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
-    # ============ HASHRATE CALCULATION ============
+    # ============ HASHRATE CALCULATION (REALE) ============
     # Bitcoin-style: hashrate = difficulty * 2^32 / block_time
-    # 2^32 derives from max_target = 2^224, so 2^256 / 2^224 = 2^32
+    # Filtra gap > 5 minuti (miner spenti) per un calcolo accurato
     HASHRATE_MULTIPLIER = 2 ** 32
     
     hashrate_estimate = 0.0
-    if blocks_count >= 2:
-        num_blocks = min(20, blocks_count)
-        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(num_blocks).to_list(num_blocks)
-        
+    try:
+        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(20).to_list(20)
         if len(recent_blocks) >= 2:
-            try:
-                first_block = recent_blocks[-1]
-                last_block_data = recent_blocks[0]
-                
-                first_time = datetime.fromisoformat(first_block["timestamp"].replace("Z", "+00:00"))
-                last_time = datetime.fromisoformat(last_block_data["timestamp"].replace("Z", "+00:00"))
-                
-                total_time = (last_time - first_time).total_seconds()
-                num_intervals = len(recent_blocks) - 1
-                
-                if total_time > 0 and num_intervals > 0:
-                    avg_block_time = total_time / num_intervals
-                    avg_difficulty = sum(b.get("difficulty", 1) for b in recent_blocks) / len(recent_blocks)
-                    # Formula: hashrate = difficulty * 2^48 / block_time
-                    hashrate_estimate = (avg_difficulty * HASHRATE_MULTIPLIER) / avg_block_time
-                else:
-                    hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
-            except (ValueError, KeyError):
+            intervals = []
+            for i in range(len(recent_blocks) - 1):
+                t1 = datetime.fromisoformat(recent_blocks[i]['timestamp'].replace('Z', '+00:00'))
+                t2 = datetime.fromisoformat(recent_blocks[i+1]['timestamp'].replace('Z', '+00:00'))
+                diff = (t1 - t2).total_seconds()
+                # Escludi gap > 5 minuti (300 secondi) - miner erano spenti
+                if 0 < diff <= 300:
+                    intervals.append(diff)
+            
+            if intervals:
+                avg_time = sum(intervals) / len(intervals)
+                avg_diff = sum(b.get("difficulty", 1) for b in recent_blocks) / len(recent_blocks)
+                hashrate_estimate = (avg_diff * HASHRATE_MULTIPLIER) / avg_time
+            else:
                 hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
         else:
             hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
-    else:
+    except Exception:
         hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
     
     # ============ HASHRATE DALLE SHARES ============
