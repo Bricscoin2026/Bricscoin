@@ -125,8 +125,8 @@ function TransactionsTable({ transactions, loading }) {
                 {tx.amount} BRICS
               </td>
               <td className="p-4">
-                <span className={tx.confirmed ? "confirmed-badge" : "pending-badge"}>
-                  {tx.confirmed ? "Confirmed" : "Pending"}
+                <span className={(tx.confirmed || tx.block_index != null) ? "text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-400" : "text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400"}>
+                  {(tx.confirmed || tx.block_index != null) ? "Confirmed" : "Pending"}
                 </span>
               </td>
             </motion.tr>
