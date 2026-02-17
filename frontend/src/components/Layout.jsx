@@ -28,6 +28,8 @@ export default function Layout() {
     { to: "/", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/explorer", icon: Search, label: "Explorer" },
     { to: "/wallet", icon: Wallet, label: "Wallet" },
+    { to: "/pqc-wallet", icon: ShieldCheck, label: "PQC Wallet" },
+    { to: "/migrate", icon: ArrowRight, label: "Migrazione" },
     { to: "/network", icon: Network, label: "Network" },
     { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/pools", icon: Users, label: "Pools" },
