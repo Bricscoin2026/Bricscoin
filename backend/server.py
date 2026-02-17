@@ -1190,8 +1190,7 @@ async def get_block_by_hash(block_hash: str):
 @limiter.limit("60/minute")
 async def get_transactions(request: Request, limit: int = 20, offset: int = 0, confirmed: Optional[bool] = None):
     """Get transactions with pagination"""
-    # Input validation
-    limit = min(max(1, limit), 100)  # Clamp between 1-100
+    limit = min(max(1, limit), 100)
     offset = max(0, offset)
     
     query = {}
@@ -1199,6 +1198,10 @@ async def get_transactions(request: Request, limit: int = 20, offset: int = 0, c
         query["confirmed"] = confirmed
     
     transactions = await db.transactions.find(query, {"_id": 0}).sort("timestamp", -1).skip(offset).limit(limit).to_list(limit)
+    # Ensure all transactions have 'confirmed' field (old txs may lack it)
+    for tx in transactions:
+        if "confirmed" not in tx:
+            tx["confirmed"] = True  # Old transactions without field are confirmed
     total = await db.transactions.count_documents(query)
     return {"transactions": transactions, "total": total}
 
