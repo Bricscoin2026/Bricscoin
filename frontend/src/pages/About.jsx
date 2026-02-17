@@ -198,7 +198,7 @@ export default function About() {
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
               <Zap className="w-8 h-8 text-primary mb-2" />
               <h4 className="font-bold">Deflationary</h4>
-              <p className="text-sm text-muted-foreground">0.05 BRICS fee per transaction - fees are BURNED (destroyed)</p>
+              <p className="text-sm text-muted-foreground">0.000005 BRICS fee per transaction - fees are BURNED (destroyed)</p>
             </div>
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
               <Code className="w-8 h-8 text-primary mb-2" />
