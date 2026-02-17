@@ -13,6 +13,8 @@ import RunNode from "./pages/RunNode";
 import About from "./pages/About";
 import Pools from "./pages/Pools";
 import RichList from "./pages/RichList";
+import PQCWallet from "./pages/PQCWallet";
+import WalletMigration from "./pages/WalletMigration";
 import "./App.css";
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
             <Route path="block/:index" element={<BlockDetail />} />
             <Route path="tx/:txId" element={<TransactionDetail />} />
             <Route path="wallet" element={<Wallet />} />
+            <Route path="pqc-wallet" element={<PQCWallet />} />
+            <Route path="migrate" element={<WalletMigration />} />
             <Route path="mining" element={<Mining />} />
             <Route path="network" element={<Network />} />
             <Route path="downloads" element={<Downloads />} />

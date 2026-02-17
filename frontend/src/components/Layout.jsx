@@ -13,7 +13,9 @@ import {
   Code,
   Twitter,
   Users,
-  Trophy
+  Trophy,
+  ShieldCheck,
+  ArrowRight
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
