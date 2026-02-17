@@ -142,8 +142,8 @@ async def get_network_difficulty() -> int:
             
             avg_block_time = actual_time / max(1, len(last_blocks) - 1)
             logger.info(
-                "⚙️ DIFFICULTY ADJUSTMENT @ block %d: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
-                current_index, current_difficulty, avg_block_time, TARGET_BLOCK_TIME, ratio, new_difficulty
+                f"DIFFICULTY ADJUSTMENT @ block {int(current_index)}: current={int(current_difficulty)}, "
+                f"avg_time={avg_block_time:.1f}s, target={TARGET_BLOCK_TIME}s, ratio={ratio:.2f}, NEW={int(new_difficulty)}"
             )
             
             return new_difficulty
