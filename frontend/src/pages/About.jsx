@@ -423,8 +423,12 @@ export default function About() {
               { label: "Halving", value: "210,000 blocks" },
               { label: "Block Time", value: "~10 min" },
               { label: "Difficulty", value: "Dynamic" },
-              { label: "TX Fees", value: "0.05 BRICS" },
+              { label: "TX Fees", value: "0.000005 BRICS" },
+              { label: "Quantum", value: "ML-DSA-65" },
+              { label: "Signatures", value: "ECDSA + PQC" },
+              { label: "Client Sign", value: "Browser-side" },
               { label: "License", value: "MIT" },
+              { label: "Mining", value: "Open to all" },
             ].map((spec, i) => (
               <div key={i} className="p-3 bg-white/5 rounded-lg text-center">
                 <p className="text-xs text-muted-foreground">{spec.label}</p>
