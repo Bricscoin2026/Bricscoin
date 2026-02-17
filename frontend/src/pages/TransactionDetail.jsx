@@ -164,6 +164,37 @@ export default function TransactionDetail() {
         </Card>
       </motion.div>
 
+      {/* PQC Signature Badge */}
+      {transaction.signature_scheme === "ecdsa_secp256k1+ml-dsa-65" && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <Card className="border border-emerald-500/30 bg-emerald-500/5" data-testid="tx-pqc-badge">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-emerald-400 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4" />
+                    Firmato Localmente - Quantum-Safe
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Firma ibrida ECDSA + ML-DSA-65 (FIPS 204). Le chiavi private non hanno mai lasciato il dispositivo del mittente.
+                  </p>
+                </div>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  ML-DSA-65
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Transaction Details */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
