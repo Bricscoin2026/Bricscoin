@@ -107,83 +107,72 @@ export default function About() {
         </p>
       </div>
 
-      {/* Security Audit */}
-      <Card className="bg-gradient-to-r from-green-500/10 to-green-600/5 border-green-500/30">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-green-500" />
-            Security Audit
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 ml-2">PASSED ✓</Badge>
-          </CardTitle>
+      {/* Security Audit - Live */}
+      <Card className="bg-card border-emerald-500/20 overflow-hidden relative" data-testid="security-audit-section">
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          background: "radial-gradient(ellipse at 20% 50%, #10b981, transparent 70%)"
+        }} />
+        <CardHeader className="relative z-10">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="w-6 h-6 text-emerald-400" />
+              Security Audit
+              {audit?.all_passed && (
+                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ml-2">
+                  {audit.total_passed}/{audit.total_tests} PASSED
+                </Badge>
+              )}
+            </CardTitle>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={runAudit} 
+              disabled={auditLoading}
+              className="border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 rounded-sm"
+              data-testid="run-audit-btn"
+            >
+              {auditLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+              {auditLoading ? "Esecuzione..." : "Esegui Audit"}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            BricsCoin has undergone a comprehensive security audit covering input validation, 
-            cryptographic security, and attack prevention. All 27 security tests passed.
+        <CardContent className="space-y-4 relative z-10">
+          <p className="text-muted-foreground text-sm">
+            Audit di sicurezza completo con test reali eseguiti in tempo reale. Copre validazione input,
+            crittografia classica (ECDSA/SHA-256), crittografia post-quantistica (ML-DSA-65), e prevenzione attacchi.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-                <h4 className="font-bold text-green-400">Input Validation</h4>
+          {audit ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {audit.categories.map((cat, i) => (
+                  <AuditCategory key={i} category={cat} />
+                ))}
               </div>
-              <p className="text-sm text-muted-foreground">8/8 tests passed</p>
-              <ul className="text-xs text-muted-foreground mt-2 space-y-1">
-                <li>• Address format validation</li>
-                <li>• Amount validation</li>
-                <li>• Signature format check</li>
-              </ul>
-            </div>
-            
-            <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <Lock className="w-5 h-5 text-green-500" />
-                <h4 className="font-bold text-green-400">Cryptography</h4>
+              
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-white/5">
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">SHA-256</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">ECDSA secp256k1</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">ML-DSA-65 (FIPS 204)</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Hybrid Signatures</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Client-Side Signing</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">DER Format</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">CORS Protected</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Rate Limiting</Badge>
               </div>
-              <p className="text-sm text-muted-foreground">2/2 tests passed</p>
-              <ul className="text-xs text-muted-foreground mt-2 space-y-1">
-                <li>• ECDSA secp256k1 signing</li>
-                <li>• Client-side key security</li>
-                <li>• Address verification</li>
-              </ul>
+
+              {audit.timestamp && (
+                <p className="text-xs text-muted-foreground/50 pt-2">
+                  Ultimo audit: {new Date(audit.timestamp).toLocaleString("it-IT")}
+                </p>
+              )}
+            </>
+          ) : auditLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+              <span className="ml-3 text-muted-foreground">Esecuzione test di sicurezza...</span>
             </div>
-            
-            <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="w-5 h-5 text-green-500" />
-                <h4 className="font-bold text-green-400">Attack Prevention</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">2/2 tests passed</p>
-              <ul className="text-xs text-muted-foreground mt-2 space-y-1">
-                <li>• Replay attack protection</li>
-                <li>• Timestamp validation</li>
-                <li>• Duplicate detection</li>
-              </ul>
-            </div>
-            
-            <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <RefreshCw className="w-5 h-5 text-green-500" />
-                <h4 className="font-bold text-green-400">Rate Limiting</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">Configured</p>
-              <ul className="text-xs text-muted-foreground mt-2 space-y-1">
-                <li>• Wallet: 5 req/min</li>
-                <li>• Transactions: 10 req/min</li>
-                <li>• IP blacklisting</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-green-500/20">
-            <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">SHA256</Badge>
-            <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">ECDSA secp256k1</Badge>
-            <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">Client-Side Signing</Badge>
-            <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">CORS Protected</Badge>
-            <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">Security Headers</Badge>
-            <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">Input Validation</Badge>
-          </div>
+          ) : null}
         </CardContent>
       </Card>
 
