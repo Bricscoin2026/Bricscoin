@@ -1216,6 +1216,8 @@ async def get_transaction(request: Request, tx_id: str):
     tx = await db.transactions.find_one({"id": tx_id}, {"_id": 0})
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    if "confirmed" not in tx:
+        tx["confirmed"] = True  # Old transactions without field are confirmed
     return tx
 
 @api_router.post("/transactions/secure")
