@@ -16,15 +16,57 @@ import {
   ShieldCheck,
   Lock,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Atom,
+  Loader2,
+  XCircle
 } from "lucide-react";
 import { getTokenomics } from "../lib/api";
+import api from "../lib/api";
+
+const ICON_MAP = {
+  "check-circle": CheckCircle,
+  "lock": Lock,
+  "atom": Atom,
+  "shield-alert": AlertTriangle,
+};
+
+function AuditCategory({ category }) {
+  const Icon = ICON_MAP[category.icon] || CheckCircle;
+  const allPassed = category.passed === category.total;
+  return (
+    <div className="p-4 bg-card/80 rounded-sm border border-white/10" data-testid={`audit-${category.name.toLowerCase().replace(/\s+/g, '-')}`}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Icon className={`w-5 h-5 ${allPassed ? "text-emerald-400" : "text-red-400"}`} />
+          <h4 className="font-bold text-sm">{category.name}</h4>
+        </div>
+        <span className={`text-sm font-mono font-bold ${allPassed ? "text-emerald-400" : "text-red-400"}`}>
+          {category.passed}/{category.total}
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        {category.tests.map((test, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs">
+            {test.passed 
+              ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              : <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+            }
+            <span className="text-muted-foreground">{test.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function About() {
   const [tokenomics, setTokenomics] = useState(null);
+  const [audit, setAudit] = useState(null);
+  const [auditLoading, setAuditLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchTokenomics() {
+    async function fetchData() {
       try {
         const res = await getTokenomics();
         setTokenomics(res.data);
@@ -32,8 +74,22 @@ export default function About() {
         console.error("Error fetching tokenomics:", error);
       }
     }
-    fetchTokenomics();
+    fetchData();
   }, []);
+
+  const runAudit = async () => {
+    setAuditLoading(true);
+    try {
+      const res = await api.get("/security/audit");
+      setAudit(res.data);
+    } catch (error) {
+      console.error("Error running audit:", error);
+    } finally {
+      setAuditLoading(false);
+    }
+  };
+
+  useEffect(() => { runAudit(); }, []);
 
   const roadmapItems = [
     { phase: "January 2026", status: "done", items: ["Mainnet launch", "Web wallet with instant transactions", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet (Linux, Windows, Mac)", "Open source on Codeberg", "Security audit completed"] },
