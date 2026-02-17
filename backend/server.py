@@ -1425,6 +1425,24 @@ async def submit_mined_block(submission: MiningSubmit):
     
     # Create the new block
     timestamp = datetime.now(timezone.utc).isoformat()
+    
+    # PQC Block Signing: sign block hash with node's hybrid keys
+    pqc_block_sig = {}
+    if node_pqc_keys:
+        block_sig_data = f"{new_index}{timestamp}{submission.hash}{submission.miner_address}"
+        sig_result = hybrid_sign(
+            node_pqc_keys["ecdsa_private_key"],
+            node_pqc_keys["dilithium_secret_key"],
+            block_sig_data
+        )
+        pqc_block_sig = {
+            "pqc_ecdsa_signature": sig_result["ecdsa_signature"],
+            "pqc_dilithium_signature": sig_result["dilithium_signature"],
+            "pqc_public_key_ecdsa": node_pqc_keys["ecdsa_public_key"],
+            "pqc_public_key_dilithium": node_pqc_keys["dilithium_public_key"],
+            "pqc_scheme": "ecdsa_secp256k1+ml-dsa-65",
+        }
+
     new_block = {
         "index": new_index,
         "timestamp": timestamp,
@@ -1434,7 +1452,8 @@ async def submit_mined_block(submission: MiningSubmit):
         "nonce": submission.nonce,
         "miner": submission.miner_address,
         "difficulty": difficulty,
-        "hash": submission.hash
+        "hash": submission.hash,
+        **pqc_block_sig
     }
     
     # Save block
