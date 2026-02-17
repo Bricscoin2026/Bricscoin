@@ -1,158 +1,118 @@
 # BricsCoin Security Audit Report
 
-**Status**: ✅ **PASSED**  
-**Date**: February 2026  
-**Version**: v2.4.0  
-**Total Tests**: 27/27 Passed (100%)
+**Status**: PASSED  
+**Date**: February 17, 2026  
+**Version**: v3.0.0 (Post-Quantum)  
+**Total Tests**: 27/27 Passed (100%)  
+**Audit Type**: Live (tests executed in real-time via `/api/security/audit`)
 
 ---
 
 ## Executive Summary
 
-BricsCoin has successfully completed a comprehensive security audit covering all critical aspects of the cryptocurrency platform. The audit evaluated input validation, cryptographic security, attack prevention mechanisms, and rate limiting. All 27 security tests passed.
+BricsCoin has completed a comprehensive security audit covering input validation, classical cryptography (ECDSA/SHA-256), post-quantum cryptography (ML-DSA-65), and attack prevention. All 27 security tests pass. The audit runs in real-time and can be re-executed at any time.
 
 ---
 
 ## Audit Results
 
-### 1. Input Validation (8/8 Tests Passed) ✅
+### 1. Input Validation (8/8 Tests Passed)
 
 | Test | Status | Description |
 |------|--------|-------------|
-| Invalid address (no BRICS prefix) | ✅ PASS | Rejected with HTTP 422 |
-| Invalid address (too short) | ✅ PASS | Rejected with HTTP 422 |
-| Invalid sender address | ✅ PASS | Rejected with HTTP 422 |
-| Negative amount | ✅ PASS | Rejected with HTTP 422 |
-| Zero amount | ✅ PASS | Rejected with HTTP 422 |
-| Invalid signature format | ✅ PASS | Rejected with HTTP 422 |
-| Invalid public key format | ✅ PASS | Rejected with HTTP 422 |
-| Amount > max supply (21M) | ✅ PASS | Rejected with HTTP 422 |
+| Legacy address format (BRICS...) | PASS | Validates `BRICS` + 40 hex characters |
+| PQC address format (BRICSPQ...) | PASS | Validates `BRICSPQ` + 38 hex characters |
+| Reject invalid address format | PASS | Non-BRICS addresses rejected |
+| Amount bounds validation | PASS | Amount must be > 0 and <= max supply |
+| Amount precision (max 8 decimals) | PASS | Prevents floating point issues |
+| Reject negative amounts | PASS | Negative values rejected |
+| Signature hex format check | PASS | Validates hex encoding |
+| Public key hex format check | PASS | Validates 128-char hex format |
 
-### 2. Signature Verification (2/2 Tests Passed) ✅
-
-| Test | Status | Description |
-|------|--------|-------------|
-| Invalid signature rejection | ✅ PASS | Malformed signatures rejected |
-| Public key/address mismatch | ✅ PASS | Unauthorized transactions blocked |
-
-### 3. Replay Attack Prevention (2/2 Tests Passed) ✅
+### 2. Classical Cryptography (5/5 Tests Passed)
 
 | Test | Status | Description |
 |------|--------|-------------|
-| Old timestamp (>5 min) | ✅ PASS | Rejected with HTTP 400 |
-| Future timestamp | ✅ PASS | Rejected with HTTP 400 |
+| ECDSA secp256k1 key generation | PASS | Key pair generation verified |
+| ECDSA SHA-256 sign & verify | PASS | Signature creation and verification |
+| DER signature format (JS compatible) | PASS | Cross-platform JavaScript compatibility |
+| Address derivation from public key | PASS | Deterministic address generation |
+| SHA-256 block hashing | PASS | Block hash integrity |
 
-### 4. Rate Limiting ✅ CONFIGURED
+### 3. Post-Quantum Cryptography (6/6 Tests Passed)
 
-| Endpoint | Limit |
-|----------|-------|
-| Wallet creation | 5 requests/minute |
-| Secure transactions | 10 requests/minute |
-| Transaction queries | 60 requests/minute |
+| Test | Status | Description |
+|------|--------|-------------|
+| ML-DSA-65 key pair generation | PASS | Dilithium key generation (FIPS 204) |
+| PQC address format (BRICSPQ...) | PASS | Correct PQC address derivation |
+| Hybrid ECDSA + ML-DSA-65 signing | PASS | Dual-algorithm signature creation |
+| Hybrid signature verification | PASS | Both signatures verified independently |
+| PQC wallet key recovery | PASS | Key recovery from stored credentials |
+| Node PQC key pair configured | PASS | Network node has active PQC keys |
 
----
+### 4. Attack Prevention & Security (8/8 Tests Passed)
 
-## Security Features Implemented
-
-### Client-Side Transaction Signing
-Private keys **NEVER** leave the user's device. All transaction signing is performed locally using the `elliptic` library with secp256k1 curve (same as Bitcoin).
-
-```javascript
-// Example: Client-side signing (frontend/src/lib/crypto.js)
-export function signTransaction(privateKeyHex, transactionData) {
-  const key = ec.keyFromPrivate(privateKeyHex, 'hex');
-  const msgHash = sha256(transactionData);
-  const signature = key.sign(msgHash);
-  return signature.toDER('hex');
-}
-```
-
-### Pydantic Input Validation
-All API inputs are validated using Pydantic models with custom validators:
-
-```python
-@field_validator('sender_address', 'recipient_address')
-@classmethod
-def validate_address(cls, v):
-    if not v.startswith('BRICS') or len(v) < 40:
-        raise ValueError('Invalid BRICS address format')
-    if not re.match(r'^BRICS[a-fA-F0-9]{40}$', v):
-        raise ValueError('Address must be BRICS followed by 40 hex characters')
-    return v
-```
-
-### Security Headers
-All responses include security headers:
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `X-XSS-Protection: 1; mode=block`
-- `Strict-Transport-Security: max-age=31536000`
-- `Content-Security-Policy: default-src 'self'`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-
-### IP Blacklisting
-Automatic IP blocking after 10 failed authentication/signature attempts:
-
-```python
-MAX_FAILED_ATTEMPTS = 10
-BLACKLIST_DURATION = 3600  # 1 hour
-```
+| Test | Status | Description |
+|------|--------|-------------|
+| Replay attack protection | PASS | Signature uniqueness enforced |
+| Timestamp window validation (5 min) | PASS | Stale transactions rejected |
+| IP blacklisting after failed attempts | PASS | Automatic IP blocking |
+| Rate limiting (slowapi) active | PASS | Request throttling configured |
+| Security headers (X-Frame, HSTS, XSS) | PASS | HTTP security headers set |
+| CORS origin restriction | PASS | Cross-origin requests controlled |
+| Migration restricted to PQC only | PASS | Only BRICSPQ addresses accepted |
+| Self-send transaction prevention | PASS | Cannot send to own address |
 
 ---
 
-## Cryptographic Standards
+## Security Architecture
 
-| Component | Standard |
-|-----------|----------|
-| Hashing | SHA-256 |
-| Signing | ECDSA secp256k1 |
-| Key Derivation | BIP-39 (12-word mnemonic) |
-| Address Format | BRICS + SHA256(pubkey)[:40] |
+### Cryptographic Stack
+
+| Layer | Algorithm | Purpose |
+|-------|-----------|---------|
+| Block Hashing | SHA-256 | Proof-of-Work consensus |
+| Transaction Signing (Classical) | ECDSA secp256k1 | Digital signatures |
+| Transaction Signing (Quantum) | ML-DSA-65 (FIPS 204) | Post-quantum digital signatures |
+| Hybrid Scheme | ECDSA + ML-DSA-65 | Backward-compatible quantum resistance |
+| Key Derivation | SHA-256 | Address generation from public key |
+
+### Client-Side Security
+
+All cryptographic operations are performed **in the user's browser**:
+
+1. **Key Generation**: Private keys are generated locally using `@noble/post-quantum`
+2. **Transaction Signing**: Transactions are signed client-side before submission
+3. **Zero Key Transmission**: Private keys are NEVER sent to the server
+4. **Signature Verification**: The server only verifies pre-signed transactions
+
+### Network Security
+
+| Feature | Configuration |
+|---------|---------------|
+| Rate Limiting | Wallet: 5 req/min, Transactions: 10 req/min |
+| CORS | Restricted to allowed origins |
+| Security Headers | X-Frame-Options, HSTS, X-XSS-Protection, Referrer-Policy |
+| IP Blacklisting | Auto-block after repeated failed attempts |
+| Timestamp Validation | 5-minute window for transaction freshness |
+| Anti-Replay | Signature uniqueness check (no duplicate transactions) |
 
 ---
 
-## Test Files
+## How to Run the Audit
 
-Security tests are located at:
-- `/backend/tests/test_security_audit.py` - 27 comprehensive security tests
-
-### Running the Audit
+The security audit runs live on the network. Execute it at any time:
 
 ```bash
-cd backend
-pip install pytest ecdsa
-REACT_APP_BACKEND_URL=https://bricscoin26.org pytest tests/test_security_audit.py -v
+curl https://bricscoin26.org/api/security/audit | python3 -m json.tool
 ```
 
-Expected output:
-```
-============================= test session starts ==============================
-collected 27 items
-
-tests/test_security_audit.py::TestInputValidation::test_invalid_brics_address_format_missing_prefix PASSED
-tests/test_security_audit.py::TestInputValidation::test_invalid_brics_address_too_short PASSED
-...
-============================== 27 passed ==============================
-```
+Or visit the [About page](https://bricscoin26.org/about) and click "Esegui Audit".
 
 ---
 
-## Recommendations for Users
+## Disclosure
 
-1. **Always verify the website URL**: Only use `https://bricscoin26.org`
-2. **Save your seed phrase securely**: Write it on paper, never store digitally
-3. **Never share your private key**: BricsCoin staff will never ask for it
-4. **Use hardware wallets**: For large holdings, consider cold storage
+This audit was conducted internally. For security vulnerability reports, please contact the team via Codeberg issues.
 
----
-
-## Contact
-
-- **Website**: [bricscoin26.org](https://bricscoin26.org)
-- **Codeberg**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)
-- **Security Issues**: Open an issue on Codeberg with `[SECURITY]` tag
-
----
-
-**Audit conducted by**: BricsCoin Development Team  
-**Last Updated**: February 2026
+**Repository**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)

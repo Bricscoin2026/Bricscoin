@@ -4,129 +4,129 @@
 ![Tests](https://img.shields.io/badge/Tests-27%2F27%20Passed-success?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![SHA256](https://img.shields.io/badge/Algorithm-SHA256-orange?style=for-the-badge)
+![Quantum Safe](https://img.shields.io/badge/Quantum-ML--DSA--65-10b981?style=for-the-badge)
 
-A decentralized cryptocurrency powered by SHA256 Proof-of-Work.
+A decentralized cryptocurrency powered by SHA256 Proof-of-Work with Post-Quantum Cryptography (PQC).
 
-## 🛡️ Security Audit Status
+## Security Audit Status
 
-**✅ SECURITY AUDIT PASSED** - January 2026
+**SECURITY AUDIT PASSED** - February 2026
 
 | Category | Status | Tests |
 |----------|--------|-------|
-| Input Validation | ✅ PASSED | 8/8 |
-| Signature Verification | ✅ PASSED | 2/2 |
-| Replay Attack Prevention | ✅ PASSED | 2/2 |
-| Rate Limiting | ✅ CONFIGURED | - |
-| **TOTAL** | **✅ PASSED** | **27/27** |
+| Input Validation | PASSED | 8/8 |
+| Classical Cryptography | PASSED | 5/5 |
+| Post-Quantum Cryptography | PASSED | 6/6 |
+| Attack Prevention & Security | PASSED | 8/8 |
+| **TOTAL** | **PASSED** | **27/27** |
 
 ### Security Features
-- ✅ **Client-side transaction signing** - Private keys never leave your device
-- ✅ **ECDSA secp256k1** - Same cryptography as Bitcoin
-- ✅ **Input validation** - All inputs validated with Pydantic
-- ✅ **Rate limiting** - Protection against spam and DDoS
-- ✅ **CORS protection** - Restricted to allowed origins
-- ✅ **Security headers** - XSS, clickjacking protection
-- ✅ **Replay attack prevention** - Timestamp and signature validation
-- ✅ **IP blacklisting** - Automatic blocking of suspicious activity
+- **Client-side transaction signing** - Private keys never leave your device
+- **ECDSA secp256k1** - Same cryptography as Bitcoin
+- **ML-DSA-65 (FIPS 204)** - Post-quantum digital signatures (Dilithium)
+- **Hybrid signatures** - ECDSA + ML-DSA-65 for backward-compatible quantum resistance
+- **Input validation** - All inputs validated with Pydantic
+- **Rate limiting** - Protection against spam and DDoS
+- **CORS protection** - Restricted to allowed origins
+- **Security headers** - XSS, clickjacking, HSTS protection
+- **Replay attack prevention** - Timestamp and signature validation
+- **IP blacklisting** - Automatic blocking of suspicious activity
 
-## Features
-
-- **Proof of Work**: SHA256 mining algorithm (Bitcoin-compatible)
-- **Hardware Mining**: Compatible with Bitaxe, NerdMiner and other ASIC miners via Stratum protocol
-- **Web Wallet**: Create, import, and manage wallets from your browser
-- **Desktop Wallet**: BricsCoin Core - Electron-based wallet application
-- **Block Explorer**: View blocks, transactions, and network statistics
-- **Security**: Client-side transaction signing, rate limiting, CORS protection
+---
 
 ## Technical Specifications
 
 | Parameter | Value |
 |-----------|-------|
-| Algorithm | SHA256 |
-| Max Supply | 21,000,000 BRICS |
-| Block Reward | 50 BRICS (halving every 210,000 blocks) |
-| Block Time | ~10 minutes |
-| Premine | 1,000,000 BRICS |
-| Transaction Fees | 0.05 BRICS (burned) |
+| **Algorithm** | SHA256 Proof-of-Work |
+| **Max Supply** | 21,000,000 BRICS |
+| **Block Reward** | 50 BRICS |
+| **Halving Interval** | Every 210,000 blocks |
+| **Target Block Time** | ~10 minutes |
+| **Difficulty Adjustment** | Every 2016 blocks |
+| **Transaction Fee** | 0.000005 BRICS (burned) |
+| **Signature Algorithm** | ECDSA (secp256k1) + ML-DSA-65 (hybrid PQC) |
+| **Address Format** | Legacy: `BRICS...` / PQC: `BRICSPQ...` |
+| **Quantum Security** | ML-DSA-65 (FIPS 204) |
+| **Client Signing** | Browser-side (keys never leave device) |
+| **License** | MIT |
 
-## Project Structure
+---
 
-```
-bricscoin/
-├── backend/           # FastAPI backend server
-│   ├── server.py      # Main API server
-│   └── stratum_server.py  # Mining pool server
-├── frontend/          # React web application
-├── bricscoin-core/    # Electron desktop wallet
-└── docker-compose.yml # Docker deployment
-```
+## Post-Quantum Cryptography (PQC)
+
+BricsCoin implements a **hybrid signature scheme** combining classical ECDSA with the NIST-standardized ML-DSA-65 (formerly Dilithium) algorithm. This provides:
+
+- **Backward compatibility**: Legacy ECDSA wallets continue to work
+- **Quantum resistance**: ML-DSA-65 protects against future quantum computer attacks
+- **Client-side security**: All cryptographic signing happens in the browser using `@noble/post-quantum`
+- **Zero-fee migration**: Users can migrate from legacy wallets to PQC wallets without fees
+
+### How it works
+
+1. **Create a PQC wallet** - Generates both ECDSA and ML-DSA-65 key pairs
+2. **Sign transactions** - Every transaction is signed with both algorithms in the browser
+3. **Verify on-chain** - The network verifies both signatures for maximum security
+4. **Block signing** - Nodes sign mined blocks with their PQC key pair
+
+---
 
 ## Quick Start
 
-### Prerequisites
+### Mining
 
-- Docker and Docker Compose
-- Node.js 18+ (for development)
-- Python 3.11+ (for development)
-- MongoDB
+Connect your SHA256 ASIC miner to:
+```
+stratum+tcp://bricscoin26.org:3333
+```
 
-### Using Docker
+### API
 
 ```bash
-# Clone the repository
+# Get network stats
+curl https://bricscoin26.org/api/network/stats
+
+# Create a PQC wallet
+curl -X POST https://bricscoin26.org/api/pqc/wallet/create \
+  -H "Content-Type: application/json" \
+  -d '{"name": "my-wallet"}'
+
+# Run security audit
+curl https://bricscoin26.org/api/security/audit
+```
+
+### Run Your Own Node
+
+```bash
 git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
 cd Bricscoin
-
-# Copy environment files
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-
-# Start all services
-docker-compose up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-### Manual Setup
+---
 
-#### Backend
-```bash
-cd backend
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your configuration
-uvicorn server:app --host 0.0.0.0 --port 8001
-```
-
-#### Frontend
-```bash
-cd frontend
-yarn install
-cp .env.example .env
-# Edit .env with your backend URL
-yarn start
-```
-
-#### Stratum Server (Mining)
-```bash
-cd backend
-python stratum_server.py
-```
-
-## Mining
-
-Connect your ASIC miner (Bitaxe, NerdMiner, etc.) to the Stratum server:
-
-- **Pool URL**: `stratum+tcp://bricscoin26.org:3333`
-- **Username**: Your BRICS wallet address
-- **Password**: `x` (or any value)
-
-### Example Configuration (Bitaxe)
+## Architecture
 
 ```
-Stratum URL: bricscoin26.org
-Port: 3333
-Username: BRICSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Password: x
+BricsCoin/
+├── backend/
+│   ├── server.py           # FastAPI API server
+│   ├── pqc_crypto.py       # Post-Quantum Cryptography module
+│   ├── stratum_server.py   # Mining stratum protocol
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── pages/          # React pages (Dashboard, Explorer, PQC Wallet, etc.)
+│   │   ├── lib/            # API client, crypto utilities, PQC signing
+│   │   └── components/     # UI components (Shadcn/UI)
+│   └── package.json
+├── docker-compose.prod.yml # Production Docker setup
+├── WHITEPAPER.md           # Technical whitepaper
+├── SECURITY_AUDIT.md       # Security audit report
+└── README.md
 ```
+
+---
 
 ## API Endpoints
 
@@ -135,55 +135,23 @@ Password: x
 | `/api/network/stats` | GET | Network statistics |
 | `/api/blocks` | GET | List blocks |
 | `/api/transactions` | GET | List transactions |
-| `/api/transactions/secure` | POST | Create secure transaction |
-| `/api/wallet/create` | POST | Create new wallet |
-| `/api/wallet/{address}/balance` | GET | Get wallet balance |
-| `/api/address/{address}` | GET | Get address info |
+| `/api/richlist` | GET | Top wallet holders |
+| `/api/pqc/wallet/create` | POST | Create PQC wallet |
+| `/api/pqc/stats` | GET | PQC network statistics |
+| `/api/pqc/node/keys` | GET | Node PQC public keys |
+| `/api/pqc/migrate` | POST | Migrate legacy to PQC (no fee) |
+| `/api/security/audit` | GET | Run live security audit |
+| `/api/tokenomics` | GET | Tokenomics info |
 
-## Security
-
-BricsCoin has undergone a comprehensive security audit. See our [Security Audit Report](SECURITY_AUDIT.md) for details.
-
-- **Client-side signing**: Private keys never leave your device
-- **Rate limiting**: Protection against spam and DDoS (5 req/min wallet, 10 req/min transactions)
-- **Input validation**: All inputs are validated server-side with Pydantic
-- **CORS protection**: Restricted to allowed origins
-- **Security headers**: X-Content-Type-Options, X-Frame-Options, HSTS, CSP
-- **IP blacklisting**: Automatic blocking after 10 failed attempts
-
-### Running Security Tests
-
-```bash
-cd backend
-pip install pytest ecdsa
-REACT_APP_BACKEND_URL=https://bricscoin26.org pytest tests/test_security_audit.py -v
-```
-
-## BricsCoin Core (Desktop Wallet)
-
-Download the desktop wallet from the [Downloads](https://bricscoin26.org/downloads) page or build from source:
-
-```bash
-cd bricscoin-core
-yarn install
-yarn start       # Development
-yarn build       # Build for production
-```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
+---
 
 ## Links
 
 - **Website**: [bricscoin26.org](https://bricscoin26.org)
-- **Codeberg**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)
-- **Twitter**: [@Bricscoin26](https://x.com/Bricscoin26)
+- **Repository**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)
 
-## Disclaimer
+---
 
-This is an experimental cryptocurrency project for educational purposes. Use at your own risk.
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.
