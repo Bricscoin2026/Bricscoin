@@ -1563,6 +1563,169 @@ async def get_wallet_qr_base64(address: str):
     
     return {"qr_code": f"data:image/png;base64,{base64_img}"}
 
+# ==================== PQC ENDPOINTS ====================
+
+@api_router.post("/pqc/wallet/create")
+@limiter.limit("5/minute")
+async def create_pqc_wallet(request: Request, wallet_request: PQCWalletCreate):
+    """Create a new Post-Quantum Cryptographic hybrid wallet"""
+    wallet_data = generate_pqc_wallet()
+    wallet_data["name"] = wallet_request.name
+    wallet_data["created_at"] = datetime.now(timezone.utc).isoformat()
+
+    # Store PQC wallet metadata in DB (no private keys!)
+    await db.pqc_wallets.update_one(
+        {"address": wallet_data["address"]},
+        {"$set": {
+            "address": wallet_data["address"],
+            "wallet_type": "pqc_hybrid",
+            "ecdsa_public_key": wallet_data["ecdsa_public_key"],
+            "dilithium_public_key": wallet_data["dilithium_public_key"],
+            "created_at": wallet_data["created_at"],
+        }},
+        upsert=True
+    )
+
+    logger.info(f"PQC wallet created: {wallet_data['address'][:20]}...")
+    return wallet_data
+
+
+@api_router.post("/pqc/wallet/import")
+@limiter.limit("5/minute")
+async def import_pqc_wallet(request: Request, wallet_request: PQCWalletImportKeys):
+    """Import/recover a PQC wallet from its key pair"""
+    try:
+        wallet_data = recover_pqc_wallet(
+            wallet_request.ecdsa_private_key,
+            wallet_request.dilithium_secret_key
+        )
+        wallet_data["name"] = wallet_request.name
+        wallet_data["created_at"] = datetime.now(timezone.utc).isoformat()
+        return wallet_data
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@api_router.get("/pqc/wallet/{address}")
+async def get_pqc_wallet_info(address: str):
+    """Get PQC wallet public info and balance"""
+    if not address.startswith("BRICSPQ"):
+        raise HTTPException(status_code=400, detail="Not a PQC address (must start with BRICSPQ)")
+    
+    balance = await get_balance(address)
+    wallet_meta = await db.pqc_wallets.find_one(
+        {"address": address}, {"_id": 0}
+    )
+    
+    return {
+        "address": address,
+        "balance": balance,
+        "wallet_type": "pqc_hybrid" if wallet_meta else "unknown",
+        "ecdsa_public_key": wallet_meta.get("ecdsa_public_key") if wallet_meta else None,
+        "dilithium_public_key": wallet_meta.get("dilithium_public_key") if wallet_meta else None,
+        "created_at": wallet_meta.get("created_at") if wallet_meta else None,
+    }
+
+
+@api_router.post("/pqc/verify")
+async def verify_pqc_signature(req: PQCVerifyRequest):
+    """Verify a hybrid PQC signature"""
+    result = hybrid_verify(
+        req.ecdsa_public_key,
+        req.dilithium_public_key,
+        req.ecdsa_signature,
+        req.dilithium_signature,
+        req.message
+    )
+    return result
+
+
+@api_router.post("/pqc/transaction/secure")
+@limiter.limit("10/minute")
+async def create_pqc_transaction(request: Request, tx: PQCSecureTransactionRequest):
+    """Create a transaction signed with hybrid PQC signatures"""
+    # Verify sender is a PQC address
+    if not tx.sender_address.startswith("BRICSPQ"):
+        raise HTTPException(status_code=400, detail="Sender must be a PQC address")
+
+    # Verify the hybrid signature
+    tx_data = f"{tx.sender_address}{tx.recipient_address}{tx.amount}{tx.timestamp}"
+    verification = hybrid_verify(
+        tx.ecdsa_public_key,
+        tx.dilithium_public_key,
+        tx.ecdsa_signature,
+        tx.dilithium_signature,
+        tx_data
+    )
+    if not verification["hybrid_valid"]:
+        detail = "Hybrid signature verification failed."
+        if not verification["ecdsa_valid"]:
+            detail += " ECDSA invalid."
+        if not verification["dilithium_valid"]:
+            detail += " Dilithium invalid."
+        raise HTTPException(status_code=400, detail=detail)
+
+    # Verify address ownership
+    from pqc_crypto import hashlib as pqc_hashlib
+    combined_hash = hashlib.sha256(
+        (tx.ecdsa_public_key + tx.dilithium_public_key).encode()
+    ).hexdigest()
+    expected_address = "BRICSPQ" + combined_hash[:38]
+    if tx.sender_address != expected_address:
+        raise HTTPException(status_code=400, detail="Public keys do not match sender address")
+
+    # Check balance
+    balance = await get_balance(tx.sender_address)
+    if balance < tx.amount:
+        raise HTTPException(status_code=400, detail=f"Insufficient balance: {balance} < {tx.amount}")
+
+    # Create transaction
+    tx_id = hashlib.sha256(
+        f"{tx.sender_address}{tx.recipient_address}{tx.amount}{tx.timestamp}{tx.ecdsa_signature[:32]}".encode()
+    ).hexdigest()
+
+    transaction = {
+        "tx_id": tx_id,
+        "sender": tx.sender_address,
+        "recipient": tx.recipient_address,
+        "amount": tx.amount,
+        "timestamp": tx.timestamp,
+        "ecdsa_signature": tx.ecdsa_signature,
+        "dilithium_signature": tx.dilithium_signature,
+        "ecdsa_public_key": tx.ecdsa_public_key,
+        "dilithium_public_key": tx.dilithium_public_key,
+        "signature_scheme": "ecdsa_secp256k1+dilithium2",
+        "confirmed": False,
+    }
+    await db.transactions.insert_one(transaction)
+    transaction.pop("_id", None)
+
+    logger.info(f"PQC transaction created: {tx_id[:16]}... from {tx.sender_address[:15]}...")
+    return transaction
+
+
+@api_router.get("/pqc/wallets/list")
+async def list_pqc_wallets(limit: int = 50):
+    """List all registered PQC wallets (public info only)"""
+    wallets = await db.pqc_wallets.find(
+        {}, {"_id": 0, "address": 1, "wallet_type": 1, "created_at": 1}
+    ).sort("created_at", -1).to_list(limit)
+    return {"wallets": wallets, "total": len(wallets)}
+
+
+@api_router.get("/pqc/stats")
+async def get_pqc_stats():
+    """Get PQC network statistics"""
+    total_pqc_wallets = await db.pqc_wallets.count_documents({})
+    total_pqc_txs = await db.transactions.count_documents({"signature_scheme": "ecdsa_secp256k1+dilithium2"})
+    return {
+        "total_pqc_wallets": total_pqc_wallets,
+        "total_pqc_transactions": total_pqc_txs,
+        "signature_scheme": "ECDSA (secp256k1) + ML-DSA (Dilithium2)",
+        "quantum_resistant": True,
+        "status": "active"
+    }
+
 # Address lookup
 @api_router.get("/address/{address}")
 async def get_address_info(address: str):
