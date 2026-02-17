@@ -4,9 +4,8 @@
  * SECURITY: ALL private keys and signing happen ONLY in the browser.
  * Uses hybrid ECDSA (secp256k1) + ML-DSA-65 (FIPS 204) signatures.
  * 
- * Dependencies:
- * - elliptic (ECDSA) - already in project
- * - @noble/post-quantum (ML-DSA-65) - WASM-speed pure JS
+ * ECDSA: SHA-256 hash + raw r||s signature (128 hex chars)
+ * ML-DSA-65: @noble/post-quantum (NIST FIPS 204 standard)
  */
 
 import { ec as EC } from 'elliptic';
@@ -34,15 +33,18 @@ function bytesToHex(bytes) {
 }
 
 /**
- * Sign with ECDSA (secp256k1) - same as legacy crypto.js
+ * Sign with ECDSA (secp256k1) using SHA-256 hash, output raw r||s hex.
+ * Compatible with Python ecdsa library's verify_digest(sig, sha256(msg))
  */
 function ecdsaSign(privateKeyHex, messageStr) {
   const key = ec.keyFromPrivate(privateKeyHex, 'hex');
-  const msgBytes = new TextEncoder().encode(messageStr);
-  // Sign raw bytes (matching python ecdsa library behavior)
+  // Hash message with SHA-256 (same as backend)
   const msgHash = sha256(messageStr);
   const signature = key.sign(msgHash);
-  return signature.toDER('hex');
+  // Output raw r||s format (64 bytes = 128 hex chars) for python-ecdsa compatibility
+  const r = signature.r.toString(16).padStart(64, '0');
+  const s = signature.s.toString(16).padStart(64, '0');
+  return r + s;
 }
 
 /**
@@ -72,10 +74,6 @@ export function mlDsaVerify(publicKeyHex, messageStr, signatureHex) {
 /**
  * Create a hybrid PQC signature (ECDSA + ML-DSA-65)
  * Both signatures are created client-side. Private keys NEVER leave the browser.
- * 
- * @param {object} wallet - PQC wallet with ecdsa_private_key and dilithium_secret_key
- * @param {string} message - The message to sign (typically transaction data)
- * @returns {object} - Both signatures
  */
 export function hybridSign(wallet, message) {
   const ecdsaSig = ecdsaSign(wallet.ecdsa_private_key, message);
@@ -92,11 +90,6 @@ export function hybridSign(wallet, message) {
  * Prepare a PQC transaction for secure submission.
  * Signs with BOTH ECDSA and ML-DSA-65 locally.
  * Private keys NEVER leave the browser.
- * 
- * @param {object} wallet - PQC wallet object
- * @param {string} recipientAddress - Recipient's address
- * @param {number} amount - Amount to send
- * @returns {object} - Transaction ready for server submission (no private keys!)
  */
 export function preparePQCTransaction(wallet, recipientAddress, amount) {
   const timestamp = new Date().toISOString();
