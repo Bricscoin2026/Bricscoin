@@ -1761,6 +1761,100 @@ async def list_pqc_wallets(limit: int = 50):
     return {"wallets": wallets, "total": len(wallets)}
 
 
+@api_router.post("/pqc/migrate")
+@limiter.limit("5/minute")
+async def migrate_to_pqc(request: Request, tx_request: SecureTransactionRequest):
+    """
+    Migrate funds from legacy ECDSA wallet to PQC wallet - NO FEE.
+    Same validation as /transactions/secure but fee is waived for migration.
+    """
+    client_ip = get_remote_address(request)
+
+    if client_ip in ip_blacklist:
+        if datetime.now(timezone.utc) < ip_blacklist[client_ip]:
+            raise HTTPException(status_code=403, detail="Access temporarily blocked")
+        else:
+            del ip_blacklist[client_ip]
+
+    # Must migrate TO a PQC address
+    if not tx_request.recipient_address.startswith("BRICSPQ"):
+        raise HTTPException(status_code=400, detail="Destinazione deve essere un indirizzo PQC (BRICSPQ...)")
+
+    # Must migrate FROM a legacy address
+    if tx_request.sender_address.startswith("BRICSPQ"):
+        raise HTTPException(status_code=400, detail="Mittente deve essere un wallet legacy (BRICS...)")
+
+    # Check balance - NO FEE for migration
+    sender_balance = await get_balance(tx_request.sender_address)
+    if sender_balance < tx_request.amount:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Saldo insufficiente. Necessario: {tx_request.amount} BRICS. Disponibile: {sender_balance}"
+        )
+
+    # Verify public key matches sender
+    expected_address = generate_address_from_public_key(tx_request.public_key)
+    if expected_address != tx_request.sender_address:
+        failed_attempts[client_ip] += 1
+        raise HTTPException(status_code=400, detail="La chiave pubblica non corrisponde all'indirizzo")
+
+    # Verify signature
+    tx_data = f"{tx_request.sender_address}{tx_request.recipient_address}{tx_request.amount}{tx_request.timestamp}"
+    try:
+        is_valid = verify_signature(tx_request.public_key, tx_request.signature, tx_data)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail="Firma non valida")
+    except BadSignatureError:
+        raise HTTPException(status_code=400, detail="Firma non valida")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="Verifica firma fallita")
+
+    # Anti-replay
+    try:
+        tx_time = datetime.fromisoformat(tx_request.timestamp.replace('Z', '+00:00'))
+        if abs((datetime.now(timezone.utc) - tx_time).total_seconds()) > 300:
+            raise HTTPException(status_code=400, detail="Timestamp troppo vecchio")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato timestamp non valido")
+
+    existing = await db.transactions.find_one({"signature": tx_request.signature})
+    if existing:
+        raise HTTPException(status_code=400, detail="Transazione duplicata")
+
+    failed_attempts[client_ip] = 0
+
+    tx_id = str(uuid.uuid4())
+    transaction = {
+        "id": tx_id,
+        "sender": tx_request.sender_address,
+        "recipient": tx_request.recipient_address,
+        "amount": tx_request.amount,
+        "fee": 0,  # NO FEE for PQC migration
+        "timestamp": tx_request.timestamp,
+        "signature": tx_request.signature,
+        "public_key": tx_request.public_key,
+        "confirmed": True,
+        "migration": True,
+        "migration_type": "legacy_to_pqc",
+        "block_index": None,
+        "ip_hash": hashlib.sha256(client_ip.encode()).hexdigest()[:16]
+    }
+
+    await db.transactions.insert_one(transaction)
+    del transaction["_id"]
+    del transaction["ip_hash"]
+
+    asyncio.create_task(broadcast_to_peers(
+        "broadcast/transaction",
+        {"transaction": transaction, "sender_node_id": NODE_ID}
+    ))
+
+    logger.info(f"PQC migration: {tx_id} - {tx_request.amount} BRICS from {tx_request.sender_address[:15]}... to {tx_request.recipient_address[:15]}...")
+    return transaction
+
+
 @api_router.get("/pqc/stats")
 async def get_pqc_stats():
     """Get PQC network statistics"""
