@@ -8,13 +8,15 @@ import {
   Clock,
   ChevronRight,
   Pickaxe,
-  ShieldCheck
+  ShieldCheck,
+  Lock,
+  Atom
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Skeleton } from "../components/ui/skeleton";
 import { Badge } from "../components/ui/badge";
-import { getNetworkStats, getBlocks } from "../lib/api";
+import { getNetworkStats, getBlocks, getPQCStats, getPQCNodeKeys } from "../lib/api";
 import { motion } from "framer-motion";
 
 function StatCard({ icon: Icon, title, value, subtitle, delay = 0 }) {
