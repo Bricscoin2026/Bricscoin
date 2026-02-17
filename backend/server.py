@@ -1696,7 +1696,7 @@ async def create_pqc_transaction(request: Request, tx: PQCSecureTransactionReque
         "dilithium_signature": tx.dilithium_signature,
         "ecdsa_public_key": tx.ecdsa_public_key,
         "dilithium_public_key": tx.dilithium_public_key,
-        "signature_scheme": "ecdsa_secp256k1+dilithium2",
+        "signature_scheme": "ecdsa_secp256k1+ml-dsa-65",
         "confirmed": False,
     }
     await db.transactions.insert_one(transaction)
@@ -1719,11 +1719,11 @@ async def list_pqc_wallets(limit: int = 50):
 async def get_pqc_stats():
     """Get PQC network statistics"""
     total_pqc_wallets = await db.pqc_wallets.count_documents({})
-    total_pqc_txs = await db.transactions.count_documents({"signature_scheme": "ecdsa_secp256k1+dilithium2"})
+    total_pqc_txs = await db.transactions.count_documents({"signature_scheme": "ecdsa_secp256k1+ml-dsa-65"})
     return {
         "total_pqc_wallets": total_pqc_wallets,
         "total_pqc_transactions": total_pqc_txs,
-        "signature_scheme": "ECDSA (secp256k1) + ML-DSA (Dilithium2)",
+        "signature_scheme": "ECDSA (secp256k1) + ML-DSA-65 (FIPS 204)",
         "quantum_resistant": True,
         "status": "active"
     }
