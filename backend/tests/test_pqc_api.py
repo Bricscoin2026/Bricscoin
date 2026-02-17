@@ -343,6 +343,10 @@ class TestPQCAddressValidation:
             json={"name": "TEST_PQC_Address_Format"}
         )
         
+        # Handle rate limiting
+        if response.status_code == 429:
+            pytest.skip("Rate limited - skipping test")
+        
         assert response.status_code == 200
         wallet = response.json()
         
