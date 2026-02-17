@@ -2048,6 +2048,37 @@ async def load_peers_from_db():
     except Exception as e:
         logger.error(f"Failed to load peers from database: {e}")
 
+
+async def init_node_pqc_keys():
+    """Initialize or load the node's PQC keypair for block signing."""
+    global node_pqc_keys
+    existing = await db.node_config.find_one({"type": "pqc_keys"}, {"_id": 0})
+    if existing:
+        node_pqc_keys = {
+            "ecdsa_private_key": existing["ecdsa_private_key"],
+            "ecdsa_public_key": existing["ecdsa_public_key"],
+            "dilithium_secret_key": existing["dilithium_secret_key"],
+            "dilithium_public_key": existing["dilithium_public_key"],
+        }
+        logger.info(f"Loaded existing node PQC keys (pk={existing['ecdsa_public_key'][:16]}...)")
+    else:
+        wallet = generate_pqc_wallet()
+        node_pqc_keys = {
+            "ecdsa_private_key": wallet["ecdsa_private_key"],
+            "ecdsa_public_key": wallet["ecdsa_public_key"],
+            "dilithium_secret_key": wallet["dilithium_secret_key"],
+            "dilithium_public_key": wallet["dilithium_public_key"],
+        }
+        await db.node_config.insert_one({
+            "type": "pqc_keys",
+            "ecdsa_private_key": wallet["ecdsa_private_key"],
+            "ecdsa_public_key": wallet["ecdsa_public_key"],
+            "dilithium_secret_key": wallet["dilithium_secret_key"],
+            "dilithium_public_key": wallet["dilithium_public_key"],
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        logger.info(f"Generated new node PQC keys (pk={wallet['ecdsa_public_key'][:16]}...)")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
