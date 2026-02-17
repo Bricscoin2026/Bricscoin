@@ -172,23 +172,19 @@ export default function PQCWallet() {
     if (!selectedWallet) return;
     setSending(true);
     try {
-      const timestamp = new Date().toISOString();
       const amount = parseFloat(sendForm.amount);
-      const txData = `${selectedWallet.address}${sendForm.recipient}${amount}${timestamp}`;
+      if (!sendForm.recipient || amount <= 0) {
+        toast.error("Inserisci un destinatario e importo validi");
+        return;
+      }
 
-      // We need to call backend for signing since Dilithium isn't available in browser
-      // For now, send pre-built request (in production, signing would be done via WASM)
-      const res = await createPQCTransaction({
-        sender_address: selectedWallet.address,
-        recipient_address: sendForm.recipient,
-        amount: amount,
-        timestamp: timestamp,
-        ecdsa_signature: "pending_client_sign",
-        dilithium_signature: "pending_client_sign",
-        ecdsa_public_key: selectedWallet.ecdsa_public_key,
-        dilithium_public_key: selectedWallet.dilithium_public_key
-      });
-      toast.success(`Transazione creata: ${res.data.tx_id?.slice(0, 16)}...`);
+      // CLIENT-SIDE SIGNING: Private keys NEVER leave the browser
+      // Signs with both ECDSA + ML-DSA-65 locally
+      const txPayload = preparePQCTransaction(selectedWallet, sendForm.recipient, amount);
+
+      // Send only signatures and public keys to server for verification
+      const res = await createPQCTransaction(txPayload);
+      toast.success(`Transazione firmata e inviata: ${res.data.tx_id?.slice(0, 16)}...`);
       setSendOpen(false);
       setSendForm({ recipient: "", amount: "" });
     } catch (err) {
