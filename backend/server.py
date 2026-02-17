@@ -913,10 +913,9 @@ async def get_network_stats():
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
     # ============ HASHRATE CALCULATION ============
-    # Con MAX_TARGET = 2^256-1, il fattore di scala è diverso da Bitcoin.
-    # Usiamo 2^48 come moltiplicatore per convertire difficulty in hashrate reale.
-    # Questo fattore è calibrato per ASIC miners che operano nel range TH/s.
-    HASHRATE_MULTIPLIER = 2 ** 48
+    # Bitcoin-style: hashrate = difficulty * 2^32 / block_time
+    # 2^32 derives from max_target = 2^224, so 2^256 / 2^224 = 2^32
+    HASHRATE_MULTIPLIER = 2 ** 32
     
     hashrate_estimate = 0.0
     if blocks_count >= 2:
