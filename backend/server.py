@@ -16,7 +16,7 @@ import hashlib
 import json
 import time
 import secrets
-from ecdsa import SigningKey, VerifyingKey, SECP256k1, BadSignatureError
+from ecdsa import SigningKey, VerifyingKey, SECP256k1, BadSignatureError, util
 import io
 import qrcode
 import base64
