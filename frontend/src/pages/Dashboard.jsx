@@ -82,6 +82,108 @@ function BlockRow({ block, index }) {
   );
 }
 
+function QuantumSecurityWidget({ pqcStats, nodeKeys, delay = 0 }) {
+  const pqcBlocks = pqcStats?.total_pqc_blocks || 0;
+  const totalBlocks = pqcStats?.total_blocks || 1;
+  const pqcPercent = totalBlocks > 0 ? ((pqcBlocks / totalBlocks) * 100).toFixed(1) : 0;
+  const isActive = pqcStats?.status === "active";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: delay * 0.1, duration: 0.4 }}
+    >
+      <Card className="bg-card border-white/10 overflow-hidden relative" data-testid="quantum-security-widget">
+        {/* Subtle animated background glow */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          background: "radial-gradient(ellipse at 30% 50%, #10b981, transparent 70%)"
+        }} />
+
+        <CardContent className="p-6 relative z-10">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-11 h-11 rounded-sm bg-emerald-500/15 flex items-center justify-center border border-emerald-500/20">
+              <ShieldCheck className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="font-heading font-bold text-base">Quantum Security</h3>
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${isActive ? "bg-emerald-400 animate-pulse" : "bg-red-400"}`} />
+                <span className="text-xs text-muted-foreground">
+                  {isActive ? "ML-DSA-65 Active" : "Inactive"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* PQC Block Coverage */}
+          <div className="mb-5">
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">PQC Block Coverage</span>
+              <span className="text-2xl font-heading font-bold text-emerald-400">{pqcPercent}%</span>
+            </div>
+            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(pqcPercent, 100)}%` }}
+                transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              {pqcBlocks.toLocaleString()} / {totalBlocks.toLocaleString()} blocks signed
+            </p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/[0.03] rounded-sm p-3 border border-white/5">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Lock className="w-3.5 h-3.5 text-emerald-400/70" />
+                <span className="text-xs text-muted-foreground">Wallets</span>
+              </div>
+              <p className="text-lg font-bold">{pqcStats?.total_pqc_wallets?.toLocaleString() || 0}</p>
+            </div>
+            <div className="bg-white/[0.03] rounded-sm p-3 border border-white/5">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Activity className="w-3.5 h-3.5 text-emerald-400/70" />
+                <span className="text-xs text-muted-foreground">PQC Txs</span>
+              </div>
+              <p className="text-lg font-bold">{pqcStats?.total_pqc_transactions?.toLocaleString() || 0}</p>
+            </div>
+            <div className="bg-white/[0.03] rounded-sm p-3 border border-white/5">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Atom className="w-3.5 h-3.5 text-emerald-400/70" />
+                <span className="text-xs text-muted-foreground">Scheme</span>
+              </div>
+              <p className="text-xs font-medium leading-tight mt-0.5">ECDSA + ML-DSA-65</p>
+            </div>
+          </div>
+
+          {/* Node ID */}
+          {nodeKeys?.node_id && (
+            <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Node</span>
+              <span className="text-xs font-mono text-muted-foreground/80">{nodeKeys.node_id}</span>
+            </div>
+          )}
+
+          {/* CTA */}
+          <div className="mt-4">
+            <Button asChild variant="outline" size="sm" className="w-full border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 rounded-sm" data-testid="quantum-wallet-cta">
+              <Link to="/pqc-wallet">
+                <ShieldCheck className="w-4 h-4 mr-2" />
+                Quantum-Safe Wallet
+                <ChevronRight className="w-4 h-4 ml-auto" />
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [blocks, setBlocks] = useState([]);
