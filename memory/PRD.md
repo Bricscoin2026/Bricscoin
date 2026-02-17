@@ -1,91 +1,95 @@
 # BricsCoin - Product Requirements Document
 
 ## Original Problem Statement
-Create a Bitcoin-like cryptocurrency called "BricsCoin" with a fully operational blockchain, mining capabilities, wallet system, and a decentralized network architecture. The project has evolved to include Post-Quantum Cryptography for future-proofing against quantum computing threats.
+Create a Bitcoin-like cryptocurrency called "BricsCoin" with a fully operational blockchain, mining, wallet, and decentralized network. Upgraded with Post-Quantum Cryptography (PQC) for quantum resistance.
 
 ## Core Architecture
-- **Frontend**: React (CRA) with Tailwind CSS + Shadcn/UI
-- **Backend**: FastAPI (Python) with Motor (async MongoDB driver)
+- **Frontend**: React (CRA) + Tailwind CSS + Shadcn/UI
+- **Backend**: FastAPI (Python) + Motor (async MongoDB)
 - **Database**: MongoDB
-- **Blockchain**: SHA256 Proof-of-Work with ASIC mining support (Stratum protocol)
+- **Blockchain**: SHA256 PoW + Stratum mining protocol
 
 ## What's Been Implemented
 
 ### Core Blockchain (DONE)
-- Genesis block creation, block mining & validation
-- SHA256 PoW with dynamic difficulty adjustment
-- Transaction system with ECDSA signatures (client-side signing)
-- Wallet creation (seed phrase, private key import)
-- Balance calculation, mempool, block rewards, halving schedule
+- Genesis block, mining, validation, SHA256 PoW, dynamic difficulty
+- Transaction system with ECDSA signatures, wallet creation, balance, mempool, halving
 
 ### Network & P2P (DONE)
-- Peer registration persisted in MongoDB
-- P2P blockchain sync, peer discovery
-- Node setup script (`setup-node.sh`) for one-command deployment
-- Backup distribution via `/api/node/backup`
-- Daily backup cron job
+- Persistent peers in MongoDB, node setup script, backup distribution, daily backup cron
 
 ### Mining (DONE)
-- Stratum protocol server for ASIC miners
-- Mining pools support, active miner tracking
+- Stratum protocol server, mining pools, active miner tracking
 
-### Pages & Features (DONE)
-- Dashboard, Explorer, Block Detail, Transaction Detail
-- Wallet (ECDSA), Network, Mining, Pools
-- Rich List, Downloads, Run Node (cloud deployment guide), About
+### Pages (DONE)
+- Dashboard, Explorer, Block/Tx Detail, Wallet, Network, Mining, Pools
+- Rich List, Downloads, Run Node, About, Community
 
-### Post-Quantum Cryptography - PQC (DONE - Feb 2026)
-- **Backend**: `pqc_crypto.py` using ML-DSA-65 (NIST FIPS 204)
-- **Frontend**: `@noble/post-quantum` for client-side ML-DSA-65 signing
+### Post-Quantum Cryptography (DONE - Feb 2026)
+- **ML-DSA-65 (FIPS 204)** via `dilithium-py` backend + `@noble/post-quantum` frontend
 - **Hybrid scheme**: ECDSA (secp256k1) + ML-DSA-65
-- **Client-side signing**: Private keys NEVER leave the browser
-- **ECDSA format**: SHA-256 hash + raw r||s (128 hex chars) for cross-platform compatibility
-- **ML-DSA-65 sizes**: PK=1952 bytes, SK=4032 bytes, SIG=3309 bytes
+- **Client-side signing**: `@noble/post-quantum` v0.5.4 in browser, private keys NEVER leave device
+- **ECDSA format**: SHA-256 hash + raw r||s (128 hex chars) cross-platform
 - **Address format**: `BRICSPQ...` (45 chars) for PQC wallets
 - **Pages**: PQC Wallet (`/pqc-wallet`) + Migration Wizard (`/migrate`)
 
-### Client-Side ML-DSA-65 WASM Signing (DONE - Feb 2026)
-- Installed `@noble/post-quantum` v0.5.4 for browser ML-DSA-65
-- Cross-platform compatibility verified: JS signatures validated by Python backend
-- `preparePQCTransaction()` signs locally with ECDSA + ML-DSA-65
-- Backend `hybrid_verify()` uses `verify_digest()` with SHA-256 for ECDSA
+### PQC Block Signing (DONE - Feb 2026)
+- Node generates ML-DSA-65 keypair on startup (stored in MongoDB `node_config`)
+- Every mined block signed with hybrid ECDSA + ML-DSA-65
+- Both API mining and Stratum mining produce PQC-signed blocks
+- Verification endpoint: `/api/pqc/block/{index}/verify`
+- Node public keys: `/api/pqc/node/keys`
+
+### "Firmato Localmente" Indicator (DONE - Feb 2026)
+- Green Lock badge in PQC Wallet Send dialog
+- PQC signature section in BlockDetail for signed blocks
+- "Firmato Localmente - Quantum-Safe" badge in TransactionDetail for PQC transactions
+- "Blocchi Firmati" stat in PQC stats dashboard
+
+### Bug Fixes (DONE - Feb 2026)
+- **Hashrate**: Fixed from 2^48 to 2^32 multiplier (7.16 GH/s vs PH/s inflated)
+- **Stratum logger**: Converted to f-strings to prevent TypeError
+- **Stratum PQC**: Blocks mined via Stratum now also get PQC signatures
+
+### Disk Cleanup Script (DONE - Feb 2026)
+- `/app/backend/disk-cleanup.sh` - docker prune, journal vacuum, log/tmp cleanup
+- Ready for cron deployment on production server
 
 ## Key API Endpoints
-- `/api/pqc/wallet/create` - Create PQC hybrid wallet (ML-DSA-65)
-- `/api/pqc/wallet/import` - Import with 3 keys (ECDSA sk + ML-DSA sk + ML-DSA pk)
-- `/api/pqc/wallet/{address}` - PQC wallet info and balance
-- `/api/pqc/stats` - PQC network statistics
+- `/api/pqc/wallet/create|import` - PQC wallet management
+- `/api/pqc/wallet/{address}` - PQC wallet info
+- `/api/pqc/stats` - PQC stats (wallets, txs, blocks, total)
 - `/api/pqc/verify` - Verify hybrid signature
-- `/api/pqc/transaction/secure` - PQC signed transaction
-- `/api/pqc/wallets/list` - List registered PQC wallets
+- `/api/pqc/transaction/secure` - PQC transaction
+- `/api/pqc/node/keys` - Node PQC public keys
+- `/api/pqc/block/{index}/verify` - Block PQC signature verification
+- `/api/pqc/wallets/list` - List PQC wallets
 
 ## DB Schema
-- **blocks**: index, hash, previous_hash, transactions, proof, nonce, difficulty, timestamp, miner
-- **transactions**: tx_id, sender, recipient, amount, timestamp, signature, confirmed, signature_scheme
-- **peers**: node_id, url, version, last_seen
+- **blocks**: + pqc_ecdsa_signature, pqc_dilithium_signature, pqc_public_key_*, pqc_scheme
 - **pqc_wallets**: address, wallet_type, ecdsa_public_key, dilithium_public_key, created_at
+- **node_config**: type="pqc_keys", ecdsa/dilithium key pairs
 
 ## Prioritized Backlog
 
-### P0 (Critical)
+### P0 (Critical) - ALL DONE
 - ~~PQC Wallet Backend + Frontend~~ DONE
 - ~~Client-side ML-DSA-65 signing~~ DONE
-- PQC Block Signing: Sign blocks with hybrid signatures
-- PQC Automated Test Suite (comprehensive)
+- ~~PQC Block Signing~~ DONE
 
 ### P1 (High)
-- Automated Disk Cleanup cron job (server crashed 2x from full disk)
+- ~~Disk cleanup script~~ DONE (needs cron on production)
 - Deploy PQC to production server (5.161.254.163)
+- PQC Automated Test Suite (comprehensive pytest)
 
 ### P2 (Medium)
-- Incorrect Hashrate Display fix
-- Block Count Mismatch on Frontend Explorer
+- ~~Hashrate display fix~~ DONE
+- Block Count Mismatch (not reproducible in test env)
 - Active Miner Count accuracy
 
 ### P3 (Low)
-- TypeError in stratum_server.py logs
+- ~~Stratum TypeError fix~~ DONE
 
 ### Future
-- PQC block signing integration
-- Mobile wallet application
-- Stratum v2 / P2Pool investigation
+- Mobile wallet app
+- Stratum v2 / P2Pool
