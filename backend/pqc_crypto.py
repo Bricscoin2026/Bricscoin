@@ -60,18 +60,14 @@ def generate_pqc_wallet(seed_phrase: str = None) -> dict:
     }
 
 
-def recover_pqc_wallet(ecdsa_private_key_hex: str, dilithium_secret_key_hex: str) -> dict:
-    """Recover a PQC wallet from its key pair."""
+def recover_pqc_wallet(ecdsa_private_key_hex: str, dilithium_secret_key_hex: str, dilithium_public_key_hex: str) -> dict:
+    """Recover a PQC wallet from its key pair. Requires the Dilithium public key explicitly."""
     try:
         ecdsa_sk = SigningKey.from_string(bytes.fromhex(ecdsa_private_key_hex), curve=SECP256k1)
         ecdsa_pk = ecdsa_sk.get_verifying_key()
         ecdsa_pub_hex = ecdsa_pk.to_string().hex()
 
-        dil_sk = bytes.fromhex(dilithium_secret_key_hex)
-        # Derive the Dilithium public key from the secret key
-        # The public key is embedded in the last 1312 bytes of the secret key for Dilithium2
-        dil_pk = dil_sk[64:64 + 1312]  # Extract pk from sk structure
-        dil_pub_hex = dil_pk.hex()
+        dil_pub_hex = dilithium_public_key_hex
 
         combined_hash = hashlib.sha256((ecdsa_pub_hex + dil_pub_hex).encode()).hexdigest()
         address = "BRICSPQ" + combined_hash[:38]
