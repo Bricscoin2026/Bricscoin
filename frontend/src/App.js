@@ -36,7 +36,6 @@ function App() {
             <Route path="node" element={<RunNode />} />
             <Route path="richlist" element={<RichList />} />
             <Route path="about" element={<About />} />
-            <Route path="pools" element={<Pools />} />
           </Route>
         </Routes>
       </BrowserRouter>
