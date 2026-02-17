@@ -761,12 +761,16 @@ def sign_transaction(private_key_hex: str, transaction_data: str) -> str:
     return signature.hex()
 
 def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: str) -> bool:
-    """Verify transaction signature (SHA-256, compatible with JS elliptic)"""
+    """Verify transaction signature (SHA-256, handles both DER and raw formats)"""
     try:
         public_key = VerifyingKey.from_string(bytes.fromhex(public_key_hex), curve=SECP256k1)
         msg_hash = hashlib.sha256(transaction_data.encode()).digest()
-        return public_key.verify_digest(bytes.fromhex(signature_hex), msg_hash)
-    except BadSignatureError:
+        sig_bytes = bytes.fromhex(signature_hex)
+        # DER signatures start with 0x30 and are longer than 64 bytes
+        if len(sig_bytes) > 64 and sig_bytes[0] == 0x30:
+            return public_key.verify_digest(sig_bytes, msg_hash, sigdecode=util.sigdecode_der)
+        return public_key.verify_digest(sig_bytes, msg_hash)
+    except (BadSignatureError, Exception):
         return False
 
 def js_number_str(n):
