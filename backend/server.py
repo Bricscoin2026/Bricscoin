@@ -754,16 +754,18 @@ def recover_wallet_from_private_key(private_key_hex: str):
         raise ValueError(f"Invalid private key: {str(e)}")
 
 def sign_transaction(private_key_hex: str, transaction_data: str) -> str:
-    """Sign transaction with private key"""
+    """Sign transaction with private key (SHA-256, compatible with JS elliptic)"""
     private_key = SigningKey.from_string(bytes.fromhex(private_key_hex), curve=SECP256k1)
-    signature = private_key.sign(transaction_data.encode())
+    msg_hash = hashlib.sha256(transaction_data.encode()).digest()
+    signature = private_key.sign_digest(msg_hash)
     return signature.hex()
 
 def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: str) -> bool:
-    """Verify transaction signature"""
+    """Verify transaction signature (SHA-256, compatible with JS elliptic)"""
     try:
         public_key = VerifyingKey.from_string(bytes.fromhex(public_key_hex), curve=SECP256k1)
-        return public_key.verify(bytes.fromhex(signature_hex), transaction_data.encode())
+        msg_hash = hashlib.sha256(transaction_data.encode()).digest()
+        return public_key.verify_digest(bytes.fromhex(signature_hex), msg_hash)
     except BadSignatureError:
         return False
 
