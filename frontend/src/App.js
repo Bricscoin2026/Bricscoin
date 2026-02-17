@@ -11,7 +11,7 @@ import TransactionDetail from "./pages/TransactionDetail";
 import Downloads from "./pages/Downloads";
 import RunNode from "./pages/RunNode";
 import About from "./pages/About";
-import Pools from "./pages/Pools";
+// Pools page removed
 import RichList from "./pages/RichList";
 import PQCWallet from "./pages/PQCWallet";
 import WalletMigration from "./pages/WalletMigration";
