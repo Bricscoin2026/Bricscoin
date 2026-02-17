@@ -44,8 +44,6 @@ export default function Mining() {
     }
   };
 
-  // Removed active miners UI as per request
-
   useEffect(() => {
     // Carica il wallet locale una sola volta al mount
     const saved = localStorage.getItem('bricscoin_web_wallet');
