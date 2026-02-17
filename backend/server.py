@@ -622,7 +622,7 @@ async def sync_blockchain_from_peer(peer_url: str, full_sync: bool = False):
             return False
 
 async def validate_block(block: dict) -> bool:
-    """Validate a block"""
+    """Validate a block (including PQC signature if present)"""
     try:
         # Verify hash
         calculated_hash = calculate_block_hash(
@@ -650,6 +650,20 @@ async def validate_block(block: dict) -> bool:
         if block['index'] > 0:
             prev_block = await db.blocks.find_one({"index": block['index'] - 1}, {"_id": 0})
             if prev_block and prev_block['hash'] != block['previous_hash']:
+                return False
+        
+        # Verify PQC signature if present
+        if block.get('pqc_ecdsa_signature') and block.get('pqc_dilithium_signature'):
+            block_sig_data = f"{block['index']}{block['timestamp']}{block['hash']}{block.get('miner', '')}"
+            pqc_result = hybrid_verify(
+                block['pqc_public_key_ecdsa'],
+                block['pqc_public_key_dilithium'],
+                block['pqc_ecdsa_signature'],
+                block['pqc_dilithium_signature'],
+                block_sig_data
+            )
+            if not pqc_result['hybrid_valid']:
+                logging.warning(f"Block {block['index']} PQC signature invalid!")
                 return False
         
         return True
