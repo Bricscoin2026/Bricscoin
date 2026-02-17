@@ -10,7 +10,7 @@
 
 ## Risultati Test Difficoltà BricsCoin
 
-**Backend URL testato:** https://pqc-deploy.preview.emergentagent.com
+**Backend URL testato:** https://quantum-tx-deploy.preview.emergentagent.com
 
 ### ✅ Tutti i test superati (7/7)
 
