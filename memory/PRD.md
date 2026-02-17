@@ -1,157 +1,86 @@
 # BricsCoin - Product Requirements Document
 
 ## Original Problem Statement
-Creare una criptovaluta Bitcoin-like chiamata "BricsCoin" con:
-- Blockchain Proof of Work con SHA256
-- Difficulty adjustment dinamico (~10 min target)
-- Supporto ASIC miners via Stratum protocol
-- Web wallet e desktop wallet
-- Explorer e dashboard
+Create a Bitcoin-like cryptocurrency called "BricsCoin" with a fully operational blockchain, mining capabilities, wallet system, and a decentralized network architecture. The project has evolved to include Post-Quantum Cryptography for future-proofing against quantum computing threats.
 
-## User Persona
-- Crypto enthusiast con hardware mining (Bitaxe, NerdMiner, NerdQaxe)
-- Vuole una coin privata per esperimenti/community
-
-## Current Architecture
-```
-/root/Bricscoin/
-├── backend/
-│   ├── server.py          # FastAPI API + blockchain logic
-│   ├── stratum_server.py  # Stratum v1 per ASIC miners
-│   └── .env
-├── frontend/
-│   └── src/pages/
-│       ├── Mining.jsx     # Stats mining con hashrate reale
-│       ├── Wallet.jsx     # Web wallet
-│       └── ...
-└── docker-compose.yml
-```
+## Core Architecture
+- **Frontend**: React (CRA) with Tailwind CSS + Shadcn/UI
+- **Backend**: FastAPI (Python) with Motor (async MongoDB driver)
+- **Database**: MongoDB
+- **Blockchain**: SHA256 Proof-of-Work with ASIC mining support (Stratum protocol)
 
 ## What's Been Implemented
 
-### 2026-02-06 (Sessione Corrente)
-- ✅ **Stratum Pool Address su Network Page**: 
-  - Aggiunta card "Official Mining Pool" con indirizzo `stratum+tcp://stratum.bricscoin26.org:3333`
-  - Pulsante copia, info algoritmo (SHA256), porta (3333), protocollo (Stratum v1)
-  - File modificato: `/app/frontend/src/pages/Network.jsx`
+### Core Blockchain (DONE)
+- Genesis block creation, block mining & validation
+- SHA256 PoW with dynamic difficulty adjustment
+- Transaction system with ECDSA signatures (client-side signing)
+- Wallet creation (seed phrase, private key import)
+- Balance calculation, mempool, block rewards, halving schedule
 
-### 2026-02-05
-- ✅ **Rete P2P Decentralizzata (3 nodi)**:
-  - Nodo principale: 5.161.254.163 (bricscoin26.org)
-  - Nodo 2: 167.235.133.118
-  - Nodo 3: 46.225.104.63
-  - Package standalone: `/app/bricscoin-node/`
+### Network & P2P (DONE)
+- Peer registration persisted in MongoDB
+- P2P blockchain sync, peer discovery
+- Node setup script (`setup-node.sh`) for one-command deployment
+- Backup distribution via `/api/node/backup`
+- Daily backup cron job
 
-### 2026-02-02
-- ✅ **P0 CRITICAL - Blockchain Bloccata RISOLTA**: 
-  - Fix `MAX_TARGET = 2^256 - 1` per accettare share/blocchi
-  - 900+ blocchi prodotti, difficoltà auto-adjustment funzionante
-- ✅ **Endpoint `/api/miners/stats`**: Creato nuovo endpoint per statistiche miners
-  - Mostra minatori attivi, shares 24h, blocchi trovati
-  - Basato su collezione `miner_shares` (più affidabile)
-- ✅ **Hashrate Display Corretto**: Cambiato moltiplicatore da `2^32` a `2^41`
-  - Ora mostra ~8-9 TH/s invece di 21 GH/s
-- ✅ **HTTPS Cloudflare**: Configurato redirect HTTP → HTTPS
-- ✅ **Documenti Aggiornati**: 
-  - SECURITY_AUDIT.md, README.md, WHITEPAPER.md
-  - GitHub → Codeberg (https://codeberg.org/Bricscoin_26/Bricscoin)
-  - Transaction Fees: 0.05 BRICS (burned)
-  - Data: February 2026
-- ✅ **Server Stability**:
-  - Restart policy `unless-stopped` per frontend
-  - 2GB swap aggiunto
-- ✅ **P0 CRITICAL - Transazioni "Signature verification failed" RISOLTO**:
-  - Fix 1: `verify()` → `verify_digest()` per hash pre-calcolato
-  - Fix 2: `sigdecode=sigdecode_der` per formato firma DER
-  - Fix 3: Amount formatting (`1` vs `1.0`) allineato frontend/backend
+### Mining (DONE)
+- Stratum protocol server for ASIC miners
+- Mining pools support
+- Active miner tracking
 
-### 2026-01-31
-- ✅ **Real Hashrate Tracking**: Hashrate calcolato dalle shares
-- ✅ **Difficulty Clamping**: Blocco limitato a max 10 min nel calcolo
-- ✅ **HTTPS**: Abilitato su bricscoin26.org via Nginx + Certbot
-- ✅ **Share Difficulty**: Default 512, accetta suggerimenti miner
+### Pages & Features (DONE)
+- Dashboard, Explorer, Block Detail, Transaction Detail
+- Wallet (ECDSA), Network, Mining, Pools
+- Rich List, Downloads, Run Node (cloud deployment guide), About
 
-### Previous
-- ✅ Stratum server v6.2 Bitcoin-compatible
-- ✅ Personalized jobs per miner (reward address corretto)
-- ✅ Web wallet con generazione seed phrase
-- ✅ Block explorer
-- ✅ Desktop wallet downloads
-- ✅ Security Audit 27/27 test passed
+### Post-Quantum Cryptography - PQC (DONE - Feb 2026)
+- **Backend module**: `/app/backend/pqc_crypto.py` - Hybrid ECDSA + ML-DSA (Dilithium2)
+- **PQC API endpoints**: wallet create/import/info, signature verify, transaction, stats
+- **Frontend**: PQC Wallet page (`/pqc-wallet`) and Migration page (`/migrate`)
+- **Address format**: `BRICSPQ...` (45 chars) for PQC wallets vs `BRICS...` for legacy
+- **Wallet import**: Requires ECDSA private key + Dilithium secret key + Dilithium public key
+
+## Key API Endpoints
+- `/api/network/stats` - Network statistics
+- `/api/blocks`, `/api/transactions` - Blockchain data
+- `/api/wallet/create`, `/api/wallet/import/*` - Legacy wallet
+- `/api/pqc/wallet/create` - Create PQC hybrid wallet
+- `/api/pqc/wallet/import` - Import PQC wallet (requires 3 keys)
+- `/api/pqc/wallet/{address}` - PQC wallet info
+- `/api/pqc/stats` - PQC network stats
+- `/api/pqc/verify` - Verify hybrid signature
+- `/api/pqc/transaction/secure` - PQC signed transaction
+- `/api/richlist` - Top wallet holders
+- `/api/p2p/register`, `/api/p2p/peers` - Peer management
+
+## DB Schema
+- **blocks**: index, hash, previous_hash, transactions, proof, nonce, difficulty, timestamp, miner
+- **transactions**: tx_id, sender, recipient, amount, timestamp, signature, confirmed
+- **peers**: node_id, url, version, last_seen
+- **pqc_wallets**: address, wallet_type, ecdsa_public_key, dilithium_public_key, created_at
 
 ## Prioritized Backlog
 
-### P0 - Critical
-- (none currently - all resolved)
+### P0 (Critical)
+- ~~PQC Wallet Backend + Frontend~~ DONE
+- PQC Block Signing: Sign blocks with hybrid signatures
+- PQC Automated Test Suite
 
-### P1 - High Priority  
-- [ ] Warning "SAVE SEED PHRASE" on wallet creation (UI prominente)
-- [ ] Hashrate display verification (confermare ~9 TH/s vs ~1437 TH/s)
-- [ ] Server-side wallet backup (encrypted in DB)
+### P1 (High)
+- Automated Disk Cleanup cron job (server has crashed 2x from full disk)
+- Deploy PQC to production server (5.161.254.163)
 
-### P2 - Medium Priority
-- [ ] Conteggio blocchi Explorer (off-by-one error)
-- [ ] Active miners count più accurato (estendere finestra 5 → 15/30 min)
-- [ ] Fix logger error in stratum_server.py (linea 345)
-- [ ] Frontend production build (attualmente dev mode)
+### P2 (Medium)
+- Incorrect Hashrate Display fix
+- Block Count Mismatch on Frontend Explorer
+- Active Miner Count accuracy
 
-### P3 - Future
-- [ ] Automated P2P block sync (no manual mongoimport)
-- [ ] Mobile wallet iOS/Android
-- [ ] Exchange listings
-- [ ] Community mining pools page
-- [ ] Stratum v2 / P2Pool
+### P3 (Low)
+- TypeError in stratum_server.py logs
+- Stratum v2 / P2Pool investigation
 
-## Technical Notes
-
-### Signature Verification (CRITICAL)
-```python
-# Backend MUST:
-# 1. Hash tx_data with SHA256
-# 2. Use verify_digest (not verify)
-# 3. Use sigdecode_der for DER format
-# 4. Format amount same as frontend (int if whole number)
-
-tx_hash = hashlib.sha256(tx_data.encode()).digest()
-public_key.verify_digest(signature, tx_hash, sigdecode=sigdecode_der)
-```
-
-### Amount Formatting Fix
-```python
-# Frontend sends "1", backend was creating "1.0"
-# Fix: Convert to int if whole number
-amount_str = str(int(amount)) if amount == int(amount) else str(amount)
-```
-
-### Hashrate Calculation Formula
-```python
-# Using 2^41 multiplier for TH/s miners
-HASHRATE_MULTIPLIER = 2 ** 41
-hashrate = (difficulty * HASHRATE_MULTIPLIER) / block_time
-```
-
-### Key Endpoints
-- `GET /api/network/stats` - Network stats with hashrate
-- `GET /api/miners/stats` - Active miners statistics
-- `GET /api/blocks` - Block list
-- `POST /api/transactions/secure` - Send signed transaction
-- Stratum: `stratum+tcp://bricscoin26.org:3333`
-
-### Database Collections
-- `blocks` - Blockchain blocks
-- `transactions` - All transactions
-- `miner_shares` - Share submissions
-- `miners` - Connected miners info
-
-## Server Info
-- Hetzner VPS CPX11: 5.161.254.163 (2GB RAM + 2GB Swap)
-- Domain: bricscoin26.org
-- Git: https://codeberg.org/Bricscoin_26/Bricscoin
-- SSL: Cloudflare (Full)
-
-## Files Modified This Session
-- `/app/backend/server.py` - verify_signature fix, amount formatting
-- `/app/backend/stratum_server.py` - MAX_TARGET fix
-- `/app/SECURITY_AUDIT.md` - Codeberg links
-- `/app/README.md` - Codeberg links, fees
-- `/app/WHITEPAPER.md` - Codeberg links, Genesis block info
+### Future
+- Mobile wallet application
+- Client-side Dilithium signing (WASM)
