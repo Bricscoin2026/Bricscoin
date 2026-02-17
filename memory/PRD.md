@@ -8,6 +8,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with blockchain, mining,
 - **Backend**: FastAPI (Python) + Motor (async MongoDB)
 - **Database**: MongoDB
 - **Blockchain**: SHA256 PoW + Stratum mining + PQC block signing
+- **Production**: Docker Compose on Hetzner (5.161.254.163)
 
 ## Completed Features
 
@@ -29,18 +30,25 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with blockchain, mining,
 - Pages: `/pqc-wallet`, `/migrate`
 - 35/35 pytest tests passing
 
+### Production Deployment (Feb 17, 2026)
+- **PQC deployed to production server** (5.161.254.163)
+- All PQC endpoints verified live: wallet create, stats, node keys, verify
+- Blockchain intact: 1885 blocks, difficulty 5787
+- Fixed INITIAL_DIFFICULTY for production (1000000 vs 1 in preview)
+- Added backward-compatible /miners/count endpoint
+- Clean requirements.txt without preview-only packages (emergentintegrations)
+- Updated Dockerfile and Dockerfile.frontend for PQC dependencies
+- Disk cleanup cron job installed (weekly, Sunday 3AM)
+
 ### Bug Fixes (Feb 2026)
 - Hashrate: 2^48 → 2^32 (realistic values)
 - Stratum logger: f-strings, PQC block signing added
-- Disk cleanup: script ready + cron
-
-### Deploy Script
-- `/app/deploy-pqc.sh` — safe production deploy (no blockchain data touched)
-- `/app/README-PQC-DEPLOY.md` — detailed deploy instructions
+- Disk cleanup: script + cron installed on production
 
 ## Key API Endpoints
-- `/api/pqc/wallet/create|import` - Wallet management
-- `/api/pqc/stats` - Stats (wallets, txs, blocks)
+- `/api/pqc/wallet/create` - Create PQC wallet
+- `/api/pqc/wallet/import` - Import PQC wallet
+- `/api/pqc/stats` - PQC stats (wallets, txs, blocks)
 - `/api/pqc/node/keys` - Node PQC public keys
 - `/api/pqc/block/{index}/verify` - Block signature verification
 - `/api/pqc/verify` - Hybrid signature verification
@@ -53,12 +61,9 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with blockchain, mining,
 
 ## Remaining Backlog
 
-### P1
-- Deploy PQC to production (script ready, user needs to execute)
-
 ### P2 (Investigated, not reproducible in test env)
-- Block count: code correct, confusion between height vs count
 - Active miner count: uses 2 collections with different time windows
+- Block count: code correct, confusion between height vs count
 
 ### Future
 - Mobile wallet app
