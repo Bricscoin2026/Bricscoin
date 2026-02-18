@@ -3,8 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { ec: EC } = require('elliptic');
-const { ml_dsa65 } = require('@noble/post-quantum/ml-dsa.js');
 const { sha256 } = require('js-sha256');
+
+// ML-DSA-65 loaded via dynamic import (ESM module)
+let ml_dsa65 = null;
 
 // Initialize elliptic curve for ECDSA signing
 const ec = new EC('secp256k1');
