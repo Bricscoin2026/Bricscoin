@@ -332,6 +332,7 @@ class StratumMiner:
         self.subscribed=True
         result=[[["mining.set_difficulty","d1"],["mining.notify","n1"]],self.extranonce1,self.extranonce2_size]
         self.respond(msg_id,result)
+        logger.info(f"SET_DIFF [{self.miner_id}] sending difficulty={self.difficulty}")
         self.notify("mining.set_difficulty",[self.difficulty])
         if current_job: await self.send_job(current_job)
 
