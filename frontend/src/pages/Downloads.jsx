@@ -139,7 +139,7 @@ export default function Downloads() {
                   <div className="flex-1" />
                   <Button
                     className="gold-button rounded-sm w-full mt-4"
-                    onClick={() => window.open(`${CODEBERG_BASE}/${encodeURIComponent(p.file)}`, '_blank')}
+                    onClick={() => window.open(CODEBERG_DOWNLOADS, '_blank')}
                     data-testid={`download-${p.name.toLowerCase()}-btn`}
                   >
                     <Download className="w-4 h-4 mr-2" />
