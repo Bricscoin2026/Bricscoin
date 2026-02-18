@@ -219,8 +219,14 @@ textarea{resize:vertical;min-height:70px}
     <div class="card pqc-card">
       <div class="card-header"><div class="card-title"><div class="card-icon pqc">&#8595;</div>Import PQC Wallet</div></div>
       <div class="btn-group" style="margin-bottom:14px">
-        <button class="btn btn-sm btn-secondary" onclick="showPQCImportKeys()">From Keys</button>
+        <button class="btn btn-sm btn-pqc" onclick="showPQCImportSeed()">From Seed Phrase</button>
         <button class="btn btn-sm btn-secondary" onclick="showPQCImportFile()">From Backup File</button>
+        <button class="btn btn-sm btn-secondary" onclick="showPQCImportKeys()">From Keys</button>
+      </div>
+      <div id="pqc-import-seed">
+        <div class="form-group"><label class="form-label">Name</label><input id="pqc-seed-name" placeholder="Recovered PQC Wallet"></div>
+        <div class="form-group"><label class="form-label">Seed Phrase (12 words)</label><textarea id="pqc-seed-phrase" placeholder="word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12" style="min-height:60px"></textarea></div>
+        <button class="btn btn-pqc" onclick="pqcRecoverFromSeed()">Recover PQC Wallet</button>
       </div>
       <div id="pqc-import-keys" style="display:none">
         <div class="form-group"><label class="form-label">Name</label><input id="pqc-imp-name" placeholder="Imported PQC Wallet"></div>
