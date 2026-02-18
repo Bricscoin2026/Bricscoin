@@ -466,7 +466,7 @@ class StratumServer:
                     line,buffer = buffer.split(b'\n',1)
                     if line:
                         try: await miner.handle_message(json.loads(line.decode()))
-                        except: pass
+                        except Exception as e: logger.error(f"Message handling error for {miner.miner_id}: {e}")
         except:
             pass
         finally:
