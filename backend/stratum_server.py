@@ -377,6 +377,7 @@ class StratumMiner:
         try:
             worker,job_id,extranonce2,ntime,nonce=params[:5]
             version_bits = params[5] if len(params) > 5 else None
+            logger.info(f"SUBMIT [{self.worker_name}] job={job_id} nonce={nonce} vbits={version_bits}")
             job=self.personal_jobs.get(job_id) or job_cache.get(job_id)
             if not job: 
                 logger.warning(f"Job {job_id} not found for {self.worker_name}")
@@ -404,9 +405,12 @@ class StratumMiner:
                     {"$set": {"last_seen": now_iso, "online": True}, "$inc": {"shares": 1}},
                     upsert=True
                 )
+                logger.info(f"SHARE_OK [{self.worker_name}] diff={self.difficulty} hash={block_hash[:16]}... is_block={is_block}")
                 if is_block:
                     logger.info(f"BLOCK FOUND by {self.worker_name}! Hash: {block_hash[:16]}...")
                     await self.save_block(job, nonce, block_hash)
+            else:
+                logger.warning(f"SHARE_REJECTED [{self.worker_name}] hash={block_hash[:16] if isinstance(block_hash,str) else block_hash} share_diff={job.get('share_difficulty')} net_diff={net_diff}")
         except Exception as e:
             logger.error(f"handle_submit error for {self.worker_name}: {e}")
             self.respond(msg_id, True)
