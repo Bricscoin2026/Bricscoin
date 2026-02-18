@@ -2462,6 +2462,25 @@ async def startup_event():
     
     # Start periodic sync task
     asyncio.create_task(periodic_sync())
+    
+    # Start periodic cleanup of stale miners
+    asyncio.create_task(periodic_miners_cleanup())
+
+
+async def periodic_miners_cleanup():
+    """Pulisce miners con online=true ma last_seen > 1 ora, ogni 15 minuti"""
+    while True:
+        try:
+            cutoff = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            result = await db.miners.update_many(
+                {"online": True, "last_seen": {"$lt": cutoff}},
+                {"$set": {"online": False}}
+            )
+            if result.modified_count > 0:
+                logging.info(f"Miners cleanup: {result.modified_count} stale miners set offline")
+        except Exception as e:
+            logging.error(f"Miners cleanup error: {e}")
+        await asyncio.sleep(900)  # Ogni 15 minuti
 
 async def load_peers_from_db():
     """Load saved peers from database on startup"""
