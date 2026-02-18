@@ -341,6 +341,28 @@ ipcMain.handle('pqc:importfile', async (e, jsonStr) => {
   }
 });
 
+ipcMain.handle('pqc:recoverseed', async (e, seedPhrase, name) => {
+  try {
+    const res = await fetch(SERVER + '/api/pqc/wallet/recover', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seed_phrase: seedPhrase, name: name || 'Recovered PQC Wallet' })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Recovery failed');
+    }
+    const walletData = await res.json();
+    const list = getPQCWallets();
+    if (list.find(x => x.address === walletData.address)) throw new Error('Wallet already exists');
+    list.push(walletData);
+    savePQCWallets(list);
+    return walletData;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
 ipcMain.handle('pqc:wallets', async () => {
   const list = getPQCWallets();
   for (const w of list) {
