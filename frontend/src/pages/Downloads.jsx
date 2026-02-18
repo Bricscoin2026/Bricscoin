@@ -202,7 +202,7 @@ export default function Downloads() {
             <Button
               variant="outline"
               className="border-white/20"
-              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads/BricsCoin%20Core%203.0.0', '_blank')}
+              onClick={() => window.open(CODEBERG_DOWNLOADS, '_blank')}
               data-testid="codeberg-downloads-btn"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
