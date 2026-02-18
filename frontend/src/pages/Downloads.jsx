@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 
-const CODEBERG_DOWNLOADS = "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads";
+const CODEBERG_DOWNLOADS = "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads/BricsCoin%20Core%203.0.0";
 
 const platforms = [
   {
