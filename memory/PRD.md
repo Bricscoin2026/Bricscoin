@@ -41,6 +41,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Hybrid ECDSA + ML-DSA-65 signing (keys never leave device)
 - Deterministic ML-DSA-65 keygen from seed phrase
 - Cross-platform: Windows, macOS, Linux builds on Codeberg
+- crypto.getRandomValues polyfill for Node.js/Electron compatibility
 
 ## Completed Work
 
@@ -51,11 +52,14 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Deterministic PQC key generation from seed phrase
 - New API endpoint: POST /api/pqc/wallet/recover
 
-### Session Feb 18, 2026 - Fork 2 (Current)
-- **FIXED**: Download page links — each platform button now links directly to the specific file on Codeberg via raw URL (not just the folder)
-- **FIXED**: Git commit author — rewrote all 456 commits from "Fabio Astorino" to "Bricscoin_26" using git filter-branch, force pushed to Codeberg
+### Session Feb 18, 2026 - Fork 2
+- **FIXED**: Download page links — each platform button now links directly to the specific file on Codeberg via raw URL
+- **FIXED**: Git commit author — rewrote all 456 commits from "Fabio Astorino" to "Bricscoin_26" using git filter-branch
 - **FIXED**: macOS Gatekeeper block — provided xattr -cr command to remove quarantine attribute
-- Built and deployed production frontend with correct REACT_APP_BACKEND_URL=https://bricscoin26.org
+- **FIXED**: PQC transaction bug in desktop wallet — `crypto.getRandomValues must be defined` error. Added `globalThis.crypto = crypto.webcrypto` polyfill in main.js
+- Rebuilt and redeployed all 3 platform builds (Windows, macOS, Linux) with the crypto fix to Codeberg
+- Updated Downloads.jsx with correct file names matching actual builds: `BricsCoin Wallet 1.0.0.exe`, `BricsCoin Wallet-1.0.0-arm64-mac.zip`, `BricsCoin Wallet-1.0.0-arm64.AppImage`
+- Deployed frontend 3 times to production with incremental fixes
 
 ## Remaining Backlog
 
