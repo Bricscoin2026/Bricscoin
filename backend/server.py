@@ -858,28 +858,27 @@ async def get_active_miners():
 async def get_miners_stats():
     """
     Statistiche sui minatori attivi.
-    Legge prima da /tmp/miners_count.txt (scritto dallo Stratum server),
-    poi integra con dati da miner_shares MongoDB.
+    Legge dalla collezione 'miners' (aggiornata dallo Stratum server in tempo reale).
     """
-    # Prima prova a leggere il conteggio dal file Stratum (più affidabile)
-    stratum_count = 0
-    try:
-        with open('/tmp/miners_count.txt', 'r') as f:
-            stratum_count = int(f.read().strip())
-    except Exception:
-        pass
-    
-    # Conta anche da miner_shares MongoDB (ultimi 5 minuti)
-    activity_window = timedelta(minutes=5)
+    # Conta miner online dalla collezione miners (aggiornata dallo Stratum)
+    activity_window = timedelta(minutes=10)
     cutoff_time = (datetime.now(timezone.utc) - activity_window).isoformat()
     
+    # Miner marcati come online E con last_seen recente
+    online_count = await db.miners.count_documents({
+        "online": True,
+        "last_seen": {"$gte": cutoff_time}
+    })
+    
+    # Fallback: conta anche da miner_shares (ultimi 5 minuti)
+    shares_cutoff = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
     active_workers = await db.miner_shares.distinct(
         "worker",
-        {"timestamp": {"$gte": cutoff_time}}
+        {"timestamp": {"$gte": shares_cutoff}}
     )
     
-    # Usa il massimo tra Stratum e MongoDB
-    active_count = max(stratum_count, len(active_workers))
+    # Usa il massimo tra le due fonti
+    active_count = max(online_count, len(active_workers))
     
     # Statistiche aggregate 24h
     total_shares_24h_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
