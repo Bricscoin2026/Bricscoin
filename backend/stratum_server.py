@@ -363,33 +363,36 @@ class StratumMiner:
             worker,job_id,extranonce2,ntime,nonce=params
             job=self.personal_jobs.get(job_id) or job_cache.get(job_id)
             if not job: 
+                logger.warning(f"Job {job_id} not found for {self.worker_name}")
                 self.respond(msg_id,True)
                 return
             job['miner_address']=self.worker_name
             net_diff = await get_network_difficulty()
             is_share,is_block,block_hash = await verify_share(job,self.extranonce1,extranonce2,ntime,nonce,net_diff)
             self.respond(msg_id,True)
-            self.shares += 1
-            if self.miner_id in miners:
-                miners[self.miner_id]['shares'] += 1
-            now_iso = datetime.now(timezone.utc).isoformat()
-            await db.miner_shares.insert_one({
-                "miner_id": self.miner_id,
-                "worker": self.worker_name,
-                "timestamp": now_iso,
-                "share_difficulty": self.difficulty,
-                "job_id": job_id,
-                "is_block": is_block
-            })
-            # Aggiorna last_seen e shares nel DB per /api/mining/miners
-            await db.miners.update_one(
-                {"miner_id": self.miner_id},
-                {"$set": {"last_seen": now_iso, "online": True}, "$inc": {"shares": 1}},
-                upsert=True
-            )
-            if is_block:
-                await self.save_block(job, nonce, block_hash)
-        except:
+            if is_share:
+                self.shares += 1
+                if self.miner_id in miners:
+                    miners[self.miner_id]['shares'] += 1
+                now_iso = datetime.now(timezone.utc).isoformat()
+                await db.miner_shares.insert_one({
+                    "miner_id": self.miner_id,
+                    "worker": self.worker_name,
+                    "timestamp": now_iso,
+                    "share_difficulty": self.difficulty,
+                    "job_id": job_id,
+                    "is_block": is_block
+                })
+                await db.miners.update_one(
+                    {"miner_id": self.miner_id},
+                    {"$set": {"last_seen": now_iso, "online": True}, "$inc": {"shares": 1}},
+                    upsert=True
+                )
+                if is_block:
+                    logger.info(f"BLOCK FOUND by {self.worker_name}! Hash: {block_hash[:16]}...")
+                    await self.save_block(job, nonce, block_hash)
+        except Exception as e:
+            logger.error(f"handle_submit error for {self.worker_name}: {e}")
             self.respond(msg_id, True)
 
     async def save_block(self,job,nonce,block_hash):
