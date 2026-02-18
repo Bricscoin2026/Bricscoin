@@ -218,8 +218,10 @@ export default function PQCWallet() {
     const a = document.createElement("a");
     a.href = url;
     a.download = `bricscoin-pqc-wallet-${selectedWallet.address.slice(0, 12)}.json`;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success("Backup scaricato");
   };
 
