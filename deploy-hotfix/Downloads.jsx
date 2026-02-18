@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 
-const CODEBERG_BASE = "https://codeberg.org/Bricscoin_26/Bricscoin/raw/branch/main/downloads/BricsCoin%20Core%203.0.0";
+const CODEBERG_DOWNLOADS = "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads";
 
 const platforms = [
   {
@@ -139,7 +139,7 @@ export default function Downloads() {
                   <div className="flex-1" />
                   <Button
                     className="gold-button rounded-sm w-full mt-4"
-                    onClick={() => window.open(`${CODEBERG_BASE}/${encodeURIComponent(p.file)}`, '_blank')}
+                    onClick={() => window.open(CODEBERG_DOWNLOADS, '_blank')}
                     data-testid={`download-${p.name.toLowerCase()}-btn`}
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -202,7 +202,7 @@ export default function Downloads() {
             <Button
               variant="outline"
               className="border-white/20"
-              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads/BricsCoin%20Core%203.0.0', '_blank')}
+              onClick={() => window.open(CODEBERG_DOWNLOADS, '_blank')}
               data-testid="codeberg-downloads-btn"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
