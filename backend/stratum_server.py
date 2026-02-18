@@ -225,12 +225,10 @@ def create_stratum_job(template:dict, miner_address:str, extranonce1:str="000000
     return job
 
 # ================= VERIFY SHARE =================
-async def verify_share(job:dict, extranonce1:str, extranonce2:str, ntime:str, nonce:str, network_diff:int) -> tuple:
+async def verify_share(job:dict, extranonce1:str, extranonce2:str, ntime:str, nonce:str, network_diff:int, version_bits:str=None) -> tuple:
     """
     Verifica se l'hash della share soddisfa il target di difficoltà.
-    
-    IMPORTANTE: Usa max_target = 2^256 - 1 per permettere QUALSIASI hash valido
-    quando la difficoltà è 1. La difficoltà scala linearmente da lì.
+    Supporta version rolling (BIP320) per ASIC miners come Bitaxe.
     """
     key = f"{job['job_id']}-{extranonce2}-{nonce}"
     if key in recent_shares.get(job['miner_address'], set()):
@@ -241,7 +239,17 @@ async def verify_share(job:dict, extranonce1:str, extranonce2:str, ntime:str, no
         merkle_root = coinbase_hash
         for branch in job.get('merkle_branch',[]):
             merkle_root = double_sha256(merkle_root+bytes.fromhex(branch))
-        header = struct.pack('<I',int(job['version'],16)) + bytes.fromhex(swap_endian_words(job['prevhash'])) + merkle_root + struct.pack('<I',int(ntime,16)) + struct.pack('<I',int(job['nbits'],16)) + struct.pack('<I',int(nonce,16))
+        
+        # Version rolling: applica version_bits se forniti dal miner
+        base_version = int(job['version'],16)
+        if version_bits:
+            mask = 0x1fffe000
+            rolled = int(version_bits, 16)
+            version = (base_version & ~mask) | (rolled & mask)
+        else:
+            version = base_version
+        
+        header = struct.pack('<I',version) + bytes.fromhex(swap_endian_words(job['prevhash'])) + merkle_root + struct.pack('<I',int(ntime,16)) + struct.pack('<I',int(job['nbits'],16)) + struct.pack('<I',int(nonce,16))
         header_hash = double_sha256(header)
         block_hash_hex = reverse_bytes(header_hash).hex()
         
