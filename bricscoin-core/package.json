@@ -1,7 +1,7 @@
 {
   "name": "bricscoin-core",
-  "version": "2.1.1",
-  "description": "BricsCoin Core Desktop Wallet with P2P Sync",
+  "version": "3.0.0",
+  "description": "BricsCoin Core Desktop Wallet with PQC Quantum-Safe Support",
   "main": "main.js",
   "homepage": "https://bricscoin26.org",
   "author": {
@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bricscoin26/Bricscoin26.git"
+    "url": "https://codeberg.org/Bricscoin_26/Bricscoin.git"
   },
   "scripts": {
     "start": "electron .",
@@ -21,7 +21,9 @@
     "build:mac": "electron-builder --mac --publish never"
   },
   "dependencies": {
-    "elliptic": "^6.5.4"
+    "elliptic": "^6.5.4",
+    "@noble/post-quantum": "^0.2.0",
+    "js-sha256": "^0.11.0"
   },
   "devDependencies": {
     "electron": "^28.0.0",
