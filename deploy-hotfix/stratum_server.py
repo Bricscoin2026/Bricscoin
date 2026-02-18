@@ -217,7 +217,7 @@ def create_stratum_job(template:dict, miner_address:str, extranonce1:str="000000
         "template":template,
         "miner_address":miner_address,
         "network_difficulty":template["difficulty"],
-        "share_difficulty":1,
+        "share_difficulty":512,
         "created_at":time.time()
     }
     job_cache[job_id] = job
