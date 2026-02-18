@@ -864,11 +864,12 @@ async def get_miners_stats():
     activity_window = timedelta(minutes=10)
     cutoff_time = (datetime.now(timezone.utc) - activity_window).isoformat()
     
-    # Miner marcati come online E con last_seen recente
-    online_count = await db.miners.count_documents({
-        "online": True,
-        "last_seen": {"$gte": cutoff_time}
-    })
+    # Conta WORKER UNICI (non connessioni) con last_seen recente
+    online_workers = await db.miners.distinct(
+        "worker",
+        {"online": True, "last_seen": {"$gte": cutoff_time}}
+    )
+    online_count = len(online_workers)
     
     # Fallback: conta anche da miner_shares (ultimi 5 minuti)
     shares_cutoff = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
