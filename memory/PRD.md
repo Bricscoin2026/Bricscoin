@@ -51,7 +51,16 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Mining + hashrate + active miners fix
 - Distinct worker count fix
 
+## Session Changes (Feb 18, 2026 - Hotfix #2)
+
+### Bugs Fixed
+8. Network Hashrate drastically wrong: `share_difficulty` was 1, changed to 512 to match ASIC capabilities
+   - Also fixed `self.difficulty` initial value from 1 to 512 so miners receive correct difficulty AND shares are stored with correct difficulty in DB
+
 ## Remaining Backlog
+
+### P1
+- Burn 1M premine from Genesis wallet
 
 ### P2
 - Disclaimer on Dashboard (user mentioned, needs clarification)
