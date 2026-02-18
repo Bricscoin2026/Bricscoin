@@ -294,7 +294,7 @@ class StratumMiner:
         extranonce_counter += 1
         self.extranonce1 = format(extranonce_counter,'08x')
         self.extranonce2_size = 4
-        self.difficulty = 1
+        self.difficulty = 512
         self.shares = 0
         self.blocks = 0
         self.personal_jobs:Dict[str,dict]={}
