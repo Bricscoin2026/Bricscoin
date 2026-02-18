@@ -21,7 +21,7 @@ mnemo = Mnemonic("english")
 def generate_pqc_wallet(seed_phrase: str = None) -> dict:
     """
     Generate a hybrid PQC wallet with both ECDSA and ML-DSA-65 keys.
-    The address is derived from a hash of both public keys combined.
+    Both key pairs are derived DETERMINISTICALLY from the BIP39 seed phrase.
     """
     if seed_phrase:
         if not mnemo.check(seed_phrase):
@@ -31,12 +31,13 @@ def generate_pqc_wallet(seed_phrase: str = None) -> dict:
         seed_phrase = mnemo.generate(strength=128)
         seed = mnemo.to_seed(seed_phrase)
 
-    # --- ECDSA Key Pair ---
+    # --- ECDSA Key Pair (from first 32 bytes of seed) ---
     ecdsa_private_key = SigningKey.from_string(seed[:32], curve=SECP256k1)
     ecdsa_public_key = ecdsa_private_key.get_verifying_key()
 
-    # --- ML-DSA-65 Key Pair ---
-    dil_pk, dil_sk = ML_DSA_65.keygen()
+    # --- ML-DSA-65 Key Pair (deterministic from seed) ---
+    dil_seed = hashlib.sha256(seed[32:64] + b'dilithium-v1').digest()
+    dil_pk, dil_sk = ML_DSA_65._keygen_internal(dil_seed)
 
     # --- Hybrid Address ---
     ecdsa_pub_hex = ecdsa_public_key.to_string().hex()
