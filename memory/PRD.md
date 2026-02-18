@@ -34,32 +34,23 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 ### Frontend Pages
 - Dashboard, Explorer, Mining, Network, Wallet, PQC Wallet
 - Rich List, Wallet Migration, About (Security Audit)
-- Downloads page with direct file download links per platform
+- Downloads page linking to Codeberg release folder
 
-### Desktop Wallet - BricsCoin Core v3.0.0
+### Desktop Wallet - BricsCoin Wallet v1.0.0
 - Electron desktop wallet with full PQC integration
 - Hybrid ECDSA + ML-DSA-65 signing (keys never leave device)
 - Deterministic ML-DSA-65 keygen from seed phrase
-- Cross-platform: Windows, macOS, Linux builds on Codeberg
 - crypto.getRandomValues polyfill for Node.js/Electron compatibility
+- Cross-platform: Windows, macOS, Linux builds on Codeberg
 
-## Completed Work
+## Completed Work - Session Feb 18, 2026 (Fork 2)
 
-### Session Feb 18, 2026 - Fork 1
-- PQC transactions fix, Mining/Stratum fixes, Hashrate calculation fix
-- BricsCoin Core Desktop Wallet v3.0.0 with PQC integration
-- Web wallet backup download fix
-- Deterministic PQC key generation from seed phrase
-- New API endpoint: POST /api/pqc/wallet/recover
-
-### Session Feb 18, 2026 - Fork 2
-- **FIXED**: Download page links — each platform button now links directly to the specific file on Codeberg via raw URL
-- **FIXED**: Git commit author — rewrote all 456 commits from "Fabio Astorino" to "Bricscoin_26" using git filter-branch
-- **FIXED**: macOS Gatekeeper block — provided xattr -cr command to remove quarantine attribute
-- **FIXED**: PQC transaction bug in desktop wallet — `crypto.getRandomValues must be defined` error. Added `globalThis.crypto = crypto.webcrypto` polyfill in main.js
-- Rebuilt and redeployed all 3 platform builds (Windows, macOS, Linux) with the crypto fix to Codeberg
-- Updated Downloads.jsx with correct file names matching actual builds: `BricsCoin Wallet 1.0.0.exe`, `BricsCoin Wallet-1.0.0-arm64-mac.zip`, `BricsCoin Wallet-1.0.0-arm64.AppImage`
-- Deployed frontend 3 times to production with incremental fixes
+1. **Download page links fixed** — All buttons point to Codeberg folder: `src/branch/main/downloads/BricsCoin Core 3.0.0`
+2. **Git commit author fixed** — 456 commits rewritten from "Fabio Astorino" to "Bricscoin_26" via git filter-branch
+3. **PQC transaction bug fixed** — `crypto.getRandomValues must be defined` error in Electron resolved with `globalThis.crypto = crypto.webcrypto` polyfill
+4. **All platform builds rebuilt** — Windows, macOS, Linux recompiled with crypto fix and pushed to Codeberg
+5. **Old builds cleaned up** — Removed obsolete "Core 3.0.0" builds, kept "Wallet 1.0.0" with fix
+6. **Frontend deployed 4 times** to production with incremental fixes
 
 ## Remaining Backlog
 
