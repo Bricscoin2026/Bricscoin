@@ -1,47 +1,33 @@
-<analysis>**original_problem_statement:** The user's initial request was to create a Bitcoin-like cryptocurrency called BricsCoin. The project has since evolved through multiple sessions. The current session focused on deploying a major Post-Quantum Cryptography (PQC) security upgrade to the live production server, fixing numerous bugs discovered during and after deployment, and updating the project's official documentation. The core PQC feature is a hybrid  signature scheme, with all transaction signing performed client-side in the browser.
+<analysis>**original_problem_statement:** The user's initial request was to create a Bitcoin-like cryptocurrency called BricsCoin. The project has since evolved. The previous session focused on deploying a Post-Quantum Cryptography (PQC) security upgrade and fixing critical mining bugs on the live production server.
+
+This session's primary goals were:
+1.  Fix a critical bug causing incorrect network hashrate calculation.
+2.  Integrate a full Quantum-Safe PQC wallet into the existing desktop applications (Windows, macOS, Linux).
+3.  Create a new v3.0.0 release on the project's Codeberg repository.
+4.  Update the official website's download page to link to the new release.
+5.  Fix release-related issues, including incorrect Git commit authorship and broken download links.
 
 **User's preferred language**: Italian. The next agent MUST respond in Italian.
 
 **what currently exists?**
-- A live BricsCoin blockchain on the production server (), running via Docker.
-- The PQC feature set, including client-side signing, has been deployed to production. This includes a quantum-resistant wallet, a fee-less migration path from old wallets, and PQC-signed blocks.
-- A UI widget on the main dashboard displays the Quantum Security Status in real-time.
-- A new dynamic Security Audit page () that runs a live suite of 27 cryptographic and security tests via a dedicated API endpoint ().
-- A  script that automates the entire deployment process, including code updates, Docker container rebuilds, and installing a cron job for disk cleanup.
-- Updated project documentation (, , ) reflecting all the new PQC features.
-- Numerous critical bug fixes related to signature compatibility, transaction validation, wallet counts, and UI displays have been implemented and deployed.
+- A live BricsCoin blockchain application running on a production server, managed via Docker Compose.
+- The PQC hybrid signature scheme () is functional.
+- The critical network hashrate calculation bug has been **resolved**.
+- A new version (v3.0.0) of the BricsCoin Core Electron desktop wallet has been created, integrating full PQC functionality (create, import from seed, sign transactions).
+- A major flaw in the original PQC implementation was discovered and **fixed**: PQC keys are now generated deterministically from the user's seed phrase, allowing for proper wallet recovery. A new backend endpoint () was created to support this.
+- Multiple bugs related to the desktop wallet build process were fixed, including ES Module import errors and macOS code signing failures.
+- A bug preventing wallet backup downloads on the web frontend was fixed.
+- The v3.0.0 desktop wallet builds for Windows, macOS, and Linux have been created by the user and pushed to a new release folder on Codeberg.
+- The official website's download page () has been updated to point to the new release, but the user reports the links are still incorrect.
+- The Git commit history on Codeberg was updated, but the user reports the author name is still incorrect.
 
 **Last working item**:
--   Last item agent was working: The user reported a critical bug: transactions sent from new PQC wallets (e.g., PQC-to-PQC) remain stuck in a Pending state and are never mined into a block. The agent diagnosed that the  endpoint was creating these transactions with , and the mining process was not designed to pick them up. The proposed solution is to modify this endpoint to set  immediately upon creation, treating them as instantly verified due to the robust client-side signature check.
--   Status: IN PROGRESS
--   Agent Testing Done: N
--   Which testing method agent to use? The agent needs to modify , regenerate the deployment archive (), and then provide the user with the  and  commands to run on the production server. Testing will be manual, requiring the user to perform a transaction from a PQC wallet on the live site and confirm it appears as Confirmed in the explorer.
--   User Testing Done: N
-
-**All Pending/In progress Issue list**:
--   Issue 1: PQC transactions are stuck in a Pending state (P0)
--   Issue 2: Update the official Codeberg repository with all the new code (P1)
--   Issue 3: Inaccurate active miner count display (P2)
-
-Issues Detail:
--   Issue 1: PQC transactions are stuck in a Pending state
-    -   Attempted fixes: The agent correctly identified that the bug is in the backend  function in , which defaults to setting .
-    -   Next debug checklist:
-        1.  Edit .
-        2.  Locate the  endpoint.
-        3.  Change the transaction creation logic to set .
-        4.  Re-create the  deployment archive with all the latest files.
-        5.  Provide the user with the commands to download and run the  script on the production server.
-    -   Why fix this issue and what will be achieved with the fix?: This is a critical blocker. The new PQC wallets are unusable for sending funds if transactions are never confirmed.
-    -   Status: IN PROGRESS
-    -   Is recurring issue? N
-    -   Should Test frontend/backend/both after fix? Both
-    -   Blocked on other issue: None
-
--   Issue 2: Update the official Codeberg repository
-    -   Attempted fixes: The agent has prepared the updated documentation files (, , ).
-    -   Next debug checklist:
-        1.  After Issue 1 is fixed and verified by the user, provide the user with a set of usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+-   Last item agent was working: The user reported that after deploying the latest fixes, two issues persist:
+    1.  The Git commit author on Codeberg is still displayed as Fabio Astorino instead of Bricscoin_26.
+    2.  The download links on the live website () still point to the wrong directory.
+-   Status: **IN PROGRESS**
+-   Agent Testing Done: N (The agent provided commands that the user executed, but the user's verification failed).
+-   Which testing method agent to use? Manual verification. The agent must provide corrected usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
            [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
            [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
            [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
@@ -85,123 +71,275 @@ collaborate (see also: git help workflows)
 'git help -a' and 'git help -g' list available subcommands and some
 concept guides. See 'git help <command>' or 'git help <concept>'
 to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system. commands to commit all the new and modified files and push them to the  branch of their Codeberg repository.
-    -   Why fix this issue and what will be achieved with the fix?: The public repository is outdated and does not reflect the major security upgrades and bug fixes, which is misleading for the community.
-    -   Status: NOT STARTED
-    -   Is recurring issue? N
-    -   Should Test frontend/backend/both after fix? N/A
-    -   Blocked on other issue: Issue 1: PQC transactions are stuck in a Pending state.
+See 'git help git' for an overview of the system. commands for the user to execute locally and new frontend code to be deployed on the server. The user will verify the results on Codeberg and the live website.
+-   User Testing Done: Y (User has confirmed that the fixes were not successful).
 
--   Issue 3: Inaccurate Active Miner Count
-    -   Attempted fixes: None in this session. It was noted in the initial handoff summary.
-    -   Next debug checklist: This requires analysis of the live data on the production server to understand why the calculation is incorrect.
-    -   Why fix this issue and what will be achieved with the fix?: To provide accurate network statistics to users and miners.
+**All Pending/In progress Issue list**:
+-   Issue 1: Incorrect Git commit author on Codeberg (P0, Recurring)
+-   Issue 2: Incorrect download links on the live website (P0, Recurring)
+-   Issue 3: Burn 1M premine from Genesis wallet (P1)
+
+Issues Detail:
+-   Issue 1:
+    -   Attempted fixes: The agent provided  and There is no tracking information for the current branch.
+Please specify which branch you want to rebase against.
+See git-rebase(1) for details.
+
+    git rebase '<branch>'
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=<remote>/<branch> main instructions. However, the user's execution or the agent's instructions were incomplete, as they did not rewrite the author on all necessary historical commits.
+    -   Next debug checklist:
+        1.  Explain to the user that multiple commits have the wrong author and the history needs to be rewritten with an interactive rebase.
+        2.  Provide precise commands to start an interactive rebase for the last few commits (e.g., ).
+        3.  Provide a clear, step-by-step walkthrough of the interactive rebase process: change  to  for each relevant commit, then use [main 2492470] auto-commit for 8650e34a-1170-41df-a466-45fc0aaf6a8f
+ 1 file changed, 1 insertion(+), 1 deletion(-) followed by  for each one.
+        4.  Finally, instruct the user to run .
+    -   Why fix this issue and what will be achieved with the fix?: To correctly attribute all project contributions on Codeberg to the Bricscoin_26 entity.
+    -   Status: IN PROGRESS
+    -   Is recurring issue? Y
+    -   Should Test frontend/backend/both after fix? User will verify on the Codeberg website.
+    -   Blocked on other issue: None
+
+-   Issue 2:
+    -   Attempted fixes: The agent provided updated code for  with corrected links and gave the user deployment commands. The user deployed the changes but reported the links are still incorrect, possibly due to browser caching or an error in the provided code.
+    -   Next debug checklist:
+        1.  Re-examine and regenerate the code for .
+        2.  Ensure the  attributes for all download buttons point explicitly to the new release directory: .
+        3.  Provide the user with the frontend hotfix deployment commands again.
+        4.  **Crucially**, instruct the user to perform a hard refresh (Ctrl+Shift+R or Cmd+Shift+R) on their browser after deployment to bypass any caching issues.
+    -   Why fix this issue and what will be achieved with the fix?: The download page is critical for users to access the new wallet software.
+    -   Status: IN PROGRESS
+    -   Is recurring issue? Y
+    -   Should Test frontend/backend/both after fix? User will verify on the live website.
+    -   Blocked on other issue: None
+
+-   Issue 3:
+    -   Attempted fixes: None in this session. This task has been deferred.
+    -   Next debug checklist:
+        1.  Once Issues 1 & 2 are resolved, confirm with the user to proceed with this task.
+        2.  Ask the user to run the verification command: 
+        3.  If the output is , proceed to edit  and set .
+        4.  Provide the user with a Current Mongosh Log ID:	69961a8e7cf9cbf8e2591666
+Connecting to:		mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.7.0
+Using MongoDB:		7.0.30
+Using Mongosh:		2.7.0
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+
+To help improve our products, anonymous usage data is collected and sent to MongoDB periodically (https://www.mongodb.com/legal/privacy-policy).
+You can opt-out by running the disableTelemetry() command.
+
+------
+   The server generated these startup warnings when booting
+   2026-02-18T20:01:04.973+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+   2026-02-18T20:01:07.634+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+   2026-02-18T20:01:07.634+00:00: You are running this process as the root user, which is not recommended
+   2026-02-18T20:01:07.635+00:00: Soft rlimits for open file descriptors too low
+------
+
+test>  command to remove the original premine transaction from the  collection.
+        5.  Provide commands to deploy the updated backend code.
+    -   Why fix this issue and what will be achieved with the fix?: Fulfills a longstanding user request to remove the developer's premine, increasing community trust.
     -   Status: NOT STARTED
     -   Is recurring issue? N
     -   Should Test frontend/backend/both after fix? Backend
-    -   Blocked on other issue: None, but it is lower priority than the other issues.
+    -   Blocked on other issue: Issue 1, Issue 2
 
 **In progress Task List**:
--   There are no other in-progress tasks besides fixing the primary Pending transaction issue.
+-   None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   P1: Guide the user to update the Codeberg repository after the Pending transaction bug is fixed.
+    -   P1: Burn 1M premine from Genesis wallet.
 -   **Future Tasks:**
     -   Investigate Stratum v2 or P2Pool for mining optimization.
     -   Develop a mobile wallet application.
 
 **Completed work in this session**
--   **PQC Production Deployment**: Successfully deployed the entire PQC feature set to the live production server.
--   **Critical Bug Fix (Wallet Migration)**: Resolved a multi-part bug preventing wallet migration by fixing address validation, creating a fee-less migration endpoint, and fixing a critical signature incompatibility between the JavaScript frontend (SHA-256, DER format) and Python backend (defaulted to SHA-1, raw format).
--   **UI/UX Enhancements**:
-    -   Created a Quantum Security Status widget on the Dashboard.
-    -   Implemented a dynamic, live Security Audit page with 27 real-time tests.
--   **Bug Fix (Wallet & Holder Counts)**: Corrected logic to ensure only wallets with a positive balance are counted on the Rich List and PQC Wallet pages.
--   **Configuration Update**: Changed the global transaction fee to  BRICS as requested.
--   **Bug Fix (Explorer UI)**: Fixed an issue where confirmed transactions were incorrectly displayed as Pending.
--   **Documentation**: Updated , , and  to include all PQC and security enhancements.
--   **Code Cleanup**: Removed the defunct Pools page from the site navigation and routing.
+-   **Hashrate Calculation Fix (RESOLVED):** Successfully fixed the network hashrate calculation by debugging and correcting the  logic in .
+-   **PQC Desktop Wallet Integration (DONE):** Integrated full PQC wallet functionality into the Electron-based BricsCoin Core desktop application (v3.0.0).
+    -   **Deterministic PQC Key Generation (DONE):** Reworked the cryptography backend () and desktop client () to ensure PQC keys can be reliably recovered from a seed phrase.
+    -   **Build & Release (DONE):** Guided the user to build the wallet for Windows, macOS, and Linux, and upload the binaries to a new release folder on Codeberg.
+-   **Web Wallet Backup Bug (RESOLVED):** Fixed an issue on the project website that prevented users from downloading their PQC wallet backup file.
 
 **Earlier issues found/mentioned but not fixed**
--   The inaccurate active miner count was mentioned in the initial handoff and remains unresolved.
+-   None.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence:** Server disk filling to 100%.
--   **Recurrence count:** 2
--   **Status:** RESOLVED. An automated cleanup script was successfully installed as a cron job on the production server via the deployment script.
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Live Production Deployment**: Orchestrating a deployment to a live server by providing the user with commands to execute (, , ). The agent prepares a self-contained deployment archive.
--   **Cryptographic Debugging**: Solved a critical cross-language signature incompatibility between JavaScript () and Python () by aligning the hashing algorithm (SHA-256) and signature encoding (DER).
--   **Live Security Audit**: Implemented a backend endpoint that performs a real-time suite of cryptographic self-tests, with the results dynamically rendered on the frontend.
+-   **Live Production Hotfixing**: Diagnosing and deploying fixes to a live server by providing the user with precise , , and  commands.
+-   **Electron App Development**: Adding PQC features to an existing Electron application, including managing dependencies, IPC communication, and UI updates.
+-   **Deterministic Cryptography**: Implementing deterministic key generation for Dilithium (ML-DSA) from a BIP39 seed to enable wallet recovery, ensuring Python backend and JS frontend produce identical keys.
+-   **Git History Rewriting**: Using There is no tracking information for the current branch.
+Please specify which branch you want to rebase against.
+See git-rebase(1) for details.
+
+    git rebase '<branch>'
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=<remote>/<branch> main and  to attempt to change the author of past commits.
+-   **Cross-Platform Builds**: Using  on macOS to generate application bundles for Windows and Linux.
 
 **key DB schema**
--   No schema changes were made. The  collection was a focus, specifically the absence or state of the  field.
+-   No changes made to the database schema in this session.
 
 **changes in tech stack**
--   No new technologies were added; existing ones (, ) were successfully deployed to production.
+-   The  project now uses  and  for client-side PQC operations.
 
 **All files of reference**
--    (The local copy to be modified and deployed)
--    (The deployment script)
--   
--   
--   
+-    (Needs link correction)
+-    (Updated with deterministic keygen)
+-    (Updated with wallet recovery endpoint)
+-    (Updated with full PQC logic)
+-    (Updated with PQC UI)
+-    (Updated with build configs)
+
+**Areas that need refactoring**:
+-   The manual process of creating releases on Codeberg is error-prone. A script could automate cloning, copying build artifacts, and pushing a tagged release.
+-   The  file for the desktop wallet has grown significantly and contains a large amount of inline JavaScript and CSS. This should be split into separate, modular files for better maintainability.
 
 **key api endpoints**
--   : **(CURRENT BUG)** Creates PQC transactions but they remain pending.
--   : (FIXED) Fee-less endpoint for wallet migration.
--   : (NEW) Endpoint for the live security audit page.
--   : (FIXED) Modified to correctly reflect the confirmation status of all transactions.
+-   : (NEW) Recovers a full PQC wallet from a seed phrase.
+-   : Used to serve deployment archives ().
 
 **Critical Info for New Agent**
--   **You are managing a LIVE production deployment.** The user executes all commands on the production server. Be precise and provide clear, single-step commands. The established workflow is to create a  archive with a  script for the user.
--   **The immediate priority is the Pending transaction bug.** This is a critical failure of the new PQC wallet functionality and must be fixed before anything else.
--   **The root cause is known.** You need to edit  to change  to  in the  endpoint.
--   **The user's next goal is to update their public Codeberg repository.** This should be done only after the pending transaction bug is resolved and verified.
+-   The two highest priority tasks (P0) are fixing the **Git commit author** and the **website download links**. The user is blocked and has reported that previous fixes failed. You must provide clear, robust instructions.
+-   For the Git author issue, a simple  is not enough. You must guide the user through an **interactive rebase (There is no tracking information for the current branch.
+Please specify which branch you want to rebase against.
+See git-rebase(1) for details.
+
+    git rebase '<branch>'
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=<remote>/<branch> main)** to rewrite the history of multiple commits.
+-   For the download link issue, provide corrected code for  and instruct the user to **perform a hard refresh** in their browser after deployment to rule out caching.
+-   The user executes all server commands (, ) and all Git commands on their local machine. Tailor your instructions accordingly.
+-   Once the release-related issues are fixed, the next priority is the **P1 task: Burn 1M premine**.
 
 **documents and test reports created in this job**
--    (Needs to be regenerated after the bug fix)
--   
--   
--   
--   
+-    (Updated)
+-   Multiple deployment archives were created: , , , .
 
 **Last 10 User Messages and any pending HUMAN messages**
-10.  update request & pending transaction issue. (IN PROGRESS)
-9.  Request to create new audit page. (DONE)
-8.  Fee is wrong, should be . (DONE)
-7.  Wallet PQC count is wrong (shows 27). (DONE)
-6.   page is not working. (DONE)
-5.  Migration works now. (USER CONFIRMED)
-4.  Still migration error, invalid signature. (BUG REPORT)
-3.  Migration should not have a fee. (BUG REPORT)
-2.  Migration gives another error (). (BUG REPORT)
-1.  PQC transaction issue: pending when using new wallet. (CURRENT BLOCKER)
+1.  **:** Reports that the Git author is still Fabio Astorino and the website download links point to the wrong directory (). **(UNRESOLVED)**
+2.  **:** User confirms execution of frontend deployment and  commands.
+3.  **:** User specifies that the download page should link to the Codeberg release folder.
+4.  **:** User asks why the commit author is fabio astorino and states the download page needs updating.
+5.  **:** User confirms the  command to add Windows/Linux builds was executed.
+6.  **:** User provides CONTRIBUTING.md
+Dockerfile
+Dockerfile.stratum
+LICENSE
+README-PQC-DEPLOY.md
+README.md
+SECURITY_AUDIT.md
+WHITEPAPER.md
+__pycache__
+backend
+backend_test.py
+bricscoin-core
+bricscoin-hotfix.tar.gz
+bricscoin-node
+bricscoin-pqc-deploy.tar.gz
+deploy-hotfix
+deploy-pqc.sh
+difficulty_test_results.json
+docker-compose.node.yml
+docker-compose.prod.yml
+docker-compose.yml
+docs
+downloads
+dump
+frontend
+memory
+nginx.conf
+node_modules
+server_updated.py
+stratum_consistency_result.json
+stratum_consistency_test.py
+stratum_server_updated.py
+test_reports
+test_result.md
+tests
+wallet-app
+yarn.lock output showing the locally built wallet files.
+7.  **:** User shows output where the usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add       Add file contents to the index
+   mv        Move or rename a file, a directory, or a symlink
+   restore   Restore working tree files
+   rm        Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect    Use binary search to find the commit that introduced a bug
+   diff      Show changes between commits, commit and working tree, etc
+   grep      Print lines matching a pattern
+   log       Show commit logs
+   show      Show various types of objects
+   status    Show the working tree status
+
+grow, mark and tweak your common history
+   branch    List, create, or delete branches
+   commit    Record changes to the repository
+   merge     Join two or more development histories together
+   rebase    Reapply commits on top of another base tip
+   reset     Reset current HEAD to the specified state
+   switch    Switch branches
+   tag       Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch     Download objects and refs from another repository
+   pull      Fetch from and integrate with another repository or a local branch
+   push      Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system. commands failed because the build files weren't found.
+8.  **:** User confirms the cross-platform builds are fatto (done).
+9.  **:** User confirms the web wallet backup fix works and requests the Windows/Linux builds and the Codeberg release.
+10. **:** User confirms deployment of the frontend hotfix for the backup issue.
 
 **Project Health Check:**
--   **Broken**: The ability to send funds from a PQC wallet is currently broken on production, as all transactions get stuck in a Pending state.
+-   **Broken**:
+    -   The official website's Downloads page has incorrect, non-functional links.
+    -   The project's official Git repository has incorrect author attribution on recent commits.
 -   **Mocked**: None.
 
 **3rd Party Integrations**
 -   None.
 
 **Testing status**
--   **Testing agent used after significant changes:** No
--   **Troubleshoot agent used after agent stuck in loop:** No
--   **Test files created:** None. A live security audit endpoint was created instead.
--   **Known regressions:** The new PQC transaction functionality is not working correctly on production.
+-   Testing agent used after significant changes: NO
+-   Troubleshoot agent used after agent stuck in loop: NO
+-   Test files created: None.
+-   Known regressions: The fixes for the Git commit author and website download links have both failed and must be addressed again.
 
 **Credentials to test flow:**
-The user provides direct terminal access to the production server. No credentials are required from the agent.
-
-**What agent forgot to execute**
-- The agent has not yet implemented the fix for the PQC transactions getting stuck in Pending, which was the last active bug report from the user.
-- The agent has not yet provided the usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+-   The user will execute commands on the production server via .
+-   The user will execute usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
            [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
            [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
            [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
@@ -245,4 +383,53 @@ collaborate (see also: git help workflows)
 'git help -a' and 'git help -g' list available subcommands and some
 concept guides. See 'git help <command>' or 'git help <concept>'
 to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system. commands for the user to update their public Codeberg repository.</analysis>
+See 'git help git' for an overview of the system. commands on their local machine against the repository .
+
+**What agent forgot to execute**
+-   The agent provided incomplete usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add       Add file contents to the index
+   mv        Move or rename a file, a directory, or a symlink
+   restore   Restore working tree files
+   rm        Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect    Use binary search to find the commit that introduced a bug
+   diff      Show changes between commits, commit and working tree, etc
+   grep      Print lines matching a pattern
+   log       Show commit logs
+   show      Show various types of objects
+   status    Show the working tree status
+
+grow, mark and tweak your common history
+   branch    List, create, or delete branches
+   commit    Record changes to the repository
+   merge     Join two or more development histories together
+   rebase    Reapply commits on top of another base tip
+   reset     Reset current HEAD to the specified state
+   switch    Switch branches
+   tag       Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch     Download objects and refs from another repository
+   pull      Fetch from and integrate with another repository or a local branch
+   push      Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system. instructions, failing to ensure all relevant commits in the history had their author amended via an interactive rebase.
+-   The agent's last attempt to fix the website's download links was unsuccessful. The cause is likely either incorrect code or browser caching that the agent did not instruct the user to clear.
+-   The P1 task to burn the premine has been deferred throughout the session and remains outstanding.</analysis>

@@ -10,7 +10,7 @@
 
 ## Risultati Test Difficoltà BricsCoin
 
-**Backend URL testato:** https://mining-pqc-upgrade.preview.emergentagent.com
+**Backend URL testato:** https://pqc-wallet-v3.preview.emergentagent.com
 
 ### ✅ Tutti i test superati (7/7)
 
