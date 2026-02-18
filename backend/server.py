@@ -948,40 +948,36 @@ async def get_network_stats():
     halvings_done = current_height // HALVING_INTERVAL
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
-    # ============ HASHRATE CALCULATION ============
-    # Formula stabile: hashrate = current_difficulty * 2^32 / target_block_time
-    # Usa la difficulty corrente e il tempo target per una stima affidabile
+    # ============ HASHRATE DALLE SHARES (REALE) ============
+    # Calcola hashrate REALE basato sulle shares dei miner
+    # Prova finestre progressive: 5min -> 1h -> 24h
     HASHRATE_MULTIPLIER = 2 ** 32
-    hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
-    
-    # ============ HASHRATE DALLE SHARES ============
-    # Calcola anche l'hashrate basandosi sulle shares (backup/verifica)
     hashrate_from_shares = 0.0
     try:
-        five_min_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
-        
-        pipeline = [
-            {"$match": {"timestamp": {"$gte": five_min_ago}}},
-            {"$group": {
-                "_id": None,
-                "total_shares": {"$sum": 1},
-                "weighted_difficulty": {"$sum": "$share_difficulty"}
-            }}
-        ]
-        
-        result = await db.miner_shares.aggregate(pipeline).to_list(1)
-        
-        if result and len(result) > 0:
-            total_shares = result[0].get("total_shares", 0)
-            weighted_difficulty = result[0].get("weighted_difficulty", 0)
-            
-            if total_shares > 0 and weighted_difficulty > 0:
-                time_window = 300
+        for window_minutes in [5, 60, 1440]:
+            cutoff = (datetime.now(timezone.utc) - timedelta(minutes=window_minutes)).isoformat()
+            pipeline = [
+                {"$match": {"timestamp": {"$gte": cutoff}}},
+                {"$group": {
+                    "_id": None,
+                    "total_shares": {"$sum": 1},
+                    "weighted_difficulty": {"$sum": "$share_difficulty"}
+                }}
+            ]
+            result = await db.miner_shares.aggregate(pipeline).to_list(1)
+            if result and result[0].get("total_shares", 0) > 0:
+                total_shares = result[0]["total_shares"]
+                weighted_difficulty = result[0].get("weighted_difficulty", total_shares)
                 avg_share_diff = weighted_difficulty / total_shares
-                # Usa lo stesso moltiplicatore
+                time_window = window_minutes * 60
                 hashrate_from_shares = (total_shares * avg_share_diff * HASHRATE_MULTIPLIER) / time_window
+                break
     except Exception:
         pass
+    
+    # ============ HASHRATE ESTIMATE (FALLBACK) ============
+    # Formula dalla difficulty: hashrate = difficulty * 2^32 / target_block_time
+    hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
     
     return NetworkStats(
         total_supply=MAX_SUPPLY,
