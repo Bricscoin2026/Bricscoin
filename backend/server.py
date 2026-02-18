@@ -268,6 +268,10 @@ class PQCWalletImportKeys(BaseModel):
     dilithium_public_key: str
     name: Optional[str] = "Imported PQC Wallet"
 
+class PQCWalletImportSeed(BaseModel):
+    seed_phrase: str
+    name: Optional[str] = "Imported PQC Wallet"
+
 class PQCSecureTransactionRequest(BaseModel):
     sender_address: str
     recipient_address: str
