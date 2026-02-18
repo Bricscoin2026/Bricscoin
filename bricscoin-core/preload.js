@@ -11,11 +11,21 @@ contextBridge.exposeInMainWorld('bc', {
   copy: t => ipcRenderer.invoke('copy', t),
   send: (f, t, a) => ipcRenderer.invoke('send', f, t, a),
   transactions: a => ipcRenderer.invoke('transactions', a),
-  
+
   // P2P functions
   getPeers: () => ipcRenderer.invoke('getpeers'),
   syncStatus: () => ipcRenderer.invoke('syncstatus'),
   getNodeId: () => ipcRenderer.invoke('getnodeid'),
   setServer: url => ipcRenderer.invoke('setserver', url),
-  getServer: () => ipcRenderer.invoke('getserver')
+  getServer: () => ipcRenderer.invoke('getserver'),
+
+  // PQC Quantum-Safe functions
+  pqcCreate: name => ipcRenderer.invoke('pqc:create', name),
+  pqcImport: data => ipcRenderer.invoke('pqc:import', data),
+  pqcImportFile: json => ipcRenderer.invoke('pqc:importfile', json),
+  pqcWallets: () => ipcRenderer.invoke('pqc:wallets'),
+  pqcDelete: addr => ipcRenderer.invoke('pqc:delete', addr),
+  pqcSend: (from, to, amt) => ipcRenderer.invoke('pqc:send', from, to, amt),
+  pqcStats: () => ipcRenderer.invoke('pqc:stats'),
+  pqcBackup: addr => ipcRenderer.invoke('pqc:backup', addr)
 });
