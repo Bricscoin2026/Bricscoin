@@ -363,6 +363,31 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Disclaimer Legale */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Card className="bg-card/50 border-white/5" data-testid="legal-disclaimer">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Disclaimer legale</h3>
+            <p className="text-xs text-muted-foreground/70 leading-relaxed">
+              BRICScoin è rilasciato come software libero e open-source esclusivamente per scopi informativi, sperimentali e di ricerca.
+              Nulla di quanto associato a BRICScoin costituisce consulenza finanziaria, di investimento, legale o fiscale.
+              BRICScoin non è un investimento, né uno strumento finanziario, né un titolo o prodotto di natura finanziaria.
+              Non vengono venduti token, non vengono raccolti fondi e non vengono promessi né implicati rendimenti economici.
+              Il creatore non gestisce, controlla, promuove né approva alcun mercato, exchange, piattaforma o servizio di terze parti che possa decidere di listare, scambiare o fare riferimento a BRICScoin.
+              L'utilizzo del software, inclusi a titolo esemplificativo l'esecuzione di nodi, il mining, le transazioni o qualsiasi interazione con la rete, è totalmente volontario e avviene sotto l'esclusiva responsabilità dell'utente.
+              Il software è fornito "così com'è", senza garanzie di alcun tipo, esplicite o implicite.
+              Il creatore non potrà essere ritenuto responsabile per perdite, danni, conseguenze legali o rivendicazioni derivanti dall'uso, dall'abuso o dall'impossibilità di utilizzo del software.
+              Gli utenti sono gli unici responsabili del rispetto delle leggi e dei regolamenti applicabili nella propria giurisdizione.
+              Accedendo, scaricando, utilizzando o interagendo con BRICScoin, l'utente dichiara di aver letto, compreso e accettato il presente disclaimer.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
