@@ -362,6 +362,7 @@ class StratumMiner:
             return
         try:
             worker,job_id,extranonce2,ntime,nonce=params[:5]
+            version_bits = params[5] if len(params) > 5 else None
             job=self.personal_jobs.get(job_id) or job_cache.get(job_id)
             if not job: 
                 logger.warning(f"Job {job_id} not found for {self.worker_name}")
@@ -369,7 +370,7 @@ class StratumMiner:
                 return
             job['miner_address']=self.worker_name
             net_diff = await get_network_difficulty()
-            is_share,is_block,block_hash = await verify_share(job,self.extranonce1,extranonce2,ntime,nonce,net_diff)
+            is_share,is_block,block_hash = await verify_share(job,self.extranonce1,extranonce2,ntime,nonce,net_diff,version_bits)
             self.respond(msg_id,True)
             if is_share:
                 self.shares += 1
