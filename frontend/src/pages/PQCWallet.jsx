@@ -502,6 +502,40 @@ export default function PQCWallet() {
         </DialogContent>
       </Dialog>
 
+      {/* Backup JSON Dialog */}
+      <Dialog open={showBackup} onOpenChange={setShowBackup}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Backup Wallet PQC</DialogTitle>
+            <DialogDescription>Copia questo JSON e salvalo in un file sicuro. Contiene le chiavi private!</DialogDescription>
+          </DialogHeader>
+          <div className="relative">
+            <textarea
+              readOnly
+              value={backupJson}
+              className="w-full h-48 p-3 text-xs font-mono bg-background border rounded resize-none"
+              onClick={(e) => e.target.select()}
+              data-testid="backup-json-textarea"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="absolute top-2 right-2"
+              data-testid="copy-backup-btn"
+              onClick={() => {
+                navigator.clipboard.writeText(backupJson);
+                toast.success("Backup copiato negli appunti!");
+              }}
+            >
+              <Copy className="w-3 h-3 mr-1" /> Copia
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBackup(false)}>Chiudi</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Info Section */}
       <Card className="bg-card/40 border-white/10">
         <CardContent className="p-6">
