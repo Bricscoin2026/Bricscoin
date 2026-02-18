@@ -65,10 +65,13 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
    - Upgraded Electron desktop wallet from v2.1.1 to v3.0.0
    - Added PQC (Post-Quantum) wallet support: hybrid ECDSA + ML-DSA-65 (FIPS 204)
    - Client-side hybrid signing: private keys NEVER leave the device
-   - PQC wallet creation, import (from keys or backup JSON), backup, send, detail view
-   - Uses @noble/post-quantum v0.5.4 (same as web frontend)
-   - Cross-platform: Windows, macOS, Linux build targets
-   - Full E2E tested: wallet creation, hybrid signing, transaction submission
+   - PQC wallet creation, import (seed phrase, backup JSON, keys), backup, send, detail view
+   - Deterministic ML-DSA-65 keygen from seed phrase (both Python and JS produce identical keys)
+   - New API endpoint: POST /api/pqc/wallet/recover (recovery from seed phrase)
+   - Fixed backup download on Safari (data URI + copy dialog fallback)
+   - Uses @noble/post-quantum v0.5.4 via dynamic import() for ESM compatibility
+   - Cross-platform: Windows, macOS, Linux builds released on Codeberg
+   - Full E2E tested: wallet creation, hybrid signing, seed recovery, transaction submission
 
 ## Remaining Backlog
 

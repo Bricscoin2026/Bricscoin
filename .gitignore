@@ -227,3 +227,5 @@ frontend/node_modules/.cache/default-development/0.pack
 *.env
 *.env.*
 frontend/node_modules/.cache/default-development/10.pack
+bricscoin-core/dist/win-arm64-unpacked/BricsCoin
+Core.exe
