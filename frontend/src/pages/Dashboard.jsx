@@ -372,18 +372,17 @@ export default function Dashboard() {
       >
         <Card className="bg-card/50 border-white/5" data-testid="legal-disclaimer">
           <CardContent className="p-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Disclaimer legale</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Legal Disclaimer</h3>
             <p className="text-xs text-muted-foreground/70 leading-relaxed">
-              BRICScoin è rilasciato come software libero e open-source esclusivamente per scopi informativi, sperimentali e di ricerca.
-              Nulla di quanto associato a BRICScoin costituisce consulenza finanziaria, di investimento, legale o fiscale.
-              BRICScoin non è un investimento, né uno strumento finanziario, né un titolo o prodotto di natura finanziaria.
-              Non vengono venduti token, non vengono raccolti fondi e non vengono promessi né implicati rendimenti economici.
-              Il creatore non gestisce, controlla, promuove né approva alcun mercato, exchange, piattaforma o servizio di terze parti che possa decidere di listare, scambiare o fare riferimento a BRICScoin.
-              L'utilizzo del software, inclusi a titolo esemplificativo l'esecuzione di nodi, il mining, le transazioni o qualsiasi interazione con la rete, è totalmente volontario e avviene sotto l'esclusiva responsabilità dell'utente.
-              Il software è fornito "così com'è", senza garanzie di alcun tipo, esplicite o implicite.
-              Il creatore non potrà essere ritenuto responsabile per perdite, danni, conseguenze legali o rivendicazioni derivanti dall'uso, dall'abuso o dall'impossibilità di utilizzo del software.
-              Gli utenti sono gli unici responsabili del rispetto delle leggi e dei regolamenti applicabili nella propria giurisdizione.
-              Accedendo, scaricando, utilizzando o interagendo con BRICScoin, l'utente dichiara di aver letto, compreso e accettato il presente disclaimer.
+              BRICScoin is released solely as free and open-source software for purely informational, experimental, and research purposes.
+              Nothing contained in BRICScoin, its source code, documentation, or any associated communications constitutes financial, investment, legal, tax, or any other form of advice or recommendation.
+              BRICScoin is not an investment, a financial instrument, a security, a share, a derivative, or any product or contract of a financial or investment nature. No tokens are offered, sold, or distributed; no funds are raised (via ICO, presale, or otherwise); and no economic returns, profits, or value appreciation are promised, guaranteed, or implied in any way.
+              The creator and contributors do not manage, control, promote, endorse, or have any affiliation with any markets, exchanges, trading platforms, wallets, or third-party services that may independently choose to list, trade, or reference BRICScoin.
+              Use of the software—including, but not limited to, running nodes, mining, validating transactions, or any other interaction with the network—is entirely voluntary and carried out at the user's sole risk and responsibility. Mining and interacting with cryptocurrencies involve significant risks, including but not limited to total loss of funds, hardware damage, cybersecurity issues, extreme volatility, and potential legal, tax, or regulatory consequences.
+              The software is provided "AS IS", without any warranties of any kind, express or implied, including (without limitation) implied warranties of merchantability, fitness for a particular purpose, non-infringement, accuracy, reliability, security, or freedom from errors, bugs, or vulnerabilities.
+              To the fullest extent permitted by law, the creator, contributors, and anyone involved in the development shall not be liable, under any theory of liability, for any direct, indirect, incidental, consequential, special, punitive, or exemplary damages—including loss of profits, data, goodwill, hardware, or other intangible losses—claims, fines, penalties, or any other consequences arising from the use, misuse, malfunction, or inability to use the software or the network.
+              Users are solely responsible for ensuring compliance with all applicable laws, regulations, tax obligations, and restrictions in their jurisdiction, including those related to cryptocurrencies, mining activities, taxation, anti-money laundering (AML), and know-your-customer (KYC) requirements.
+              By accessing, downloading, compiling, running, modifying, or in any way interacting with BRICScoin, the user acknowledges that they have read, understood, and fully accept this disclaimer in its entirety, and agree to assume all risks associated with its use.
             </p>
           </CardContent>
         </Card>
