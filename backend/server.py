@@ -948,34 +948,11 @@ async def get_network_stats():
     halvings_done = current_height // HALVING_INTERVAL
     next_halving = (halvings_done + 1) * HALVING_INTERVAL
     
-    # ============ HASHRATE CALCULATION (REALE) ============
-    # Bitcoin-style: hashrate = difficulty * 2^32 / block_time
-    # Filtra gap > 5 minuti (miner spenti) per un calcolo accurato
+    # ============ HASHRATE CALCULATION ============
+    # Formula stabile: hashrate = current_difficulty * 2^32 / target_block_time
+    # Usa la difficulty corrente e il tempo target per una stima affidabile
     HASHRATE_MULTIPLIER = 2 ** 32
-    
-    hashrate_estimate = 0.0
-    try:
-        recent_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "difficulty": 1}).sort("index", -1).limit(20).to_list(20)
-        if len(recent_blocks) >= 2:
-            intervals = []
-            for i in range(len(recent_blocks) - 1):
-                t1 = datetime.fromisoformat(recent_blocks[i]['timestamp'].replace('Z', '+00:00'))
-                t2 = datetime.fromisoformat(recent_blocks[i+1]['timestamp'].replace('Z', '+00:00'))
-                diff = (t1 - t2).total_seconds()
-                # Escludi gap > 5 minuti (300 secondi) - miner erano spenti
-                if 0 < diff <= 300:
-                    intervals.append(diff)
-            
-            if intervals:
-                avg_time = sum(intervals) / len(intervals)
-                avg_diff = sum(b.get("difficulty", 1) for b in recent_blocks) / len(recent_blocks)
-                hashrate_estimate = (avg_diff * HASHRATE_MULTIPLIER) / avg_time
-            else:
-                hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
-        else:
-            hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
-    except Exception:
-        hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
+    hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
     
     # ============ HASHRATE DALLE SHARES ============
     # Calcola anche l'hashrate basandosi sulle shares (backup/verifica)
