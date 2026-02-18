@@ -1656,6 +1656,34 @@ async def import_pqc_wallet(request: Request, wallet_request: PQCWalletImportKey
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@api_router.post("/pqc/wallet/recover")
+@limiter.limit("5/minute")
+async def recover_pqc_wallet_from_seed(request: Request, wallet_request: PQCWalletImportSeed):
+    """Recover a PQC wallet from seed phrase (deterministic key regeneration)"""
+    try:
+        wallet_data = generate_pqc_wallet(seed_phrase=wallet_request.seed_phrase)
+        wallet_data["name"] = wallet_request.name
+        wallet_data["created_at"] = datetime.now(timezone.utc).isoformat()
+
+        await db.pqc_wallets.update_one(
+            {"address": wallet_data["address"]},
+            {"$set": {
+                "address": wallet_data["address"],
+                "ecdsa_public_key": wallet_data["ecdsa_public_key"],
+                "dilithium_public_key": wallet_data["dilithium_public_key"],
+                "name": wallet_data["name"],
+                "wallet_type": "pqc_hybrid",
+                "signature_scheme": "ecdsa_secp256k1+ml-dsa-65",
+            }},
+            upsert=True
+        )
+
+        logger.info(f"PQC wallet recovered from seed: {wallet_data['address'][:20]}...")
+        return wallet_data
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @api_router.get("/pqc/wallet/{address}")
 async def get_pqc_wallet_info(address: str):
     """Get PQC wallet public info and balance"""
