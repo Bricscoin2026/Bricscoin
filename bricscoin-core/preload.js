@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('bc', {
   pqcCreate: name => ipcRenderer.invoke('pqc:create', name),
   pqcImport: data => ipcRenderer.invoke('pqc:import', data),
   pqcImportFile: json => ipcRenderer.invoke('pqc:importfile', json),
+  pqcRecoverSeed: (seed, name) => ipcRenderer.invoke('pqc:recoverseed', seed, name),
   pqcWallets: () => ipcRenderer.invoke('pqc:wallets'),
   pqcDelete: addr => ipcRenderer.invoke('pqc:delete', addr),
   pqcSend: (from, to, amt) => ipcRenderer.invoke('pqc:send', from, to, amt),
