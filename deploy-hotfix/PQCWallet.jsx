@@ -202,6 +202,9 @@ export default function PQCWallet() {
     toast.info("Wallet rimosso");
   };
 
+  const [backupJson, setBackupJson] = useState("");
+  const [showBackup, setShowBackup] = useState(false);
+
   const downloadBackup = () => {
     if (!selectedWallet) return;
     const backup = {
@@ -213,16 +216,24 @@ export default function PQCWallet() {
       dilithium_public_key: selectedWallet.dilithium_public_key,
       seed_phrase: selectedWallet.seed_phrase,
     };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `bricscoin-pqc-wallet-${selectedWallet.address.slice(0, 12)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast.success("Backup scaricato");
+    const jsonStr = JSON.stringify(backup, null, 2);
+    setBackupJson(jsonStr);
+    setShowBackup(true);
+
+    // Try download via data URI (works better on Safari)
+    try {
+      const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(jsonStr);
+      const a = document.createElement("a");
+      a.href = dataStr;
+      a.download = `bricscoin-pqc-wallet-${selectedWallet.address.slice(0, 12)}.json`;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 100);
+    } catch (e) {
+      console.error("Download failed:", e);
+    }
+    toast.success("Backup pronto - copia o salva il file");
   };
 
   return (
@@ -487,6 +498,40 @@ export default function PQCWallet() {
               {sending ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
               {sending ? "Invio in corso..." : "Invia"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Backup JSON Dialog */}
+      <Dialog open={showBackup} onOpenChange={setShowBackup}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Backup Wallet PQC</DialogTitle>
+            <DialogDescription>Copia questo JSON e salvalo in un file sicuro. Contiene le chiavi private!</DialogDescription>
+          </DialogHeader>
+          <div className="relative">
+            <textarea
+              readOnly
+              value={backupJson}
+              className="w-full h-48 p-3 text-xs font-mono bg-background border rounded resize-none"
+              onClick={(e) => e.target.select()}
+              data-testid="backup-json-textarea"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="absolute top-2 right-2"
+              data-testid="copy-backup-btn"
+              onClick={() => {
+                navigator.clipboard.writeText(backupJson);
+                toast.success("Backup copiato negli appunti!");
+              }}
+            >
+              <Copy className="w-3 h-3 mr-1" /> Copia
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBackup(false)}>Chiudi</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
