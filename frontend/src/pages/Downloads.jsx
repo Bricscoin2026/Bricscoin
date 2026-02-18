@@ -141,14 +141,17 @@ export default function Downloads() {
                   <p className="text-sm text-muted-foreground mb-2">{p.desc}</p>
                   <code className="text-xs bg-white/10 px-2 py-1 rounded mb-1">{p.size}</code>
                   <div className="flex-1" />
-                  <Button
-                    className="gold-button rounded-sm w-full mt-4"
-                    onClick={() => window.open(CODEBERG_DOWNLOADS, '_blank')}
+                  <a
+                    href={`${CODEBERG_BASE}/${p.file}`}
+                    download
+                    className="w-full mt-4 inline-block"
                     data-testid={`download-${p.name.toLowerCase()}-btn`}
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download {p.name}
-                  </Button>
+                    <Button className="gold-button rounded-sm w-full" asChild={false}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download {p.name}
+                    </Button>
+                  </a>
                 </CardContent>
               </Card>
             </motion.div>
