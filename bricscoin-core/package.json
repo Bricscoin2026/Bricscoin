@@ -21,8 +21,8 @@
     "build:mac": "electron-builder --mac --publish never"
   },
   "dependencies": {
+    "@noble/post-quantum": "0.5.4",
     "elliptic": "^6.5.4",
-    "@noble/post-quantum": "^0.2.0",
     "js-sha256": "^0.11.0"
   },
   "devDependencies": {
@@ -40,15 +40,21 @@
       "!**/node_modules/*/{CHANGELOG.md,README.md,readme.md,test,__tests__,tests,spec,*.ts}"
     ],
     "linux": {
-      "target": ["AppImage"],
+      "target": [
+        "AppImage"
+      ],
       "category": "Finance",
       "maintainer": "info@bricscoin26.org"
     },
     "win": {
-      "target": ["portable"]
+      "target": [
+        "portable"
+      ]
     },
     "mac": {
-      "target": ["zip"],
+      "target": [
+        "zip"
+      ],
       "category": "public.app-category.finance"
     },
     "publish": null
