@@ -21,8 +21,8 @@ const platforms = [
     icon: Monitor,
     color: "text-blue-500",
     bg: "bg-blue-500/20",
-    file: "BricsCoin%20Core%203.0.0.exe",
-    label: "BricsCoin Core 3.0.0.exe",
+    file: "BricsCoin%20Wallet%201.0.0.exe",
+    label: "BricsCoin Wallet 1.0.0.exe",
     desc: "Portable .exe - No installation needed",
     size: "~69 MB",
     instructions: [
@@ -52,8 +52,8 @@ const platforms = [
     icon: HardDrive,
     color: "text-orange-500",
     bg: "bg-orange-500/20",
-    file: "BricsCoin%20Core-3.0.0-arm64.AppImage",
-    label: "BricsCoin Core-3.0.0-arm64.AppImage",
+    file: "BricsCoin%20Wallet-1.0.0-arm64.AppImage",
+    label: "BricsCoin Wallet-1.0.0-arm64.AppImage",
     desc: "AppImage - Make executable and run",
     size: "~100 MB",
     instructions: [
