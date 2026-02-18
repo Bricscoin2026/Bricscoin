@@ -202,6 +202,9 @@ export default function PQCWallet() {
     toast.info("Wallet rimosso");
   };
 
+  const [backupJson, setBackupJson] = useState("");
+  const [showBackup, setShowBackup] = useState(false);
+
   const downloadBackup = () => {
     if (!selectedWallet) return;
     const backup = {
@@ -213,16 +216,24 @@ export default function PQCWallet() {
       dilithium_public_key: selectedWallet.dilithium_public_key,
       seed_phrase: selectedWallet.seed_phrase,
     };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `bricscoin-pqc-wallet-${selectedWallet.address.slice(0, 12)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast.success("Backup scaricato");
+    const jsonStr = JSON.stringify(backup, null, 2);
+    setBackupJson(jsonStr);
+    setShowBackup(true);
+
+    // Try download via data URI (works better on Safari)
+    try {
+      const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(jsonStr);
+      const a = document.createElement("a");
+      a.href = dataStr;
+      a.download = `bricscoin-pqc-wallet-${selectedWallet.address.slice(0, 12)}.json`;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 100);
+    } catch (e) {
+      console.error("Download failed:", e);
+    }
+    toast.success("Backup pronto - copia o salva il file");
   };
 
   return (
