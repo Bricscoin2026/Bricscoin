@@ -482,10 +482,30 @@ async function pqcCreate(){
 function showPQCImportKeys(){
   document.getElementById('pqc-import-keys').style.display='block';
   document.getElementById('pqc-import-file').style.display='none';
+  document.getElementById('pqc-import-seed').style.display='none';
 }
 function showPQCImportFile(){
   document.getElementById('pqc-import-keys').style.display='none';
   document.getElementById('pqc-import-file').style.display='block';
+  document.getElementById('pqc-import-seed').style.display='none';
+}
+function showPQCImportSeed(){
+  document.getElementById('pqc-import-keys').style.display='none';
+  document.getElementById('pqc-import-file').style.display='none';
+  document.getElementById('pqc-import-seed').style.display='block';
+}
+
+async function pqcRecoverFromSeed(){
+  const name=document.getElementById('pqc-seed-name').value.trim()||'Recovered PQC';
+  const seed=document.getElementById('pqc-seed-phrase').value.trim().toLowerCase();
+  if(!seed||seed.split(/\s+/).length<12){toast('Enter 12 seed words',1);return}
+  try{
+    const w=await bc.pqcRecoverSeed(seed,name);
+    toast('PQC Wallet recovered!');
+    document.getElementById('pqc-seed-name').value='';
+    document.getElementById('pqc-seed-phrase').value='';
+    loadPQCWallets();
+  }catch(e){toast('Error: '+e.message,1)}
 }
 
 async function pqcImportKeys(){
