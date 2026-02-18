@@ -3,15 +3,17 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { ec: EC } = require('elliptic');
+const { ml_dsa65 } = require('@noble/post-quantum/ml-dsa.js');
+const { sha256 } = require('js-sha256');
 
 // Initialize elliptic curve for ECDSA signing
 const ec = new EC('secp256k1');
 
-// Server configuration - can be changed by user
+// Server configuration
 let SERVER = 'https://bricscoin26.org';
-let win, walletsPath, configPath;
+let win, walletsPath, pqcWalletsPath, configPath;
 
-const sha256 = d => crypto.createHash('sha256').update(d).digest('hex');
+const sha256Hash = d => crypto.createHash('sha256').update(d).digest('hex');
 
 // P2P Node Configuration
 let knownPeers = [];
@@ -21,58 +23,91 @@ let syncInterval = null;
 // BIP39-like word list (subset)
 const WORDS = ['abandon','ability','able','about','above','absent','absorb','abstract','absurd','abuse','access','accident','account','accuse','achieve','acid','acoustic','acquire','across','act','action','actor','actress','actual','adapt','add','addict','address','adjust','admit','adult','advance','advice','aerobic','affair','afford','afraid','again','age','agent','agree','ahead','aim','air','airport','aisle','alarm','album','alcohol','alert','alien','all','alley','allow','almost','alone','alpha','already','also','alter','always','amateur','amazing','among','amount','amused','analyst','anchor','ancient','anger','angle','angry','animal','ankle','announce','annual','another','answer','antenna','antique','anxiety','any','apart','apology','appear','apple','approve','april','arch','arctic','area','arena','argue','arm','armed','armor','army','around','arrange','arrest','arrive','arrow','art','artefact','artist','artwork','ask','aspect','assault','asset','assist','assume','asthma','athlete','atom','attack','attend','attitude','attract','auction','audit','august','aunt','author','auto','autumn','average','avocado','avoid','awake','aware','away','awesome','awful','awkward','axis','baby','bachelor','bacon','badge','bag','balance','balcony','ball','bamboo','banana','banner','bar','barely','bargain','barrel','base','basic','basket','battle','beach','bean','beauty','because','become','beef','before','begin','behave','behind','believe','below','belt','bench','benefit','best','betray','better','between','beyond','bicycle','bid','bike','bind','biology','bird','birth','bitter','black','blade','blame','blanket','blast','bleak','bless','blind','blood','blossom','blouse','blue','blur','blush','board','boat','body','boil','bomb','bone','bonus','book','boost','border','boring','borrow','boss','bottom','bounce','box','boy','bracket','brain','brand','brass','brave','bread','breeze','brick','bridge','brief','bright','bring','brisk','broccoli','broken','bronze','broom','brother','brown','brush','bubble','buddy','budget','buffalo','build','bulb','bulk','bullet','bundle','bunker','burden','burger','burst','bus','business','busy','butter','buyer','buzz','cabbage','cabin','cable','cactus','cage','cake','call','calm','camera','camp','can','canal','cancel','candy','cannon','canoe','canvas','canyon','capable','capital','captain','car','carbon','card','cargo','carpet','carry','cart','case','cash','casino','castle','casual'];
 
-// Generate wallet from seed phrase using proper ECDSA
+// ==================== CLASSIC WALLET ====================
 const makeWallet = (seedPhrase = null) => {
   let seed;
   if (seedPhrase) {
-    seed = sha256(seedPhrase.toLowerCase().trim());
+    seed = sha256Hash(seedPhrase.toLowerCase().trim());
   } else {
     const words = [];
     for (let i = 0; i < 12; i++) words.push(WORDS[Math.floor(Math.random() * WORDS.length)]);
     seedPhrase = words.join(' ');
-    seed = sha256(seedPhrase);
+    seed = sha256Hash(seedPhrase);
   }
-  
-  // Generate ECDSA key pair
-  const keyPair = ec.keyFromPrivate(sha256(seed + 'privkey'));
+  const keyPair = ec.keyFromPrivate(sha256Hash(seed + 'privkey'));
   const privateKey = keyPair.getPrivate('hex');
-  const publicKey = keyPair.getPublic('hex').slice(2); // Remove '04' prefix
-  
-  // Generate address from public key hash
-  const addressHash = sha256(publicKey);
+  const publicKey = keyPair.getPublic('hex').slice(2);
+  const addressHash = sha256Hash(publicKey);
   const address = 'BRICS' + addressHash.substring(0, 40);
-  
-  return { 
-    address, 
-    privateKey, 
-    publicKey,
-    seedPhrase 
-  };
+  return { address, privateKey, publicKey, seedPhrase };
 };
 
-// Sign transaction data using ECDSA
 const signTransaction = (privateKey, txData) => {
   const keyPair = ec.keyFromPrivate(privateKey);
-  const msgHash = sha256(txData);
+  const msgHash = sha256Hash(txData);
   const signature = keyPair.sign(msgHash);
   return signature.toDER('hex');
 };
 
-// Load/save wallets
+// ==================== PQC WALLET ====================
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+  }
+  return bytes;
+}
+
+function bytesToHex(bytes) {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function ecdsaSignPQC(privateKeyHex, messageStr) {
+  const key = ec.keyFromPrivate(privateKeyHex, 'hex');
+  const msgHash = sha256(messageStr);
+  const signature = key.sign(msgHash);
+  const r = signature.r.toString(16).padStart(64, '0');
+  const s = signature.s.toString(16).padStart(64, '0');
+  return r + s;
+}
+
+function mlDsaSign(secretKeyHex, messageStr) {
+  const sk = hexToBytes(secretKeyHex);
+  const msg = new TextEncoder().encode(messageStr);
+  const sig = ml_dsa65.sign(msg, sk);
+  return bytesToHex(sig);
+}
+
+function hybridSign(wallet, message) {
+  const ecdsaSig = ecdsaSignPQC(wallet.ecdsa_private_key, message);
+  const mlDsaSig = mlDsaSign(wallet.dilithium_secret_key, message);
+  return {
+    ecdsa_signature: ecdsaSig,
+    dilithium_signature: mlDsaSig,
+    scheme: 'ecdsa_secp256k1+ml-dsa-65'
+  };
+}
+
+// ==================== FILE I/O ====================
 const getWallets = () => {
-  try { return JSON.parse(fs.readFileSync(walletsPath, 'utf8')); } 
+  try { return JSON.parse(fs.readFileSync(walletsPath, 'utf8')); }
   catch { return []; }
 };
 const saveWallets = w => fs.writeFileSync(walletsPath, JSON.stringify(w, null, 2));
 
-// Load/save config
+const getPQCWallets = () => {
+  try { return JSON.parse(fs.readFileSync(pqcWalletsPath, 'utf8')); }
+  catch { return []; }
+};
+const savePQCWallets = w => fs.writeFileSync(pqcWalletsPath, JSON.stringify(w, null, 2));
+
 const getConfig = () => {
-  try { return JSON.parse(fs.readFileSync(configPath, 'utf8')); } 
-  catch { return { server: SERVER, peers: [], nodeId: sha256(Date.now().toString()).slice(0, 16) }; }
+  try { return JSON.parse(fs.readFileSync(configPath, 'utf8')); }
+  catch { return { server: SERVER, peers: [], nodeId: sha256Hash(Date.now().toString()).slice(0, 16) }; }
 };
 const saveConfig = c => fs.writeFileSync(configPath, JSON.stringify(c, null, 2));
 
-// P2P Functions
+// ==================== P2P ====================
 const discoverPeers = async () => {
   try {
     const res = await fetch(SERVER + '/api/p2p/peers');
@@ -90,16 +125,11 @@ const discoverPeers = async () => {
 const registerWithNetwork = async () => {
   const config = getConfig();
   nodeId = config.nodeId;
-  
   try {
     await fetch(SERVER + '/api/p2p/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        node_id: nodeId,
-        url: '', // Desktop wallets don't expose URLs
-        version: '2.1.0'
-      })
+      body: JSON.stringify({ node_id: nodeId, url: '', version: '3.0.0' })
     });
   } catch (e) {
     console.log('Network registration failed:', e.message);
@@ -108,7 +138,6 @@ const registerWithNetwork = async () => {
 
 const syncWithNetwork = async () => {
   try {
-    // Get chain info from main server
     const infoRes = await fetch(SERVER + '/api/p2p/chain/info');
     if (infoRes.ok) {
       const info = await infoRes.json();
@@ -120,59 +149,57 @@ const syncWithNetwork = async () => {
   return { synced: false };
 };
 
+// ==================== APP INIT ====================
 app.whenReady().then(() => {
   walletsPath = path.join(app.getPath('userData'), 'wallets.json');
+  pqcWalletsPath = path.join(app.getPath('userData'), 'pqc_wallets.json');
   configPath = path.join(app.getPath('userData'), 'config.json');
-  
-  // Initialize config
+
   const config = getConfig();
   SERVER = config.server || SERVER;
   nodeId = config.nodeId;
   saveConfig(config);
-  
+
   win = new BrowserWindow({
-    width: 1200, height: 800,
-    webPreferences: { 
-      preload: path.join(__dirname, 'preload.js'), 
-      contextIsolation: true 
+    width: 1200, height: 850,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true
     }
   });
   win.loadFile('index.html');
-  
-  // Start P2P sync
+
   registerWithNetwork();
   discoverPeers();
-  
-  // Periodic sync every 30 seconds
   syncInterval = setInterval(() => {
     syncWithNetwork();
     discoverPeers();
   }, 30000);
 });
 
-// IPC Handlers
+// ==================== CLASSIC IPC HANDLERS ====================
 ipcMain.handle('stats', async () => {
-  try { 
+  try {
     const res = await fetch(SERVER + '/api/network/stats');
-    return await res.json(); 
+    return await res.json();
   } catch { return null; }
 });
 
 ipcMain.handle('blocks', async () => {
-  try { 
+  try {
     const res = await fetch(SERVER + '/api/blocks?limit=10');
     const data = await res.json();
-    return data.blocks || []; 
+    return data.blocks || [];
   } catch { return []; }
 });
 
 ipcMain.handle('wallets', async () => {
   const list = getWallets();
   for (const w of list) {
-    try { 
+    try {
       const res = await fetch(SERVER + '/api/wallet/' + w.address + '/balance');
       const data = await res.json();
-      w.balance = data.balance || 0; 
+      w.balance = data.balance || 0;
     } catch { w.balance = 0; }
   }
   return list;
@@ -211,38 +238,29 @@ ipcMain.handle('copy', (e, text) => {
   return true;
 });
 
-// SECURE transaction - sign locally, never send private key
 ipcMain.handle('send', async (e, from, to, amt) => {
   const list = getWallets();
   const w = list.find(x => x.address === from);
   if (!w) throw new Error('Wallet not found');
-  
-  // Create transaction data
   const timestamp = new Date().toISOString();
   const txData = `${from}${to}${Number(amt)}${timestamp}`;
-  
-  // Sign transaction locally - private key NEVER leaves this device!
   const signature = signTransaction(w.privateKey, txData);
-  
-  // Send signed transaction to server
   const res = await fetch(SERVER + '/api/transactions/secure', {
-    method: 'POST', 
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      sender_address: from, 
-      recipient_address: to, 
+    body: JSON.stringify({
+      sender_address: from,
+      recipient_address: to,
       amount: Number(amt),
       timestamp: timestamp,
       signature: signature,
       public_key: w.publicKey
     })
   });
-  
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.detail || 'Transaction failed');
   }
-  
   return true;
 });
 
@@ -255,7 +273,152 @@ ipcMain.handle('transactions', async (e, address) => {
   } catch { return []; }
 });
 
-// P2P IPC Handlers
+// ==================== PQC IPC HANDLERS ====================
+ipcMain.handle('pqc:create', async (e, name) => {
+  try {
+    const res = await fetch(SERVER + '/api/pqc/wallet/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name || 'PQC Wallet' })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Creation failed');
+    }
+    const walletData = await res.json();
+    const list = getPQCWallets();
+    list.push(walletData);
+    savePQCWallets(list);
+    return walletData;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+ipcMain.handle('pqc:import', async (e, importData) => {
+  try {
+    const res = await fetch(SERVER + '/api/pqc/wallet/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(importData)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Import failed');
+    }
+    const walletData = await res.json();
+    const list = getPQCWallets();
+    if (list.find(x => x.address === walletData.address)) throw new Error('Wallet already exists');
+    list.push(walletData);
+    savePQCWallets(list);
+    return walletData;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+ipcMain.handle('pqc:importfile', async (e, jsonStr) => {
+  try {
+    const backup = JSON.parse(jsonStr);
+    if (!backup.address || !backup.ecdsa_private_key || !backup.dilithium_secret_key) {
+      throw new Error('Invalid backup file');
+    }
+    const list = getPQCWallets();
+    if (list.find(x => x.address === backup.address)) throw new Error('Wallet already exists');
+    if (!backup.name) backup.name = 'Imported PQC Wallet';
+    if (!backup.wallet_type) backup.wallet_type = 'pqc_hybrid';
+    list.push(backup);
+    savePQCWallets(list);
+    return backup;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+ipcMain.handle('pqc:wallets', async () => {
+  const list = getPQCWallets();
+  for (const w of list) {
+    try {
+      const res = await fetch(SERVER + '/api/pqc/wallet/' + w.address);
+      if (res.ok) {
+        const data = await res.json();
+        w.balance = data.balance || 0;
+      } else {
+        w.balance = 0;
+      }
+    } catch { w.balance = 0; }
+  }
+  return list;
+});
+
+ipcMain.handle('pqc:delete', (e, address) => {
+  const list = getPQCWallets();
+  const idx = list.findIndex(x => x.address === address);
+  if (idx === -1) throw new Error('Wallet not found');
+  list.splice(idx, 1);
+  savePQCWallets(list);
+  return true;
+});
+
+ipcMain.handle('pqc:send', async (e, walletAddress, recipient, amount) => {
+  const list = getPQCWallets();
+  const wallet = list.find(x => x.address === walletAddress);
+  if (!wallet) throw new Error('PQC Wallet not found');
+
+  const timestamp = new Date().toISOString();
+  const txData = `${wallet.address}${recipient}${amount}${timestamp}`;
+
+  // CLIENT-SIDE hybrid signing: keys NEVER leave this device
+  const signatures = hybridSign(wallet, txData);
+
+  const res = await fetch(SERVER + '/api/pqc/transaction/secure', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender_address: wallet.address,
+      recipient_address: recipient,
+      amount: amount,
+      timestamp: timestamp,
+      ecdsa_signature: signatures.ecdsa_signature,
+      dilithium_signature: signatures.dilithium_signature,
+      ecdsa_public_key: wallet.ecdsa_public_key,
+      dilithium_public_key: wallet.dilithium_public_key
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || 'Transaction failed');
+  }
+  const result = await res.json();
+  return result;
+});
+
+ipcMain.handle('pqc:stats', async () => {
+  try {
+    const res = await fetch(SERVER + '/api/pqc/stats');
+    if (res.ok) return await res.json();
+    return null;
+  } catch { return null; }
+});
+
+ipcMain.handle('pqc:backup', (e, address) => {
+  const list = getPQCWallets();
+  const wallet = list.find(x => x.address === address);
+  if (!wallet) throw new Error('Wallet not found');
+  return JSON.stringify({
+    address: wallet.address,
+    wallet_type: wallet.wallet_type || 'pqc_hybrid',
+    name: wallet.name,
+    ecdsa_private_key: wallet.ecdsa_private_key,
+    ecdsa_public_key: wallet.ecdsa_public_key,
+    dilithium_secret_key: wallet.dilithium_secret_key,
+    dilithium_public_key: wallet.dilithium_public_key,
+    seed_phrase: wallet.seed_phrase,
+  }, null, 2);
+});
+
+// ==================== P2P IPC HANDLERS ====================
 ipcMain.handle('getpeers', async () => {
   await discoverPeers();
   return knownPeers;
