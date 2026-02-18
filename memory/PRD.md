@@ -1,96 +1,72 @@
 # BricsCoin - Product Requirements Document
 
 ## Original Problem Statement
-Create a Bitcoin-like cryptocurrency called "BricsCoin" with blockchain, mining, wallet, and decentralized network. Upgraded with Post-Quantum Cryptography (ML-DSA-65).
+Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Cryptography (PQC) security features. The project runs on a live production server at bricscoin26.org.
 
-## Core Architecture
-- **Frontend**: React (CRA) + Tailwind CSS + Shadcn/UI
-- **Backend**: FastAPI (Python) + Motor (async MongoDB)
-- **Database**: MongoDB
-- **Blockchain**: SHA256 PoW + Stratum mining + PQC block signing
-- **Production**: Docker Compose on Hetzner (5.161.254.163)
+## Architecture
+- **Backend**: FastAPI (Python) running in Docker
+- **Frontend**: React running in Docker
+- **Database**: MongoDB running in Docker
+- **Stratum Server**: Custom Python Stratum for ASIC mining (Bitaxe)
+- **Production**: Docker Compose on Hetzner server (5.161.254.163)
+- **Repository**: https://codeberg.org/Bricscoin_26/Bricscoin
 
-## Completed Features
+## What's Been Implemented
 
 ### Core Blockchain
-- Genesis, mining, validation, SHA256 PoW, dynamic difficulty, halving
-- ECDSA transactions, wallets, balance, mempool
+- Full blockchain with SHA-256 PoW mining
+- Bitcoin-style difficulty adjustment (every 10 blocks, then 2016)
+- Halving every 210,000 blocks, initial reward 50 BRICS
+- Transaction fee: 0.000005 BRICS
+- Genesis wallet with 1M BRICS premine
 
-### Network & P2P
-- Persistent peers (MongoDB), node setup script, backup distribution, daily cron
+### Post-Quantum Cryptography (PQC)
+- Hybrid ECDSA + ML-DSA-65 signature scheme
+- Client-side signing in browser (@noble/post-quantum)
+- PQC wallet creation and management
+- Fee-less wallet migration from legacy to PQC
+- Quantum Security Status widget on Dashboard
+- Live Security Audit page (/about) with 27 tests
 
-### Mining
-- Stratum protocol, pools, miner tracking, PQC-signed blocks
+### Mining (Stratum Server)
+- Custom Stratum v1 server on port 3333
+- Support for ASIC miners (Bitaxe BM1366/BM1397)
+- Version rolling (BIP320) support
+- Share-based hashrate calculation
+- Active miner tracking via MongoDB
 
-### Post-Quantum Cryptography (Feb 2026)
-- **ML-DSA-65** (FIPS 204) + ECDSA hybrid signatures
-- Client-side signing via `@noble/post-quantum` (keys never leave browser)
-- PQC Block Signing (node keypair, auto-sign on mine)
-- "Firmato Localmente" badge (Lock icon in TX detail, send dialog, block detail)
-- Pages: `/pqc-wallet`, `/migrate`
-- 35/35 pytest tests passing
+### Frontend Pages
+- Dashboard, Explorer, Mining, Network, Wallet, PQC Wallet
+- Rich List, Wallet Migration, About (Security Audit)
 
-### Production Deployment (Feb 17, 2026)
-- **PQC deployed to production server** (5.161.254.163)
-- All PQC endpoints verified live: wallet create, stats, node keys, verify
-- Blockchain intact: 1885 blocks, difficulty 5787
-- Fixed INITIAL_DIFFICULTY for production (1000000 vs 1 in preview)
-- Added backward-compatible /miners/count endpoint
-- Clean requirements.txt without preview-only packages (emergentintegrations)
-- Updated Dockerfile and Dockerfile.frontend for PQC dependencies
-- Disk cleanup cron job installed (weekly, Sunday 3AM)
+### Documentation
+- README.md, WHITEPAPER.md, SECURITY_AUDIT.md updated with PQC info
 
-### Wallet Migration Fix (Feb 17, 2026)
-- **Address validator**: Updated regex to accept both `BRICS[hex]{40}` and `BRICSPQ[hex]{38}`
-- **No fee migration**: Created `/api/pqc/migrate` endpoint - zero fee for legacy→PQC migration
-- **Amount precision**: Round to 8 decimal places before sending (Bitcoin precision)
-- **Signature compatibility (CRITICAL FIX)**:
-  - Fixed SHA-1→SHA-256 hash mismatch between JS frontend and Python backend
-  - Added DER signature format detection (JS uses DER ~144 hex, Python raw 128 hex)
-  - `verify_signature()` now handles both DER and raw formats with SHA-256
-  - `sign_transaction()` updated to use SHA-256 for consistency
-  - `build_tx_data()` helper to format numbers like JavaScript (no trailing .0)
-  - Fixed `isValidAddress()` in frontend to accept PQC addresses
+## Session Changes (Feb 18, 2026)
 
-### Quantum Security Dashboard Widget (Feb 17, 2026)
-- Widget "Quantum Security" on main Dashboard showing:
-  - ML-DSA-65 Active status (animated pulse)
-  - PQC Block Coverage percentage with progress bar
-  - PQC Wallets count, PQC Transactions count, Signature scheme
-  - Node ID, link to Quantum-Safe Wallet page
-- "Quantum-Safe" badge added next to "Security Audit Passed" in hero section
+### Bugs Fixed
+1. **PQC transactions stuck in "Pending"** (P0): Set confirmed=True in /api/pqc/transaction/secure
+2. **Mining broken - share submission error** (P0): Bitaxe sends 6 params (version_bits), was expecting 5. Fixed with params[:5] + version_bits handling
+3. **Mining broken - version rolling** (P0): verify_share now applies BIP320 version mask for ASIC miners
+4. **Hashrate inaccurate**: Now calculated from real share data with progressive time windows (5m/1h/24h)
+5. **Active miners not showing**: Reads from MongoDB 'miners' collection (online: true, last_seen recent)
+6. **Transaction ID regex**: Now accepts both UUID (36 chars) and SHA-256 hash (64 chars) for PQC transactions
+7. **Silent error handling in stratum**: Added proper error logging (was bare except: pass)
 
-### Bug Fixes (Feb 2026)
-- Hashrate: 2^48 → 2^32 (realistic values)
-- Stratum logger: f-strings, PQC block signing added
-- Disk cleanup: script + cron installed on production
-- Error handling: Pydantic validation errors properly serialized in frontend
+### Features Added
+- Active Miners card on Mining page
+- Better error logging in Stratum server
 
-## Key API Endpoints
-- `/api/pqc/wallet/create` - Create PQC wallet
-- `/api/pqc/wallet/import` - Import PQC wallet
-- `/api/pqc/stats` - PQC stats (wallets, txs, blocks)
-- `/api/pqc/node/keys` - Node PQC public keys
-- `/api/pqc/block/{index}/verify` - Block signature verification
-- `/api/pqc/verify` - Hybrid signature verification
-- `/api/pqc/transaction/secure` - PQC transaction
-- `/api/pqc/migrate` - Legacy→PQC migration (NO FEE)
-
-### PQC Transaction Hotfix (Feb 17, 2026)
-- **Fix**: `/api/pqc/transaction/secure` ora imposta `confirmed: True` immediatamente
-- **Database fix**: Script deploy corregge automaticamente le transazioni PQC bloccate in "Pending"
-- **Deploy archive**: `bricscoin-hotfix.tar.gz` con `deploy.sh` automatizzato
-- Backup automatico, rebuild Docker, test API inclusi nello script
+### Codeberg Updated
+- 2 commits pushed with all fixes
 
 ## Remaining Backlog
 
-### P1 - Aggiornamento Repository Codeberg
-- Committare e pushare tutte le modifiche al repository pubblico
-
-### P2 (Investigated, not reproducible in test env)
-- Active miner count: uses 2 collections with different time windows
-- Block count: code correct, confusion between height vs count
+### P2
+- Active miner count accuracy (investigated, uses 2 collections)
+- Disclaimer on Dashboard (user mentioned, needs clarification)
 
 ### Future
 - Mobile wallet app
-- Stratum v2 / P2Pool
+- Stratum v2 / P2Pool optimization
+- Increase stratum share_difficulty for more accurate hashrate measurement
