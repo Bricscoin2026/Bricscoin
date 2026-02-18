@@ -152,7 +152,11 @@ const syncWithNetwork = async () => {
 };
 
 // ==================== APP INIT ====================
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Load ESM module via dynamic import
+  const pqMod = await import('@noble/post-quantum/ml-dsa.js');
+  ml_dsa65 = pqMod.ml_dsa65;
+
   walletsPath = path.join(app.getPath('userData'), 'wallets.json');
   pqcWalletsPath = path.join(app.getPath('userData'), 'pqc_wallets.json');
   configPath = path.join(app.getPath('userData'), 'config.json');
