@@ -12,7 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 
-const CODEBERG_DOWNLOADS = "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads/BricsCoin%20Core%203.0.0";
+const CODEBERG_BASE = "https://codeberg.org/Bricscoin_26/Bricscoin/raw/branch/main/downloads/BricsCoin%20Core%203.0.0";
+const CODEBERG_FOLDER = "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads/BricsCoin%20Core%203.0.0";
 
 const platforms = [
   {
@@ -20,7 +21,8 @@ const platforms = [
     icon: Monitor,
     color: "text-blue-500",
     bg: "bg-blue-500/20",
-    file: "BricsCoin Core 3.0.0.exe",
+    file: "BricsCoin%20Core%203.0.0.exe",
+    label: "BricsCoin Core 3.0.0.exe",
     desc: "Portable .exe - No installation needed",
     size: "~69 MB",
     instructions: [
@@ -34,7 +36,8 @@ const platforms = [
     icon: Apple,
     color: "text-gray-300",
     bg: "bg-gray-500/20",
-    file: "BricsCoin Core-3.0.0-arm64-mac.zip",
+    file: "BricsCoin%20Core-3.0.0-arm64-mac.zip",
+    label: "BricsCoin Core-3.0.0-arm64-mac.zip",
     desc: "Apple Silicon (M1/M2/M3) - Extract and run",
     size: "~87 MB",
     instructions: [
@@ -49,7 +52,8 @@ const platforms = [
     icon: HardDrive,
     color: "text-orange-500",
     bg: "bg-orange-500/20",
-    file: "BricsCoin Core-3.0.0-arm64.AppImage",
+    file: "BricsCoin%20Core-3.0.0-arm64.AppImage",
+    label: "BricsCoin Core-3.0.0-arm64.AppImage",
     desc: "AppImage - Make executable and run",
     size: "~100 MB",
     instructions: [
