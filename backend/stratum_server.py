@@ -330,6 +330,7 @@ class StratumMiner:
             return
         self.authorized = True
         self.respond(msg_id, True)
+        logger.info(f"Miner authorized: {self.worker_name} ({self.miner_id})")
         # Stato in‑memory
         miners[self.miner_id] = {
             "worker": self.worker_name,
