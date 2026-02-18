@@ -60,6 +60,16 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
    - Fix: set `mining.set_difficulty(512)` to throttle miner submissions, accept all shares server-side (diff 1 for verification), record 512 in DB
    - Result: hashrate now correctly shows ~12-14 TH/s matching real hardware
 
+### Features Added
+9. BricsCoin Core Desktop Wallet v3.0 - Quantum-Safe PQC Integration
+   - Upgraded Electron desktop wallet from v2.1.1 to v3.0.0
+   - Added PQC (Post-Quantum) wallet support: hybrid ECDSA + ML-DSA-65 (FIPS 204)
+   - Client-side hybrid signing: private keys NEVER leave the device
+   - PQC wallet creation, import (from keys or backup JSON), backup, send, detail view
+   - Uses @noble/post-quantum v0.5.4 (same as web frontend)
+   - Cross-platform: Windows, macOS, Linux build targets
+   - Full E2E tested: wallet creation, hybrid signing, transaction submission
+
 ## Remaining Backlog
 
 ### P1
