@@ -36,8 +36,8 @@ const platforms = [
     icon: Apple,
     color: "text-gray-300",
     bg: "bg-gray-500/20",
-    file: "BricsCoin%20Core-3.0.0-arm64-mac.zip",
-    label: "BricsCoin Core-3.0.0-arm64-mac.zip",
+    file: "BricsCoin%20Wallet-1.0.0-arm64-mac.zip",
+    label: "BricsCoin Wallet-1.0.0-arm64-mac.zip",
     desc: "Apple Silicon (M1/M2/M3) - Extract and run",
     size: "~87 MB",
     instructions: [
