@@ -361,7 +361,7 @@ class StratumMiner:
             self.respond(msg_id,False,[24,"Unauthorized worker",None])
             return
         try:
-            worker,job_id,extranonce2,ntime,nonce=params
+            worker,job_id,extranonce2,ntime,nonce=params[:5]
             job=self.personal_jobs.get(job_id) or job_cache.get(job_id)
             if not job: 
                 logger.warning(f"Job {job_id} not found for {self.worker_name}")
