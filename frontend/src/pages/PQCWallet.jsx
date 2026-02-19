@@ -292,44 +292,44 @@ export default function PQCWallet() {
           <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setNewWalletData(null); }}>
             <DialogTrigger asChild>
               <Button className="bg-emerald-600 hover:bg-emerald-700" data-testid="pqc-create-btn">
-                <Plus className="w-4 h-4 mr-1" /> Crea Wallet PQC
+                <Plus className="w-4 h-4 mr-1" /> Create PQC Wallet
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10 max-w-lg">
               <DialogHeader>
-                <DialogTitle>Nuovo Wallet Quantum-Safe</DialogTitle>
+                <DialogTitle>New Quantum-Safe Wallet</DialogTitle>
                 <DialogDescription>
-                  Genera un wallet con firma ibrida ECDSA + ML-DSA-65 (FIPS 204)
+                  Generate a wallet with hybrid ECDSA + ML-DSA-65 (FIPS 204) signature
                 </DialogDescription>
               </DialogHeader>
               {!newWalletData ? (
                 <div className="space-y-4">
                   <div className="p-4 rounded bg-emerald-500/10 border border-emerald-500/20">
                     <h4 className="font-semibold text-emerald-400 flex items-center gap-2 mb-2">
-                      <Atom className="w-4 h-4" /> Cosa viene generato
+                      <Atom className="w-4 h-4" /> What will be generated
                     </h4>
                     <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>Coppia di chiavi ECDSA (secp256k1) - compatibilita legacy</li>
-                      <li>Coppia di chiavi ML-DSA-65 (FIPS 204) - resistenza quantistica</li>
-                      <li>Indirizzo ibrido BRICSPQ... derivato da entrambe le chiavi</li>
-                      <li>Seed phrase da 12 parole per il backup</li>
+                      <li>ECDSA key pair (secp256k1) - legacy compatibility</li>
+                      <li>ML-DSA-65 key pair (FIPS 204) - quantum resistance</li>
+                      <li>Hybrid address BRICSPQ... derived from both keys</li>
+                      <li>12-word seed phrase for backup</li>
                     </ul>
                   </div>
                   <Button onClick={handleCreate} disabled={creating} className="w-full bg-emerald-600 hover:bg-emerald-700"
                     data-testid="pqc-create-confirm">
                     {creating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
-                    {creating ? "Generazione in corso..." : "Genera Wallet Quantum-Safe"}
+                    {creating ? "Generating..." : "Generate Quantum-Safe Wallet"}
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="p-3 rounded bg-amber-500/10 border border-amber-500/30">
                     <p className="text-amber-400 text-sm font-semibold flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4" /> Salva queste informazioni! Non possono essere recuperate.
+                      <AlertTriangle className="w-4 h-4" /> Save this information! It cannot be recovered.
                     </p>
                   </div>
                   <div>
-                    <Label className="text-xs text-muted-foreground">Indirizzo</Label>
+                    <Label className="text-xs text-muted-foreground">Address</Label>
                     <code className="block text-xs font-mono p-2 bg-background/50 rounded break-all" data-testid="pqc-new-address">
                       {newWalletData.address}
                     </code>
@@ -341,7 +341,7 @@ export default function PQCWallet() {
                     </code>
                   </div>
                   <Button onClick={downloadBackup} variant="outline" className="w-full" data-testid="pqc-download-backup">
-                    <Download className="w-4 h-4 mr-2" /> Scarica Backup Completo (JSON)
+                    <Download className="w-4 h-4 mr-2" /> Download Full Backup (JSON)
                   </Button>
                 </div>
               )}
