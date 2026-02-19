@@ -63,7 +63,7 @@ function PQCWalletCard({ wallet, onSelect, isSelected }) {
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success(`${label} copiato`);
+    toast.success(`${label} copied`);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -144,9 +144,9 @@ export default function PQCWallet() {
       const res = await createPQCWallet("PQC Wallet " + (wallets.length + 1));
       setNewWalletData(res.data);
       saveWallets([...wallets, res.data]);
-      toast.success("Wallet PQC creato con successo!");
+      toast.success("PQC wallet created successfully!");
     } catch (err) {
-      toast.error("Errore nella creazione: " + (err.response?.data?.detail || err.message));
+      toast.error("Creation error: " + (err.response?.data?.detail || err.message));
     } finally {
       setCreating(false);
     }
@@ -163,9 +163,9 @@ export default function PQCWallet() {
       saveWallets([...wallets, res.data]);
       setImportOpen(false);
       setImportForm({ ecdsa_key: "", dilithium_sk: "", dilithium_pk: "", name: "" });
-      toast.success("Wallet PQC importato!");
+      toast.success("PQC wallet imported!");
     } catch (err) {
-      toast.error("Errore import: " + (err.response?.data?.detail || err.message));
+      toast.error("Import error: " + (err.response?.data?.detail || err.message));
     }
   };
 
@@ -175,7 +175,7 @@ export default function PQCWallet() {
     try {
       const amount = parseFloat(sendForm.amount);
       if (!sendForm.recipient || amount <= 0) {
-        toast.error("Inserisci un destinatario e importo validi");
+        toast.error("Enter a valid recipient and amount");
         return;
       }
 
@@ -189,7 +189,7 @@ export default function PQCWallet() {
       setSendOpen(false);
       setSendForm({ recipient: "", amount: "" });
     } catch (err) {
-      toast.error("Errore transazione: " + (err.response?.data?.detail || err.message));
+      toast.error("Transaction error: " + (err.response?.data?.detail || err.message));
     } finally {
       setSending(false);
     }
@@ -199,7 +199,7 @@ export default function PQCWallet() {
     const filtered = wallets.filter(w => w.address !== addr);
     saveWallets(filtered);
     if (selectedWallet?.address === addr) setSelectedWallet(null);
-    toast.info("Wallet rimosso");
+    toast.info("Wallet removed");
   };
 
   const [backupJson, setBackupJson] = useState("");
@@ -233,7 +233,7 @@ export default function PQCWallet() {
     } catch (e) {
       console.error("Download failed:", e);
     }
-    toast.success("Backup pronto - copia o salva il file");
+    toast.success("Backup ready - copy or save the file");
   };
 
   return (
@@ -243,48 +243,48 @@ export default function PQCWallet() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
             <ShieldCheck className="w-8 h-8 text-emerald-400" />
-            Wallet Quantum-Safe
+            Quantum-Safe Wallet
           </h1>
           <p className="text-muted-foreground mt-1">
-            Firma ibrida ECDSA + ML-DSA-65 (FIPS 204) - Le chiavi private non lasciano mai il browser
+            Hybrid signature ECDSA + ML-DSA-65 (FIPS 204) - Private keys never leave the browser
           </p>
         </div>
         <div className="flex gap-2">
           <Dialog open={importOpen} onOpenChange={setImportOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" data-testid="pqc-import-btn">
-                <Key className="w-4 h-4 mr-1" /> Importa
+                <Key className="w-4 h-4 mr-1" /> Import
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10">
               <DialogHeader>
-                <DialogTitle>Importa Wallet PQC</DialogTitle>
-                <DialogDescription>Inserisci le chiavi private ECDSA e Dilithium</DialogDescription>
+                <DialogTitle>Import PQC Wallet</DialogTitle>
+                <DialogDescription>Enter your ECDSA and Dilithium private keys</DialogDescription>
               </DialogHeader>
               <div className="space-y-3">
                 <div>
-                  <Label>Nome</Label>
+                  <Label>Name</Label>
                   <Input value={importForm.name} onChange={e => setImportForm(p => ({...p, name: e.target.value}))}
-                    placeholder="Nome wallet" data-testid="pqc-import-name" />
+                    placeholder="Wallet name" data-testid="pqc-import-name" />
                 </div>
                 <div>
-                  <Label>Chiave privata ECDSA (hex)</Label>
+                  <Label>ECDSA Private Key (hex)</Label>
                   <Input value={importForm.ecdsa_key} onChange={e => setImportForm(p => ({...p, ecdsa_key: e.target.value}))}
-                    placeholder="64 caratteri hex" className="font-mono text-xs" data-testid="pqc-import-ecdsa" />
+                    placeholder="64 hex characters" className="font-mono text-xs" data-testid="pqc-import-ecdsa" />
                 </div>
                 <div>
-                  <Label>Chiave segreta Dilithium (hex)</Label>
+                  <Label>Dilithium Secret Key (hex)</Label>
                   <Input value={importForm.dilithium_sk} onChange={e => setImportForm(p => ({...p, dilithium_sk: e.target.value}))}
-                    placeholder="Chiave segreta Dilithium hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-sk" />
+                    placeholder="Dilithium secret key hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-sk" />
                 </div>
                 <div>
-                  <Label>Chiave pubblica Dilithium (hex)</Label>
+                  <Label>Dilithium Public Key (hex)</Label>
                   <Input value={importForm.dilithium_pk} onChange={e => setImportForm(p => ({...p, dilithium_pk: e.target.value}))}
-                    placeholder="Chiave pubblica Dilithium hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-pk" />
+                    placeholder="Dilithium public key hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-pk" />
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleImport} data-testid="pqc-import-submit">Importa Wallet</Button>
+                <Button onClick={handleImport} data-testid="pqc-import-submit">Import Wallet</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
