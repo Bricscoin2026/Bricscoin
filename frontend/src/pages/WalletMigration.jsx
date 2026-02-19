@@ -174,12 +174,12 @@ export default function WalletMigration() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
-              Genera Wallet PQC Destinazione
+              Generate PQC Destination Wallet
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-3 rounded bg-background/30 border border-white/5">
-              <p className="text-xs text-muted-foreground">Wallet Legacy Selezionato</p>
+              <p className="text-xs text-muted-foreground">Selected Legacy Wallet</p>
               <code className="text-sm font-mono text-foreground">{selectedLegacy.address}</code>
               <p className="text-lg font-bold text-foreground mt-1">
                 {loadingBalance ? <RefreshCw className="w-4 h-4 animate-spin inline" /> : `${legacyBalance} BRICS`}
@@ -188,19 +188,19 @@ export default function WalletMigration() {
 
             <div className="p-4 rounded bg-emerald-500/10 border border-emerald-500/20">
               <p className="text-sm text-emerald-400 font-medium mb-2">
-                Verra creato un nuovo wallet PQC con firma ibrida ECDSA + ML-DSA-65 (FIPS 204).
-                I tuoi fondi verranno trasferiti automaticamente.
+                A new PQC wallet with hybrid ECDSA + ML-DSA-65 (FIPS 204) signature will be created.
+                Your funds will be transferred automatically.
               </p>
             </div>
 
             <Button onClick={generatePQCWallet} className="w-full bg-emerald-600 hover:bg-emerald-700"
               data-testid="migration-generate-pqc">
               <ShieldCheck className="w-4 h-4 mr-2" />
-              Genera Wallet PQC e Procedi
+              Generate PQC Wallet and Proceed
             </Button>
 
             <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
-              Indietro
+              Back
             </Button>
           </CardContent>
         </Card>
@@ -212,13 +212,13 @@ export default function WalletMigration() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ArrowUpRight className="w-5 h-5 text-cyan-400" />
-              Conferma Trasferimento
+              Confirm Transfer
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* From */}
             <div className="p-3 rounded bg-background/30 border border-white/5">
-              <p className="text-xs text-amber-400 font-medium">DA (Legacy ECDSA)</p>
+              <p className="text-xs text-amber-400 font-medium">FROM (Legacy ECDSA)</p>
               <code className="text-xs font-mono text-foreground break-all">{selectedLegacy.address}</code>
             </div>
 
@@ -228,20 +228,20 @@ export default function WalletMigration() {
 
             {/* To */}
             <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/20">
-              <p className="text-xs text-emerald-400 font-medium">A (PQC Ibrido)</p>
+              <p className="text-xs text-emerald-400 font-medium">TO (PQC Hybrid)</p>
               <code className="text-xs font-mono text-foreground break-all">{newPQCWallet.address}</code>
             </div>
 
             <div className="text-center py-2">
               <p className="text-3xl font-bold text-foreground">{legacyBalance} BRICS</p>
-              <p className="text-xs text-muted-foreground">Importo totale da migrare</p>
+              <p className="text-xs text-muted-foreground">Total amount to migrate</p>
             </div>
 
             {legacyBalance <= 0 && (
               <div className="p-3 rounded bg-amber-500/10 border border-amber-500/20">
                 <p className="text-sm text-amber-400 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
-                  Il wallet legacy ha saldo 0. La migrazione registrera il wallet PQC ma non trasferira fondi.
+                  The legacy wallet has 0 balance. Migration will register the PQC wallet but will not transfer funds.
                 </p>
               </div>
             )}
@@ -249,7 +249,7 @@ export default function WalletMigration() {
             <Button onClick={executeMigration} disabled={migrating} className="w-full bg-amber-600 hover:bg-amber-700"
               data-testid="migration-execute">
               {migrating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
-              {migrating ? "Migrazione in corso..." : "Esegui Migrazione"}
+              {migrating ? "Migration in progress..." : "Execute Migration"}
             </Button>
           </CardContent>
         </Card>
@@ -262,9 +262,9 @@ export default function WalletMigration() {
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
               <CheckCircle2 className="w-16 h-16 text-emerald-400 mb-4" />
             </motion.div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Migrazione Completata!</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Migration Complete!</h2>
             <p className="text-muted-foreground mb-2">
-              I tuoi fondi sono ora protetti dalla crittografia post-quantistica.
+              Your funds are now protected by post-quantum cryptography.
             </p>
             <code className="text-xs font-mono text-emerald-400 mb-6 break-all max-w-sm">
               {newPQCWallet?.address}
@@ -273,12 +273,12 @@ export default function WalletMigration() {
             <div className="flex gap-3">
               <Link to="/pqc-wallet">
                 <Button className="bg-emerald-600 hover:bg-emerald-700" data-testid="migration-go-pqc">
-                  <ShieldCheck className="w-4 h-4 mr-2" /> Vai al Wallet PQC
+                  <ShieldCheck className="w-4 h-4 mr-2" /> Go to PQC Wallet
                 </Button>
               </Link>
               <Button variant="outline" onClick={() => { setStep(1); setSelectedLegacy(null); setNewPQCWallet(null); setMigrationComplete(false); }}
                 data-testid="migration-again">
-                Migra un Altro Wallet
+                Migrate Another Wallet
               </Button>
             </div>
           </CardContent>
@@ -290,12 +290,12 @@ export default function WalletMigration() {
         <CardContent className="p-5">
           <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
             <Info className="w-4 h-4 text-cyan-400" />
-            Perche migrare?
+            Why migrate?
           </h3>
           <p className="text-sm text-muted-foreground">
-            I wallet legacy usano solo ECDSA (secp256k1), che e vulnerabile ai futuri computer quantistici. 
-            Il wallet PQC aggiunge una seconda firma con ML-DSA-65 (FIPS 204), un algoritmo resistente agli attacchi 
-            quantistici approvato dal NIST. La firma avviene interamente nel browser: le chiavi private non lasciano mai il tuo dispositivo.
+            Legacy wallets use only ECDSA (secp256k1), which is vulnerable to future quantum computers. 
+            The PQC wallet adds a second signature with ML-DSA-65 (FIPS 204), a quantum-resistant algorithm 
+            approved by NIST. Signing happens entirely in the browser: private keys never leave your device.
           </p>
         </CardContent>
       </Card>
