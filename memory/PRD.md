@@ -43,14 +43,24 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - crypto.getRandomValues polyfill for Node.js/Electron compatibility
 - Cross-platform: Windows, macOS, Linux builds on Codeberg
 
-## Completed Work - Session Feb 18, 2026 (Fork 2)
+## Completed Work - Session Feb 18-19, 2026 (Fork 2)
 
-1. **Download page links fixed** — All buttons point to Codeberg folder: `src/branch/main/downloads/BricsCoin Core 3.0.0`
-2. **Git commit author fixed** — 456 commits rewritten from "Fabio Astorino" to "Bricscoin_26" via git filter-branch
-3. **PQC transaction bug fixed** — `crypto.getRandomValues must be defined` error in Electron resolved with `globalThis.crypto = crypto.webcrypto` polyfill
-4. **All platform builds rebuilt** — Windows, macOS, Linux recompiled with crypto fix and pushed to Codeberg
-5. **Old builds cleaned up** — Removed obsolete "Core 3.0.0" builds, kept "Wallet 1.0.0" with fix
-6. **Frontend deployed 4 times** to production with incremental fixes
+1. **Download page links fixed** — All buttons point to Codeberg folder
+2. **Git commit author fixed** — 456 commits rewritten to "Bricscoin_26"
+3. **PQC transaction bug fixed** — crypto.getRandomValues polyfill in Electron
+4. **All platform builds rebuilt** — Win/Mac/Linux with crypto fix on Codeberg
+5. **Old builds cleaned up** — Removed obsolete "Core 3.0.0" builds
+6. **PQC Wallet & Migration pages translated** — Italian → English
+7. **Negative balance bug fixed** — PQC transaction now checks amount + fee
+8. **MAX button added** — Send dialog shows available balance and MAX button
+9. **Number formatting fixed** — Balances rounded to 8 decimals, no scientific notation
+10. **Production backup created** — `/root/bricscoin-backup-20260219_071116/`
+
+## Production Deploy Notes
+- **NEVER replace entire server.py** — Use `sed` for targeted fixes
+- Latest backup: `/root/bricscoin-backup-20260219_071116/`
+- Frontend deploy: `docker cp` tar.gz + `tar -xzf` + `nginx -s reload`
+- Backend patch: `docker exec sed -i` + `docker restart bricscoin-api`
 
 ## Remaining Backlog
 
@@ -58,7 +68,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Burn 1M premine from Genesis wallet
 
 ### P2
-- Fix verify_share header endianness to properly validate ASIC hashes (currently bypassed)
+- Fix verify_share header endianness to properly validate ASIC hashes
 
 ### Future
 - Mobile wallet app
