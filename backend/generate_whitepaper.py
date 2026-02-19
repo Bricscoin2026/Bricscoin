@@ -659,6 +659,11 @@ def build_whitepaper():
     story.append(Paragraph("<b>Source Code</b>: https://codeberg.org/Bricscoin_26/Bricscoin", links_style))
     story.append(Paragraph("<b>Community</b>: https://bricscoin26-chat.org/community", links_style))
     story.append(Paragraph("<b>Twitter/X</b>: @Bricscoin26", links_style))
+    story.append(Spacer(1, 1*cm))
+    
+    footer_style = ParagraphStyle('Footer', parent=body_style, alignment=TA_CENTER, fontSize=9, textColor=LIGHT_GRAY)
+    story.append(Paragraph("BricsCoin - Created and developed by Jabo86", footer_style))
+    story.append(Paragraph("Copyright 2026 BricsCoin Project. All rights reserved.", footer_style))
 
     # Build PDF
     doc.build(story)
