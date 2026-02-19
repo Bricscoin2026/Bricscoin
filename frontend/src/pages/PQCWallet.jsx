@@ -121,6 +121,7 @@ export default function PQCWallet() {
   const [importForm, setImportForm] = useState({ ecdsa_key: "", dilithium_sk: "", dilithium_pk: "", name: "" });
   const [sendForm, setSendForm] = useState({ recipient: "", amount: "" });
   const [sending, setSending] = useState(false);
+  const [selectedBalance, setSelectedBalance] = useState(null);
 
   // Load wallets from localStorage
   useEffect(() => {
