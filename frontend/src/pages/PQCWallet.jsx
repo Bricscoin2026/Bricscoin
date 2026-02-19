@@ -354,11 +354,11 @@ export default function PQCWallet() {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
-            { label: "Wallet PQC", value: stats.total_pqc_wallets, color: "text-emerald-400" },
-            { label: "TX Quantistiche", value: stats.total_pqc_transactions, color: "text-cyan-400" },
-            { label: "Blocchi Firmati", value: `${stats.total_pqc_blocks || 0}/${stats.total_blocks || 0}`, color: "text-amber-400" },
-            { label: "Schema Firma", value: "Ibrido", color: "text-amber-400" },
-            { label: "Stato", value: stats.status === "active" ? "Attivo" : "N/A", color: "text-emerald-400" },
+            { label: "PQC Wallets", value: stats.total_pqc_wallets, color: "text-emerald-400" },
+            { label: "Quantum TX", value: stats.total_pqc_transactions, color: "text-cyan-400" },
+            { label: "Signed Blocks", value: `${stats.total_pqc_blocks || 0}/${stats.total_blocks || 0}`, color: "text-amber-400" },
+            { label: "Signature Scheme", value: "Hybrid", color: "text-amber-400" },
+            { label: "Status", value: stats.status === "active" ? "Active" : "N/A", color: "text-emerald-400" },
           ].map((s, i) => (
             <Card key={i} className="bg-card/40 border-white/10">
               <CardContent className="p-4 text-center">
@@ -375,13 +375,13 @@ export default function PQCWallet() {
         <Card className="bg-card/40 border-white/10 border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <ShieldCheck className="w-16 h-16 text-emerald-500/30 mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">Nessun Wallet PQC</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-2">No PQC Wallets</h3>
             <p className="text-sm text-muted-foreground max-w-sm mb-6">
-              Crea il tuo primo wallet quantum-safe con firma ibrida ECDSA + ML-DSA-65
+              Create your first quantum-safe wallet with hybrid ECDSA + ML-DSA-65 signature
             </p>
             <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setCreateOpen(true)}
               data-testid="pqc-empty-create-btn">
-              <Plus className="w-4 h-4 mr-2" /> Crea Wallet PQC
+              <Plus className="w-4 h-4 mr-2" /> Create PQC Wallet
             </Button>
           </CardContent>
         </Card>
@@ -406,46 +406,46 @@ export default function PQCWallet() {
                 </span>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => setSendOpen(true)} data-testid="pqc-send-btn">
-                    <Send className="w-3.5 h-3.5 mr-1" /> Invia
+                    <Send className="w-3.5 h-3.5 mr-1" /> Send
                   </Button>
                   <Button size="sm" variant="outline" onClick={downloadBackup} data-testid="pqc-backup-btn">
                     <Download className="w-3.5 h-3.5 mr-1" /> Backup
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(selectedWallet.address)}
-                    data-testid="pqc-delete-btn">Rimuovi</Button>
+                    data-testid="pqc-delete-btn">Remove</Button>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-xs text-muted-foreground">Indirizzo PQC</Label>
+                <Label className="text-xs text-muted-foreground">PQC Address</Label>
                 <code className="block text-sm font-mono p-2 bg-background/50 rounded break-all">{selectedWallet.address}</code>
               </div>
 
               <div className="flex items-center gap-2">
                 <Button size="sm" variant="ghost" onClick={() => setShowKeys(!showKeys)} data-testid="pqc-toggle-keys">
                   {showKeys ? <EyeOff className="w-4 h-4 mr-1" /> : <Eye className="w-4 h-4 mr-1" />}
-                  {showKeys ? "Nascondi Chiavi" : "Mostra Chiavi"}
+                  {showKeys ? "Hide Keys" : "Show Keys"}
                 </Button>
               </div>
 
               {showKeys && (
                 <div className="space-y-3 p-4 rounded bg-background/30 border border-white/5">
                   <div>
-                    <Label className="text-xs text-amber-400">Chiave Pubblica ECDSA</Label>
+                    <Label className="text-xs text-amber-400">ECDSA Public Key</Label>
                     <code className="block text-[10px] font-mono p-1.5 bg-background/50 rounded break-all text-muted-foreground">
                       {selectedWallet.ecdsa_public_key}
                     </code>
                   </div>
                   <div>
-                    <Label className="text-xs text-emerald-400">Chiave Pubblica Dilithium</Label>
+                    <Label className="text-xs text-emerald-400">Dilithium Public Key</Label>
                     <code className="block text-[10px] font-mono p-1.5 bg-background/50 rounded break-all text-muted-foreground max-h-20 overflow-y-auto">
                       {selectedWallet.dilithium_public_key?.slice(0, 200)}...
                     </code>
                   </div>
                   {selectedWallet.seed_phrase && (
                     <div>
-                      <Label className="text-xs text-red-400">Seed Phrase (SEGRETO!)</Label>
+                      <Label className="text-xs text-red-400">Seed Phrase (SECRET!)</Label>
                       <code className="block text-xs font-mono p-1.5 bg-red-500/5 border border-red-500/20 rounded text-red-300">
                         {selectedWallet.seed_phrase}
                       </code>
@@ -456,10 +456,10 @@ export default function PQCWallet() {
 
               {/* Signature Info */}
               <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/10">
-                <h4 className="text-sm font-semibold text-emerald-400 mb-1">Schema di Firma Client-Side</h4>
+                <h4 className="text-sm font-semibold text-emerald-400 mb-1">Client-Side Signature Scheme</h4>
                 <p className="text-xs text-muted-foreground">
-                  ECDSA (secp256k1) + ML-DSA-65 (FIPS 204) - Le chiavi private non lasciano MAI il browser.
-                  Ogni transazione viene firmata localmente con entrambi gli algoritmi e solo le firme vengono inviate al server.
+                  ECDSA (secp256k1) + ML-DSA-65 (FIPS 204) - Private keys NEVER leave the browser.
+                  Each transaction is signed locally with both algorithms and only the signatures are sent to the server.
                 </p>
               </div>
             </CardContent>
