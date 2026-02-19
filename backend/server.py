@@ -807,7 +807,10 @@ async def get_balance(address: str) -> float:
         balance -= tx['amount']
         balance -= tx.get('fee', 0)  # Subtract fee too
     
-    return balance
+    # Round to 8 decimal places to prevent floating point display errors
+    balance = round(balance, 8)
+    # Never return negative balance (floating point artifact)
+    return max(0.0, balance)
 
 # ==================== API ENDPOINTS ====================
 
