@@ -1752,10 +1752,11 @@ async def create_pqc_transaction(request: Request, tx: PQCSecureTransactionReque
     if tx.sender_address != expected_address:
         raise HTTPException(status_code=400, detail="Public keys do not match sender address")
 
-    # Check balance
+    # Check balance (amount + fee)
+    total_cost = tx.amount + TRANSACTION_FEE
     balance = await get_balance(tx.sender_address)
-    if balance < tx.amount:
-        raise HTTPException(status_code=400, detail=f"Insufficient balance: {balance} < {tx.amount}")
+    if balance < total_cost:
+        raise HTTPException(status_code=400, detail=f"Insufficient balance: {balance} < {total_cost} (amount: {tx.amount} + fee: {TRANSACTION_FEE})")
 
     # Create transaction
     tx_id = hashlib.sha256(
