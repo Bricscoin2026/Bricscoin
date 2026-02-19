@@ -487,16 +487,33 @@ export default function PQCWallet() {
               <strong>Signed Locally</strong> — ECDSA + ML-DSA-65 signing happens in your browser. Private keys never leave the device.
             </p>
           </div>
+          {selectedBalance != null && (
+            <div className="p-3 rounded bg-background/50 border border-white/10 flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Available balance:</span>
+              <span className="text-sm font-bold text-emerald-400">{parseFloat(selectedBalance).toFixed(8).replace(/\.?0+$/, '')} BRICS</span>
+            </div>
+          )}
           <div className="space-y-3">
             <div>
               <Label>Recipient</Label>
               <Input value={sendForm.recipient} onChange={e => setSendForm(p => ({...p, recipient: e.target.value}))}
-                placeholder="BRICS... o BRICSPQ..." className="font-mono text-xs" data-testid="pqc-send-recipient" />
+                placeholder="BRICS... or BRICSPQ..." className="font-mono text-xs" data-testid="pqc-send-recipient" />
             </div>
             <div>
               <Label>Amount (BRICS)</Label>
-              <Input type="number" value={sendForm.amount} onChange={e => setSendForm(p => ({...p, amount: e.target.value}))}
-                placeholder="0.00" data-testid="pqc-send-amount" />
+              <div className="flex gap-2">
+                <Input type="number" value={sendForm.amount} onChange={e => setSendForm(p => ({...p, amount: e.target.value}))}
+                  placeholder="0.00" data-testid="pqc-send-amount" className="flex-1" />
+                <Button variant="outline" size="sm" data-testid="pqc-send-max"
+                  onClick={() => {
+                    const fee = 0.000005;
+                    const max = Math.max(0, parseFloat(selectedBalance || 0) - fee);
+                    setSendForm(p => ({...p, amount: max.toFixed(8).replace(/\.?0+$/, '')}));
+                  }}>
+                  MAX
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Fee: 0.000005 BRICS</p>
             </div>
           </div>
           <DialogFooter>
