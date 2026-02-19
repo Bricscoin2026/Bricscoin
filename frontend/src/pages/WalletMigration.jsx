@@ -64,9 +64,9 @@ export default function WalletMigration() {
       localStorage.setItem("bricscoin_pqc_wallets", JSON.stringify(existing));
 
       setStep(3);
-      toast.success("Wallet PQC generato per la migrazione!");
+      toast.success("PQC wallet generated for migration!");
     } catch (err) {
-      toast.error("Errore generazione wallet PQC: " + (err.response?.data?.detail || err.message));
+      toast.error("PQC wallet generation error: " + (err.response?.data?.detail || err.message));
     }
   };
 
@@ -80,23 +80,23 @@ export default function WalletMigration() {
       await migrateToPQC(txData);
       setMigrationComplete(true);
       setStep(4);
-      toast.success("Migrazione completata con successo!");
+      toast.success("Migration completed successfully!");
     } catch (err) {
       const detail = err.response?.data?.detail;
       const msg = Array.isArray(detail)
         ? detail.map(d => d.msg || JSON.stringify(d)).join(', ')
         : detail || err.message;
-      toast.error("Errore migrazione: " + msg);
+      toast.error("Migration error: " + msg);
     } finally {
       setMigrating(false);
     }
   };
 
   const steps = [
-    { num: 1, label: "Seleziona Wallet Legacy" },
-    { num: 2, label: "Genera Wallet PQC" },
-    { num: 3, label: "Trasferisci Fondi" },
-    { num: 4, label: "Completato" },
+    { num: 1, label: "Select Legacy Wallet" },
+    { num: 2, label: "Generate PQC Wallet" },
+    { num: 3, label: "Transfer Funds" },
+    { num: 4, label: "Complete" },
   ];
 
   return (
@@ -105,10 +105,10 @@ export default function WalletMigration() {
       <div>
         <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
           <ArrowRight className="w-8 h-8 text-amber-400" />
-          Migrazione Quantum-Safe
+          Quantum-Safe Migration
         </h1>
         <p className="text-muted-foreground mt-1">
-          Trasferisci i tuoi fondi da un wallet legacy ECDSA a un wallet PQC ibrido
+          Transfer your funds from a legacy ECDSA wallet to a hybrid PQC wallet
         </p>
       </div>
 
@@ -137,16 +137,16 @@ export default function WalletMigration() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Wallet className="w-5 h-5 text-amber-400" />
-              Seleziona Wallet Legacy da Migrare
+              Select Legacy Wallet to Migrate
             </CardTitle>
           </CardHeader>
           <CardContent>
             {legacyWallets.length === 0 ? (
               <div className="text-center py-8">
                 <Wallet className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground mb-4">Nessun wallet legacy trovato nel browser.</p>
+                <p className="text-muted-foreground mb-4">No legacy wallets found in the browser.</p>
                 <p className="text-sm text-muted-foreground">
-                  Vai alla pagina <Link to="/wallet" className="text-primary underline">Wallet</Link> per crearne uno prima.
+                  Go to the <Link to="/wallet" className="text-primary underline">Wallet</Link> page to create one first.
                 </p>
               </div>
             ) : (
