@@ -406,7 +406,13 @@ export default function PQCWallet() {
                   {selectedWallet.name}
                 </span>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setSendOpen(true)} data-testid="pqc-send-btn">
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    setSendOpen(true);
+                    try {
+                      const res = await getPQCWalletInfo(selectedWallet.address);
+                      setSelectedBalance(res.data.balance);
+                    } catch { setSelectedBalance(0); }
+                  }} data-testid="pqc-send-btn">
                     <Send className="w-3.5 h-3.5 mr-1" /> Send
                   </Button>
                   <Button size="sm" variant="outline" onClick={downloadBackup} data-testid="pqc-backup-btn">
