@@ -92,6 +92,10 @@ def build_whitepaper():
     story.append(Spacer(1, 8*mm))
     story.append(Paragraph("Technical Whitepaper v3.0", ParagraphStyle('ver', parent=subtitle_style, fontSize=12)))
     story.append(Spacer(1, 4*mm))
+    
+    author_style = ParagraphStyle('Author', parent=subtitle_style, fontSize=12, textColor=HexColor('#444444'))
+    story.append(Paragraph("Created by <b>Jabo86</b>", author_style))
+    story.append(Spacer(1, 4*mm))
     story.append(Paragraph("February 2026", ParagraphStyle('date', parent=subtitle_style, fontSize=11, textColor=LIGHT_GRAY)))
     story.append(Spacer(1, 2*cm))
     
