@@ -471,23 +471,23 @@ export default function PQCWallet() {
       <Dialog open={sendOpen} onOpenChange={setSendOpen}>
         <DialogContent className="bg-card border-white/10">
           <DialogHeader>
-            <DialogTitle>Invia BRICS (PQC)</DialogTitle>
-            <DialogDescription>Transazione firmata con schema ibrido quantum-safe</DialogDescription>
+            <DialogTitle>Send BRICS (PQC)</DialogTitle>
+            <DialogDescription>Transaction signed with quantum-safe hybrid scheme</DialogDescription>
           </DialogHeader>
           <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/20 flex items-center gap-2">
             <Lock className="w-4 h-4 text-emerald-400 flex-shrink-0" />
             <p className="text-xs text-emerald-400">
-              <strong>Firmato Localmente</strong> — La firma ECDSA + ML-DSA-65 avviene nel tuo browser. Le chiavi private non lasciano mai il dispositivo.
+              <strong>Signed Locally</strong> — ECDSA + ML-DSA-65 signing happens in your browser. Private keys never leave the device.
             </p>
           </div>
           <div className="space-y-3">
             <div>
-              <Label>Destinatario</Label>
+              <Label>Recipient</Label>
               <Input value={sendForm.recipient} onChange={e => setSendForm(p => ({...p, recipient: e.target.value}))}
                 placeholder="BRICS... o BRICSPQ..." className="font-mono text-xs" data-testid="pqc-send-recipient" />
             </div>
             <div>
-              <Label>Importo (BRICS)</Label>
+              <Label>Amount (BRICS)</Label>
               <Input type="number" value={sendForm.amount} onChange={e => setSendForm(p => ({...p, amount: e.target.value}))}
                 placeholder="0.00" data-testid="pqc-send-amount" />
             </div>
@@ -496,7 +496,7 @@ export default function PQCWallet() {
             <Button onClick={handleSend} disabled={sending || !sendForm.recipient || !sendForm.amount}
               className="bg-emerald-600 hover:bg-emerald-700" data-testid="pqc-send-confirm">
               {sending ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-              {sending ? "Invio in corso..." : "Invia"}
+              {sending ? "Sending..." : "Send"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -506,8 +506,8 @@ export default function PQCWallet() {
       <Dialog open={showBackup} onOpenChange={setShowBackup}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Backup Wallet PQC</DialogTitle>
-            <DialogDescription>Copia questo JSON e salvalo in un file sicuro. Contiene le chiavi private!</DialogDescription>
+            <DialogTitle>PQC Wallet Backup</DialogTitle>
+            <DialogDescription>Copy this JSON and save it in a secure file. It contains private keys!</DialogDescription>
           </DialogHeader>
           <div className="relative">
             <textarea
@@ -524,14 +524,14 @@ export default function PQCWallet() {
               data-testid="copy-backup-btn"
               onClick={() => {
                 navigator.clipboard.writeText(backupJson);
-                toast.success("Backup copiato negli appunti!");
+                toast.success("Backup copied to clipboard!");
               }}
             >
-              <Copy className="w-3 h-3 mr-1" /> Copia
+              <Copy className="w-3 h-3 mr-1" /> Copy
             </Button>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowBackup(false)}>Chiudi</Button>
+            <Button variant="outline" onClick={() => setShowBackup(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -541,18 +541,18 @@ export default function PQCWallet() {
         <CardContent className="p-6">
           <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
             <FileText className="w-5 h-5 text-emerald-400" />
-            Cosa e la Crittografia Post-Quantistica?
+            What is Post-Quantum Cryptography?
           </h3>
           <div className="grid sm:grid-cols-2 gap-4 text-sm text-muted-foreground">
             <div>
-              <h4 className="text-foreground font-medium mb-1">Il Problema</h4>
-              <p>I computer quantistici potranno rompere ECDSA e RSA, le basi della sicurezza blockchain attuale.
-                BricsCoin implementa una difesa proattiva.</p>
+              <h4 className="text-foreground font-medium mb-1">The Problem</h4>
+              <p>Quantum computers will be able to break ECDSA and RSA, the foundations of current blockchain security.
+                BricsCoin implements a proactive defense.</p>
             </div>
             <div>
-              <h4 className="text-foreground font-medium mb-1">La Soluzione</h4>
-              <p>Schema di firma ibrido: ECDSA (classico) + ML-DSA-65 (quantistico, FIPS 204). 
-                Ogni transazione viene firmata nel browser con entrambi gli algoritmi. Le chiavi private non lasciano mai il tuo dispositivo.</p>
+              <h4 className="text-foreground font-medium mb-1">The Solution</h4>
+              <p>Hybrid signature scheme: ECDSA (classic) + ML-DSA-65 (quantum, FIPS 204). 
+                Each transaction is signed in the browser with both algorithms. Private keys never leave your device.</p>
             </div>
           </div>
         </CardContent>
