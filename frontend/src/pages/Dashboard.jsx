@@ -274,10 +274,16 @@ export default function Dashboard() {
             </Link>
           </Button>
           <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="create-wallet-btn">
-            <Link to="/wallet">
-              <Coins className="w-4 h-4 mr-2" />
-              Create Wallet
+            <Link to="/pqc-wallet">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Create PQC Wallet
             </Link>
+          </Button>
+          <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="community-chat-btn">
+            <a href="https://bricscoin26-chat.org/community" target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Community Chat
+            </a>
           </Button>
         </div>
       </motion.div>
