@@ -88,7 +88,7 @@ function PQCWalletCard({ wallet, onSelect, isSelected }) {
       <p className="text-sm text-muted-foreground mb-1">{wallet.name}</p>
       <div className="flex items-center gap-2 mb-3">
         <code className="text-xs font-mono text-foreground/80 truncate max-w-[200px]">{wallet.address}</code>
-        <button onClick={(e) => { e.stopPropagation(); handleCopy(wallet.address, "Indirizzo"); }}
+        <button onClick={(e) => { e.stopPropagation(); handleCopy(wallet.address, "Address"); }}
           className="text-muted-foreground hover:text-foreground" data-testid="pqc-copy-address">
           {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
         </button>
