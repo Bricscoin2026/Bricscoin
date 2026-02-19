@@ -99,7 +99,7 @@ function PQCWalletCard({ wallet, onSelect, isSelected }) {
           <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
         ) : (
           <>
-            <span className="text-2xl font-bold text-emerald-400">{balance ?? "0"}</span>
+            <span className="text-2xl font-bold text-emerald-400">{balance != null ? parseFloat(balance).toFixed(8).replace(/\.?0+$/, '') : "0"}</span>
             <span className="text-sm text-muted-foreground">BRICS</span>
           </>
         )}
