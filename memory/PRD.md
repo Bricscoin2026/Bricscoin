@@ -62,7 +62,15 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Frontend deploy: `docker cp` tar.gz + `tar -xzf` + `nginx -s reload`
 - Backend patch: `docker exec sed -i` + `docker restart bricscoin-api`
 
+## Completed Work - Session Feb 20, 2026 (Fork 3)
+
+11. **Blockspot.io logo on Dashboard** — Added Blockspot.io logo below the Legal Disclaimer, linked to https://blockspot.io/coin/bricscoin/
+12. **Production build created** — `frontend-build-blockspot.tar.gz` ready for deploy
+
 ## Remaining Backlog
+
+### P0
+- Deploy latest frontend build to production server
 
 ### P1
 - Burn 1M premine from Genesis wallet
