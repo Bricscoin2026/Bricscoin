@@ -402,12 +402,12 @@ export default function Dashboard() {
         </Card>
       </motion.div>
 
-      {/* Blockspot.io Explorer */}
+      {/* Explorer Logos */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="flex justify-center"
+        className="flex justify-center items-center gap-8"
       >
         <a
           href="https://blockspot.io/coin/bricscoin/"
@@ -419,6 +419,19 @@ export default function Dashboard() {
           <img
             src="/blockspot-logo.png"
             alt="BricsCoin on Blockspot.io"
+            className="h-12 w-auto"
+          />
+        </a>
+        <a
+          href="https://www.coincarp.com/currencies/bricscoin/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-opacity hover:opacity-80"
+          data-testid="coincarp-explorer-link"
+        >
+          <img
+            src="/coincarp-logo.png"
+            alt="BricsCoin on CoinCarp"
             className="h-12 w-auto"
           />
         </a>
