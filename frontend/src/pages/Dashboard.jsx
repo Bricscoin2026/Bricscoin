@@ -401,6 +401,28 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Blockspot.io Explorer */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="flex justify-center"
+      >
+        <a
+          href="https://blockspot.io/coin/bricscoin/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-opacity hover:opacity-80"
+          data-testid="blockspot-explorer-link"
+        >
+          <img
+            src="/blockspot-logo.png"
+            alt="BricsCoin on Blockspot.io"
+            className="h-12 w-auto"
+          />
+        </a>
+      </motion.div>
     </div>
   );
 }
