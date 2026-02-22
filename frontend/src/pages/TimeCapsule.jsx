@@ -34,6 +34,7 @@ import {
   listTimeCapsules,
   getTimeCapsuleStats
 } from "../lib/api";
+import { hybridSign } from "../lib/pqc-crypto";
 
 function formatTime(ts) {
   if (!ts) return "";
@@ -171,8 +172,6 @@ export default function TimeCapsule() {
 
     setCreating(true);
     try {
-      const { hybridSign } = await import("../lib/pqc-crypto");
-
       const contentBytes = new TextEncoder().encode(content);
       const hashBuf = await crypto.subtle.digest("SHA-256", contentBytes);
       const contentHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, "0")).join("");

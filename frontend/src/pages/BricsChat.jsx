@@ -26,6 +26,7 @@ import {
   getChatConversation,
   getChatStats
 } from "../lib/api";
+import { hybridSign } from "../lib/pqc-crypto";
 
 function formatTime(ts) {
   if (!ts) return "";
@@ -116,9 +117,6 @@ export default function BricsChat() {
 
     setSending(true);
     try {
-      // Import pqc-crypto for signing
-      const { hybridSign } = await import("../lib/pqc-crypto");
-
       const contentHash = await crypto.subtle.digest(
         "SHA-256",
         new TextEncoder().encode(newMessage)
