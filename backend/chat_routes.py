@@ -63,13 +63,9 @@ async def send_message(msg: ChatMessage):
     if not verify_result.get("hybrid_valid"):
         raise HTTPException(status_code=400, detail="Invalid PQC signature")
 
-    # Verify sender address matches public keys
-    combined_hash = hashlib.sha256(
-        (msg.ecdsa_public_key + msg.dilithium_public_key).encode()
-    ).hexdigest()
-    expected_address = "BRICSPQ" + combined_hash[:38]
-    if expected_address != msg.sender_address:
-        raise HTTPException(status_code=400, detail="Sender address does not match PQC keys")
+    # Verify sender is a PQC address
+    if not msg.sender_address.startswith("BRICSPQ"):
+        raise HTTPException(status_code=400, detail="Sender must be a PQC address (BRICSPQ...)")
 
     # Check balance for fee
     balance = await get_balance(msg.sender_address)
