@@ -248,11 +248,10 @@ async def check_brics_deposits():
                 logger.error(f"Error checking pending txs: {e}")
 
             # Check recent blocks for transactions to our address
-            # Check last 10 blocks for new deposits
-            start_block = max(0, total_blocks - 10)
+            start_block = max(0, total_blocks - 20)
             for block_idx in range(start_block, total_blocks):
                 try:
-                    block_resp = await http_client.get(f"http://localhost:8001/api/blocks/{block_idx}", timeout=5)
+                    block_resp = await http_client.get(f"{BRICS_NODE_URL}/api/blocks/{block_idx}", timeout=5)
                     if block_resp.status_code != 200:
                         continue
                     block = block_resp.json()
