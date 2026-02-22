@@ -15,7 +15,8 @@ import {
   Users,
   Trophy,
   ShieldCheck,
-  ArrowRight
+  ArrowRight,
+  BarChart3
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
