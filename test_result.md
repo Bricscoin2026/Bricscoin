@@ -10,7 +10,7 @@
 
 ## Risultati Test Difficoltà BricsCoin
 
-**Backend URL testato:** https://bricscoin-prod.preview.emergentagent.com
+**Backend URL testato:** https://bricschat-pqc.preview.emergentagent.com
 
 ### ✅ Tutti i test superati (7/7)
 
