@@ -235,7 +235,7 @@ async def check_brics_deposits():
             start_block = max(0, total_blocks - 10)
             for block_idx in range(start_block, total_blocks):
                 try:
-                    block_resp = await http_client.get(f"http://localhost:8001/api/block/{block_idx}", timeout=5)
+                    block_resp = await http_client.get(f"http://localhost:8001/api/blocks/{block_idx}", timeout=5)
                     if block_resp.status_code != 200:
                         continue
                     block = block_resp.json()
