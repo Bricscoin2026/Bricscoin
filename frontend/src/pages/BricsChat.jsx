@@ -211,39 +211,76 @@ export default function BricsChat() {
           </div>
           <p className="text-muted-foreground">Quantum-Proof On-Chain Messaging</p>
         </motion.div>
-        <Card className="bg-card border-white/10 max-w-lg">
-          <CardContent className="p-8 text-center space-y-4">
-            <Lock className="w-12 h-12 text-primary mx-auto" />
-            <h2 className="text-lg font-heading font-bold">PQC Wallet Required</h2>
-            <p className="text-muted-foreground text-sm">
-              You need a PQC wallet to use BricsChat. Create one now — it only takes a second.
-            </p>
-            <Button
-              className="gold-button"
-              onClick={async () => {
-                try {
-                  const res = await createPQCWallet("BricsChat Wallet");
-                  const w = res.data;
-                  // Save to PQC wallets list
-                  const existing = JSON.parse(localStorage.getItem("bricscoin_pqc_wallets") || "[]");
-                  existing.push(w);
-                  localStorage.setItem("bricscoin_pqc_wallets", JSON.stringify(existing));
-                  // Save as active chat wallet
-                  localStorage.setItem("pqc_wallet", JSON.stringify(w));
-                  setMyAddress(w.address);
-                  setWalletLoaded(true);
-                  toast.success("PQC Wallet created! You can now use BricsChat.");
-                } catch (err) {
-                  toast.error("Failed to create wallet: " + (err?.response?.data?.detail || err.message));
-                }
-              }}
-              data-testid="create-pqc-inline-btn"
-            >
-              <ShieldCheck className="w-4 h-4 mr-2" />
-              Create PQC Wallet
-            </Button>
-          </CardContent>
-        </Card>
+
+        {showWalletPicker && pqcWallets.length > 0 ? (
+          /* Wallet Picker - user has multiple PQC wallets */
+          <Card className="bg-card border-white/10 max-w-lg">
+            <CardContent className="p-6 space-y-4">
+              <h2 className="text-lg font-heading font-bold flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+                Select PQC Wallet
+              </h2>
+              <p className="text-sm text-muted-foreground">Choose which PQC wallet to use for BricsChat:</p>
+              <div className="space-y-2">
+                {pqcWallets.map((w, i) => (
+                  <button
+                    key={w.address}
+                    onClick={() => selectWallet(w)}
+                    className="w-full text-left p-3 rounded border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                    data-testid={`pick-wallet-${i}`}
+                  >
+                    <p className="font-mono text-xs truncate text-primary">{w.address}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{w.name || `Wallet ${i + 1}`}</p>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          /* No wallet found - offer to create */
+          <Card className="bg-card border-white/10 max-w-lg">
+            <CardContent className="p-8 text-center space-y-4">
+              <Lock className="w-12 h-12 text-primary mx-auto" />
+              <h2 className="text-lg font-heading font-bold">PQC Wallet Required</h2>
+              <p className="text-muted-foreground text-sm">
+                You need a PQC wallet with BRICS balance to use BricsChat.
+                Create a wallet, then send some BRICS to it.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Button
+                  className="gold-button"
+                  onClick={async () => {
+                    try {
+                      const res = await createPQCWallet("BricsChat Wallet");
+                      const w = res.data;
+                      const existing = JSON.parse(localStorage.getItem("bricscoin_pqc_wallets") || "[]");
+                      existing.push(w);
+                      localStorage.setItem("bricscoin_pqc_wallets", JSON.stringify(existing));
+                      localStorage.setItem("pqc_wallet", JSON.stringify(w));
+                      setMyAddress(w.address);
+                      setWalletLoaded(true);
+                      toast.success("PQC Wallet created! Send BRICS to it before chatting.");
+                    } catch (err) {
+                      toast.error("Failed to create wallet: " + (err?.response?.data?.detail || err.message));
+                    }
+                  }}
+                  data-testid="create-pqc-inline-btn"
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  Create New PQC Wallet
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => window.location.href = "/wallet"}
+                  data-testid="go-to-wallet-btn"
+                >
+                  Go to Wallet (use existing)
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Fee: 0.000005 BRICS per message (burned)</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
