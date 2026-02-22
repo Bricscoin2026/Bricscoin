@@ -244,6 +244,17 @@ export default function TimeCapsule() {
         </Card>
       </div>
 
+      {/* Fee Notice */}
+      <Card className="bg-primary/5 border-primary/20">
+        <CardContent className="p-3 flex items-center gap-3">
+          <Coins className="w-5 h-5 text-primary flex-shrink-0" />
+          <div>
+            <p className="text-sm"><span className="font-bold text-primary">Fee: 0.000005 BRICS</span> per capsule (burned)</p>
+            <p className="text-xs text-muted-foreground">Each time capsule creates a real on-chain transaction. The fee is permanently destroyed, making BRICS deflationary.</p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Action buttons */}
       <div className="flex gap-3">
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
