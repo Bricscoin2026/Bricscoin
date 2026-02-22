@@ -53,20 +53,47 @@ export default function BricsChat() {
   const [stats, setStats] = useState(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pqcWallets, setPqcWallets] = useState([]);
+  const [showWalletPicker, setShowWalletPicker] = useState(false);
 
-  // Load wallet from localStorage (PQC wallet)
+  // Load PQC wallets from localStorage
   const loadWallet = useCallback(() => {
-    const saved = localStorage.getItem("pqc_wallet");
+    // First check dedicated chat wallet
+    const chatWallet = localStorage.getItem("pqc_wallet");
+    if (chatWallet) {
+      try {
+        const w = JSON.parse(chatWallet);
+        if (w.address) { setMyAddress(w.address); setWalletLoaded(true); return w; }
+      } catch { /* ignore */ }
+    }
+    // Then check PQC wallets list
+    const saved = localStorage.getItem("bricscoin_pqc_wallets");
     if (saved) {
       try {
-        const w = JSON.parse(saved);
-        setMyAddress(w.address || "");
-        setWalletLoaded(true);
-        return w;
+        const wallets = JSON.parse(saved);
+        setPqcWallets(wallets);
+        if (wallets.length === 1) {
+          // Auto-select single wallet
+          localStorage.setItem("pqc_wallet", JSON.stringify(wallets[0]));
+          setMyAddress(wallets[0].address);
+          setWalletLoaded(true);
+          return wallets[0];
+        } else if (wallets.length > 1) {
+          // Multiple wallets — show picker
+          setShowWalletPicker(true);
+          return null;
+        }
       } catch { /* ignore */ }
     }
     return null;
   }, []);
+
+  const selectWallet = (wallet) => {
+    localStorage.setItem("pqc_wallet", JSON.stringify(wallet));
+    setMyAddress(wallet.address);
+    setWalletLoaded(true);
+    setShowWalletPicker(false);
+  };
 
   useEffect(() => {
     loadWallet();
