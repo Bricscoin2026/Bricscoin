@@ -123,18 +123,38 @@ async def check_usdt_deposits():
             logger.error(f"Error checking USDT deposit for {addr_doc['address']}: {e}")
 
 async def get_trc20_balance(address: str, contract: str) -> float:
-    """Get TRC-20 token balance for an address via TronGrid API"""
-    url = f"https://api.trongrid.io/v1/accounts/{address}/tokens"
-    headers = {"TRON-PRO-API-KEY": TRONGRID_API_KEY}
+    """Get TRC-20 token balance for an address via TronGrid API using balanceOf"""
+    try:
+        # Convert base58 address to hex
+        import base58
+        addr_bytes = base58.b58decode_check(address)
+        addr_hex = addr_bytes.hex()
+        # Pad to 32 bytes for ABI encoding
+        parameter = addr_hex.rjust(64, '0')
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(url, headers=headers, timeout=10)
-        if resp.status_code == 200:
-            data = resp.json()
-            for token in data.get("data", []):
-                if token.get("tokenId") == contract or token.get("tokenAbbr") == "USDT":
-                    balance = float(token.get("balance", 0)) / (10 ** USDT_DECIMALS)
-                    return balance
+        url = "https://api.trongrid.io/wallet/triggerconstantcontract"
+        headers = {
+            "Content-Type": "application/json",
+            "TRON-PRO-API-KEY": TRONGRID_API_KEY
+        }
+        payload = {
+            "owner_address": address,
+            "contract_address": contract,
+            "function_selector": "balanceOf(address)",
+            "parameter": parameter,
+            "visible": True
+        }
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(url, json=payload, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("result", {}).get("result") and data.get("constant_result"):
+                    hex_balance = data["constant_result"][0]
+                    raw_balance = int(hex_balance, 16)
+                    return raw_balance / (10 ** USDT_DECIMALS)
+    except Exception as e:
+        logger.error(f"Error getting TRC-20 balance for {address}: {e}")
     return 0.0
 
 # ============ WITHDRAWALS ============
