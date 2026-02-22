@@ -179,11 +179,7 @@ export default function TimeCapsule() {
       const encrypted = Array.from(contentBytes).map(b => b.toString(16).padStart(2, "0")).join("");
 
       const sigData = `${wallet.address}${contentHash}${unlockHeight}`;
-      const sig = await hybridSign(
-        wallet.ecdsa_private_key,
-        wallet.dilithium_secret_key,
-        sigData
-      );
+      const sig = await hybridSign(wallet, sigData);
 
       await createTimeCapsule({
         creator_address: wallet.address,

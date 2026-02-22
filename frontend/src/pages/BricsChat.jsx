@@ -129,11 +129,7 @@ export default function BricsChat() {
       const encrypted = Array.from(new TextEncoder().encode(newMessage)).map(b => b.toString(16).padStart(2, "0")).join("");
 
       const sigData = `${wallet.address}${recipient}${hashHex}`;
-      const sig = await hybridSign(
-        wallet.ecdsa_private_key,
-        wallet.dilithium_secret_key,
-        sigData
-      );
+      const sig = await hybridSign(wallet, sigData);
 
       await sendChatMessage({
         sender_address: wallet.address,
