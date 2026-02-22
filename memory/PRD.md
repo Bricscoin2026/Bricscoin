@@ -40,21 +40,36 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Electron desktop wallet with full PQC integration
 - Hybrid ECDSA + ML-DSA-65 signing (keys never leave device)
 - Deterministic ML-DSA-65 keygen from seed phrase
-- crypto.getRandomValues polyfill for Node.js/Electron compatibility
 - Cross-platform: Windows, macOS, Linux builds on Codeberg
 
-## Completed Work - Session Feb 18-19, 2026 (Fork 2)
+## Completed Work - Session Feb 22, 2026 (Fork 4 - Current)
 
-1. **Download page links fixed** — All buttons point to Codeberg folder
-2. **Git commit author fixed** — 456 commits rewritten to "Bricscoin_26"
-3. **PQC transaction bug fixed** — crypto.getRandomValues polyfill in Electron
-4. **All platform builds rebuilt** — Win/Mac/Linux with crypto fix on Codeberg
-5. **Old builds cleaned up** — Removed obsolete "Core 3.0.0" builds
-6. **PQC Wallet & Migration pages translated** — Italian → English
-7. **Negative balance bug fixed** — PQC transaction now checks amount + fee
-8. **MAX button added** — Send dialog shows available balance and MAX button
-9. **Number formatting fixed** — Balances rounded to 8 decimals, no scientific notation
-10. **Production backup created** — `/root/bricscoin-backup-20260219_071116/`
+### CEX Cleanup (DONE)
+- Removed Exchange route from App.js and Layout.jsx navigation
+- Removed exchange router from server.py
+- Exchange files (exchange.py, Exchange.jsx, exchange-api.js) still exist but are not imported/used
+
+### 17. BricsChat - Quantum-Proof On-Chain Messaging (DONE)
+- World's first PQC-encrypted blockchain messaging
+- Messages signed with hybrid ECDSA + ML-DSA-65 before on-chain storage
+- Backend: /api/chat/send, /api/chat/messages/{address}, /api/chat/conversation/{a}/{b}, /api/chat/contacts/{address}, /api/chat/stats
+- Frontend: /chat page with contacts list, message thread, real-time send
+- Requires PQC wallet (stored in localStorage)
+- All tests passed (100% backend + frontend)
+
+### 18. Decentralized Time Capsule (DONE)
+- Store encrypted data on-chain, unlockable only at a future block height
+- PQC-signed capsule creation with content hash integrity verification
+- Backend: /api/timecapsule/create, /api/timecapsule/get/{id}, /api/timecapsule/list, /api/timecapsule/address/{address}, /api/timecapsule/stats
+- Frontend: /timecapsule page with stats dashboard, create dialog, progress bars, lock/unlock visualization
+- All tests passed (100% backend + frontend)
+
+### 19. AI Blockchain Oracle - GPT-5.2 (DONE)
+- GPT-5.2 powered network health analysis and predictions via Emergent LLM Key
+- 3 tabs: Analysis (health score, network metrics, AI insights), Predictions (difficulty trend, outlook), Ask Oracle (interactive chat)
+- Backend: /api/oracle/analysis (cached 5min), /api/oracle/predict (cached 15min), /api/oracle/ask, /api/oracle/history
+- Frontend: /oracle page with health gauge, metric cards, recommendations, chat interface
+- All tests passed (100% backend + frontend)
 
 ## Production Deploy Notes
 - **NEVER replace entire server.py** — Use `sed` for targeted fixes
@@ -62,53 +77,19 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Frontend deploy: `docker cp` tar.gz + `tar -xzf` + `nginx -s reload`
 - Backend patch: `docker exec sed -i` + `docker restart bricscoin-api`
 
-## Completed Work - Session Feb 20, 2026 (Fork 3)
-
-11. **Blockspot.io logo on Dashboard** — Added Blockspot.io logo below the Legal Disclaimer, linked to https://blockspot.io/coin/bricscoin/
-12. **CoinCarp logo on Dashboard** — Added CoinCarp logo next to Blockspot.io, linked to https://www.coincarp.com/currencies/bricscoin/
-
-## Completed Work - Session Feb 22, 2026 (Fork 3 continued)
-
-13. **CEX Exchange MVP** — Full centralized exchange for BRICS/USDT trading
-    - User registration/login with JWT auth
-    - Wallet system (BRICS + USDT balances)
-    - Order book with limit and market orders
-    - Matching engine with maker/taker fees (0.1%/0.2%)
-    - Candlestick price chart (TradingView lightweight-charts v5)
-    - Recent trades, open orders
-    - Admin credit endpoint for funding wallets
-    - Initial price: 0.0086 USDT
-14. **Deposit/Withdrawal Integration**
-    - USDT TRC-20: Unique Tron deposit address per user, auto-monitoring via TronGrid API (mainnet)
-    - BRICS PQC: On-chain PQC deposit address (BRICSPQ...) with memo, PQC hybrid signature withdrawals
-    - USDT withdrawal via hot wallet (auto-generated)
-    - Wallet panel in UI with deposit/withdraw tabs
-    - Background deposit monitor running every 30s
-    - TronGrid API balance check via balanceOf contract call
-    - All tests passed (53/53 backend, 100% frontend)
-
-15. **2FA Authentication (Google Authenticator TOTP)**
-    - Setup con QR code scansionabile
-    - Login richiede codice 2FA quando attivo
-    - Prelievi USDT/BRICS richiedono codice 2FA
-    - Disattivazione richiede password + codice 2FA
-    - All tests passed (22/22 backend, 100% frontend)
-16. **Per-user BRICS PQC deposit addresses**
-    - Ogni utente ha un indirizzo PQC unico per depositi BRICS
-    - Monitor automatico controlla blockchain produzione (bricscoin26.org)
-
 ## Remaining Backlog
 
-### P0
-- Deploy exchange to production server (bricscoin26.org/exchange)
-
 ### P1
-- Add exchange link to main Dashboard navigation ✅ DONE
+- Configure miner block rewards to PQC address for network-wide PQC adoption
+- Deploy 3 new features to production server (bricscoin26.org)
 
 ### P2
-- Add trading volume/price history graphs
+- Clean up Codeberg downloads folder (remove old builds)
+- Delete unused CEX files from codebase (exchange.py, tron_integration.py, Exchange.jsx, exchange-api.js)
+
+### P3
+- Mining pool optimizations (Stratum v2 / P2Pool)
 
 ### Future
 - Mobile wallet app
-- Stratum v2 / P2Pool
 - Hashrate history graph on Mining page
