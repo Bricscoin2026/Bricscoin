@@ -2414,6 +2414,14 @@ async def download_file(filename: str):
 # Include the router
 app.include_router(api_router)
 
+# Include exchange router
+from exchange import router as exchange_router, create_exchange_indexes
+app.include_router(exchange_router)
+
+@app.on_event("startup")
+async def startup_exchange():
+    await create_exchange_indexes()
+
 # Security Headers Middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
