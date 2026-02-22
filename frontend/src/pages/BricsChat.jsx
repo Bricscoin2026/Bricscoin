@@ -26,6 +26,7 @@ import {
   getChatContacts,
   getChatConversation,
   getChatStats,
+  getChatFeed,
   createPQCWallet
 } from "../lib/api";
 import { hybridSign } from "../lib/pqc-crypto";
