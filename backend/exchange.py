@@ -176,33 +176,43 @@ async def get_usdt_deposit_address(user: dict = Depends(get_current_user)):
 
 @router.get("/deposit/brics")
 async def get_brics_deposit_address(user: dict = Depends(get_current_user)):
-    """Get user's BRICS PQC deposit address"""
-    exchange_wallet = await db.exchange_config.find_one(
-        {"type": "brics_pqc_wallet"}, {"_id": 0}
+    """Get user's unique BRICS PQC deposit address"""
+    # Check if user already has a BRICS deposit address
+    existing = await db.exchange_deposit_addresses.find_one(
+        {"user_id": user["user_id"], "currency": "brics"}, {"_id": 0}
     )
-    if not exchange_wallet:
-        from pqc_crypto import generate_pqc_wallet
-        pqc = generate_pqc_wallet()
-        exchange_wallet = {
-            "type": "brics_pqc_wallet",
-            "address": pqc["address"],
-            "ecdsa_private_key": pqc["ecdsa_private_key"],
-            "ecdsa_public_key": pqc["ecdsa_public_key"],
-            "dilithium_public_key": pqc["dilithium_public_key"],
-            "dilithium_secret_key": pqc["dilithium_secret_key"],
-            "seed_phrase": pqc["seed_phrase"],
-            "created_at": datetime.now(timezone.utc).isoformat()
+    if existing:
+        return {
+            "address": existing["address"],
+            "currency": "BRICS",
+            "network": "BricsCoin (PQC)",
+            "min_deposit": 1.0,
+            "note": "Send BRICS to this PQC address. Your deposit will be detected automatically."
         }
-        await db.exchange_config.insert_one(exchange_wallet)
-        logger.info(f"Created PQC exchange wallet: {pqc['address']}")
+
+    # Generate a unique PQC wallet for this user
+    from pqc_crypto import generate_pqc_wallet
+    pqc = generate_pqc_wallet()
+
+    deposit_addr = {
+        "user_id": user["user_id"],
+        "currency": "brics",
+        "address": pqc["address"],
+        "ecdsa_private_key": pqc["ecdsa_private_key"],
+        "ecdsa_public_key": pqc["ecdsa_public_key"],
+        "dilithium_public_key": pqc["dilithium_public_key"],
+        "dilithium_secret_key": pqc["dilithium_secret_key"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.exchange_deposit_addresses.insert_one(deposit_addr)
+    logger.info(f"Created PQC deposit address for user {user['user_id']}: {pqc['address']}")
 
     return {
-        "address": exchange_wallet["address"],
-        "memo": user["user_id"][:8],
+        "address": pqc["address"],
         "currency": "BRICS",
         "network": "BricsCoin (PQC)",
         "min_deposit": 1.0,
-        "note": "Send BRICS to this PQC address. Include the memo in the transaction."
+        "note": "Send BRICS to this PQC address. Your deposit will be detected automatically."
     }
 
 @router.post("/withdraw/usdt")
