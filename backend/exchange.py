@@ -49,6 +49,7 @@ class RegisterModel(BaseModel):
 class LoginModel(BaseModel):
     email: str
     password: str
+    totp_code: Optional[str] = None
 
 class OrderModel(BaseModel):
     side: str  # "buy" or "sell"
@@ -60,6 +61,14 @@ class WithdrawModel(BaseModel):
     currency: str  # "brics" or "usdt"
     amount: float
     address: str
+    totp_code: Optional[str] = None
+
+class Enable2FAModel(BaseModel):
+    totp_code: str
+
+class Disable2FAModel(BaseModel):
+    totp_code: str
+    password: str
 
 # ============ AUTH HELPERS ============
 def create_token(user_id: str, username: str) -> str:
