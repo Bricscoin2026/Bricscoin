@@ -380,7 +380,7 @@ export default function BricsChat() {
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Lock className="w-3 h-3" />
-                End-to-end PQC encrypted. Stored on-chain forever.
+                End-to-end PQC encrypted. Stored on-chain forever. Fee: 0.000005 BRICS (burned)
               </p>
             </div>
           </CardContent>
