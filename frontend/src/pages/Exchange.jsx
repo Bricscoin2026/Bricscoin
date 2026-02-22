@@ -5,7 +5,8 @@ import {
   placeOrder, getOpenOrders, cancelOrder, getExchangeWallet,
   exchangeLogin, exchangeRegister,
   getUsdtDepositAddress, getBricsDepositAddress,
-  withdrawUsdt, withdrawBrics
+  withdrawUsdt, withdrawBrics,
+  get2FAStatus, setup2FA, enable2FA, disable2FA
 } from "../lib/exchange-api";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
