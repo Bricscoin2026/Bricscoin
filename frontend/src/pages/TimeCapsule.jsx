@@ -9,7 +9,8 @@ import {
   Eye,
   Copy,
   Check,
-  RefreshCw
+  RefreshCw,
+  Coins
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
