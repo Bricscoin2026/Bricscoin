@@ -19,7 +19,7 @@ import { getWalletBalance, createPQCWallet, migrateToPQC } from "../lib/api";
 import { prepareSecureTransaction } from "../lib/crypto";
 import { Link } from "react-router-dom";
 
-export default function WalletMigration() {
+export default function WalletMigration({ embedded }) {
   const [step, setStep] = useState(1);
   const [legacyWallets, setLegacyWallets] = useState([]);
   const [selectedLegacy, setSelectedLegacy] = useState(null);
@@ -102,6 +102,7 @@ export default function WalletMigration() {
   return (
     <div className="space-y-6 max-w-3xl mx-auto" data-testid="wallet-migration-page">
       {/* Header */}
+      {!embedded && (
       <div>
         <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
           <ArrowRight className="w-8 h-8 text-amber-400" />
@@ -111,6 +112,7 @@ export default function WalletMigration() {
           Transfer your funds from a legacy ECDSA wallet to a hybrid PQC wallet
         </p>
       </div>
+      )}
 
       {/* Progress Steps */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
