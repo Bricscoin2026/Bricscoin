@@ -24,7 +24,8 @@ import {
   getChatMessages,
   getChatContacts,
   getChatConversation,
-  getChatStats
+  getChatStats,
+  createPQCWallet
 } from "../lib/api";
 import { hybridSign } from "../lib/pqc-crypto";
 
@@ -187,15 +188,31 @@ export default function BricsChat() {
             <Lock className="w-12 h-12 text-primary mx-auto" />
             <h2 className="text-lg font-heading font-bold">PQC Wallet Required</h2>
             <p className="text-muted-foreground text-sm">
-              You need a PQC wallet to use BricsChat. Messages are signed with hybrid ECDSA + ML-DSA-65 and stored on-chain.
+              You need a PQC wallet to use BricsChat. Create one now — it only takes a second.
             </p>
             <Button
               className="gold-button"
-              onClick={() => window.location.href = "/pqc-wallet"}
-              data-testid="go-to-pqc-wallet"
+              onClick={async () => {
+                try {
+                  const res = await createPQCWallet("BricsChat Wallet");
+                  const w = res.data;
+                  // Save to PQC wallets list
+                  const existing = JSON.parse(localStorage.getItem("bricscoin_pqc_wallets") || "[]");
+                  existing.push(w);
+                  localStorage.setItem("bricscoin_pqc_wallets", JSON.stringify(existing));
+                  // Save as active chat wallet
+                  localStorage.setItem("pqc_wallet", JSON.stringify(w));
+                  setMyAddress(w.address);
+                  setWalletLoaded(true);
+                  toast.success("PQC Wallet created! You can now use BricsChat.");
+                } catch (err) {
+                  toast.error("Failed to create wallet: " + (err?.response?.data?.detail || err.message));
+                }
+              }}
+              data-testid="create-pqc-inline-btn"
             >
               <ShieldCheck className="w-4 h-4 mr-2" />
-              Go to PQC Wallet
+              Create PQC Wallet
             </Button>
           </CardContent>
         </Card>
