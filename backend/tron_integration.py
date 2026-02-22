@@ -223,13 +223,29 @@ async def check_brics_deposits():
     try:
         # Query the BricsCoin blockchain for transactions to our address
         async with httpx.AsyncClient() as http_client:
-            # Get total blocks count
-            resp = await http_client.get("http://localhost:8001/api/network/stats", timeout=10)
+            # Get total blocks count from PRODUCTION node
+            resp = await http_client.get(f"{BRICS_NODE_URL}/api/network/stats", timeout=10)
             if resp.status_code != 200:
+                logger.error(f"BRICS node unreachable: {BRICS_NODE_URL}")
                 return
 
             summary = resp.json()
             total_blocks = summary.get("total_blocks", 0)
+
+            # Also check pending transactions (mempool)
+            try:
+                pending_resp = await http_client.get(f"{BRICS_NODE_URL}/api/transactions/pending", timeout=10)
+                if pending_resp.status_code == 200:
+                    pending_txs = pending_resp.json()
+                    if isinstance(pending_txs, list):
+                        for tx in pending_txs:
+                            if tx.get("recipient") == exchange_address and float(tx.get("amount", 0)) > 0:
+                                tx_id = tx.get("id") or tx.get("hash") or f"pending_{tx.get('sender', '')}_{tx.get('amount', '')}"
+                                existing = await db.exchange_deposits.find_one({"tx_ref": tx_id, "currency": "brics"})
+                                if not existing:
+                                    await _credit_brics_deposit(tx, tx_id, exchange_address)
+            except Exception as e:
+                logger.error(f"Error checking pending txs: {e}")
 
             # Check recent blocks for transactions to our address
             # Check last 10 blocks for new deposits
