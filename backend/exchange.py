@@ -145,6 +145,14 @@ async def login(data: LoginModel):
     if not bcrypt.checkpw(data.password.encode(), user["password_hash"].encode()):
         raise HTTPException(401, "Invalid credentials")
 
+    # Check 2FA if enabled
+    if user.get("totp_enabled") and user.get("totp_secret"):
+        if not data.totp_code:
+            return {"requires_2fa": True, "message": "2FA code required"}
+        totp = pyotp.TOTP(user["totp_secret"])
+        if not totp.verify(data.totp_code, valid_window=1):
+            raise HTTPException(401, "Invalid 2FA code")
+
     token = create_token(user["user_id"], user["username"])
     return {"token": token, "user_id": user["user_id"], "username": user["username"]}
 
