@@ -46,6 +46,7 @@ export default function BricsChat() {
   const [walletLoaded, setWalletLoaded] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [publicFeed, setPublicFeed] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [recipientAddress, setRecipientAddress] = useState("");
@@ -53,12 +54,11 @@ export default function BricsChat() {
   const [stats, setStats] = useState(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [feedLoading, setFeedLoading] = useState(true);
   const [pqcWallets, setPqcWallets] = useState([]);
   const [showWalletPicker, setShowWalletPicker] = useState(false);
 
-  // Load PQC wallets from localStorage
   const loadWallet = useCallback(() => {
-    // First check dedicated chat wallet
     const chatWallet = localStorage.getItem("pqc_wallet");
     if (chatWallet) {
       try {
@@ -66,20 +66,17 @@ export default function BricsChat() {
         if (w.address) { setMyAddress(w.address); setWalletLoaded(true); return w; }
       } catch { /* ignore */ }
     }
-    // Then check PQC wallets list
     const saved = localStorage.getItem("bricscoin_pqc_wallets");
     if (saved) {
       try {
         const wallets = JSON.parse(saved);
         setPqcWallets(wallets);
         if (wallets.length === 1) {
-          // Auto-select single wallet
           localStorage.setItem("pqc_wallet", JSON.stringify(wallets[0]));
           setMyAddress(wallets[0].address);
           setWalletLoaded(true);
           return wallets[0];
         } else if (wallets.length > 1) {
-          // Multiple wallets — show picker
           setShowWalletPicker(true);
           return null;
         }
@@ -95,9 +92,19 @@ export default function BricsChat() {
     setShowWalletPicker(false);
   };
 
+  const loadPublicFeed = async () => {
+    try {
+      setFeedLoading(true);
+      const res = await getChatFeed(50);
+      setPublicFeed(res.data.messages || []);
+    } catch { /* empty */ }
+    finally { setFeedLoading(false); }
+  };
+
   useEffect(() => {
     loadWallet();
     getChatStats().then(r => setStats(r.data)).catch(() => {});
+    loadPublicFeed();
   }, [loadWallet]);
 
   useEffect(() => {
@@ -151,8 +158,6 @@ export default function BricsChat() {
         new TextEncoder().encode(newMessage)
       );
       const hashHex = Array.from(new Uint8Array(contentHash)).map(b => b.toString(16).padStart(2, "0")).join("");
-
-      // Encrypt content (simple hex encode for demo - in production, use recipient's public key)
       const encrypted = Array.from(new TextEncoder().encode(newMessage)).map(b => b.toString(16).padStart(2, "0")).join("");
 
       const sigData = `${wallet.address}${recipient}${hashHex}`;
@@ -171,6 +176,7 @@ export default function BricsChat() {
 
       toast.success("Message sent with PQC encryption!");
       setNewMessage("");
+      loadPublicFeed();
       if (selectedContact) {
         loadConversation(selectedContact);
       } else {
@@ -201,90 +207,6 @@ export default function BricsChat() {
     }
   };
 
-  if (!walletLoaded) {
-    return (
-      <div className="space-y-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-3 mb-2">
-            <MessageSquareLock className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text">BricsChat</h1>
-          </div>
-          <p className="text-muted-foreground">Quantum-Proof On-Chain Messaging</p>
-        </motion.div>
-
-        {showWalletPicker && pqcWallets.length > 0 ? (
-          /* Wallet Picker - user has multiple PQC wallets */
-          <Card className="bg-card border-white/10 max-w-lg">
-            <CardContent className="p-6 space-y-4">
-              <h2 className="text-lg font-heading font-bold flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-primary" />
-                Select PQC Wallet
-              </h2>
-              <p className="text-sm text-muted-foreground">Choose which PQC wallet to use for BricsChat:</p>
-              <div className="space-y-2">
-                {pqcWallets.map((w, i) => (
-                  <button
-                    key={w.address}
-                    onClick={() => selectWallet(w)}
-                    className="w-full text-left p-3 rounded border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                    data-testid={`pick-wallet-${i}`}
-                  >
-                    <p className="font-mono text-xs truncate text-primary">{w.address}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{w.name || `Wallet ${i + 1}`}</p>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          /* No wallet found - offer to create */
-          <Card className="bg-card border-white/10 max-w-lg">
-            <CardContent className="p-8 text-center space-y-4">
-              <Lock className="w-12 h-12 text-primary mx-auto" />
-              <h2 className="text-lg font-heading font-bold">PQC Wallet Required</h2>
-              <p className="text-muted-foreground text-sm">
-                You need a PQC wallet with BRICS balance to use BricsChat.
-                Create a wallet, then send some BRICS to it.
-              </p>
-              <div className="flex flex-col gap-2">
-                <Button
-                  className="gold-button"
-                  onClick={async () => {
-                    try {
-                      const res = await createPQCWallet("BricsChat Wallet");
-                      const w = res.data;
-                      const existing = JSON.parse(localStorage.getItem("bricscoin_pqc_wallets") || "[]");
-                      existing.push(w);
-                      localStorage.setItem("bricscoin_pqc_wallets", JSON.stringify(existing));
-                      localStorage.setItem("pqc_wallet", JSON.stringify(w));
-                      setMyAddress(w.address);
-                      setWalletLoaded(true);
-                      toast.success("PQC Wallet created! Send BRICS to it before chatting.");
-                    } catch (err) {
-                      toast.error("Failed to create wallet: " + (err?.response?.data?.detail || err.message));
-                    }
-                  }}
-                  data-testid="create-pqc-inline-btn"
-                >
-                  <ShieldCheck className="w-4 h-4 mr-2" />
-                  Create New PQC Wallet
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => window.location.href = "/wallet"}
-                  data-testid="go-to-wallet-btn"
-                >
-                  Go to Wallet (use existing)
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Fee: 0.000005 BRICS per message (burned)</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8" data-testid="bricschat-page">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -295,17 +217,26 @@ export default function BricsChat() {
         <p className="text-muted-foreground">Quantum-Proof On-Chain Messaging — World's First PQC-Encrypted Blockchain Chat</p>
       </motion.div>
 
-      {/* Stats Row */}
+      {/* Stats Row — always visible */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-card border-white/10">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground">Your Address</p>
-            <button onClick={copyAddress} className="flex items-center gap-1 mx-auto mt-1 text-sm font-mono text-primary hover:underline" data-testid="copy-address-btn">
-              {truncateAddress(myAddress)}
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            </button>
-          </CardContent>
-        </Card>
+        {walletLoaded ? (
+          <Card className="bg-card border-white/10">
+            <CardContent className="p-4 text-center">
+              <p className="text-xs text-muted-foreground">Your Address</p>
+              <button onClick={copyAddress} className="flex items-center gap-1 mx-auto mt-1 text-sm font-mono text-primary hover:underline" data-testid="copy-address-btn">
+                {truncateAddress(myAddress)}
+                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              </button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card border-white/10">
+            <CardContent className="p-4 text-center">
+              <p className="text-xs text-muted-foreground">Status</p>
+              <Badge variant="outline" className="mt-1 border-yellow-500/50 text-yellow-400 text-xs">Read-Only</Badge>
+            </CardContent>
+          </Card>
+        )}
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">Total Messages</p>
@@ -337,78 +268,150 @@ export default function BricsChat() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Contacts / Inbox */}
-        <Card className="bg-card border-white/10 lg:col-span-1">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Users className="w-4 h-4 text-primary" />
-              Contacts
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 max-h-96 overflow-y-auto">
-            {contacts.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-4">No conversations yet. Send your first PQC message!</p>
+      {/* Wallet connect prompt (only when not loaded) */}
+      {!walletLoaded && (
+        <Card className="bg-card border-primary/30">
+          <CardContent className="p-4">
+            {showWalletPicker && pqcWallets.length > 0 ? (
+              <div className="space-y-3">
+                <h2 className="text-sm font-heading font-bold flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-primary" />
+                  Select PQC Wallet to Send Messages
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {pqcWallets.map((w, i) => (
+                    <button
+                      key={w.address}
+                      onClick={() => selectWallet(w)}
+                      className="text-left p-3 rounded border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                      data-testid={`pick-wallet-${i}`}
+                    >
+                      <p className="font-mono text-xs truncate text-primary">{w.address}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{w.name || `Wallet ${i + 1}`}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
             ) : (
-              contacts.map((c) => (
-                <button
-                  key={c.address}
-                  onClick={() => loadConversation(c.address)}
-                  data-testid={`contact-${c.address.slice(0, 10)}`}
-                  className={`w-full text-left p-3 rounded border transition-colors ${
-                    selectedContact === c.address
-                      ? "border-primary/50 bg-primary/10"
-                      : "border-white/5 hover:border-white/20"
-                  }`}
-                >
-                  <p className="font-mono text-xs truncate">{c.address}</p>
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-xs text-muted-foreground">{c.message_count} msgs</span>
-                    <span className="text-xs text-muted-foreground">{formatTime(c.last_message)}</span>
-                  </div>
-                </button>
-              ))
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <Lock className="w-8 h-8 text-primary flex-shrink-0" />
+                <div className="flex-1 text-center sm:text-left">
+                  <h2 className="text-sm font-heading font-bold">Connect a PQC Wallet to Send Messages</h2>
+                  <p className="text-xs text-muted-foreground mt-1">You can read the public feed below. To send messages, you need a PQC wallet with BRICS balance.</p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <Button
+                    className="gold-button"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const res = await createPQCWallet("BricsChat Wallet");
+                        const w = res.data;
+                        const existing = JSON.parse(localStorage.getItem("bricscoin_pqc_wallets") || "[]");
+                        existing.push(w);
+                        localStorage.setItem("bricscoin_pqc_wallets", JSON.stringify(existing));
+                        localStorage.setItem("pqc_wallet", JSON.stringify(w));
+                        setMyAddress(w.address);
+                        setWalletLoaded(true);
+                        toast.success("PQC Wallet created! Send BRICS to it before chatting.");
+                      } catch (err) {
+                        toast.error("Failed to create wallet: " + (err?.response?.data?.detail || err.message));
+                      }
+                    }}
+                    data-testid="create-pqc-inline-btn"
+                  >
+                    <ShieldCheck className="w-4 h-4 mr-2" />
+                    Create Wallet
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = "/wallet"}
+                    data-testid="go-to-wallet-btn"
+                  >
+                    Use Existing
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
+      )}
 
-        {/* Chat Area */}
-        <Card className="bg-card border-white/10 lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Contacts / Inbox — only when wallet loaded */}
+        {walletLoaded && (
+          <Card className="bg-card border-white/10 lg:col-span-1">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                Contacts
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 max-h-96 overflow-y-auto">
+              {contacts.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">No conversations yet. Send your first PQC message!</p>
+              ) : (
+                contacts.map((c) => (
+                  <button
+                    key={c.address}
+                    onClick={() => loadConversation(c.address)}
+                    data-testid={`contact-${c.address.slice(0, 10)}`}
+                    className={`w-full text-left p-3 rounded border transition-colors ${
+                      selectedContact === c.address
+                        ? "border-primary/50 bg-primary/10"
+                        : "border-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <p className="font-mono text-xs truncate">{c.address}</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-muted-foreground">{c.message_count} msgs</span>
+                      <span className="text-xs text-muted-foreground">{formatTime(c.last_message)}</span>
+                    </div>
+                  </button>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Chat Area — Public Feed always visible, Send only for wallet holders */}
+        <Card className={`bg-card border-white/10 ${walletLoaded ? "lg:col-span-2" : "lg:col-span-3"}`}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm flex items-center gap-2">
                 <MessageSquareLock className="w-4 h-4 text-primary" />
-                {selectedContact ? truncateAddress(selectedContact) : "Messages"}
+                {walletLoaded && selectedContact ? truncateAddress(selectedContact) : "Global Feed"}
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => { loadMessages(); loadContacts(); }} data-testid="refresh-messages">
+              <Button variant="ghost" size="sm" onClick={() => { loadPublicFeed(); if (walletLoaded) { loadMessages(); loadContacts(); } }} data-testid="refresh-messages">
                 <RefreshCw className="w-4 h-4" />
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Messages List */}
-            <div className="space-y-3 max-h-80 overflow-y-auto pr-2" data-testid="messages-container">
-              {loading ? (
+            {/* Messages List — uses public feed for non-wallet users, private messages for wallet holders */}
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-2" data-testid="messages-container">
+              {(walletLoaded ? loading : feedLoading) ? (
                 <p className="text-xs text-muted-foreground text-center py-8">Loading...</p>
-              ) : messages.length === 0 ? (
+              ) : (walletLoaded && selectedContact ? messages : publicFeed).length === 0 ? (
                 <div className="text-center py-8">
                   <Inbox className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground">No messages yet</p>
+                  <p className="text-xs text-muted-foreground">No messages yet. Be the first to send a PQC message!</p>
                 </div>
               ) : (
-                messages.map((m) => (
+                (walletLoaded && selectedContact ? messages : publicFeed).map((m) => (
                   <div
                     key={m.id}
                     className={`p-3 rounded border ${
-                      m.sender_address === myAddress
+                      walletLoaded && m.sender_address === myAddress
                         ? "border-primary/30 bg-primary/5 ml-8"
-                        : "border-white/10 bg-card mr-8"
+                        : "border-white/10 bg-card"
                     }`}
                     data-testid={`message-${m.id}`}
                   >
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-mono text-xs text-muted-foreground">
-                        {m.sender_address === myAddress ? "You" : truncateAddress(m.sender_address)}
+                        {walletLoaded && m.sender_address === myAddress ? "You" : truncateAddress(m.sender_address)}
                       </span>
                       <div className="flex items-center gap-2">
                         {m.pqc_verified && <ShieldCheck className="w-3 h-3 text-green-400" />}
@@ -416,49 +419,60 @@ export default function BricsChat() {
                       </div>
                     </div>
                     <p className="text-sm">{decryptMessage(m.encrypted_content)}</p>
-                    <p className="text-xs text-muted-foreground mt-1 font-mono">Block #{m.block_height}</p>
+                    {m.block_height !== undefined && (
+                      <p className="text-xs text-muted-foreground mt-1 font-mono">Block #{m.block_height}</p>
+                    )}
                   </div>
                 ))
               )}
             </div>
 
-            {/* Send Area */}
-            <div className="border-t border-white/10 pt-4 space-y-3">
-              {!selectedContact && (
-                <div>
-                  <Label className="text-xs text-muted-foreground">Recipient PQC Address</Label>
+            {/* Send Area — only for wallet holders */}
+            {walletLoaded ? (
+              <div className="border-t border-white/10 pt-4 space-y-3">
+                {!selectedContact && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Recipient PQC Address</Label>
+                    <Input
+                      value={recipientAddress}
+                      onChange={(e) => setRecipientAddress(e.target.value)}
+                      placeholder="BRICSPQ..."
+                      className="font-mono text-xs mt-1"
+                      data-testid="recipient-input"
+                    />
+                  </div>
+                )}
+                <div className="flex gap-2">
                   <Input
-                    value={recipientAddress}
-                    onChange={(e) => setRecipientAddress(e.target.value)}
-                    placeholder="BRICSPQ..."
-                    className="font-mono text-xs mt-1"
-                    data-testid="recipient-input"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a quantum-proof message..."
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    className="flex-1"
+                    data-testid="message-input"
                   />
+                  <Button
+                    className="gold-button"
+                    onClick={handleSend}
+                    disabled={sending}
+                    data-testid="send-message-btn"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
                 </div>
-              )}
-              <div className="flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a quantum-proof message..."
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  className="flex-1"
-                  data-testid="message-input"
-                />
-                <Button
-                  className="gold-button"
-                  onClick={handleSend}
-                  disabled={sending}
-                  data-testid="send-message-btn"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  End-to-end PQC encrypted. Stored on-chain forever. Fee: 0.000005 BRICS (burned)
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Lock className="w-3 h-3" />
-                End-to-end PQC encrypted. Stored on-chain forever. Fee: 0.000005 BRICS (burned)
-              </p>
-            </div>
+            ) : (
+              <div className="border-t border-white/10 pt-4 text-center">
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  Connect a PQC wallet to send messages
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
