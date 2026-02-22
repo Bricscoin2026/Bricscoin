@@ -2414,7 +2414,13 @@ async def download_file(filename: str):
 # Include the router
 app.include_router(api_router)
 
-# (Exchange removed)
+# Include new feature routers
+from chat_routes import router as chat_router
+from timecapsule_routes import router as timecapsule_router
+from oracle_routes import router as oracle_router
+app.include_router(chat_router)
+app.include_router(timecapsule_router)
+app.include_router(oracle_router)
 
 # Security Headers Middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
