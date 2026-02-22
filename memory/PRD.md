@@ -57,6 +57,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Fixed BricsChat: inline PQC wallet creation (no redirect)
 - Updated all internal links to new routes
 - Removed old routes: /explorer, /mining, /network, /pqc-wallet, /migrate, /richlist, /node
+- **Dashboard Live Feed**: BricsChat Global Feed + Network Activity panel on Dashboard
 
 **CEX Cleanup (DONE):**
 - Removed exchange router and navigation links
