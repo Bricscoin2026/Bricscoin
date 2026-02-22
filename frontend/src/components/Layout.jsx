@@ -1,21 +1,14 @@
 import { Outlet, NavLink } from "react-router-dom";
 import { 
   LayoutDashboard, 
-  Search, 
   Wallet, 
-  Pickaxe, 
   Network,
   Menu,
   X,
   Download,
-  Server,
   Info,
   Code,
   Twitter,
-  Users,
-  Trophy,
-  ShieldCheck,
-  ArrowRight,
   MessageSquareLock,
   Clock,
   Brain
