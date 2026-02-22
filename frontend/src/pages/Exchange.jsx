@@ -325,15 +325,23 @@ function WalletPanel({ wallet, onRefresh }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const fetchDeposit = async () => {
+  const fetchDeposit = useCallback(async (cur) => {
     setLoading(true);
     setMessage("");
     try {
-      const res = currency === "usdt" ? await getUsdtDepositAddress() : await getBricsDepositAddress();
+      const res = cur === "usdt" ? await getUsdtDepositAddress() : await getBricsDepositAddress();
       setDepositInfo(res.data);
     } catch (e) { setMessage(e.response?.data?.detail || "Error"); }
     setLoading(false);
-  };
+  }, []);
+
+  // Reset and auto-fetch when currency changes
+  useEffect(() => {
+    setDepositInfo(null);
+    if (tab === "deposit") {
+      fetchDeposit(currency);
+    }
+  }, [currency, tab, fetchDeposit]);
 
   const handleWithdraw = async () => {
     if (!withdrawAddr || !withdrawAmt) return;
