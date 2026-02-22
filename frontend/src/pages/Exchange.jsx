@@ -223,6 +223,8 @@ function AuthModal({ onClose, onAuth }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [needs2FA, setNeeds2FA] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -233,7 +235,12 @@ function AuthModal({ onClose, onAuth }) {
     try {
       let res;
       if (mode === "login") {
-        res = await exchangeLogin(email, password);
+        res = await exchangeLogin(email, password, needs2FA ? totpCode : undefined);
+        if (res.data.requires_2fa) {
+          setNeeds2FA(true);
+          setLoading(false);
+          return;
+        }
       } else {
         res = await exchangeRegister(username, email, password);
       }
@@ -250,30 +257,47 @@ function AuthModal({ onClose, onAuth }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" data-testid="auth-modal">
       <Card className="w-full max-w-md bg-[#0d1117] border-white/10">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">{mode === "login" ? "Login" : "Register"}</CardTitle>
+          <CardTitle className="text-lg">{needs2FA ? "2FA Verification" : mode === "login" ? "Login" : "Register"}</CardTitle>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "register" && (
+            {!needs2FA && mode === "register" && (
               <Input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)}
                 className="bg-white/5 border-white/10" data-testid="auth-username" required />
             )}
-            <Input placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)}
-              className="bg-white/5 border-white/10" data-testid="auth-email" required />
-            <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)}
-              className="bg-white/5 border-white/10" data-testid="auth-password" required />
+            {!needs2FA && (
+              <>
+                <Input placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  className="bg-white/5 border-white/10" data-testid="auth-email" required />
+                <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)}
+                  className="bg-white/5 border-white/10" data-testid="auth-password" required />
+              </>
+            )}
+            {needs2FA && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                  <Shield className="w-4 h-4" />
+                  <span>Enter the 6-digit code from Google Authenticator</span>
+                </div>
+                <Input placeholder="000000" value={totpCode} onChange={e => setTotpCode(e.target.value)}
+                  className="bg-white/5 border-white/10 text-center text-2xl tracking-widest" maxLength={6}
+                  data-testid="auth-totp" autoFocus required />
+              </div>
+            )}
             {error && <p className="text-red-400 text-sm">{error}</p>}
             <Button type="submit" disabled={loading} className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold" data-testid="auth-submit">
-              {loading ? "..." : mode === "login" ? "Login" : "Register"}
+              {loading ? "..." : needs2FA ? "Verify" : mode === "login" ? "Login" : "Register"}
             </Button>
-            <p className="text-center text-sm text-gray-500">
-              {mode === "login" ? "No account? " : "Already registered? "}
-              <button type="button" onClick={() => setMode(mode === "login" ? "register" : "login")}
-                className="text-yellow-400 hover:underline">
-                {mode === "login" ? "Register" : "Login"}
-              </button>
-            </p>
+            {!needs2FA && (
+              <p className="text-center text-sm text-gray-500">
+                {mode === "login" ? "No account? " : "Already registered? "}
+                <button type="button" onClick={() => setMode(mode === "login" ? "register" : "login")}
+                  className="text-yellow-400 hover:underline">
+                  {mode === "login" ? "Register" : "Login"}
+                </button>
+              </p>
+            )}
           </form>
         </CardContent>
       </Card>
