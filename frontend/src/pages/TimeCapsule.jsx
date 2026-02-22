@@ -272,6 +272,7 @@ export default function TimeCapsule() {
               </DialogTitle>
               <DialogDescription>
                 Store encrypted data on-chain. No one can access it until the target block is reached.
+                <span className="block mt-1 text-primary font-medium">Fee: 0.000005 BRICS (burned)</span>
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
