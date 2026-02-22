@@ -51,11 +51,11 @@ export const getUsdtDepositAddress = () =>
 export const getBricsDepositAddress = () =>
   axios.get(`${API}/api/exchange/deposit/brics`, { headers: getAuthHeaders() });
 
-export const withdrawUsdt = (amount, address) =>
-  axios.post(`${API}/api/exchange/withdraw/usdt`, { currency: "usdt", amount, address }, { headers: getAuthHeaders() });
+export const withdrawUsdt = (amount, address, totp_code) =>
+  axios.post(`${API}/api/exchange/withdraw/usdt`, { currency: "usdt", amount, address, totp_code }, { headers: getAuthHeaders() });
 
-export const withdrawBrics = (amount, address) =>
-  axios.post(`${API}/api/exchange/withdraw/brics`, { currency: "brics", amount, address }, { headers: getAuthHeaders() });
+export const withdrawBrics = (amount, address, totp_code) =>
+  axios.post(`${API}/api/exchange/withdraw/brics`, { currency: "brics", amount, address, totp_code }, { headers: getAuthHeaders() });
 
 export const getDeposits = () =>
   axios.get(`${API}/api/exchange/wallet/deposits`, { headers: getAuthHeaders() });
