@@ -395,11 +395,9 @@ function WalletPanel({ wallet, onRefresh }) {
 
       {tab === "deposit" && (
         <div className="space-y-2">
-          {!depositInfo ? (
-            <Button onClick={fetchDeposit} disabled={loading} size="sm" className="w-full bg-green-600 hover:bg-green-700 text-xs" data-testid="get-deposit-address-btn">
-              {loading ? "..." : "Get Deposit Address"}
-            </Button>
-          ) : (
+          {loading ? (
+            <p className="text-xs text-center text-gray-400">Loading...</p>
+          ) : depositInfo ? (
             <div className="space-y-2">
               <p className="text-xs text-gray-400">{depositInfo.network}</p>
               <div className="flex items-center gap-1 bg-white/5 rounded p-2">
@@ -415,7 +413,7 @@ function WalletPanel({ wallet, onRefresh }) {
               )}
               <p className="text-xs text-yellow-400/70">{depositInfo.note}</p>
             </div>
-          )}
+          ) : null}
         </div>
       )}
 
