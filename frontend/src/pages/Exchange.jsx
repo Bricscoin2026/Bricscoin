@@ -566,6 +566,10 @@ function WalletPanel({ wallet, onRefresh }) {
               className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-yellow-400">MAX</button>
           </div>
           <p className="text-xs text-gray-500">Min: {currency === "usdt" ? "5 USDT" : "1 BRICS"}</p>
+          {has2FA && (
+            <Input placeholder="2FA Code" value={withdrawTotp} onChange={e => setWithdrawTotp(e.target.value)}
+              className="bg-white/5 border-white/10 text-xs text-center" maxLength={6} data-testid="withdraw-totp-input" />
+          )}
           <Button onClick={handleWithdraw} disabled={loading} size="sm" className="w-full bg-red-600 hover:bg-red-700 text-xs" data-testid="withdraw-submit-btn">
             {loading ? "..." : `Withdraw ${currency.toUpperCase()}`}
           </Button>
