@@ -15,7 +15,9 @@ import About from "./pages/About";
 import RichList from "./pages/RichList";
 import PQCWallet from "./pages/PQCWallet";
 import WalletMigration from "./pages/WalletMigration";
-import Exchange from "./pages/Exchange";
+import BricsChat from "./pages/BricsChat";
+import TimeCapsule from "./pages/TimeCapsule";
+import AiOracle from "./pages/AiOracle";
 import "./App.css";
 
 function App() {
@@ -37,8 +39,10 @@ function App() {
             <Route path="node" element={<RunNode />} />
             <Route path="richlist" element={<RichList />} />
             <Route path="about" element={<About />} />
+            <Route path="chat" element={<BricsChat />} />
+            <Route path="timecapsule" element={<TimeCapsule />} />
+            <Route path="oracle" element={<AiOracle />} />
           </Route>
-          <Route path="exchange" element={<Exchange />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="bottom-right" richColors />

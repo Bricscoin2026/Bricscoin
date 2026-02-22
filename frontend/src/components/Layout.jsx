@@ -16,7 +16,9 @@ import {
   Trophy,
   ShieldCheck,
   ArrowRight,
-  BarChart3
+  MessageSquareLock,
+  Clock,
+  Brain
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
