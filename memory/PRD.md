@@ -58,6 +58,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - Updated all internal links to new routes
 - Removed old routes: /explorer, /mining, /network, /pqc-wallet, /migrate, /richlist, /node
 - **Dashboard Live Feed**: BricsChat Global Feed + Network Activity panel on Dashboard
+- **Real Fees**: BricsChat (0.000005 BRICS/msg) and Time Capsule (0.000005 BRICS/capsule) — fees burned, creating deflationary mechanism. Each message/capsule creates a real on-chain transaction.
 
 **CEX Cleanup (DONE):**
 - Removed exchange router and navigation links
