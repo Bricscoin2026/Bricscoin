@@ -2421,6 +2421,10 @@ app.include_router(exchange_router)
 @app.on_event("startup")
 async def startup_exchange():
     await create_exchange_indexes()
+    # Start Tron deposit monitor
+    from tron_integration import deposit_monitor_loop, get_or_create_hot_wallet
+    await get_or_create_hot_wallet()
+    asyncio.create_task(deposit_monitor_loop())
 
 # Security Headers Middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
