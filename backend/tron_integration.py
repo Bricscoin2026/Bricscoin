@@ -252,88 +252,70 @@ async def process_usdt_withdrawal(user_id: str, amount: float, to_address: str) 
 
 # ============ BRICS DEPOSIT MONITORING ============
 async def check_brics_deposits():
-    """Check for incoming BRICS transactions to the exchange PQC wallet"""
-    exchange_wallet = await db.exchange_config.find_one(
-        {"type": "brics_pqc_wallet"}, {"_id": 0}
-    )
-    if not exchange_wallet:
+    """Check for incoming BRICS transactions to per-user PQC deposit addresses"""
+    # Get all BRICS deposit addresses
+    addresses = await db.exchange_deposit_addresses.find(
+        {"currency": "brics"}, {"_id": 0}
+    ).to_list(1000)
+
+    if not addresses:
         return
 
-    exchange_address = exchange_wallet["address"]
-
-    try:
-        async with httpx.AsyncClient() as http_client:
-            # Query the address balance API directly - most reliable
-            resp = await http_client.get(
-                f"{BRICS_NODE_URL}/api/address/{exchange_address}", timeout=10
-            )
-            if resp.status_code != 200:
-                logger.error(f"BRICS address API error: {resp.status_code}")
-                return
-
-            addr_data = resp.json()
-            txs = addr_data.get("recent_transactions", [])
-
-            for tx in txs:
-                if tx.get("recipient") != exchange_address:
-                    continue
-                if float(tx.get("amount", 0)) <= 0:
-                    continue
-
-                tx_id = tx.get("id") or tx.get("tx_id") or tx.get("hash", "")
-                if not tx_id:
-                    continue
-
-                # Check if already processed
-                existing = await db.exchange_deposits.find_one({
-                    "tx_ref": tx_id, "currency": "brics"
-                })
-                if existing:
-                    continue
-
-                amount = float(tx.get("amount", 0))
-                sender = tx.get("sender", "")
-
-                # Find user - check all exchange users
-                users = await db.exchange_users.find({}, {"_id": 0}).to_list(1000)
-                matched_user = None
-                for u in users:
-                    if u["user_id"][:8] in tx_id or sender:
-                        # For now, credit any deposit to the user whose memo matches
-                        # or if there's only one user who deposited recently
-                        pass
-
-                # Since we use a single exchange address, match by checking
-                # which user has the memo matching their user_id[:8]
-                for u in users:
-                    # Check if this user's memo was used (we show user_id[:8] as memo)
-                    matched_user = u  # For single-user testing, credit the last registered user
-                    break
-
-                if not matched_user:
-                    logger.warning(f"BRICS deposit {amount} from {sender} - no user match")
-                    continue
-
-                deposit = {
-                    "deposit_id": str(uuid.uuid4()),
-                    "user_id": matched_user["user_id"],
-                    "currency": "brics",
-                    "amount": amount,
-                    "tx_ref": tx_id,
-                    "from_address": sender,
-                    "status": "completed",
-                    "method": "on-chain",
-                    "created_at": datetime.now(timezone.utc).isoformat()
-                }
-                await db.exchange_deposits.insert_one(deposit)
-                await db.exchange_wallets.update_one(
-                    {"user_id": matched_user["user_id"]},
-                    {"$inc": {"brics_available": amount}}
+    for addr_doc in addresses:
+        try:
+            async with httpx.AsyncClient() as http_client:
+                resp = await http_client.get(
+                    f"{BRICS_NODE_URL}/api/address/{addr_doc['address']}", timeout=10
                 )
-                logger.info(f"BRICS deposit: {amount} BRICS for user {matched_user['username']} from {sender}")
+                if resp.status_code != 200:
+                    continue
 
-    except Exception as e:
-        logger.error(f"BRICS deposit monitor error: {e}")
+                addr_data = resp.json()
+                balance = float(addr_data.get("balance", 0))
+
+                if balance <= 0:
+                    continue
+
+                # Check each transaction to this address
+                for tx in addr_data.get("recent_transactions", []):
+                    if tx.get("recipient") != addr_doc["address"]:
+                        continue
+                    if float(tx.get("amount", 0)) <= 0:
+                        continue
+
+                    tx_id = tx.get("id") or tx.get("tx_id", "")
+                    if not tx_id:
+                        continue
+
+                    # Already processed?
+                    existing = await db.exchange_deposits.find_one({
+                        "tx_ref": tx_id, "currency": "brics"
+                    })
+                    if existing:
+                        continue
+
+                    amount = float(tx.get("amount", 0))
+                    deposit = {
+                        "deposit_id": str(uuid.uuid4()),
+                        "user_id": addr_doc["user_id"],
+                        "currency": "brics",
+                        "amount": amount,
+                        "tx_ref": tx_id,
+                        "from_address": tx.get("sender", ""),
+                        "deposit_address": addr_doc["address"],
+                        "status": "completed",
+                        "method": "on-chain-pqc",
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.exchange_deposits.insert_one(deposit)
+                    await db.exchange_wallets.update_one(
+                        {"user_id": addr_doc["user_id"]},
+                        {"$inc": {"brics_available": amount}}
+                    )
+                    logger.info(f"BRICS deposit: {amount} BRICS for user {addr_doc['user_id'][:8]} at {addr_doc['address'][:20]}...")
+
+        except Exception as e:
+            logger.error(f"Error checking BRICS deposit for {addr_doc['address'][:20]}: {e}")
 
 # ============ BACKGROUND TASK ============
 async def deposit_monitor_loop():
