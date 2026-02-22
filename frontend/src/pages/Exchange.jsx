@@ -13,7 +13,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import {
   ArrowUpRight, ArrowDownRight, TrendingUp, BarChart3,
-  LogIn, UserPlus, X, Wallet, RefreshCw, Copy, ArrowDownToLine, ArrowUpFromLine
+  LogIn, UserPlus, X, Wallet, RefreshCw, Copy, ArrowDownToLine, ArrowUpFromLine, Shield, Settings
 } from "lucide-react";
 
 // ============ CHART COMPONENT ============
