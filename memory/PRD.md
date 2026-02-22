@@ -78,19 +78,24 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
     - Recent trades, open orders
     - Admin credit endpoint for funding wallets
     - Initial price: 0.0086 USDT
+14. **Deposit/Withdrawal Integration**
+    - USDT TRC-20: Unique Tron deposit address per user, auto-monitoring via TronGrid API
+    - BRICS: On-chain deposit address with memo, on-chain withdrawal
+    - USDT withdrawal via hot wallet
+    - Wallet panel in UI with deposit/withdraw tabs
+    - Background deposit monitor running every 30s
     - All tests passed (28/28 backend, 100% frontend)
 
 ## Remaining Backlog
 
 ### P0
-- Integrate BRICS on-chain deposits/withdrawals in the exchange
-- Integrate USDT TRC-20 deposits/withdrawals (needs TronGrid API key + Tron wallet private key)
-
-### P1
 - Deploy exchange to production server (bricscoin26.org/exchange)
 
-### P2
+### P1
 - Add exchange link to main Dashboard navigation
+
+### P2
+- Add trading volume/price history graphs
 
 ### Future
 - Mobile wallet app
