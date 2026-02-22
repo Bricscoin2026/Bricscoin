@@ -62,3 +62,16 @@ export const getDeposits = () =>
 
 export const getWithdrawals = () =>
   axios.get(`${API}/api/exchange/wallet/withdrawals`, { headers: getAuthHeaders() });
+
+// 2FA
+export const get2FAStatus = () =>
+  axios.get(`${API}/api/exchange/2fa/status`, { headers: getAuthHeaders() });
+
+export const setup2FA = () =>
+  axios.post(`${API}/api/exchange/2fa/setup`, {}, { headers: getAuthHeaders() });
+
+export const enable2FA = (totp_code) =>
+  axios.post(`${API}/api/exchange/2fa/enable`, { totp_code }, { headers: getAuthHeaders() });
+
+export const disable2FA = (totp_code, password) =>
+  axios.post(`${API}/api/exchange/2fa/disable`, { totp_code, password }, { headers: getAuthHeaders() });
