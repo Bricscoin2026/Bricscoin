@@ -173,7 +173,7 @@ function QuantumSecurityWidget({ pqcStats, nodeKeys, delay = 0 }) {
           {/* CTA */}
           <div className="mt-4">
             <Button asChild variant="outline" size="sm" className="w-full border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 rounded-sm" data-testid="quantum-wallet-cta">
-              <Link to="/pqc-wallet">
+              <Link to="/wallet">
                 <ShieldCheck className="w-4 h-4 mr-2" />
                 Quantum-Safe Wallet
                 <ChevronRight className="w-4 h-4 ml-auto" />
@@ -252,7 +252,7 @@ export default function Dashboard() {
               Security Audit Passed
             </Badge>
           </Link>
-          <Link to="/pqc-wallet">
+          <Link to="/wallet">
             <Badge 
               className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 cursor-pointer px-3 py-1"
               data-testid="quantum-safe-badge"
@@ -270,22 +270,22 @@ export default function Dashboard() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button asChild className="gold-button rounded-sm" data-testid="start-mining-btn">
-            <Link to="/mining">
+            <Link to="/blockchain">
               <Pickaxe className="w-4 h-4 mr-2" />
               Mining Info
             </Link>
           </Button>
           <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="create-wallet-btn">
-            <Link to="/pqc-wallet">
+            <Link to="/wallet">
               <ShieldCheck className="w-4 h-4 mr-2" />
               Create PQC Wallet
             </Link>
           </Button>
           <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="community-chat-btn">
-            <a href="https://bricscoin26-chat.org/community" target="_blank" rel="noopener noreferrer">
+            <Link to="/chat">
               <MessageCircle className="w-4 h-4 mr-2" />
               Community Chat
-            </a>
+            </Link>
           </Button>
           <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="whitepaper-btn">
             <a href={`${process.env.REACT_APP_BACKEND_URL}/api/downloads/BricsCoin_Whitepaper_v3.pdf`} target="_blank" rel="noopener noreferrer">
@@ -357,7 +357,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <CardTitle className="font-heading">Recent Blocks</CardTitle>
               <Button asChild variant="ghost" size="sm" className="text-primary">
-                <Link to="/explorer">
+                <Link to="/blockchain">
                   View All
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Link>
