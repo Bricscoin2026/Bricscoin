@@ -351,6 +351,7 @@ export default function PQCWallet({ embedded }) {
           </Dialog>
         </div>
       </div>
+      )}
 
       {/* PQC Stats Banner */}
       {stats && (
