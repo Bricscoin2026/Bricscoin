@@ -222,8 +222,8 @@ async def check_brics_deposits():
     try:
         # Query the BricsCoin blockchain for transactions to our address
         async with httpx.AsyncClient() as http_client:
-            # Get all blocks and check transactions
-            resp = await http_client.get("http://localhost:8001/api/blockchain/summary", timeout=10)
+            # Get total blocks count
+            resp = await http_client.get("http://localhost:8001/api/network/stats", timeout=10)
             if resp.status_code != 200:
                 return
 
