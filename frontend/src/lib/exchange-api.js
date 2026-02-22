@@ -11,8 +11,8 @@ const getAuthHeaders = () => {
 export const exchangeRegister = (username, email, password) =>
   axios.post(`${API}/api/exchange/register`, { username, email, password });
 
-export const exchangeLogin = (email, password) =>
-  axios.post(`${API}/api/exchange/login`, { email, password });
+export const exchangeLogin = (email, password, totp_code) =>
+  axios.post(`${API}/api/exchange/login`, { email, password, totp_code });
 
 // Wallet
 export const getExchangeWallet = () =>
