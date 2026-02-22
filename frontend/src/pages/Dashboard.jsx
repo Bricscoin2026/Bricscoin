@@ -389,6 +389,139 @@ export default function Dashboard() {
         </Card>
       </motion.div>
 
+      {/* Live Activity Feed */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45 }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* BricsChat Global Feed */}
+          <Card className="bg-card border-white/10" data-testid="bricschat-global-feed">
+            <CardHeader className="border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="font-heading flex items-center gap-2 text-base">
+                  <MessageSquareLock className="w-5 h-5 text-primary" />
+                  BricsChat Live Feed
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  {chatStats && (
+                    <Badge variant="outline" className="border-primary/30 text-primary text-xs">
+                      {chatStats.total_messages} messages
+                    </Badge>
+                  )}
+                  <Button asChild variant="ghost" size="sm" className="text-primary">
+                    <Link to="/chat">
+                      <Send className="w-3 h-3 mr-1" />Join
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {chatFeed.length === 0 ? (
+                <div className="p-8 text-center">
+                  <MessageSquareLock className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
+                  <p className="text-sm text-muted-foreground">No messages yet. Be the first to send a quantum-proof message!</p>
+                  <Button asChild variant="outline" size="sm" className="mt-3 border-primary/30 text-primary">
+                    <Link to="/chat">Start Chatting</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto">
+                  {chatFeed.map((msg) => {
+                    let decoded = "[Encrypted]";
+                    try {
+                      const bytes = msg.encrypted_content.match(/.{1,2}/g)?.map(b => parseInt(b, 16)) || [];
+                      decoded = new TextDecoder().decode(new Uint8Array(bytes));
+                    } catch {}
+                    const senderShort = msg.sender_address ? `${msg.sender_address.slice(0, 10)}...${msg.sender_address.slice(-4)}` : "?";
+                    return (
+                      <div key={msg.id} className="flex items-start gap-3 p-3 border-b border-white/5 hover:bg-white/[0.02] transition-colors" data-testid={`feed-msg-${msg.id}`}>
+                        <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-mono text-xs text-primary">{senderShort}</span>
+                            <span className="text-xs text-muted-foreground">Block #{msg.block_height}</span>
+                          </div>
+                          <p className="text-sm text-foreground/90 break-words">{decoded}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{new Date(msg.timestamp).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Network Activity Summary */}
+          <Card className="bg-card border-white/10" data-testid="network-activity-feed">
+            <CardHeader className="border-b border-white/10 pb-3">
+              <CardTitle className="font-heading flex items-center gap-2 text-base">
+                <Activity className="w-5 h-5 text-green-400" />
+                Network Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              {/* Chat Stats */}
+              <div className="flex items-center gap-4 p-3 bg-primary/5 rounded border border-primary/15">
+                <MessageSquareLock className="w-8 h-8 text-primary flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold">BricsChat</p>
+                  <p className="text-xs text-muted-foreground">PQC-encrypted on-chain messaging</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold gold-text">{chatStats?.total_messages ?? 0}</p>
+                  <p className="text-xs text-muted-foreground">{chatStats?.unique_users ?? 0} users</p>
+                </div>
+              </div>
+
+              {/* Time Capsule Stats */}
+              <div className="flex items-center gap-4 p-3 bg-blue-500/5 rounded border border-blue-500/15">
+                <Clock className="w-8 h-8 text-blue-400 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold">Time Capsules</p>
+                  <p className="text-xs text-muted-foreground">Decentralized time-locked storage</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-blue-400">{capsuleStats?.total_capsules ?? 0}</p>
+                  <p className="text-xs text-muted-foreground">{capsuleStats?.locked ?? 0} locked</p>
+                </div>
+              </div>
+
+              {/* PQC Security */}
+              <div className="flex items-center gap-4 p-3 bg-green-500/5 rounded border border-green-500/15">
+                <ShieldCheck className="w-8 h-8 text-green-400 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold">Quantum Security</p>
+                  <p className="text-xs text-muted-foreground">Hybrid ECDSA + ML-DSA-65</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-green-400">{pqcStats?.pqc_wallets ?? 0}</p>
+                  <p className="text-xs text-muted-foreground">PQC wallets</p>
+                </div>
+              </div>
+
+              {/* Quick Links */}
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                <Button asChild variant="outline" size="sm" className="border-white/10 text-xs">
+                  <Link to="/chat">BricsChat</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="border-white/10 text-xs">
+                  <Link to="/timecapsule">Time Capsule</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="border-white/10 text-xs">
+                  <Link to="/oracle">AI Oracle</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </motion.div>
+
       {/* Disclaimer Legale */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
