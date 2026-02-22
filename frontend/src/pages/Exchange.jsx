@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { createChart } from "lightweight-charts";
+import { createChart, CandlestickSeries } from "lightweight-charts";
 import {
   getTicker, getOrderbook, getRecentTrades, getCandles,
   placeOrder, getOpenOrders, cancelOrder, getExchangeWallet,
