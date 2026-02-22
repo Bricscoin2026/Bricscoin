@@ -29,7 +29,9 @@ export default function Layout() {
 
   const navItems = [
     { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/exchange", icon: BarChart3, label: "Exchange" },
+    { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
+    { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
+    { to: "/oracle", icon: Brain, label: "AI Oracle" },
     { to: "/explorer", icon: Search, label: "Explorer" },
     { to: "/wallet", icon: Wallet, label: "Wallet" },
     { to: "/pqc-wallet", icon: ShieldCheck, label: "PQC Wallet" },

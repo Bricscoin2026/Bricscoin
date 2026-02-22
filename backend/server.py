@@ -2414,17 +2414,7 @@ async def download_file(filename: str):
 # Include the router
 app.include_router(api_router)
 
-# Include exchange router
-from exchange import router as exchange_router, create_exchange_indexes
-app.include_router(exchange_router)
-
-@app.on_event("startup")
-async def startup_exchange():
-    await create_exchange_indexes()
-    # Start Tron deposit monitor
-    from tron_integration import deposit_monitor_loop, get_or_create_hot_wallet
-    await get_or_create_hot_wallet()
-    asyncio.create_task(deposit_monitor_loop())
+# (Exchange removed)
 
 # Security Headers Middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
