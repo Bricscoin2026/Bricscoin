@@ -116,6 +116,8 @@ async def register(data: RegisterModel):
         "username": data.username.lower(),
         "email": data.email.lower(),
         "password_hash": password_hash,
+        "totp_enabled": False,
+        "totp_secret": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.exchange_users.insert_one(user)
