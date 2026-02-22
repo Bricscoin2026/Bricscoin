@@ -629,6 +629,19 @@ export default function Exchange() {
               )}
             </CardContent>
           </Card>
+          {/* Wallet Panel */}
+          {user && (
+            <Card className="bg-[#0a0e17] border-white/5 mt-2">
+              <CardHeader className="py-2 px-3 border-b border-white/5">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-yellow-400" /> Wallet
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3">
+                <WalletPanel wallet={wallet} onRefresh={fetchUserData} />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Open Orders */}
