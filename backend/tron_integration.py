@@ -19,6 +19,7 @@ logger = logging.getLogger("tron")
 MONGO_URL = os.environ.get("MONGO_URL")
 DB_NAME = os.environ.get("DB_NAME", "test_database")
 TRONGRID_API_KEY = os.environ.get("TRONGRID_API_KEY", "")
+BRICS_NODE_URL = os.environ.get("BRICS_NODE_URL", "http://localhost:8001")
 
 # USDT TRC-20 contract on Tron Mainnet
 USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
