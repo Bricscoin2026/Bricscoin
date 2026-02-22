@@ -16,6 +16,10 @@ import bcrypt
 import uuid
 import asyncio
 import logging
+import pyotp
+import qrcode
+import io
+import base64
 
 logger = logging.getLogger("exchange")
 
