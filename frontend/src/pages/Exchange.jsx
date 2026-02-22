@@ -340,6 +340,111 @@ function OpenOrders({ orders, onCancel }) {
   );
 }
 
+// ============ 2FA SETTINGS ============
+function Security2FA() {
+  const [enabled, setEnabled] = useState(false);
+  const [setupData, setSetupData] = useState(null);
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    get2FAStatus().then(r => setEnabled(r.data.enabled)).catch(() => {});
+  }, []);
+
+  const handleSetup = async () => {
+    setLoading(true);
+    try {
+      const res = await setup2FA();
+      setSetupData(res.data);
+    } catch (e) { setMessage(e.response?.data?.detail || "Error"); }
+    setLoading(false);
+  };
+
+  const handleEnable = async () => {
+    if (!code || code.length !== 6) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      await enable2FA(code);
+      setEnabled(true);
+      setSetupData(null);
+      setCode("");
+      setMessage("2FA enabled!");
+    } catch (e) { setMessage(e.response?.data?.detail || "Invalid code"); }
+    setLoading(false);
+  };
+
+  const handleDisable = async () => {
+    if (!code || !password) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      await disable2FA(code, password);
+      setEnabled(false);
+      setCode("");
+      setPassword("");
+      setMessage("2FA disabled");
+    } catch (e) { setMessage(e.response?.data?.detail || "Error"); }
+    setLoading(false);
+  };
+
+  return (
+    <div data-testid="security-2fa" className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Shield className="w-4 h-4 text-yellow-400" />
+          <span className="text-sm font-medium">2FA</span>
+        </div>
+        <span className={`text-xs px-2 py-0.5 rounded ${enabled ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+          {enabled ? "Active" : "Disabled"}
+        </span>
+      </div>
+
+      {!enabled && !setupData && (
+        <Button onClick={handleSetup} disabled={loading} size="sm" className="w-full bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 text-xs" data-testid="setup-2fa-btn">
+          {loading ? "..." : "Enable 2FA"}
+        </Button>
+      )}
+
+      {setupData && (
+        <div className="space-y-3">
+          <p className="text-xs text-gray-400">Scan with Google Authenticator:</p>
+          <div className="flex justify-center">
+            <img src={setupData.qr_code} alt="2FA QR" className="w-40 h-40 rounded" data-testid="2fa-qr-code" />
+          </div>
+          <div className="bg-white/5 rounded p-2">
+            <p className="text-xs text-gray-500 mb-1">Manual key:</p>
+            <p className="text-xs font-mono break-all text-yellow-400" data-testid="2fa-secret">{setupData.secret}</p>
+          </div>
+          <Input placeholder="Enter 6-digit code" value={code} onChange={e => setCode(e.target.value)}
+            className="bg-white/5 border-white/10 text-center text-sm" maxLength={6} data-testid="2fa-verify-code" />
+          <Button onClick={handleEnable} disabled={loading || code.length !== 6} size="sm"
+            className="w-full bg-green-600 hover:bg-green-700 text-xs" data-testid="enable-2fa-btn">
+            {loading ? "..." : "Verify & Enable"}
+          </Button>
+        </div>
+      )}
+
+      {enabled && (
+        <div className="space-y-2">
+          <Input placeholder="2FA Code" value={code} onChange={e => setCode(e.target.value)}
+            className="bg-white/5 border-white/10 text-xs" maxLength={6} data-testid="disable-2fa-code" />
+          <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)}
+            className="bg-white/5 border-white/10 text-xs" data-testid="disable-2fa-password" />
+          <Button onClick={handleDisable} disabled={loading} size="sm"
+            className="w-full bg-red-600/20 text-red-400 hover:bg-red-600/30 text-xs" data-testid="disable-2fa-btn">
+            {loading ? "..." : "Disable 2FA"}
+          </Button>
+        </div>
+      )}
+
+      {message && <p className="text-xs text-center text-yellow-400">{message}</p>}
+    </div>
+  );
+}
+
 // ============ WALLET PANEL ============
 function WalletPanel({ wallet, onRefresh }) {
   const [tab, setTab] = useState("deposit");
