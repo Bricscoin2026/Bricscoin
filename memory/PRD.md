@@ -11,85 +11,74 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 - **Production**: Docker Compose on Hetzner server (5.161.254.163)
 - **Repository**: https://codeberg.org/Bricscoin_26/Bricscoin
 
+## Site Structure (8 pages, consolidated)
+| Route | Page | Description |
+|---|---|---|
+| `/` | Dashboard | Home page with stats, quick links |
+| `/blockchain` | Blockchain | 4 tabs: Overview, Explorer, Mining, Rich List |
+| `/wallet` | Wallet Hub | 3 tabs: Legacy Wallet, PQC Wallet, Migration |
+| `/chat` | BricsChat | PQC messaging with inline wallet creation |
+| `/timecapsule` | Time Capsule | Time-locked on-chain storage |
+| `/oracle` | AI Oracle | GPT-5.2 analysis with 3 tabs |
+| `/downloads` | Downloads | Desktop wallet builds |
+| `/about` | About | Security audit, project info |
+
 ## What's Been Implemented
 
 ### Core Blockchain
 - Full blockchain with SHA-256 PoW mining
-- Bitcoin-style difficulty adjustment
-- Halving every 210,000 blocks, initial reward 50 BRICS
-- Transaction fee: 0.000005 BRICS
+- Bitcoin-style difficulty adjustment, halving every 210,000 blocks
+- Transaction fee: 0.000005 BRICS, Max supply: 21M
 
 ### Post-Quantum Cryptography (PQC)
 - Hybrid ECDSA + ML-DSA-65 signature scheme
-- Client-side signing in browser
-- PQC wallet creation, management, and fee-less migration
-- Quantum Security Status widget + Security Audit page
+- Client-side signing, PQC wallets, quantum-safe migration
 
 ### Mining (Stratum Server)
-- Custom Stratum v1 server on port 3333
-- BIP320 version rolling support for ASIC miners (Bitaxe)
-- Share-based hashrate calculation (progressive windows)
-- Active miner tracking via MongoDB (unique workers)
+- Custom Stratum v1 on port 3333, BIP320 version rolling for Bitaxe
+- Share-based hashrate, active miner tracking
 
-### Frontend Pages
-- Dashboard, Explorer, Mining, Network, Wallet, PQC Wallet
-- Rich List, Wallet Migration, About (Security Audit)
-- Downloads page linking to Codeberg release folder
+### Desktop Wallet v1.0.0
+- Electron with PQC integration, cross-platform
 
-### Desktop Wallet - BricsCoin Wallet v1.0.0
-- Electron desktop wallet with full PQC integration
-- Hybrid ECDSA + ML-DSA-65 signing (keys never leave device)
-- Deterministic ML-DSA-65 keygen from seed phrase
-- Cross-platform: Windows, macOS, Linux builds on Codeberg
+## Completed Work - Session Feb 22, 2026
 
-## Completed Work - Session Feb 22, 2026 (Fork 4 - Current)
+### Fork 4: 3 New Features + Site Restructure
 
-### CEX Cleanup (DONE)
-- Removed Exchange route from App.js and Layout.jsx navigation
-- Removed exchange router from server.py
-- Exchange files (exchange.py, Exchange.jsx, exchange-api.js) still exist but are not imported/used
+**New Features (DONE - 100% tests passed):**
+1. **BricsChat** — PQC-encrypted on-chain messaging, inline wallet creation
+2. **Time Capsule** — Decentralized time-locked storage on-chain
+3. **AI Oracle (GPT-5.2)** — Network analysis, predictions, interactive Q&A
 
-### 17. BricsChat - Quantum-Proof On-Chain Messaging (DONE)
-- World's first PQC-encrypted blockchain messaging
-- Messages signed with hybrid ECDSA + ML-DSA-65 before on-chain storage
-- Backend: /api/chat/send, /api/chat/messages/{address}, /api/chat/conversation/{a}/{b}, /api/chat/contacts/{address}, /api/chat/stats
-- Frontend: /chat page with contacts list, message thread, real-time send
-- Requires PQC wallet (stored in localStorage)
-- All tests passed (100% backend + frontend)
+**Site Restructure (DONE - 100% tests passed):**
+- Consolidated 13 pages → 8 navigation items
+- Blockchain page: merged Explorer + Network + Mining + Rich List into 4 tabs
+- Wallet Hub: merged Legacy Wallet + PQC Wallet + Migration into 3 tabs
+- Fixed BricsChat: inline PQC wallet creation (no redirect)
+- Updated all internal links to new routes
+- Removed old routes: /explorer, /mining, /network, /pqc-wallet, /migrate, /richlist, /node
 
-### 18. Decentralized Time Capsule (DONE)
-- Store encrypted data on-chain, unlockable only at a future block height
-- PQC-signed capsule creation with content hash integrity verification
-- Backend: /api/timecapsule/create, /api/timecapsule/get/{id}, /api/timecapsule/list, /api/timecapsule/address/{address}, /api/timecapsule/stats
-- Frontend: /timecapsule page with stats dashboard, create dialog, progress bars, lock/unlock visualization
-- All tests passed (100% backend + frontend)
-
-### 19. AI Blockchain Oracle - GPT-5.2 (DONE)
-- GPT-5.2 powered network health analysis and predictions via Emergent LLM Key
-- 3 tabs: Analysis (health score, network metrics, AI insights), Predictions (difficulty trend, outlook), Ask Oracle (interactive chat)
-- Backend: /api/oracle/analysis (cached 5min), /api/oracle/predict (cached 15min), /api/oracle/ask, /api/oracle/history
-- Frontend: /oracle page with health gauge, metric cards, recommendations, chat interface
-- All tests passed (100% backend + frontend)
+**CEX Cleanup (DONE):**
+- Removed exchange router and navigation links
 
 ## Production Deploy Notes
-- **NEVER replace entire server.py** — Use `sed` for targeted fixes
-- Latest backup: `/root/bricscoin-backup-20260219_071116/`
 - Frontend deploy: `docker cp` tar.gz + `tar -xzf` + `nginx -s reload`
 - Backend patch: `docker exec sed -i` + `docker restart bricscoin-api`
+- **NEVER replace entire server.py** — Use `sed` for targeted fixes
 
 ## Remaining Backlog
 
 ### P1
-- Configure miner block rewards to PQC address for network-wide PQC adoption
-- Deploy 3 new features to production server (bricscoin26.org)
+- Deploy new features + site restructure to production (bricscoin26.org)
+- Configure miner block rewards to PQC address
 
 ### P2
-- Clean up Codeberg downloads folder (remove old builds)
-- Delete unused CEX files from codebase (exchange.py, tron_integration.py, Exchange.jsx, exchange-api.js)
+- Delete unused CEX files (exchange.py, tron_integration.py, Exchange.jsx, exchange-api.js)
+- Clean up Codeberg downloads folder
 
 ### P3
 - Mining pool optimizations (Stratum v2 / P2Pool)
 
 ### Future
 - Mobile wallet app
-- Hashrate history graph on Mining page
+- Hashrate history graph in Blockchain Mining tab
