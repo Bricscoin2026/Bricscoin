@@ -261,6 +261,17 @@ export default function BricsChat() {
         </Card>
       </div>
 
+      {/* Fee Notice */}
+      <Card className="bg-primary/5 border-primary/20">
+        <CardContent className="p-3 flex items-center gap-3">
+          <Coins className="w-5 h-5 text-primary flex-shrink-0" />
+          <div>
+            <p className="text-sm"><span className="font-bold text-primary">Fee: 0.000005 BRICS</span> per message (burned)</p>
+            <p className="text-xs text-muted-foreground">Each message creates a real on-chain transaction. The fee is permanently destroyed, making BRICS deflationary.</p>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Contacts / Inbox */}
         <Card className="bg-card border-white/10 lg:col-span-1">
