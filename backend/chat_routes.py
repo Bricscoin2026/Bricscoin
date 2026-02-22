@@ -152,6 +152,19 @@ async def get_contacts(address: str):
     ]}
 
 
+
+@router.get("/feed")
+async def get_global_feed(limit: int = 10):
+    """Get the latest public messages for the global feed"""
+    messages = await db.chat_messages.find(
+        {},
+        {"_id": 0, "id": 1, "sender_address": 1, "recipient_address": 1,
+         "encrypted_content": 1, "timestamp": 1, "block_height": 1, "pqc_verified": 1}
+    ).sort("timestamp", -1).limit(min(limit, 50)).to_list(min(limit, 50))
+    return {"messages": messages, "count": len(messages)}
+
+
+
 @router.get("/stats")
 async def get_chat_stats():
     """Get BricsChat statistics"""
