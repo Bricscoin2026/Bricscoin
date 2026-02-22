@@ -777,6 +777,16 @@ export default function Exchange() {
                 <WalletPanel wallet={wallet} onRefresh={fetchUserData} />
               </CardContent>
             </Card>
+            <Card className="bg-[#0a0e17] border-white/5 mt-2">
+              <CardHeader className="py-2 px-3 border-b border-white/5">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-yellow-400" /> Security
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3">
+                <Security2FA />
+              </CardContent>
+            </Card>
           )}
         </div>
 
