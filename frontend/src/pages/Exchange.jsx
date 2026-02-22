@@ -475,16 +475,22 @@ function WalletPanel({ wallet, onRefresh }) {
     }
   }, [currency, tab, fetchDeposit]);
 
+  useEffect(() => {
+    get2FAStatus().then(r => setHas2FA(r.data.enabled)).catch(() => {});
+  }, []);
+
   const handleWithdraw = async () => {
     if (!withdrawAddr || !withdrawAmt) return;
+    if (has2FA && !withdrawTotp) { setMessage("2FA code required"); return; }
     setLoading(true);
     setMessage("");
     try {
       const fn = currency === "usdt" ? withdrawUsdt : withdrawBrics;
-      await fn(parseFloat(withdrawAmt), withdrawAddr);
+      await fn(parseFloat(withdrawAmt), withdrawAddr, has2FA ? withdrawTotp : undefined);
       setMessage("Withdrawal processed!");
       setWithdrawAddr("");
       setWithdrawAmt("");
+      setWithdrawTotp("");
       onRefresh();
     } catch (e) { setMessage(e.response?.data?.detail || "Withdrawal failed"); }
     setLoading(false);
