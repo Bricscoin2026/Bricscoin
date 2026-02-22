@@ -193,21 +193,30 @@ export default function Dashboard() {
   const [blocks, setBlocks] = useState([]);
   const [pqcStats, setPqcStats] = useState(null);
   const [nodeKeys, setNodeKeys] = useState(null);
+  const [chatFeed, setChatFeed] = useState([]);
+  const [chatStats, setChatStats] = useState(null);
+  const [capsuleStats, setCapsuleStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [statsRes, blocksRes, pqcRes, nodeRes] = await Promise.all([
+        const [statsRes, blocksRes, pqcRes, nodeRes, feedRes, chatStatsRes, capsuleRes] = await Promise.all([
           getNetworkStats(),
           getBlocks(5),
           getPQCStats().catch(() => null),
-          getPQCNodeKeys().catch(() => null)
+          getPQCNodeKeys().catch(() => null),
+          getChatFeed(8).catch(() => null),
+          getChatStats().catch(() => null),
+          getTimeCapsuleStats().catch(() => null),
         ]);
         setStats(statsRes.data);
         setBlocks(blocksRes.data?.blocks || []);
         if (pqcRes) setPqcStats(pqcRes.data);
         if (nodeRes) setNodeKeys(nodeRes.data);
+        if (feedRes) setChatFeed(feedRes.data?.messages || []);
+        if (chatStatsRes) setChatStats(chatStatsRes.data);
+        if (capsuleRes) setCapsuleStats(capsuleRes.data);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
