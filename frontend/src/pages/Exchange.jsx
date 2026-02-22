@@ -315,6 +315,124 @@ function OpenOrders({ orders, onCancel }) {
   );
 }
 
+// ============ WALLET PANEL ============
+function WalletPanel({ wallet, onRefresh }) {
+  const [tab, setTab] = useState("deposit");
+  const [currency, setCurrency] = useState("usdt");
+  const [depositInfo, setDepositInfo] = useState(null);
+  const [withdrawAddr, setWithdrawAddr] = useState("");
+  const [withdrawAmt, setWithdrawAmt] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const fetchDeposit = async () => {
+    setLoading(true);
+    setMessage("");
+    try {
+      const res = currency === "usdt" ? await getUsdtDepositAddress() : await getBricsDepositAddress();
+      setDepositInfo(res.data);
+    } catch (e) { setMessage(e.response?.data?.detail || "Error"); }
+    setLoading(false);
+  };
+
+  const handleWithdraw = async () => {
+    if (!withdrawAddr || !withdrawAmt) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      const fn = currency === "usdt" ? withdrawUsdt : withdrawBrics;
+      await fn(parseFloat(withdrawAmt), withdrawAddr);
+      setMessage("Withdrawal processed!");
+      setWithdrawAddr("");
+      setWithdrawAmt("");
+      onRefresh();
+    } catch (e) { setMessage(e.response?.data?.detail || "Withdrawal failed"); }
+    setLoading(false);
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setMessage("Copied!");
+    setTimeout(() => setMessage(""), 2000);
+  };
+
+  return (
+    <div data-testid="wallet-panel" className="space-y-3">
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div className="bg-white/5 rounded p-2">
+          <span className="text-gray-500 text-xs">BRICS</span>
+          <p className="font-bold">{wallet.brics_available.toFixed(4)}</p>
+          {wallet.brics_locked > 0 && <p className="text-xs text-yellow-400">Locked: {wallet.brics_locked.toFixed(4)}</p>}
+        </div>
+        <div className="bg-white/5 rounded p-2">
+          <span className="text-gray-500 text-xs">USDT</span>
+          <p className="font-bold">{wallet.usdt_available.toFixed(4)}</p>
+          {wallet.usdt_locked > 0 && <p className="text-xs text-yellow-400">Locked: {wallet.usdt_locked.toFixed(4)}</p>}
+        </div>
+      </div>
+
+      <div className="flex gap-1">
+        <button onClick={() => setTab("deposit")} className={`flex-1 py-1.5 text-xs rounded ${tab === "deposit" ? "bg-green-600/20 text-green-400" : "text-gray-500"}`}>
+          <ArrowDownToLine className="w-3 h-3 inline mr-1" />Deposit
+        </button>
+        <button onClick={() => setTab("withdraw")} className={`flex-1 py-1.5 text-xs rounded ${tab === "withdraw" ? "bg-red-600/20 text-red-400" : "text-gray-500"}`}>
+          <ArrowUpFromLine className="w-3 h-3 inline mr-1" />Withdraw
+        </button>
+      </div>
+
+      <div className="flex gap-1">
+        <button onClick={() => setCurrency("usdt")} className={`flex-1 py-1 text-xs rounded ${currency === "usdt" ? "bg-white/10 text-white" : "text-gray-500"}`}>USDT</button>
+        <button onClick={() => setCurrency("brics")} className={`flex-1 py-1 text-xs rounded ${currency === "brics" ? "bg-white/10 text-white" : "text-gray-500"}`}>BRICS</button>
+      </div>
+
+      {tab === "deposit" && (
+        <div className="space-y-2">
+          {!depositInfo ? (
+            <Button onClick={fetchDeposit} disabled={loading} size="sm" className="w-full bg-green-600 hover:bg-green-700 text-xs" data-testid="get-deposit-address-btn">
+              {loading ? "..." : "Get Deposit Address"}
+            </Button>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-gray-400">{depositInfo.network}</p>
+              <div className="flex items-center gap-1 bg-white/5 rounded p-2">
+                <span className="text-xs font-mono break-all flex-1" data-testid="deposit-address">{depositInfo.address}</span>
+                <button onClick={() => copyToClipboard(depositInfo.address)}><Copy className="w-3.5 h-3.5 text-gray-400" /></button>
+              </div>
+              {depositInfo.memo && (
+                <div className="flex items-center gap-1 bg-white/5 rounded p-2">
+                  <span className="text-xs text-gray-400">Memo: </span>
+                  <span className="text-xs font-mono" data-testid="deposit-memo">{depositInfo.memo}</span>
+                  <button onClick={() => copyToClipboard(depositInfo.memo)}><Copy className="w-3.5 h-3.5 text-gray-400" /></button>
+                </div>
+              )}
+              <p className="text-xs text-yellow-400/70">{depositInfo.note}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "withdraw" && (
+        <div className="space-y-2">
+          <Input placeholder={currency === "usdt" ? "Tron address (T...)" : "BRICS address"} value={withdrawAddr}
+            onChange={e => setWithdrawAddr(e.target.value)} className="bg-white/5 border-white/10 text-xs" data-testid="withdraw-address-input" />
+          <div className="relative">
+            <Input placeholder="Amount" type="number" value={withdrawAmt}
+              onChange={e => setWithdrawAmt(e.target.value)} className="bg-white/5 border-white/10 text-xs pr-14" data-testid="withdraw-amount-input" />
+            <button onClick={() => setWithdrawAmt(currency === "usdt" ? wallet.usdt_available.toFixed(4) : wallet.brics_available.toFixed(8))}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-yellow-400">MAX</button>
+          </div>
+          <p className="text-xs text-gray-500">Min: {currency === "usdt" ? "5 USDT" : "1 BRICS"}</p>
+          <Button onClick={handleWithdraw} disabled={loading} size="sm" className="w-full bg-red-600 hover:bg-red-700 text-xs" data-testid="withdraw-submit-btn">
+            {loading ? "..." : `Withdraw ${currency.toUpperCase()}`}
+          </Button>
+        </div>
+      )}
+
+      {message && <p className="text-xs text-center text-yellow-400">{message}</p>}
+    </div>
+  );
+}
+
 // ============ MAIN EXCHANGE PAGE ============
 export default function Exchange() {
   const [user, setUser] = useState(() => {
