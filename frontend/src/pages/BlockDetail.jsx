@@ -96,7 +96,7 @@ export default function BlockDetail() {
         <p className="text-muted-foreground mb-6">
           Block #{index} does not exist yet.
         </p>
-        <Link to="/explorer">
+        <Link to="/blockchain">
           <Button variant="outline" className="border-white/20">
             Back to Explorer
           </Button>
@@ -114,7 +114,7 @@ export default function BlockDetail() {
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/explorer">
+          <Link to="/blockchain">
             <Button variant="ghost" size="sm" className="text-muted-foreground">
               <ChevronLeft className="w-4 h-4 mr-1" />
               Back
