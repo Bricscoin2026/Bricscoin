@@ -156,6 +156,81 @@ async def login(data: LoginModel):
     token = create_token(user["user_id"], user["username"])
     return {"token": token, "user_id": user["user_id"], "username": user["username"]}
 
+# ============ 2FA ROUTES ============
+@router.get("/2fa/status")
+async def get_2fa_status(user: dict = Depends(get_current_user)):
+    return {"enabled": user.get("totp_enabled", False)}
+
+@router.post("/2fa/setup")
+async def setup_2fa(user: dict = Depends(get_current_user)):
+    """Generate TOTP secret and QR code for setup"""
+    if user.get("totp_enabled"):
+        raise HTTPException(400, "2FA is already enabled")
+
+    secret = pyotp.random_base32()
+    totp = pyotp.TOTP(secret)
+    uri = totp.provisioning_uri(name=user["email"], issuer_name="BricsCoin Exchange")
+
+    # Generate QR code as base64
+    qr = qrcode.QRCode(version=1, box_size=6, border=2)
+    qr.add_data(uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="white", back_color="#0a0e17")
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+    # Save secret temporarily (not yet enabled)
+    await db.exchange_users.update_one(
+        {"user_id": user["user_id"]},
+        {"$set": {"totp_secret": secret}}
+    )
+
+    return {
+        "secret": secret,
+        "qr_code": f"data:image/png;base64,{qr_base64}",
+        "uri": uri
+    }
+
+@router.post("/2fa/enable")
+async def enable_2fa(data: Enable2FAModel, user: dict = Depends(get_current_user)):
+    """Verify TOTP code and enable 2FA"""
+    fresh_user = await db.exchange_users.find_one(
+        {"user_id": user["user_id"]}, {"_id": 0}
+    )
+    secret = fresh_user.get("totp_secret")
+    if not secret:
+        raise HTTPException(400, "Run /2fa/setup first")
+
+    totp = pyotp.TOTP(secret)
+    if not totp.verify(data.totp_code, valid_window=1):
+        raise HTTPException(400, "Invalid 2FA code. Try again.")
+
+    await db.exchange_users.update_one(
+        {"user_id": user["user_id"]},
+        {"$set": {"totp_enabled": True}}
+    )
+    return {"message": "2FA enabled successfully"}
+
+@router.post("/2fa/disable")
+async def disable_2fa(data: Disable2FAModel, user: dict = Depends(get_current_user)):
+    """Disable 2FA (requires password + current TOTP code)"""
+    if not user.get("totp_enabled"):
+        raise HTTPException(400, "2FA is not enabled")
+
+    if not bcrypt.checkpw(data.password.encode(), user["password_hash"].encode()):
+        raise HTTPException(401, "Invalid password")
+
+    totp = pyotp.TOTP(user["totp_secret"])
+    if not totp.verify(data.totp_code, valid_window=1):
+        raise HTTPException(400, "Invalid 2FA code")
+
+    await db.exchange_users.update_one(
+        {"user_id": user["user_id"]},
+        {"$set": {"totp_enabled": False, "totp_secret": None}}
+    )
+    return {"message": "2FA disabled"}
+
 # ============ WALLET ROUTES ============
 @router.get("/wallet")
 async def get_wallet(user: dict = Depends(get_current_user)):
