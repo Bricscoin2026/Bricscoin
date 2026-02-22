@@ -452,8 +452,10 @@ function WalletPanel({ wallet, onRefresh }) {
   const [depositInfo, setDepositInfo] = useState(null);
   const [withdrawAddr, setWithdrawAddr] = useState("");
   const [withdrawAmt, setWithdrawAmt] = useState("");
+  const [withdrawTotp, setWithdrawTotp] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [has2FA, setHas2FA] = useState(false);
 
   const fetchDeposit = useCallback(async (cur) => {
     setLoading(true);
