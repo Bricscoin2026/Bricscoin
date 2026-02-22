@@ -108,7 +108,7 @@ function PQCWalletCard({ wallet, onSelect, isSelected }) {
   );
 }
 
-export default function PQCWallet() {
+export default function PQCWallet({ embedded }) {
   const [wallets, setWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [showKeys, setShowKeys] = useState(false);
@@ -240,6 +240,7 @@ export default function PQCWallet() {
   return (
     <div className="space-y-6" data-testid="pqc-wallet-page">
       {/* Header */}
+      {!embedded && (
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
