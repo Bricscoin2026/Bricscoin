@@ -235,7 +235,7 @@ async def withdraw_usdt(data: WithdrawModel, user: dict = Depends(get_current_us
 
 @router.post("/withdraw/brics")
 async def withdraw_brics(data: WithdrawModel, user: dict = Depends(get_current_user)):
-    """Withdraw BRICS to on-chain wallet"""
+    """Withdraw BRICS to on-chain wallet using PQC signature"""
     if data.currency != "brics":
         raise HTTPException(400, "Use /withdraw/brics for BRICS withdrawals")
     if data.amount < 1.0:
@@ -253,34 +253,38 @@ async def withdraw_brics(data: WithdrawModel, user: dict = Depends(get_current_u
         {"$inc": {"brics_available": -data.amount}}
     )
 
-    # Create on-chain transaction
+    # Create on-chain PQC transaction
     try:
         exchange_wallet = await db.exchange_config.find_one(
-            {"type": "brics_deposit_wallet"}, {"_id": 0}
+            {"type": "brics_pqc_wallet"}, {"_id": 0}
         )
         if not exchange_wallet:
-            raise Exception("Exchange BRICS wallet not configured")
+            raise Exception("Exchange PQC wallet not configured")
 
-        from ecdsa import SigningKey, SECP256k1
-        sk = SigningKey.from_string(bytes.fromhex(exchange_wallet["private_key"]), curve=SECP256k1)
+        from pqc_crypto import hybrid_sign
 
         tx_data = f"{exchange_wallet['address']}{data.address}{data.amount}"
-        signature = sk.sign(tx_data.encode()).hex()
+        sig = hybrid_sign(
+            exchange_wallet["ecdsa_private_key"],
+            exchange_wallet["dilithium_secret_key"],
+            tx_data
+        )
 
-        # Submit transaction to blockchain
+        # Submit PQC transaction to blockchain
         import httpx
         api_url = os.environ.get("BRICS_API_URL", "http://localhost:8001")
         async with httpx.AsyncClient() as http_client:
-            resp = await http_client.post(f"{api_url}/api/transaction", json={
+            resp = await http_client.post(f"{api_url}/api/pqc/transaction", json={
                 "sender": exchange_wallet["address"],
                 "recipient": data.address,
                 "amount": data.amount,
-                "signature": signature,
-                "public_key": exchange_wallet["public_key"]
+                "ecdsa_signature": sig["ecdsa_signature"],
+                "dilithium_signature": sig["dilithium_signature"],
+                "ecdsa_public_key": exchange_wallet["ecdsa_public_key"],
+                "dilithium_public_key": exchange_wallet["dilithium_public_key"]
             }, timeout=10)
 
             if resp.status_code != 200:
-                # Refund
                 await db.exchange_wallets.update_one(
                     {"user_id": user["user_id"]},
                     {"$inc": {"brics_available": data.amount}}
@@ -294,14 +298,13 @@ async def withdraw_brics(data: WithdrawModel, user: dict = Depends(get_current_u
             "amount": data.amount,
             "to_address": data.address,
             "status": "completed",
-            "method": "on-chain",
+            "method": "pqc-on-chain",
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.exchange_withdrawals.insert_one(withdrawal)
-        return {"message": "BRICS withdrawal processed", "withdrawal": {k: v for k, v in withdrawal.items() if k != "_id"}}
+        return {"message": "BRICS withdrawal processed (PQC)", "withdrawal": {k: v for k, v in withdrawal.items() if k != "_id"}}
 
     except Exception as e:
-        # Refund on error
         await db.exchange_wallets.update_one(
             {"user_id": user["user_id"]},
             {"$inc": {"brics_available": data.amount}}
