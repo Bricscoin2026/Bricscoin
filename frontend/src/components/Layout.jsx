@@ -29,16 +29,11 @@ export default function Layout() {
 
   const navItems = [
     { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { to: "/blockchain", icon: Network, label: "Blockchain" },
+    { to: "/wallet", icon: Wallet, label: "Wallet" },
     { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
     { to: "/oracle", icon: Brain, label: "AI Oracle" },
-    { to: "/explorer", icon: Search, label: "Explorer" },
-    { to: "/wallet", icon: Wallet, label: "Wallet" },
-    { to: "/pqc-wallet", icon: ShieldCheck, label: "PQC Wallet" },
-    { to: "/migrate", icon: ArrowRight, label: "Migrazione" },
-    { to: "/network", icon: Network, label: "Network" },
-    { to: "/mining", icon: Pickaxe, label: "Mining" },
-    { to: "/richlist", icon: Trophy, label: "Rich List" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
