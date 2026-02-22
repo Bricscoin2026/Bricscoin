@@ -65,18 +65,32 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 ## Completed Work - Session Feb 20, 2026 (Fork 3)
 
 11. **Blockspot.io logo on Dashboard** — Added Blockspot.io logo below the Legal Disclaimer, linked to https://blockspot.io/coin/bricscoin/
-12. **Production build created** — `frontend-build-blockspot.tar.gz` ready for deploy
+12. **CoinCarp logo on Dashboard** — Added CoinCarp logo next to Blockspot.io, linked to https://www.coincarp.com/currencies/bricscoin/
+
+## Completed Work - Session Feb 22, 2026 (Fork 3 continued)
+
+13. **CEX Exchange MVP** — Full centralized exchange for BRICS/USDT trading
+    - User registration/login with JWT auth
+    - Wallet system (BRICS + USDT balances)
+    - Order book with limit and market orders
+    - Matching engine with maker/taker fees (0.1%/0.2%)
+    - Candlestick price chart (TradingView lightweight-charts v5)
+    - Recent trades, open orders
+    - Admin credit endpoint for funding wallets
+    - Initial price: 0.0086 USDT
+    - All tests passed (28/28 backend, 100% frontend)
 
 ## Remaining Backlog
 
 ### P0
-- Deploy latest frontend build to production server
+- Integrate BRICS on-chain deposits/withdrawals in the exchange
+- Integrate USDT TRC-20 deposits/withdrawals (needs TronGrid API key + Tron wallet private key)
 
 ### P1
-- Burn 1M premine from Genesis wallet
+- Deploy exchange to production server (bricscoin26.org/exchange)
 
 ### P2
-- Fix verify_share header endianness to properly validate ASIC hashes
+- Add exchange link to main Dashboard navigation
 
 ### Future
 - Mobile wallet app
