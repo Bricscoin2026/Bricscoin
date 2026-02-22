@@ -78,7 +78,6 @@ export default function AiOracle() {
   const chatEndRef = useRef(null);
 
   useEffect(() => {
-    fetchAnalysis();
     loadHistory();
   }, []);
 
