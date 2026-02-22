@@ -110,4 +110,24 @@ export const getPQCNodeKeys = () => api.get("/pqc/node/keys");
 
 export const migrateToPQC = (data) => api.post("/pqc/migrate", data);
 
+// BricsChat (PQC Messaging)
+export const sendChatMessage = (data) => api.post("/chat/send", data);
+export const getChatMessages = (address, limit = 50) => api.get(`/chat/messages/${address}?limit=${limit}`);
+export const getChatConversation = (addr1, addr2, limit = 100) => api.get(`/chat/conversation/${addr1}/${addr2}?limit=${limit}`);
+export const getChatContacts = (address) => api.get(`/chat/contacts/${address}`);
+export const getChatStats = () => api.get("/chat/stats");
+
+// Time Capsule
+export const createTimeCapsule = (data) => api.post("/timecapsule/create", data);
+export const getTimeCapsule = (id) => api.get(`/timecapsule/get/${id}`);
+export const listTimeCapsules = (limit = 50, showUnlocked = true) => api.get(`/timecapsule/list?limit=${limit}&show_unlocked=${showUnlocked}`);
+export const getTimeCapsulesByAddress = (address, limit = 50) => api.get(`/timecapsule/address/${address}?limit=${limit}`);
+export const getTimeCapsuleStats = () => api.get("/timecapsule/stats");
+
+// AI Oracle
+export const getOracleAnalysis = () => api.get("/oracle/analysis");
+export const askOracle = (question, sessionId) => api.post("/oracle/ask", { question, session_id: sessionId });
+export const getOracleHistory = (limit = 20) => api.get(`/oracle/history?limit=${limit}`);
+export const getOraclePredictions = () => api.get("/oracle/predict");
+
 export default api;
