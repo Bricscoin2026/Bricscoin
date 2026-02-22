@@ -1,86 +1,48 @@
 # BricsCoin - Product Requirements Document
 
 ## Original Problem Statement
-Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Cryptography (PQC) security features. The project runs on a live production server at bricscoin26.org.
+Build "BricsCoin," a cryptocurrency with Post-Quantum Cryptography (PQC). The project includes a full blockchain with SHA-256 PoW, PQC wallets (ECDSA + ML-DSA-65), and unique features:
+- **BricsChat**: On-chain PQC-encrypted messaging
+- **Decentralized Time Capsule**: Encrypted data unlockable at future block heights
+- **AI Blockchain Oracle**: GPT-5.2 network health analyzer
+- **Fee-burning mechanism**: BricsChat and Time Capsule fees burned for deflation
+
+## User Personas
+- Crypto enthusiasts wanting to mine/trade BRICS
+- Node operators supporting decentralization
+- Developers building on the platform
+
+## Core Requirements
+1. SHA-256 Proof of Work blockchain
+2. PQC hybrid signatures (ECDSA + ML-DSA-65)
+3. Stratum mining pool support
+4. Professional tabbed UI (Blockchain, Wallet, Chat, TimeCapsule, Oracle)
+5. Italian language support for node instructions
 
 ## Architecture
-- **Backend**: FastAPI (Python) running in Docker
-- **Frontend**: React running in Docker
-- **Database**: MongoDB running in Docker
-- **Stratum Server**: Custom Python Stratum for ASIC mining (Bitaxe)
-- **Production**: Docker Compose on Hetzner server (5.161.254.163)
-- **Repository**: https://codeberg.org/Bricscoin_26/Bricscoin
-
-## Site Structure (8 pages, consolidated)
-| Route | Page | Description |
-|---|---|---|
-| `/` | Dashboard | Home page with stats, quick links |
-| `/blockchain` | Blockchain | 4 tabs: Overview, Explorer, Mining, Rich List |
-| `/wallet` | Wallet Hub | 3 tabs: Legacy Wallet, PQC Wallet, Migration |
-| `/chat` | BricsChat | PQC messaging with inline wallet creation |
-| `/timecapsule` | Time Capsule | Time-locked on-chain storage |
-| `/oracle` | AI Oracle | GPT-5.2 analysis with 3 tabs |
-| `/downloads` | Downloads | Desktop wallet builds |
-| `/about` | About | Security audit, project info |
+- **Frontend**: React + Tailwind + Shadcn/UI
+- **Backend**: FastAPI + MongoDB
+- **Production**: Docker on bricscoin26.org (5.161.254.163)
 
 ## What's Been Implemented
+- Full blockchain with 2,152+ blocks
+- Legacy + PQC wallet system
+- BricsChat with public feed (visible to all visitors)
+- Time Capsule with public listing
+- AI Oracle with GPT-5.2
+- Fee-burning mechanism (0.000005 BRICS per message/capsule)
+- Consolidated Blockchain page (Overview, Explorer, Mining, Rich List, Run a Node)
+- Consolidated Wallet Hub (Legacy, PQC, Migration)
+- Dashboard with live BricsChat feed
+- Run a Node guide (Italian) in Blockchain tab
 
-### Core Blockchain
-- Full blockchain with SHA-256 PoW mining
-- Bitcoin-style difficulty adjustment, halving every 210,000 blocks
-- Transaction fee: 0.000005 BRICS, Max supply: 21M
+## Recent Changes (Feb 2026)
+- **Fixed BricsChat visibility bug**: Global Feed now visible to all visitors without wallet
+- **Added "Run a Node" tab**: Full Italian step-by-step guide in Blockchain page
 
-### Post-Quantum Cryptography (PQC)
-- Hybrid ECDSA + ML-DSA-65 signature scheme
-- Client-side signing, PQC wallets, quantum-safe migration
-
-### Mining (Stratum Server)
-- Custom Stratum v1 on port 3333, BIP320 version rolling for Bitaxe
-- Share-based hashrate, active miner tracking
-
-### Desktop Wallet v1.0.0
-- Electron with PQC integration, cross-platform
-
-## Completed Work - Session Feb 22, 2026
-
-### Fork 4: 3 New Features + Site Restructure
-
-**New Features (DONE - 100% tests passed):**
-1. **BricsChat** — PQC-encrypted on-chain messaging, inline wallet creation
-2. **Time Capsule** — Decentralized time-locked storage on-chain
-3. **AI Oracle (GPT-5.2)** — Network analysis, predictions, interactive Q&A
-
-**Site Restructure (DONE - 100% tests passed):**
-- Consolidated 13 pages → 8 navigation items
-- Blockchain page: merged Explorer + Network + Mining + Rich List into 4 tabs
-- Wallet Hub: merged Legacy Wallet + PQC Wallet + Migration into 3 tabs
-- Fixed BricsChat: inline PQC wallet creation (no redirect)
-- Updated all internal links to new routes
-- Removed old routes: /explorer, /mining, /network, /pqc-wallet, /migrate, /richlist, /node
-- **Dashboard Live Feed**: BricsChat Global Feed + Network Activity panel on Dashboard
-- **Real Fees**: BricsChat (0.000005 BRICS/msg) and Time Capsule (0.000005 BRICS/capsule) — fees burned, creating deflationary mechanism. Each message/capsule creates a real on-chain transaction.
-
-**CEX Cleanup (DONE):**
-- Removed exchange router and navigation links
-
-## Production Deploy Notes
-- Frontend deploy: `docker cp` tar.gz + `tar -xzf` + `nginx -s reload`
-- Backend patch: `docker exec sed -i` + `docker restart bricscoin-api`
-- **NEVER replace entire server.py** — Use `sed` for targeted fixes
-
-## Remaining Backlog
-
-### P1
-- ~~Deploy new features + site restructure to production (bricscoin26.org)~~ DONE (Feb 22, 2026)
-- Configure miner block rewards to PQC address
-
-### P2
-- Delete unused CEX files (exchange.py, tron_integration.py, Exchange.jsx, exchange-api.js)
-- Clean up Codeberg downloads folder
-
-### P3
-- Mining pool optimizations (Stratum v2 / P2Pool)
-
-### Future
-- Mobile wallet app
-- Hashrate history graph in Blockchain Mining tab
+## Backlog
+- P1: Configure miner block rewards to PQC address
+- P2: Clean up downloads folder on Codeberg
+- P3: Mining pool optimizations (Stratum v2 / P2Pool)
+- P4: Mobile wallet application
+- Refactor: Move logic from deprecated pages (Wallet.jsx, Explorer.jsx) into hub components
