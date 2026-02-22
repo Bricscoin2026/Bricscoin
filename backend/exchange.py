@@ -359,6 +359,14 @@ async def withdraw_brics(data: WithdrawModel, user: dict = Depends(get_current_u
     if not data.address or not data.address.startswith("BRICS"):
         raise HTTPException(400, "Invalid BRICS address")
 
+    # Verify 2FA if enabled
+    if user.get("totp_enabled"):
+        if not data.totp_code:
+            raise HTTPException(400, "2FA code required for withdrawals")
+        totp = pyotp.TOTP(user["totp_secret"])
+        if not totp.verify(data.totp_code, valid_window=1):
+            raise HTTPException(400, "Invalid 2FA code")
+
     wallet = await db.exchange_wallets.find_one({"user_id": user["user_id"]})
     if not wallet or wallet["brics_available"] < data.amount:
         raise HTTPException(400, "Insufficient BRICS balance")
