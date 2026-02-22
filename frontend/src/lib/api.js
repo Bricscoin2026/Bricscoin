@@ -116,6 +116,7 @@ export const getChatMessages = (address, limit = 50) => api.get(`/chat/messages/
 export const getChatConversation = (addr1, addr2, limit = 100) => api.get(`/chat/conversation/${addr1}/${addr2}?limit=${limit}`);
 export const getChatContacts = (address) => api.get(`/chat/contacts/${address}`);
 export const getChatStats = () => api.get("/chat/stats");
+export const getChatFeed = (limit = 10) => api.get(`/chat/feed?limit=${limit}`);
 
 // Time Capsule
 export const createTimeCapsule = (data) => api.post("/timecapsule/create", data);
