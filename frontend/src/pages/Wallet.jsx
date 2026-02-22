@@ -760,6 +760,37 @@ export default function Wallet({ embedded }) {
           </Dialog>
         </div>
       </div>
+      )}
+
+      {/* Action buttons when embedded */}
+      {embedded && (
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="border-white/20" onClick={handleRefresh} data-testid="refresh-btn">
+            <RefreshCw className="w-4 h-4 mr-2" />Aggiorna
+          </Button>
+          <ImportDialog onSuccess={handleImportSuccess} />
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gold-button rounded-sm" data-testid="create-wallet-btn">
+                <Plus className="w-4 h-4 mr-2" />Nuovo Wallet
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border-white/10" data-testid="create-wallet-dialog">
+              <DialogHeader>
+                <DialogTitle className="font-heading">Crea Nuovo Wallet</DialogTitle>
+                <DialogDescription>Verrà generata una seed phrase di 12 parole per il backup</DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <Label>Nome Wallet (opzionale)</Label>
+                <Input placeholder="My Wallet" value={walletName} onChange={(e) => setWalletName(e.target.value)} className="bg-background border-white/20" data-testid="wallet-name-input"/>
+              </div>
+              <DialogFooter>
+                <Button onClick={handleCreateWallet} disabled={creating} className="gold-button rounded-sm" data-testid="confirm-create-wallet-btn">{creating ? "Creazione..." : "Crea Wallet"}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
 
       {/* Seed Phrase Dialog */}
       <SeedPhraseDialog 
