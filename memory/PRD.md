@@ -71,7 +71,7 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
 ## Remaining Backlog
 
 ### P1
-- Deploy new features + site restructure to production (bricscoin26.org)
+- ~~Deploy new features + site restructure to production (bricscoin26.org)~~ DONE (Feb 22, 2026)
 - Configure miner block rewards to PQC address
 
 ### P2
