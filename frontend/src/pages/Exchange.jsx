@@ -3,7 +3,9 @@ import { createChart, CandlestickSeries } from "lightweight-charts";
 import {
   getTicker, getOrderbook, getRecentTrades, getCandles,
   placeOrder, getOpenOrders, cancelOrder, getExchangeWallet,
-  exchangeLogin, exchangeRegister
+  exchangeLogin, exchangeRegister,
+  getUsdtDepositAddress, getBricsDepositAddress,
+  withdrawUsdt, withdrawBrics
 } from "../lib/exchange-api";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
