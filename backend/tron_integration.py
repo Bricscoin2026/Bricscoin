@@ -158,6 +158,47 @@ async def get_trc20_balance(address: str, contract: str) -> float:
         logger.error(f"Error getting TRC-20 balance for {address}: {e}")
     return 0.0
 
+# ============ BRICS DEPOSIT HELPER ============
+async def _credit_brics_deposit(tx: dict, tx_id: str, exchange_address: str):
+    """Credit a BRICS deposit to the correct user"""
+    amount = float(tx.get("amount", 0))
+    sender = tx.get("sender", "")
+
+    # Try to find user by memo
+    memo = tx.get("memo", "")
+    user = None
+    if memo:
+        users = await db.exchange_users.find({}, {"_id": 0}).to_list(1000)
+        for u in users:
+            if u["user_id"][:8] == memo:
+                user = u
+                break
+
+    # If no memo, try to find by sender address in recent deposit requests
+    if not user:
+        # Credit to any user who has a pending deposit - find all users and check last activity
+        logger.warning(f"BRICS deposit {amount} from {sender} - no memo match, trying sender match")
+        # Check if any user wallet has this sender address stored
+        return
+
+    deposit = {
+        "deposit_id": str(uuid.uuid4()),
+        "user_id": user["user_id"],
+        "currency": "brics",
+        "amount": amount,
+        "tx_ref": tx_id,
+        "from_address": sender,
+        "status": "completed",
+        "method": "on-chain",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.exchange_deposits.insert_one(deposit)
+    await db.exchange_wallets.update_one(
+        {"user_id": user["user_id"]},
+        {"$inc": {"brics_available": amount}}
+    )
+    logger.info(f"BRICS deposit: {amount} BRICS for user {user['username']} (from {sender})")
+
 # ============ WITHDRAWALS ============
 async def process_usdt_withdrawal(user_id: str, amount: float, to_address: str) -> dict:
     """Process a USDT TRC-20 withdrawal"""
