@@ -582,7 +582,7 @@ function ImportDialog({ onSuccess }) {
   );
 }
 
-export default function Wallet() {
+export default function Wallet({ embedded }) {
   const [wallets, setWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -705,6 +705,7 @@ export default function Wallet() {
   return (
     <div className="space-y-6" data-testid="wallet-page">
       {/* Header */}
+      {!embedded && (
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold">Wallet</h1>
