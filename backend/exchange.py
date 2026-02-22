@@ -160,6 +160,156 @@ async def get_withdrawals(user: dict = Depends(get_current_user)):
     ).sort("created_at", -1).limit(50).to_list(50)
     return withdrawals
 
+# ============ DEPOSIT / WITHDRAWAL ROUTES ============
+@router.get("/deposit/usdt")
+async def get_usdt_deposit_address(user: dict = Depends(get_current_user)):
+    """Get user's unique USDT TRC-20 deposit address"""
+    from tron_integration import get_user_deposit_address, get_or_create_hot_wallet
+    addr_doc = await get_user_deposit_address(user["user_id"])
+    return {
+        "address": addr_doc["address"],
+        "currency": "USDT",
+        "network": "Tron (TRC-20)",
+        "min_deposit": 1.0,
+        "note": "Send only USDT TRC-20 to this address. Other tokens will be lost."
+    }
+
+@router.get("/deposit/brics")
+async def get_brics_deposit_address(user: dict = Depends(get_current_user)):
+    """Get user's BRICS deposit address (exchange hot wallet)"""
+    # For BRICS, we use a single exchange address + user_id as memo
+    exchange_wallet = await db.exchange_config.find_one(
+        {"type": "brics_deposit_wallet"}, {"_id": 0}
+    )
+    if not exchange_wallet:
+        # Create a BRICS deposit wallet
+        import hashlib, secrets
+        from ecdsa import SigningKey, SECP256k1
+        sk = SigningKey.generate(curve=SECP256k1)
+        vk = sk.get_verifying_key()
+        pub_key_hex = vk.to_string().hex()
+        address = "BRICS" + hashlib.sha256(bytes.fromhex(pub_key_hex)).hexdigest()[:34]
+        exchange_wallet = {
+            "type": "brics_deposit_wallet",
+            "address": address,
+            "private_key": sk.to_string().hex(),
+            "public_key": pub_key_hex,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.exchange_config.insert_one(exchange_wallet)
+
+    return {
+        "address": exchange_wallet["address"],
+        "memo": user["user_id"][:8],
+        "currency": "BRICS",
+        "network": "BricsCoin",
+        "min_deposit": 1.0,
+        "note": "Send BRICS to this address. Include the memo in the transaction."
+    }
+
+@router.post("/withdraw/usdt")
+async def withdraw_usdt(data: WithdrawModel, user: dict = Depends(get_current_user)):
+    """Withdraw USDT TRC-20"""
+    if data.currency != "usdt":
+        raise HTTPException(400, "Use /withdraw/usdt for USDT withdrawals")
+    if data.amount < 5.0:
+        raise HTTPException(400, "Minimum withdrawal: 5 USDT")
+    if not data.address or len(data.address) < 20:
+        raise HTTPException(400, "Invalid Tron address")
+
+    wallet = await db.exchange_wallets.find_one({"user_id": user["user_id"]})
+    if not wallet or wallet["usdt_available"] < data.amount:
+        raise HTTPException(400, "Insufficient USDT balance")
+
+    # Deduct from wallet
+    await db.exchange_wallets.update_one(
+        {"user_id": user["user_id"]},
+        {"$inc": {"usdt_available": -data.amount}}
+    )
+
+    # Process withdrawal
+    from tron_integration import process_usdt_withdrawal
+    try:
+        result = await process_usdt_withdrawal(user["user_id"], data.amount, data.address)
+        return {"message": "Withdrawal processed", "withdrawal": result}
+    except Exception as e:
+        raise HTTPException(500, f"Withdrawal failed: {str(e)}")
+
+@router.post("/withdraw/brics")
+async def withdraw_brics(data: WithdrawModel, user: dict = Depends(get_current_user)):
+    """Withdraw BRICS to on-chain wallet"""
+    if data.currency != "brics":
+        raise HTTPException(400, "Use /withdraw/brics for BRICS withdrawals")
+    if data.amount < 1.0:
+        raise HTTPException(400, "Minimum withdrawal: 1 BRICS")
+    if not data.address or not data.address.startswith("BRICS"):
+        raise HTTPException(400, "Invalid BRICS address")
+
+    wallet = await db.exchange_wallets.find_one({"user_id": user["user_id"]})
+    if not wallet or wallet["brics_available"] < data.amount:
+        raise HTTPException(400, "Insufficient BRICS balance")
+
+    # Deduct from wallet
+    await db.exchange_wallets.update_one(
+        {"user_id": user["user_id"]},
+        {"$inc": {"brics_available": -data.amount}}
+    )
+
+    # Create on-chain transaction
+    try:
+        exchange_wallet = await db.exchange_config.find_one(
+            {"type": "brics_deposit_wallet"}, {"_id": 0}
+        )
+        if not exchange_wallet:
+            raise Exception("Exchange BRICS wallet not configured")
+
+        from ecdsa import SigningKey, SECP256k1
+        sk = SigningKey.from_string(bytes.fromhex(exchange_wallet["private_key"]), curve=SECP256k1)
+
+        tx_data = f"{exchange_wallet['address']}{data.address}{data.amount}"
+        signature = sk.sign(tx_data.encode()).hex()
+
+        # Submit transaction to blockchain
+        import httpx
+        api_url = os.environ.get("BRICS_API_URL", "http://localhost:8001")
+        async with httpx.AsyncClient() as http_client:
+            resp = await http_client.post(f"{api_url}/api/transaction", json={
+                "sender": exchange_wallet["address"],
+                "recipient": data.address,
+                "amount": data.amount,
+                "signature": signature,
+                "public_key": exchange_wallet["public_key"]
+            }, timeout=10)
+
+            if resp.status_code != 200:
+                # Refund
+                await db.exchange_wallets.update_one(
+                    {"user_id": user["user_id"]},
+                    {"$inc": {"brics_available": data.amount}}
+                )
+                raise Exception(f"Blockchain error: {resp.text}")
+
+        withdrawal = {
+            "withdrawal_id": str(uuid.uuid4()),
+            "user_id": user["user_id"],
+            "currency": "brics",
+            "amount": data.amount,
+            "to_address": data.address,
+            "status": "completed",
+            "method": "on-chain",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.exchange_withdrawals.insert_one(withdrawal)
+        return {"message": "BRICS withdrawal processed", "withdrawal": {k: v for k, v in withdrawal.items() if k != "_id"}}
+
+    except Exception as e:
+        # Refund on error
+        await db.exchange_wallets.update_one(
+            {"user_id": user["user_id"]},
+            {"$inc": {"brics_available": data.amount}}
+        )
+        raise HTTPException(500, f"Withdrawal failed: {str(e)}")
+
 # ============ MARKET DATA (PUBLIC) ============
 @router.get("/ticker")
 async def get_ticker():
