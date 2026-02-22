@@ -87,13 +87,23 @@ Create a Bitcoin-like cryptocurrency called "BricsCoin" with Post-Quantum Crypto
     - TronGrid API balance check via balanceOf contract call
     - All tests passed (53/53 backend, 100% frontend)
 
+15. **2FA Authentication (Google Authenticator TOTP)**
+    - Setup con QR code scansionabile
+    - Login richiede codice 2FA quando attivo
+    - Prelievi USDT/BRICS richiedono codice 2FA
+    - Disattivazione richiede password + codice 2FA
+    - All tests passed (22/22 backend, 100% frontend)
+16. **Per-user BRICS PQC deposit addresses**
+    - Ogni utente ha un indirizzo PQC unico per depositi BRICS
+    - Monitor automatico controlla blockchain produzione (bricscoin26.org)
+
 ## Remaining Backlog
 
 ### P0
 - Deploy exchange to production server (bricscoin26.org/exchange)
 
 ### P1
-- Add exchange link to main Dashboard navigation
+- Add exchange link to main Dashboard navigation ✅ DONE
 
 ### P2
 - Add trading volume/price history graphs
