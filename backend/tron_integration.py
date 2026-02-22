@@ -208,13 +208,99 @@ async def process_usdt_withdrawal(user_id: str, amount: float, to_address: str) 
         )
         raise Exception(f"Withdrawal failed: {str(e)}")
 
+# ============ BRICS DEPOSIT MONITORING ============
+async def check_brics_deposits():
+    """Check for incoming BRICS transactions to the exchange PQC wallet"""
+    exchange_wallet = await db.exchange_config.find_one(
+        {"type": "brics_pqc_wallet"}, {"_id": 0}
+    )
+    if not exchange_wallet:
+        return
+
+    exchange_address = exchange_wallet["address"]
+
+    try:
+        # Query the BricsCoin blockchain for transactions to our address
+        async with httpx.AsyncClient() as http_client:
+            # Get all blocks and check transactions
+            resp = await http_client.get("http://localhost:8001/api/blockchain/summary", timeout=10)
+            if resp.status_code != 200:
+                return
+
+            summary = resp.json()
+            total_blocks = summary.get("total_blocks", 0)
+
+            # Check recent blocks for transactions to our address
+            # Check last 10 blocks for new deposits
+            start_block = max(0, total_blocks - 10)
+            for block_idx in range(start_block, total_blocks):
+                try:
+                    block_resp = await http_client.get(f"http://localhost:8001/api/block/{block_idx}", timeout=5)
+                    if block_resp.status_code != 200:
+                        continue
+                    block = block_resp.json()
+
+                    for tx in block.get("transactions", []):
+                        if tx.get("recipient") == exchange_address and tx.get("amount", 0) > 0:
+                            tx_id = tx.get("id") or tx.get("hash") or f"{block_idx}_{tx.get('sender', '')}"
+
+                            # Check if already processed
+                            existing = await db.exchange_deposits.find_one({
+                                "tx_ref": tx_id,
+                                "currency": "brics"
+                            })
+                            if existing:
+                                continue
+
+                            # Find user by memo (first 8 chars of user_id)
+                            memo = tx.get("memo", "")
+                            user = None
+                            if memo:
+                                user = await db.exchange_users.find_one(
+                                    {"user_id": {"$regex": f"^{memo}"}},
+                                    {"_id": 0}
+                                )
+
+                            # If no memo match, check all users for pending deposits
+                            if not user:
+                                # Credit to first user who has this exchange address as deposit
+                                # For now, log it
+                                logger.warning(f"BRICS deposit without memo match: {tx.get('amount')} from {tx.get('sender')}")
+                                continue
+
+                            amount = float(tx.get("amount", 0))
+                            deposit = {
+                                "deposit_id": str(uuid.uuid4()),
+                                "user_id": user["user_id"],
+                                "currency": "brics",
+                                "amount": amount,
+                                "tx_ref": tx_id,
+                                "from_address": tx.get("sender", ""),
+                                "status": "completed",
+                                "method": "on-chain",
+                                "created_at": datetime.now(timezone.utc).isoformat()
+                            }
+                            await db.exchange_deposits.insert_one(deposit)
+                            await db.exchange_wallets.update_one(
+                                {"user_id": user["user_id"]},
+                                {"$inc": {"brics_available": amount}}
+                            )
+                            logger.info(f"BRICS deposit: {amount} BRICS for user {user['user_id']}")
+
+                except Exception as e:
+                    logger.error(f"Error checking block {block_idx}: {e}")
+
+    except Exception as e:
+        logger.error(f"BRICS deposit monitor error: {e}")
+
 # ============ BACKGROUND TASK ============
 async def deposit_monitor_loop():
-    """Background loop to check for new deposits"""
-    logger.info("USDT deposit monitor started")
+    """Background loop to check for new deposits (USDT + BRICS)"""
+    logger.info("Deposit monitor started (USDT + BRICS)")
     while True:
         try:
             await check_usdt_deposits()
+            await check_brics_deposits()
         except Exception as e:
             logger.error(f"Deposit monitor error: {e}")
         await asyncio.sleep(30)  # Check every 30 seconds
