@@ -27,6 +27,7 @@ function PriceChart({ candles, interval, setInterval }) {
       crosshair: { mode: 0 },
       rightPriceScale: { borderColor: "#1a1e2e" },
       timeScale: { borderColor: "#1a1e2e", timeVisible: true },
+      localization: { locale: "en-US" },
       width: containerRef.current.clientWidth,
       height: 400,
     });
