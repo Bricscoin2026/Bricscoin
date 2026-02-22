@@ -43,3 +43,22 @@ export const getOrderHistory = () =>
 
 export const cancelOrder = (orderId) =>
   axios.delete(`${API}/api/exchange/order/${orderId}`, { headers: getAuthHeaders() });
+
+// Deposits & Withdrawals
+export const getUsdtDepositAddress = () =>
+  axios.get(`${API}/api/exchange/deposit/usdt`, { headers: getAuthHeaders() });
+
+export const getBricsDepositAddress = () =>
+  axios.get(`${API}/api/exchange/deposit/brics`, { headers: getAuthHeaders() });
+
+export const withdrawUsdt = (amount, address) =>
+  axios.post(`${API}/api/exchange/withdraw/usdt`, { currency: "usdt", amount, address }, { headers: getAuthHeaders() });
+
+export const withdrawBrics = (amount, address) =>
+  axios.post(`${API}/api/exchange/withdraw/brics`, { currency: "brics", amount, address }, { headers: getAuthHeaders() });
+
+export const getDeposits = () =>
+  axios.get(`${API}/api/exchange/wallet/deposits`, { headers: getAuthHeaders() });
+
+export const getWithdrawals = () =>
+  axios.get(`${API}/api/exchange/wallet/withdrawals`, { headers: getAuthHeaders() });
