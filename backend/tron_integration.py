@@ -298,51 +298,11 @@ async def check_brics_deposits():
                     block = block_resp.json()
 
                     for tx in block.get("transactions", []):
-                        if tx.get("recipient") == exchange_address and tx.get("amount", 0) > 0:
-                            tx_id = tx.get("id") or tx.get("hash") or f"{block_idx}_{tx.get('sender', '')}"
-
-                            # Check if already processed
-                            existing = await db.exchange_deposits.find_one({
-                                "tx_ref": tx_id,
-                                "currency": "brics"
-                            })
-                            if existing:
-                                continue
-
-                            # Find user by memo (first 8 chars of user_id)
-                            memo = tx.get("memo", "")
-                            user = None
-                            if memo:
-                                user = await db.exchange_users.find_one(
-                                    {"user_id": {"$regex": f"^{memo}"}},
-                                    {"_id": 0}
-                                )
-
-                            # If no memo match, check all users for pending deposits
-                            if not user:
-                                # Credit to first user who has this exchange address as deposit
-                                # For now, log it
-                                logger.warning(f"BRICS deposit without memo match: {tx.get('amount')} from {tx.get('sender')}")
-                                continue
-
-                            amount = float(tx.get("amount", 0))
-                            deposit = {
-                                "deposit_id": str(uuid.uuid4()),
-                                "user_id": user["user_id"],
-                                "currency": "brics",
-                                "amount": amount,
-                                "tx_ref": tx_id,
-                                "from_address": tx.get("sender", ""),
-                                "status": "completed",
-                                "method": "on-chain",
-                                "created_at": datetime.now(timezone.utc).isoformat()
-                            }
-                            await db.exchange_deposits.insert_one(deposit)
-                            await db.exchange_wallets.update_one(
-                                {"user_id": user["user_id"]},
-                                {"$inc": {"brics_available": amount}}
-                            )
-                            logger.info(f"BRICS deposit: {amount} BRICS for user {user['user_id']}")
+                        if tx.get("recipient") == exchange_address and float(tx.get("amount", 0)) > 0:
+                            tx_id = tx.get("id") or tx.get("hash") or f"{block_idx}_{tx.get('sender', '')}_{tx.get('amount', '')}"
+                            existing = await db.exchange_deposits.find_one({"tx_ref": tx_id, "currency": "brics"})
+                            if not existing:
+                                await _credit_brics_deposit(tx, tx_id, exchange_address)
 
                 except Exception as e:
                     logger.error(f"Error checking block {block_idx}: {e}")
