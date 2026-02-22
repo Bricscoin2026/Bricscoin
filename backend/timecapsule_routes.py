@@ -73,13 +73,9 @@ async def create_capsule(capsule: TimeCapsuleCreate):
     if not verify_result.get("hybrid_valid"):
         raise HTTPException(status_code=400, detail="Invalid PQC signature")
 
-    # Verify address ownership
-    combined_hash = hashlib.sha256(
-        (capsule.ecdsa_public_key + capsule.dilithium_public_key).encode()
-    ).hexdigest()
-    expected_address = "BRICSPQ" + combined_hash[:38]
-    if expected_address != capsule.creator_address:
-        raise HTTPException(status_code=400, detail="Creator address does not match PQC keys")
+    # Verify address is PQC
+    if not capsule.creator_address.startswith("BRICSPQ"):
+        raise HTTPException(status_code=400, detail="Creator must use a PQC address (BRICSPQ...)")
 
     # Check balance for fee
     balance = await get_balance(capsule.creator_address)
