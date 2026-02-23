@@ -165,7 +165,7 @@ export default function AiOracle() {
         </p>
       </motion.div>
 
-      <Tabs defaultValue="analysis" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v })} className="space-y-6">
         <TabsList className="bg-card border border-white/10">
           <TabsTrigger value="analysis" data-testid="tab-analysis">
             <Activity className="w-4 h-4 mr-2" />Analysis

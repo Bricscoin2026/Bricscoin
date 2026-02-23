@@ -553,7 +553,7 @@ export default function Blockchain() {
         </div>
       </motion.div>
 
-      <Tabs defaultValue="overview" className="space-y-5">
+      <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v })} className="space-y-5">
         <TabsList className="bg-card border border-white/10 flex-wrap">
           <TabsTrigger value="overview" data-testid="tab-overview"><NetworkIcon className="w-4 h-4 mr-2"/>Overview</TabsTrigger>
           <TabsTrigger value="explorer" data-testid="tab-explorer"><Search className="w-4 h-4 mr-2"/>Explorer</TabsTrigger>

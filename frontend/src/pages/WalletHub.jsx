@@ -20,7 +20,7 @@ export default function WalletHub() {
         <p className="text-muted-foreground">Manage your BRICS wallets — Legacy, Quantum-Proof & Migration</p>
       </motion.div>
 
-      <Tabs defaultValue="legacy" className="space-y-5">
+      <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v })} className="space-y-5">
         <TabsList className="bg-card border border-white/10">
           <TabsTrigger value="legacy" data-testid="tab-legacy-wallet">
             <WalletIcon className="w-4 h-4 mr-2" />Legacy Wallet
