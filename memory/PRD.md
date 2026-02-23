@@ -42,12 +42,13 @@ Build "BricsCoin," a cryptocurrency with Post-Quantum Cryptography (PQC) featuri
 - [x] Push all code to Codeberg repository
 - [x] Fix frontend build URL (was pointing to preview instead of production)
 - [x] Generate whitepaper PDF with professional cover image and deploy to production
+- [x] Update Dashboard subtitle: "A Decentralized SHA256 PoW Cryptocurrency with PQ Security" + Author
+- [x] P2Pool decentralized mining pool (SOLO payout, peer management, sharechain, dashboard)
 
 ## Prioritized Backlog
 - **P1:** Configure miner block rewards to PQC address
 - **P2:** BricsID / BricsVault (decentralized identity, dead man's switch)
 - **P3:** Cleanup downloads folder on Codeberg
-- **P4:** Mining Pool Optimization (Stratum v2 / P2Pool)
 - **P5:** Mobile Wallet
 
 ## 3rd Party Integrations
