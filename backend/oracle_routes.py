@@ -62,8 +62,9 @@ async def gather_network_data():
         except (ValueError, KeyError):
             pass
 
-    # Unique miners in last 50 blocks
+    # Unique miners in last 50 blocks & active miners in last 10
     unique_miners = len(set(b.get("miner", "") for b in last_blocks if b.get("miner")))
+    active_miners = len(set(b.get("miner", "") for b in last_blocks[:10] if b.get("miner")))
 
     # Current difficulty
     current_difficulty = last_block.get("difficulty", 1000000) if last_block else 1000000
@@ -81,8 +82,9 @@ async def gather_network_data():
         circulating += get_mining_reward(i)
     circulating = min(circulating, MAX_SUPPLY)
 
-    # Hashrate estimate
-    hashrate = (current_difficulty * (2 ** 32)) / TARGET_BLOCK_TIME
+    # Hashrate estimate using actual block time (not target)
+    effective_block_time = avg_block_time if avg_block_time > 0 else TARGET_BLOCK_TIME
+    hashrate = (current_difficulty * (2 ** 32)) / effective_block_time
 
     # Chat messages & time capsules
     chat_count = await db.chat_messages.count_documents({})
