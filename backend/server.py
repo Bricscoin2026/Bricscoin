@@ -2419,10 +2419,12 @@ from chat_routes import router as chat_router
 from timecapsule_routes import router as timecapsule_router
 from oracle_routes import router as oracle_router
 from nft_routes import router as nft_router
+from p2pool_routes import router as p2pool_router
 app.include_router(chat_router)
 app.include_router(timecapsule_router)
 app.include_router(oracle_router)
 app.include_router(nft_router)
+app.include_router(p2pool_router)
 
 # Security Headers Middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
