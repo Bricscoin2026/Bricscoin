@@ -382,17 +382,27 @@ export default function AiOracle() {
                         <div className="flex items-center gap-3 mb-3">
                           <TrendingUp className="w-6 h-6 text-primary" />
                           <h3 className="font-heading font-bold">Overall Outlook</h3>
-                          <Badge variant="outline" className={
-                            predictions.predictions.overall_outlook === "bullish" ? "border-green-500/50 text-green-400" :
-                            predictions.predictions.overall_outlook === "bearish" ? "border-red-500/50 text-red-400" :
-                            "border-yellow-500/50 text-yellow-400"
-                          }>
-                            {predictions.predictions.overall_outlook}
-                          </Badge>
+                          {(() => {
+                            const outlook = typeof predictions.predictions.overall_outlook === "object"
+                              ? predictions.predictions.overall_outlook.outlook
+                              : predictions.predictions.overall_outlook;
+                            return (
+                              <Badge variant="outline" className={
+                                outlook === "bullish" ? "border-green-500/50 text-green-400" :
+                                outlook === "bearish" ? "border-red-500/50 text-red-400" :
+                                "border-yellow-500/50 text-yellow-400"
+                              }>
+                                {outlook}
+                              </Badge>
+                            );
+                          })()}
                         </div>
-                        {predictions.predictions.reasoning && (
-                          <p className="text-sm text-muted-foreground">{predictions.predictions.reasoning}</p>
-                        )}
+                        {(() => {
+                          const reasoning = typeof predictions.predictions.overall_outlook === "object"
+                            ? predictions.predictions.overall_outlook.reasoning
+                            : predictions.predictions.reasoning;
+                          return reasoning ? <p className="text-sm text-muted-foreground">{reasoning}</p> : null;
+                        })()}
                       </CardContent>
                     </Card>
                   )}
