@@ -29,6 +29,7 @@ export default function Layout() {
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
     { to: "/oracle", icon: Brain, label: "AI Oracle" },
     { to: "/nft", icon: Award, label: "BricsNFT" },
+    { to: "/p2pool", icon: Network, label: "P2Pool" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
