@@ -73,11 +73,50 @@ async def get_balance(address: str) -> float:
     return max(0.0, round(balance, 8))
 
 
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload a file and get its SHA-256 hash for certificate minting"""
+    # Check file size
+    contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail=f"File too large. Max {MAX_FILE_SIZE // (1024*1024)}MB")
+    
+    # Calculate SHA-256 hash
+    file_hash = hashlib.sha256(contents).hexdigest()
+    
+    # Save file with hash as filename (dedup)
+    ext = os.path.splitext(file.filename)[1] if file.filename else ""
+    stored_name = f"{file_hash}{ext}"
+    file_path = os.path.join(UPLOAD_DIR, stored_name)
+    
+    with open(file_path, "wb") as f:
+        f.write(contents)
+    
+    return {
+        "file_hash": file_hash,
+        "file_name": file.filename,
+        "file_size": len(contents),
+        "stored_name": stored_name,
+    }
+
+
+@router.get("/file/{file_hash}")
+async def get_file(file_hash: str):
+    """Download a file by its hash"""
+    # Find file with this hash
+    for fname in os.listdir(UPLOAD_DIR):
+        if fname.startswith(file_hash):
+            file_path = os.path.join(UPLOAD_DIR, fname)
+            return FileResponse(file_path, filename=fname)
+    raise HTTPException(status_code=404, detail="File not found")
+
+
 @router.post("/mint")
 async def mint_certificate(cert: MintCertificate):
     """Mint a new PQC-signed certificate on the blockchain"""
     
-    if cert.certificate_type not in CERTIFICATE_TYPES:
+    # Allow custom types
+    if cert.certificate_type not in CERTIFICATE_TYPES and cert.certificate_type != "custom":
         raise HTTPException(status_code=400, detail=f"Invalid type. Choose from: {', '.join(CERTIFICATE_TYPES)}")
     
     # Verify PQC wallet exists
