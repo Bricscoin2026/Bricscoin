@@ -20,7 +20,7 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-MINT_FEE = 0.00001  # Fee per mint (burned)
+MINT_FEE = 0.000005  # Fee per mint (burned) — same as BricsChat
 BURN_ADDRESS = "BRICSPQ_BURN_000000000000000000000000000000"
 
 CERTIFICATE_TYPES = [
