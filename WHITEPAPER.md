@@ -1,7 +1,7 @@
 # BricsCoin Whitepaper
 ## A Decentralized SHA256 Proof-of-Work Cryptocurrency with Post-Quantum Security
 
-**Version 2.0 - February 2026**  
+**Version 3.0 - February 2026**
 **Author: Jabo86**
 
 ---
@@ -9,6 +9,8 @@
 ## Abstract
 
 BricsCoin (BRICS) is a decentralized cryptocurrency built on the proven SHA256 Proof-of-Work consensus mechanism, enhanced with post-quantum cryptographic security. Designed for hardware mining compatibility, BricsCoin enables anyone with ASIC mining equipment to participate in securing the network and earning rewards. With a fixed supply of 21 million coins, ultra-low transaction fees of 0.000005 BRICS (burned), and a hybrid ECDSA + ML-DSA-65 signature scheme providing quantum resistance, BricsCoin aims to be a fair, transparent, secure, and future-proof digital currency.
+
+BricsCoin goes beyond a simple payment network by offering a suite of on-chain applications: **BricsChat** (quantum-proof encrypted messaging), **Time Capsule** (time-locked on-chain data), **BricsNFT** (PQC-signed certificates), and an **AI Oracle** (GPT-5.2 powered network intelligence).
 
 ---
 
@@ -29,6 +31,7 @@ BricsCoin's mission is to create a truly decentralized currency that:
 - Maintains ultra-low transaction fees for all users (0.000005 BRICS, burned)
 - Provides transparent, verifiable transactions
 - Offers quantum-resistant security through ML-DSA-65
+- Hosts on-chain applications (Chat, Certificates, Time Capsules)
 - Operates as a fully open-source project
 
 ---
@@ -139,6 +142,8 @@ Transaction fees of **0.000005 BRICS** are **burned** (permanently destroyed), c
 - Provides anti-spam protection
 - Aligns incentives for long-term holders
 
+All on-chain features (BricsChat, Time Capsule, BricsNFT) use the same burn fee, contributing to the deflationary model.
+
 ### 5.3 Halving Schedule
 
 | Event | Block | Reward |
@@ -151,17 +156,95 @@ Transaction fees of **0.000005 BRICS** are **burned** (permanently destroyed), c
 
 ---
 
-## 6. Network Architecture
+## 6. On-Chain Applications
 
-### 6.1 API Server
+BricsCoin is more than a payment network. It hosts a suite of on-chain applications that leverage PQC signatures and the burn-fee mechanism.
+
+### 6.1 BricsChat — Quantum-Proof On-Chain Messaging
+
+BricsChat is the **world's first PQC-encrypted on-chain messaging system**. Each message is:
+- Signed with the sender's hybrid ECDSA + ML-DSA-65 keys
+- Stored immutably on the blockchain
+- Publicly visible in the Global Feed (read-only for visitors)
+- Accompanied by a **0.000005 BRICS** fee that is burned
+
+**How it works:**
+1. User connects their PQC wallet
+2. Writes a message and specifies a recipient address
+3. The message content is hex-encoded and signed client-side
+4. A burn transaction is created on-chain
+5. The message is permanently recorded with the sender's PQC signature
+
+**Use cases:** Immutable declarations, public statements, provable communication timestamps.
+
+### 6.2 Decentralized Time Capsule
+
+The Time Capsule feature allows users to store encrypted data on-chain that becomes accessible only at a specific future block height.
+
+- Data is locked until the target block is mined
+- Each capsule creation burns **0.000005 BRICS**
+- Capsules can be public or addressed to a specific recipient
+- Content is immutable once locked
+
+**Use cases:** Timed announcements, future predictions, proof-of-knowledge at a specific time, community events.
+
+### 6.3 BricsNFT — PQC-Signed On-Chain Certificates
+
+BricsNFT is the **world's first NFT system with post-quantum cryptographic signatures**. It allows anyone to mint immutable certificates on the BricsCoin blockchain.
+
+**Certificate Types:**
+- Diploma / Degree
+- Property Deed
+- Authenticity Certificate
+- Professional License
+- Membership
+- Award / Achievement
+- Software License
+- Custom (user-defined)
+
+**How it works:**
+1. Issuer connects their PQC wallet
+2. Selects a certificate type (or creates a custom one)
+3. Fills in title, description, and optionally a recipient address
+4. The certificate content is SHA-256 hashed and signed with ECDSA + ML-DSA-65
+5. A burn transaction of **0.000005 BRICS** is created
+6. The certificate receives a unique ID (e.g., `BRICSNFT-A1B2C3D4E5F6`)
+7. Anyone can verify the certificate's authenticity using the Verify tool
+
+**Trust Model:**
+The blockchain records **who** signed **what** and **when** — immutably. To verify the issuer's identity, users check that the issuer's PQC address matches the one published on their official website or channels. This is the same trust model used by digital signatures and PEC (certified email).
+
+**Features:**
+- Public gallery of all minted certificates
+- Certificate transfer between PQC addresses
+- On-chain verification tool
+- Transfer history tracking
+- Deflationary burn fee
+
+### 6.4 AI Blockchain Oracle
+
+The AI Oracle is powered by **GPT-5.2** and provides real-time network intelligence:
+
+- **Network Analysis**: Health score, mining analysis, security assessment, recommendations
+- **Predictions**: Difficulty trend, hashrate forecast, halving impact, network growth outlook
+- **Ask Oracle**: Conversational AI that answers questions about BricsCoin using live network data
+
+The Oracle analyzes real blockchain data including block times, difficulty, miner distribution, transaction volume, and PQC adoption rates.
+
+---
+
+## 7. Network Architecture
+
+### 7.1 API Server
 
 The BricsCoin API is built on FastAPI (Python) with:
 - Asynchronous MongoDB (Motor) for high-performance database operations
 - Rate limiting to prevent abuse
 - Security headers and CORS configuration
 - RESTful endpoints for all blockchain operations
+- Dedicated routers for Chat, Time Capsule, NFT, and Oracle features
 
-### 6.2 Mining Server
+### 7.2 Mining Server
 
 The Stratum server supports:
 - Stratum v1 protocol (port 3333)
@@ -169,7 +252,7 @@ The Stratum server supports:
 - Share validation and hashrate tracking
 - PQC block signing on successful mine
 
-### 6.3 Peer-to-Peer Network
+### 7.3 Peer-to-Peer Network
 
 Nodes communicate via HTTP API calls for:
 - Block propagation
@@ -179,9 +262,9 @@ Nodes communicate via HTTP API calls for:
 
 ---
 
-## 7. Security
+## 8. Security
 
-### 7.1 Live Security Audit
+### 8.1 Live Security Audit
 
 BricsCoin includes a built-in security audit system that runs 27 real-time tests covering:
 - Input validation (8 tests)
@@ -191,7 +274,7 @@ BricsCoin includes a built-in security audit system that runs 27 real-time tests
 
 The audit can be executed at any time via `GET /api/security/audit`.
 
-### 7.2 Attack Mitigations
+### 8.2 Attack Mitigations
 
 | Attack | Mitigation |
 |--------|-----------|
@@ -204,7 +287,7 @@ The audit can be executed at any time via `GET /api/security/audit`.
 
 ---
 
-## 8. Roadmap
+## 9. Roadmap
 
 ### Completed
 - SHA256 PoW blockchain
@@ -216,6 +299,11 @@ The audit can be executed at any time via `GET /api/security/audit`.
 - Client-side browser signing
 - Zero-fee wallet migration
 - Live security audit (27/27 tests)
+- BricsChat — On-chain PQC-encrypted messaging
+- Decentralized Time Capsule
+- BricsNFT — PQC-signed on-chain certificates
+- AI Blockchain Oracle (GPT-5.2)
+- Deflationary burn-fee mechanism
 - Production deployment
 
 ### Future
@@ -226,9 +314,13 @@ The audit can be executed at any time via `GET /api/security/audit`.
 
 ---
 
-## 9. Conclusion
+## 10. Conclusion
 
-BricsCoin combines the proven security of SHA256 Proof-of-Work with forward-looking post-quantum cryptographic protection. By implementing ML-DSA-65 alongside ECDSA in a hybrid scheme, BricsCoin is positioned to remain secure even as quantum computing technology advances. The commitment to client-side signing, open-source development, and community-driven governance ensures that BricsCoin remains transparent, accessible, and trustworthy.
+BricsCoin combines the proven security of SHA256 Proof-of-Work with forward-looking post-quantum cryptographic protection. By implementing ML-DSA-65 alongside ECDSA in a hybrid scheme, BricsCoin is positioned to remain secure even as quantum computing technology advances.
+
+Beyond a simple payment network, BricsCoin offers a complete ecosystem of on-chain applications — from quantum-proof messaging to PQC-signed certificates — all contributing to a deflationary token economy through burn fees.
+
+The commitment to client-side signing, open-source development, and community-driven governance ensures that BricsCoin remains transparent, accessible, and trustworthy.
 
 ---
 
@@ -241,6 +333,6 @@ BricsCoin combines the proven security of SHA256 Proof-of-Work with forward-look
 
 ---
 
-**Website**: [bricscoin26.org](https://bricscoin26.org)  
-**Repository**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)  
+**Website**: [bricscoin26.org](https://bricscoin26.org)
+**Repository**: [codeberg.org/Bricscoin_26/Bricscoin](https://codeberg.org/Bricscoin_26/Bricscoin)
 **License**: MIT
