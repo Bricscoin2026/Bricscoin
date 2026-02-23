@@ -40,6 +40,9 @@ class MintCertificate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(..., min_length=1, max_length=2000)
     certificate_type: str = Field(..., description="Type of certificate")
+    custom_type: Optional[str] = Field(None, max_length=100)
+    file_hash: Optional[str] = None
+    file_name: Optional[str] = None
     metadata: Optional[dict] = None
     # PQC signatures
     ecdsa_signature: str
