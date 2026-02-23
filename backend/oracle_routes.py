@@ -294,14 +294,19 @@ async def get_predictions():
         api_key=EMERGENT_LLM_KEY,
         session_id=f"oracle-predict-{uuid.uuid4().hex[:8]}",
         system_message="""You are the BricsCoin AI Oracle prediction engine.
+
+IMPORTANT: Always respond in English only.
+
 Based on historical blockchain data, generate predictions in JSON format:
-- difficulty_trend ("increasing", "decreasing", "stable") with confidence (0-100)
+- difficulty_trend: object with "trend" ("increasing", "decreasing", "stable") and "confidence" (0-100)
 - hashrate_forecast (short description of expected hashrate trend)
 - next_halving_impact (analysis of the upcoming halving's effect)
 - network_growth (prediction about network growth: users, transactions, PQC adoption)
 - risk_factors (array of potential risks to watch)
 - opportunities (array of opportunities for the network)
-- overall_outlook ("bullish", "neutral", "bearish") with reasoning
+- overall_outlook: object with "outlook" ("bullish", "neutral", "bearish") and "reasoning" (string)
+
+Use "active_miners" for the current active miner count. The actual block time may differ significantly from the 600s target.
 
 Respond ONLY with valid JSON, no markdown."""
     ).with_model("openai", "gpt-5.2")
