@@ -223,6 +223,10 @@ BricsCoin is a SHA-256 PoW cryptocurrency with Post-Quantum Cryptography (PQC) v
 Max supply: 21M BRICS. Halving: every 210,000 blocks. Block time target: 10 minutes.
 Unique features: PQC-encrypted on-chain chat (BricsChat), Decentralized Time Capsules, AI Oracle.
 
+IMPORTANT: Always respond in English only.
+
+Use "active_miners" for the current active miner count. The actual block time may differ from the 600s target.
+
 Current network data:
 {json.dumps(data, indent=2)}
 
