@@ -38,8 +38,10 @@ Build "BricsCoin," a cryptocurrency with Post-Quantum Cryptography (PQC) featuri
 ## Completed Tasks (Feb 2026)
 - [x] BricsNFT feature development (backend + frontend)
 - [x] Deploy BricsNFT to production (bricscoin26.org)
-- [x] Update Whitepaper v3.0
+- [x] Update Whitepaper v3.0 (Markdown + PDF with cover image)
 - [x] Push all code to Codeberg repository
+- [x] Fix frontend build URL (was pointing to preview instead of production)
+- [x] Generate whitepaper PDF with professional cover image and deploy to production
 
 ## Prioritized Backlog
 - **P1:** Configure miner block rewards to PQC address
