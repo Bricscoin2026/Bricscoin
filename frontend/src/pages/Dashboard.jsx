@@ -276,8 +276,11 @@ export default function Dashboard() {
         <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text mb-4">
           BRICSCOIN
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
-          Decentralized cryptocurrency powered by SHA256 Proof-of-Work. Mine with ASIC hardware and join the network.
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
+          A Decentralized SHA256 Proof-of-Work Cryptocurrency with Post-Quantum Security
+        </p>
+        <p className="text-sm text-muted-foreground mb-6">
+          2 February 2026 &middot; Author: Jabo86
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button asChild className="gold-button rounded-sm" data-testid="start-mining-btn">
