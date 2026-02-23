@@ -68,6 +68,8 @@ function formatHashrate(h) {
 }
 
 export default function AiOracle() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "analysis";
   const [analysis, setAnalysis] = useState(null);
   const [predictions, setPredictions] = useState(null);
   const [question, setQuestion] = useState("");

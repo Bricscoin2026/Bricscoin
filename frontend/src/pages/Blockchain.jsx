@@ -507,6 +507,8 @@ function RichListSection() {
 
 /* ========== MAIN BLOCKCHAIN PAGE ========== */
 export default function Blockchain() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "overview";
   const [stats, setStats] = useState(null);
   const [minerStats, setMinerStats] = useState(null);
   const [blocks, setBlocks] = useState([]);

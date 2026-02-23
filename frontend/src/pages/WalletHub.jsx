@@ -8,6 +8,8 @@ import PQCWalletPage from "./PQCWallet";
 import WalletMigrationPage from "./WalletMigration";
 
 export default function WalletHub() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "legacy";
   return (
     <div className="space-y-6" data-testid="wallet-hub-page">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
