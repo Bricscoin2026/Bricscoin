@@ -12,7 +12,7 @@ import os
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://brics-chat-global.preview.emergentagent.com"
+    BASE_URL = "https://pqc-cert-launch.preview.emergentagent.com"
 
 
 class TestPQCNodeKeys:

@@ -22,7 +22,7 @@ services:
       - DB_NAME=bricscoin
       - NODE_ID=${NODE_ID:-}
       - NODE_URL=${NODE_URL:-}
-      - SEED_NODES=${SEED_NODES:-https://brics-chat-global.preview.emergentagent.com}
+      - SEED_NODES=${SEED_NODES:-https://pqc-cert-launch.preview.emergentagent.com}
       - CORS_ORIGINS=*
     depends_on:
       - bricscoin-db
