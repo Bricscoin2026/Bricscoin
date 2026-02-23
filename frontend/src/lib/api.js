@@ -131,4 +131,14 @@ export const askOracle = (question, sessionId) => api.post("/oracle/ask", { ques
 export const getOracleHistory = (limit = 20) => api.get(`/oracle/history?limit=${limit}`);
 export const getOraclePredictions = () => api.get("/oracle/predict");
 
+// BricsNFT (PQC Certificates)
+export const mintNFT = (data) => api.post("/nft/mint", data);
+export const listNFTs = (limit = 50, certType = null) => api.get(`/nft/certificates?limit=${limit}${certType ? `&cert_type=${certType}` : ''}`);
+export const getNFT = (id) => api.get(`/nft/certificate/${id}`);
+export const verifyNFT = (id) => api.get(`/nft/verify/${id}`);
+export const getNFTsByOwner = (address, limit = 50) => api.get(`/nft/owner/${address}?limit=${limit}`);
+export const getNFTsByCreator = (address, limit = 50) => api.get(`/nft/creator/${address}?limit=${limit}`);
+export const transferNFT = (data) => api.post("/nft/transfer", data);
+export const getNFTStats = () => api.get("/nft/stats");
+
 export default api;
