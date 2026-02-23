@@ -12,6 +12,7 @@ import BricsChat from "./pages/BricsChat";
 import TimeCapsule from "./pages/TimeCapsule";
 import AiOracle from "./pages/AiOracle";
 import BricsNFT from "./pages/BricsNFT";
+import P2Pool from "./pages/P2Pool";
 import "./App.css";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
             <Route path="timecapsule" element={<TimeCapsule />} />
             <Route path="oracle" element={<AiOracle />} />
             <Route path="nft" element={<BricsNFT />} />
+            <Route path="p2pool" element={<P2Pool />} />
             <Route path="downloads" element={<Downloads />} />
             <Route path="about" element={<About />} />
           </Route>
