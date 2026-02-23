@@ -145,6 +145,8 @@ async def get_analysis():
 BricsCoin is a SHA-256 Proof-of-Work cryptocurrency with Post-Quantum Cryptography (PQC) hybrid signatures (ECDSA + ML-DSA-65).
 It has a max supply of 21M, halving every 210,000 blocks, and unique features like PQC-encrypted on-chain messaging (BricsChat) and Decentralized Time Capsules.
 
+IMPORTANT: Always respond in English only.
+
 Provide analysis in a structured JSON format with these fields:
 - health_score (0-100)
 - health_status ("Excellent", "Good", "Fair", "Needs Attention", "Critical")
@@ -154,6 +156,9 @@ Provide analysis in a structured JSON format with these fields:
 - halving_prediction (when the next halving will occur and its impact)
 - recommendations (array of 3-5 actionable recommendations)
 - fun_fact (an interesting observation about the network data)
+
+Use the "active_miners" field (miners in last 10 blocks) for current miner count, not "unique_miners_recent" (which includes historical miners).
+Note that the actual avg_block_time may differ significantly from the 600s target if difficulty needs adjustment.
 
 Respond ONLY with valid JSON, no markdown."""
     ).with_model("openai", "gpt-5.2")
