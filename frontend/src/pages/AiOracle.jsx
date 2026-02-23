@@ -414,13 +414,22 @@ export default function AiOracle() {
                           <CardTitle className="text-sm">Difficulty Trend</CardTitle>
                         </CardHeader>
                         <CardContent className="text-sm text-muted-foreground">
-                          <Badge variant="outline" className="mb-2">{predictions.predictions.difficulty_trend}</Badge>
-                          {predictions.predictions.confidence && (
-                            <div className="mt-2">
-                              <p className="text-xs mb-1">Confidence: {predictions.predictions.confidence}%</p>
-                              <Progress value={predictions.predictions.confidence} className="h-1.5" />
-                            </div>
-                          )}
+                          {(() => {
+                            const dt = predictions.predictions.difficulty_trend;
+                            const trend = typeof dt === "object" ? dt.trend : dt;
+                            const confidence = typeof dt === "object" ? dt.confidence : predictions.predictions.confidence;
+                            return (
+                              <>
+                                <Badge variant="outline" className="mb-2">{trend}</Badge>
+                                {confidence && (
+                                  <div className="mt-2">
+                                    <p className="text-xs mb-1">Confidence: {confidence}%</p>
+                                    <Progress value={confidence} className="h-1.5" />
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </CardContent>
                       </Card>
                     )}
