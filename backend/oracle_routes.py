@@ -99,6 +99,7 @@ async def gather_network_data():
         "target_block_time_seconds": TARGET_BLOCK_TIME,
         "hashrate_estimated_h_s": hashrate,
         "unique_miners_recent": unique_miners,
+        "active_miners": active_miners,
         "current_block_reward": current_reward,
         "next_halving_block": next_halving,
         "blocks_to_halving": blocks_to_halving,
