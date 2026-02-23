@@ -4,7 +4,8 @@ World's first NFT system with Post-Quantum Cryptography (PQC) signatures.
 Each certificate is minted as a PQC transaction on the BricsCoin blockchain.
 Use cases: diplomas, property deeds, authenticity certificates, professional certifications.
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import hashlib
 import uuid
+import shutil
 from pqc_crypto import hybrid_verify
 
 router = APIRouter(prefix="/api/nft", tags=["BricsNFT"])
@@ -22,6 +24,9 @@ db = client[os.environ['DB_NAME']]
 
 MINT_FEE = 0.000005  # Fee per mint (burned) — same as BricsChat
 BURN_ADDRESS = "BRICSPQ_BURN_000000000000000000000000000000"
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+UPLOAD_DIR = "/app/backend/nft_uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 CERTIFICATE_TYPES = [
     "diploma", "property", "authenticity", "professional",
