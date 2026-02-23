@@ -173,14 +173,20 @@ async def mint_certificate(cert: MintCertificate):
     await db.transactions.insert_one(fee_tx)
     
     # Store the certificate
+    display_type = cert.custom_type if cert.certificate_type == "custom" and cert.custom_type else cert.certificate_type
     certificate = {
         "id": cert_id,
         "title": cert.title,
         "description": cert.description,
         "certificate_type": cert.certificate_type,
+        "custom_type": cert.custom_type,
+        "display_type": display_type,
         "creator_address": cert.creator_address,
         "owner_address": cert.recipient_address or cert.creator_address,
         "content_hash": content_hash,
+        "file_hash": cert.file_hash,
+        "file_name": cert.file_name,
+        "has_file": bool(cert.file_hash),
         "metadata": cert.metadata or {},
         "tx_id": tx_id,
         "block_height": block_height,
