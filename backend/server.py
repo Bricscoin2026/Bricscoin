@@ -1070,7 +1070,7 @@ async def get_rich_list(limit: int = 100):
         
         for address in addresses:
             balance = await get_balance(address)
-            if balance > 0.001:  # Filter dust/rounding errors
+            if balance >= 1.0:  # Show all wallets with at least 1 BRICS
                 wallets.append({
                     "address": address,
                     "balance": round(balance, 8),
