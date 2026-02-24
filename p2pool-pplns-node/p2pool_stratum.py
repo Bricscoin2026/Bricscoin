@@ -576,17 +576,16 @@ class StratumMiner:
                     logger.warning(f"Main node block submit returned {resp.status_code}: {resp.text[:200]}")
         except Exception as e:
             logger.warning(f"Main node API unreachable for block submit: {e}")
-        except Exception as e:
-            logger.warning(f"Main node API unreachable for block submit: {e}")
 
-        # Fallback: direct DB insert (works if same MongoDB)
+        # Fallback: direct DB insert (only if same MongoDB, e.g., testing)
         if not block_submitted:
             existing = await db.blocks.find_one({"index": template['index']})
             if existing:
                 logger.info(f"Block #{template['index']} already exists, skipping")
                 return
             await db.blocks.insert_one(block)
-            await db.transactions.insert_one(reward_tx)
+            for tx in reward_txs:
+                await db.transactions.insert_one(tx)
             logger.info(f"PPLNS Block #{template['index']} saved directly to DB")
 
         pending_tx_ids = template.get('pending_tx_ids', [])
