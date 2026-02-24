@@ -321,14 +321,11 @@ class StratumMiner:
         extranonce_counter += 1
         self.extranonce1 = format(extranonce_counter, '08x')
         self.extranonce2_size = 4
-        self.difficulty = 0.1  # Start low, vardiff will adjust upward
+        self.difficulty = 512
         self.shares = 0
         self.blocks = 0
         self.personal_jobs: Dict[str, dict] = {}
         self.sent_jobs = set()
-        # Vardiff tracking
-        self.share_times: list = []
-        self.last_vardiff_time = time.time()
 
     def send(self, message):
         try: self.writer.write((json.dumps(message) + '\n').encode())
