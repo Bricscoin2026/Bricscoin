@@ -347,6 +347,29 @@ class StratumMiner:
     def notify(self, method, params):
         self.send({"id": None, "method": method, "params": params})
 
+    def vardiff_update(self):
+        """Adjust difficulty based on share submission rate."""
+        now = time.time()
+        self.share_times.append(now)
+        self.share_times = self.share_times[-(VARDIFF_RETARGET_SHARES + 1):]
+        if len(self.share_times) < VARDIFF_RETARGET_SHARES + 1:
+            return
+        intervals = [self.share_times[i] - self.share_times[i-1] for i in range(1, len(self.share_times))]
+        avg_interval = sum(intervals) / len(intervals)
+        if avg_interval < VARDIFF_TARGET_TIME * (1 - VARDIFF_VARIANCE):
+            new_diff = self.difficulty * (VARDIFF_TARGET_TIME / max(0.1, avg_interval))
+        elif avg_interval > VARDIFF_TARGET_TIME * (1 + VARDIFF_VARIANCE):
+            new_diff = self.difficulty * (VARDIFF_TARGET_TIME / avg_interval)
+        else:
+            return
+        new_diff = max(VARDIFF_MIN, min(VARDIFF_MAX, round(new_diff, 6)))
+        if new_diff != self.difficulty:
+            old_diff = self.difficulty
+            self.difficulty = new_diff
+            self.notify("mining.set_difficulty", [self.difficulty])
+            logger.info(f"VARDIFF [{self.worker_name}] {old_diff} -> {self.difficulty} (avg={avg_interval:.1f}s)")
+            self.share_times = []
+
     async def handle_message(self, message):
         method = message.get('method', '')
         params = message.get('params', [])
