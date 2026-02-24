@@ -409,7 +409,7 @@ class StratumMiner:
                 })
                 await db.miners.update_one(
                     {"worker_name": self.worker_name},
-                    {"$set": {"last_seen": now_iso, "online": True, "hashrate": self.hashrate}, "$inc": {"shares": 1}},
+                    {"$set": {"last_seen": now_iso, "online": True}, "$inc": {"shares": 1}},
                     upsert=True
                 )
                 logger.info(f"SHARE_OK [{self.worker_name}] diff={self.difficulty} hash={block_hash[:16]}... is_block={is_block}")
