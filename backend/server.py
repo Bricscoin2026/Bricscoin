@@ -399,7 +399,7 @@ async def get_current_difficulty() -> int:
     
     expected_time = TARGET_BLOCK_TIME * adjustment_interval
     ratio = expected_time / actual_time
-    ratio = max(0.25, min(4.0, ratio))
+    ratio = max(0.10, min(100.0, ratio))
     
     new_difficulty = max(1, int(window_difficulty * ratio))
     
