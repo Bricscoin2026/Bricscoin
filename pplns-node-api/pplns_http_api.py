@@ -31,6 +31,8 @@ class PPLNSHandler(BaseHTTPRequestHandler):
             self._handle_status()
         elif self.path == "/miners":
             self._handle_miners()
+        elif self.path == "/shares":
+            self._handle_shares()
         else:
             self._respond(404, {"error": "not found"})
 
@@ -63,6 +65,15 @@ class PPLNSHandler(BaseHTTPRequestHandler):
                 "pool_mode": "pplns",
             })
         self._respond(200, {"miners": miners, "active_count": len(miners)})
+
+    def _handle_shares(self):
+        """Expose share counts for aggregation by the main node."""
+        now = datetime.now(timezone.utc)
+        hr_cutoff = (now - timedelta(hours=1)).isoformat()
+        day_cutoff = (now - timedelta(hours=24)).isoformat()
+        shares_1h = db.pplns_shares.count_documents({"timestamp": {"$gte": hr_cutoff}})
+        shares_24h = db.pplns_shares.count_documents({"timestamp": {"$gte": day_cutoff}})
+        self._respond(200, {"shares_1h": shares_1h, "shares_24h": shares_24h, "node_id": NODE_ID})
 
     def _respond(self, status, data):
         self.send_response(status)
