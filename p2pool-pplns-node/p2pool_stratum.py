@@ -490,32 +490,78 @@ class StratumMiner:
             self.respond(msg_id, True)
 
     async def save_block(self, job, nonce, block_hash):
-        """Save a found block. Uses double_sha256 consistent hash.
-        Submits block to main node via HTTP API first, falls back to direct DB."""
+        """Save a found block with PPLNS reward splitting.
+        Reward is split proportionally among all PPLNS miners based on shares."""
         template = job['template']
-        miner_address = self.worker_name
+        finder_address = self.worker_name
         reward_amount = template['reward'] / COIN
-        reward_tx = {
-            "id": str(uuid.uuid4()), "sender": "COINBASE", "recipient": miner_address,
-            "amount": reward_amount, "timestamp": datetime.now(timezone.utc).isoformat(),
-            "signature": "COINBASE_REWARD", "type": "mining_reward",
-            "confirmed": True, "block_index": template['index']
-        }
-        block_transactions = template.get('transactions', []).copy()
-        block_transactions.insert(0, {
-            "id": reward_tx["id"], "sender": "COINBASE", "recipient": miner_address,
-            "amount": reward_amount, "type": "mining_reward"
-        })
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Calculate PPLNS payouts: split reward based on recent shares
+        PPLNS_WINDOW = 2016
+        pplns_payouts = []
+        try:
+            # Get all PPLNS shares from sharechain (via main node API)
+            async with httpx.AsyncClient(timeout=5.0) as http_client:
+                resp = await http_client.get(f"{MAIN_NODE_URL}/api/p2pool/pplns/preview")
+                if resp.status_code == 200:
+                    preview = resp.json()
+                    for payout in preview.get("payouts", []):
+                        pplns_payouts.append({
+                            "worker": payout["worker"],
+                            "percentage": payout["percentage"],
+                            "amount": round(reward_amount * payout["percentage"] / 100, 8)
+                        })
+        except Exception as e:
+            logger.warning(f"Failed to get PPLNS preview: {e}")
+
+        # Fallback: if no PPLNS data, split equally among active miners
+        if not pplns_payouts:
+            active_workers = list(set(
+                m.get("worker", m.get("worker_name", "")) 
+                for m in miners.values() if m.get("worker")
+            ))
+            if active_workers:
+                share_each = round(reward_amount / len(active_workers), 8)
+                for w in active_workers:
+                    pplns_payouts.append({"worker": w, "percentage": 100/len(active_workers), "amount": share_each})
+            else:
+                # Last resort: give all to finder
+                pplns_payouts = [{"worker": finder_address, "percentage": 100, "amount": reward_amount}]
+
+        # Create reward transactions for each miner
+        block_transactions = template.get('transactions', []).copy()
+        reward_txs = []
+        for payout in pplns_payouts:
+            if payout["amount"] <= 0:
+                continue
+            tx = {
+                "id": str(uuid.uuid4()), "sender": "COINBASE",
+                "recipient": payout["worker"],
+                "amount": payout["amount"],
+                "timestamp": timestamp,
+                "signature": "COINBASE_REWARD", "type": "mining_reward",
+                "confirmed": True, "block_index": template['index'],
+                "pool_mode": "pplns", "pplns_percentage": payout["percentage"]
+            }
+            reward_txs.append(tx)
+            block_transactions.insert(0, {
+                "id": tx["id"], "sender": "COINBASE",
+                "recipient": payout["worker"],
+                "amount": payout["amount"],
+                "type": "mining_reward", "pool_mode": "pplns"
+            })
+
         block = {
             "index": template['index'], "timestamp": timestamp,
             "transactions": block_transactions, "proof": int(nonce, 16),
             "previous_hash": template['previous_hash'], "hash": block_hash,
-            "miner": miner_address, "difficulty": template['difficulty'],
-            "nonce": int(nonce, 16)
+            "miner": finder_address, "difficulty": template['difficulty'],
+            "nonce": int(nonce, 16), "pool_mode": "pplns",
+            "pplns_payouts": [{"worker": p["worker"], "amount": p["amount"], "pct": p["percentage"]} for p in pplns_payouts]
         }
 
-        # Try submitting to main node via HTTP API first
+        # Submit to main node via HTTP API
         block_submitted = False
         try:
             async with httpx.AsyncClient(timeout=10.0) as http_client:
@@ -525,9 +571,11 @@ class StratumMiner:
                 )
                 if resp.status_code == 200:
                     block_submitted = True
-                    logger.info(f"PPLNS Block #{template['index']} submitted to main node via API!")
+                    logger.info(f"PPLNS Block #{template['index']} submitted! Payouts: {len(pplns_payouts)} miners")
                 else:
                     logger.warning(f"Main node block submit returned {resp.status_code}: {resp.text[:200]}")
+        except Exception as e:
+            logger.warning(f"Main node API unreachable for block submit: {e}")
         except Exception as e:
             logger.warning(f"Main node API unreachable for block submit: {e}")
 
