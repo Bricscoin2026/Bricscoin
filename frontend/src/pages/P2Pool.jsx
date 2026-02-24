@@ -266,7 +266,7 @@ export default function P2Pool() {
                     </tr></thead>
                     <tbody>
                       {sharechain.map(s => (
-                        <tr key={s.share_id} className={`border-b border-white/5 hover:bg-white/5 ${s.is_block ? "bg-primary/5" : ""}`}>
+                        <tr key={s.share_id} className={`border-b border-white/5 hover:bg-white/5 ${s.is_block ? "bg-primary/5" : ""} ${s.is_block_orphaned ? "bg-red-900/10" : ""}`}>
                           <td className="py-2 font-bold">#{s.height}</td>
                           <td className="py-2 font-mono text-xs">{s.share_id?.slice(0, 12)}...</td>
                           <td className="py-2 font-mono text-xs text-primary">{truncAddr(s.worker)}</td>
@@ -275,7 +275,9 @@ export default function P2Pool() {
                           <td className="py-2 text-center">
                             <Badge variant="outline" className="border-green-500/50 text-green-400 text-xs">{s.validated_by?.length || 0}</Badge>
                           </td>
-                          <td className="py-2 text-center">{s.is_block ? <Box className="w-4 h-4 text-primary mx-auto" /> : "—"}</td>
+                          <td className="py-2 text-center">
+                            {s.is_block ? <Box className="w-4 h-4 text-primary mx-auto" /> : s.is_block_orphaned ? <span className="text-red-400 text-xs" title="Block non accettato dalla chain (hash SHA-256 errato)">orphan</span> : "—"}
+                          </td>
                           <td className="py-2 text-right text-xs text-muted-foreground">{timeAgo(s.timestamp)}</td>
                         </tr>
                       ))}
