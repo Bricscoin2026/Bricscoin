@@ -492,7 +492,7 @@ class StratumMiner:
         try:
             async with httpx.AsyncClient(timeout=10.0) as http_client:
                 resp = await http_client.post(
-                    f"{MAIN_NODE_URL}/api/mining/submit-block",
+                    f"{MAIN_NODE_URL}/api/p2pool/submit-block",
                     json=block
                 )
                 if resp.status_code == 200:
