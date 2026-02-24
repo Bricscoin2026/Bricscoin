@@ -2195,7 +2195,7 @@ DOWNLOADS_DIR = '/app/downloads'
 
 
 @api_router.get("/security/audit")
-async def run_security_audit():
+async def run_security_audit(request: Request):
     """Run comprehensive security audit with real tests"""
     results = {"categories": [], "total_passed": 0, "total_tests": 0, "timestamp": datetime.now(timezone.utc).isoformat()}
 
