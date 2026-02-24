@@ -294,6 +294,7 @@ class StratumMiner:
         self.server = server
         self.peer = writer.get_extra_info('peername')
         self.miner_id = f"{self.peer[0]}:{self.peer[1]}" if self.peer else "unknown"
+        self.miner_ip = self.peer[0] if self.peer else "unknown"
         self.subscribed = False
         self.authorized = False
         self.worker_name = None
