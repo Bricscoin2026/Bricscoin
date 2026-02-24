@@ -46,7 +46,7 @@ PPLNS_WINDOW = 2016               # PPLNS lookback window
 BLOCK_REWARD = 50.0               # current block reward
 
 # Node identity (unique per instance)
-NODE_ID = os.environ.get('NODE_ID', 'mainnet-solo')
+NODE_ID = os.environ.get('NODE_ID', 'mainnet')
 NODE_URL = os.environ.get('BRICS_NODE_URL', '')
 
 
