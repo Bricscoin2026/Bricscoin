@@ -4,65 +4,48 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-.Python
-pip-log.txt
 
-# Environment files (NEVER commit these!)
-.env
-.env.local
-.env.production
-.env.development
-backend/.env
-frontend/.env
+# Environment files
+*.env
+*.env.*
 !*.env.example
 
 # Build outputs
 build/
 dist/
 *.egg-info/
-*.tar.gz
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-*.sublime-*
 
 # OS
 .DS_Store
 Thumbs.db
-*.DS_Store
 
 # Logs
 *.log
 logs/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Docker volumes (local data)
+# Docker volumes
 mongo-data/
 data/
 
-# SSL certificates and keys (NEVER commit!)
+# SSL certificates
 ssl/
 *.pem
 *.key
 *.crt
-*.p12
 
-# Test reports
+# Test & Cache
 test_reports/
 coverage/
 .coverage
-htmlcov/
 .pytest_cache/
-
-# Cache
+.ruff_cache/
 .cache/
-*.cache
-frontend/node_modules/.cache/
 
 # Electron builds
 bricscoin-core/dist/
@@ -70,162 +53,33 @@ bricscoin-core/out/
 wallet-app/dist/
 wallet-app/out/
 
-# Misc
-*.bak
-*.tmp
-*.temp
-*.orig
-
-# Memory/docs (internal)
+# Platform specific
+.emergent/
 memory/
 
-# Sensitive scripts
-setup-hetzner.sh
+# Temp files
+*.bak
+*.tmp
+*.orig
+dump/
 
-# Package locks (optional - uncomment if you want to include them)
-# package-lock.json
-# yarn.lock
+# Archives (keep only in downloads/)
+*.tar.gz
+!downloads/*.tar.gz
 wallet-app/dist/linux-arm64-unpacked/bricscoin-wallet
 wallet-app/dist/win-arm64-unpacked/BricsCoin
 Wallet.exe
 wallet-app/dist/BricsCoin
 Wallet-1.0.0-arm64.AppImage
 wallet-app/node_modules/electron/dist/electron
-frontend/node_modules/.cache/default-development/4.pack
-frontend/node_modules/.cache/default-development/2.pack
-bricscoin-core/node_modules/electron/dist/electron
+downloads/BricsCoin-Core-2.1.1-Linux.AppImage
 bricscoin-core/dist/BricsCoin
 Core-2.1.0-arm64.AppImage
 bricscoin-core/dist/linux-arm64-unpacked/bricscoin-core
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-frontend/node_modules/.cache/default-development/3.pack
--e 
-# Environment files
-*.env
-*.env.*
-frontend/node_modules/.cache/default-development/5.pack
-frontend/node_modules/.cache/default-development/6.pack
--e 
-# Environment files
-*.env
-*.env.*
-frontend/node_modules/.cache/default-development/7.pack
-frontend/node_modules/.cache/default-development/9.pack
-frontend/node_modules/.cache/default-development/1.pack
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-downloads/BricsCoin-Core-2.1.1-Linux.AppImage
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-frontend/node_modules/.cache/default-development/8.pack
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-frontend/node_modules/.cache/default-development/0.pack
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-frontend/node_modules/.cache/default-development/10.pack
 bricscoin-core/dist/win-arm64-unpacked/BricsCoin
 Core.exe
+bricscoin-core/node_modules/electron/dist/electron
+frontend/node_modules/.cache/default-development/4.pack
+frontend/node_modules/.cache/default-development/6.pack
+frontend/node_modules/.cache/default-development/2.pack
+frontend/node_modules/.cache/default-development/1.pack
