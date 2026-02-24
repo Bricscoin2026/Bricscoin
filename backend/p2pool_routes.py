@@ -398,6 +398,68 @@ async def list_peers():
 
 # --- Sharechain ---
 
+@router.post("/submit-block")
+async def submit_p2pool_block(block: P2PoolBlockSubmit):
+    """Accept a block found by a P2Pool peer node (e.g., PPLNS stratum).
+    Validates the block index and previous_hash before inserting."""
+    # Check if block already exists
+    existing = await db.blocks.find_one({"index": block.index})
+    if existing:
+        raise HTTPException(status_code=409, detail="Block already exists at this index")
+
+    # Verify previous_hash matches the last block
+    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
+    if not last_block:
+        raise HTTPException(status_code=500, detail="No genesis block")
+
+    expected_index = last_block["index"] + 1
+    if block.index != expected_index:
+        raise HTTPException(status_code=400, detail=f"Expected block index {expected_index}, got {block.index}")
+
+    if block.previous_hash != last_block.get("hash", ""):
+        raise HTTPException(status_code=400, detail="Previous hash mismatch")
+
+    # Create reward transaction
+    reward_amount = 50.0  # Current block reward
+    reward_tx = {
+        "id": str(uuid.uuid4()), "sender": "COINBASE", "recipient": block.miner,
+        "amount": reward_amount, "timestamp": block.timestamp,
+        "signature": "COINBASE_REWARD", "type": "mining_reward",
+        "confirmed": True, "block_index": block.index
+    }
+
+    block_data = block.dict()
+
+    # PQC signing (if available)
+    try:
+        from pqc_crypto import hybrid_sign
+        node_keys = await db.node_config.find_one({"type": "pqc_keys"}, {"_id": 0})
+        if node_keys:
+            sig_data = f"{block.index}{block.timestamp}{block.hash}{block.miner}"
+            sig = hybrid_sign(node_keys["ecdsa_private_key"], node_keys["dilithium_secret_key"], sig_data)
+            block_data["pqc_ecdsa_signature"] = sig["ecdsa_signature"]
+            block_data["pqc_dilithium_signature"] = sig["dilithium_signature"]
+            block_data["pqc_public_key_ecdsa"] = node_keys["ecdsa_public_key"]
+            block_data["pqc_public_key_dilithium"] = node_keys["dilithium_public_key"]
+            block_data["pqc_scheme"] = "ecdsa_secp256k1+ml-dsa-65"
+    except Exception as e:
+        logger.warning(f"PQC signing not available for P2Pool block: {e}")
+
+    await db.blocks.insert_one(block_data)
+    await db.transactions.insert_one(reward_tx)
+
+    # Confirm pending transactions
+    tx_ids = [t.get("id") for t in block.transactions if t.get("id")]
+    if tx_ids:
+        await db.transactions.update_many(
+            {"$or": [{"id": {"$in": tx_ids}}, {"tx_id": {"$in": tx_ids}}]},
+            {"$set": {"confirmed": True, "block_index": block.index}}
+        )
+
+    logger.info(f"P2Pool block #{block.index} accepted from miner {block.miner}")
+    return {"accepted": True, "index": block.index, "hash": block.hash}
+
+
 @router.post("/share/submit")
 async def submit_share(share: ShareBroadcast):
     """Submit a new share to the sharechain (from local Stratum or peer)"""
