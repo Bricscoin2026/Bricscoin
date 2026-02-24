@@ -60,6 +60,12 @@ PPLNS Server (157.180.123.105):
 - Main backend `/api/p2pool/miners` deduplicates by worker (keeps most recent entry)
 - Result: 4 miners total (2 SOLO + 2 PPLNS) - no more duplicates
 
+### P0: PPLNS Miner Statistics Fix - DEPLOYED TO PRODUCTION (Feb 24, 2026)
+- **Block Count Bug**: Changed `blocks_found` to validate against actual `blocks` collection (`db.blocks.count_documents({"miner": worker})`) instead of counting `is_block` flags from `p2pool_sharechain` which included old invalid shares from before the double_sha256 fix.
+- **Hashrate Bug**: Replaced fixed 1-hour calculation window with progressive window (5min → 15min → 1h). Uses shortest window with data for real-time accuracy, especially for newly connected miners.
+- **blocks_24h**: Changed to count from actual `blocks` collection instead of `is_block` flags.
+- Result: PPLNS miners now show blocks_found=1,0 (was 10,16) and hashrate ~4.5 TH/s (was ~2.5 TH/s)
+
 ## Prioritized Backlog
 
 ### P1: Miner Reward to PQC Address
