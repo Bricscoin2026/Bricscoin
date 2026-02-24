@@ -940,7 +940,8 @@ async def root():
 
 # Network endpoints
 @api_router.get("/network/stats", response_model=NetworkStats)
-async def get_network_stats():
+@limiter.limit("120/minute")
+async def get_network_stats(request: Request):
     """Get network statistics"""
     blocks_count = await db.blocks.count_documents({})
     pending_count = await db.transactions.count_documents({"confirmed": False})
