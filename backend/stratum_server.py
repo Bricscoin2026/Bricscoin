@@ -453,7 +453,10 @@ class StratumMiner:
         await db.transactions.insert_one(reward_tx)
         pending_tx_ids = template.get('pending_tx_ids',[])
         if pending_tx_ids:
-            await db.transactions.update_many({"id":{"$in":pending_tx_ids}},{"$set":{"confirmed":True,"block_index":template['index']}})
+            await db.transactions.update_many(
+                {"$or": [{"id":{"$in":pending_tx_ids}}, {"tx_id":{"$in":pending_tx_ids}}]},
+                {"$set":{"confirmed":True,"block_index":template['index']}}
+            )
         self.blocks +=1
         if self.miner_id in miners: miners[self.miner_id]['blocks']+=1
         logger.info(f"Block #{template['index']} saved with PQC! Miner: {miner_address}, Reward: {reward_amount} BRICS")
