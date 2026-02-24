@@ -183,26 +183,65 @@ def create_coinbase_tx(height, reward, miner_addr, extranonce1, extranonce2_size
 
 # ================= BLOCK TEMPLATE =================
 async def get_block_template():
-    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
-    if not last_block: return None
-    new_index = last_block['index'] + 1
-    reward = get_mining_reward(new_index)
-    prev_hash = last_block.get('hash', '0' * 64)
-    if len(prev_hash) < 64: prev_hash = prev_hash.zfill(64)
-    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(100).to_list(100)
-    txs = []
-    tx_ids = []
-    for tx in pending_txs:
-        tid = tx.get("id", tx.get("tx_id"))
-        if not tid: continue
-        txs.append({"id": tid, "sender": tx.get("sender", ""), "recipient": tx.get("recipient", ""),
-                     "amount": tx.get("amount", 0), "timestamp": tx.get("timestamp", "")})
-        tx_ids.append(tid)
-    diff = await get_network_difficulty()
-    return {
-        "index": new_index, "timestamp": int(time.time()), "previous_hash": prev_hash,
-        "difficulty": diff, "reward": reward, "transactions": txs, "pending_tx_ids": tx_ids
-    }
+    """Fetch block template from main node via API.
+    The PPLNS node doesn't have local blockchain data,
+    so it fetches the latest block from the main node."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            # Get latest block from main node
+            resp = await http_client.get(f"{MAIN_NODE_URL}/api/blocks?page=1&limit=1")
+            if resp.status_code != 200:
+                logger.warning(f"Failed to fetch blocks from main node: {resp.status_code}")
+                return None
+            data = resp.json()
+            blocks = data.get("blocks", [])
+            if not blocks:
+                return None
+            last_block = blocks[0]
+
+            # Get network stats for difficulty
+            stats_resp = await http_client.get(f"{MAIN_NODE_URL}/api/network/stats")
+            if stats_resp.status_code == 200:
+                stats = stats_resp.json()
+                diff = stats.get("current_difficulty", 10000)
+            else:
+                diff = 10000
+
+            # Get pending transactions
+            try:
+                tx_resp = await http_client.get(f"{MAIN_NODE_URL}/api/transactions/pending")
+                pending_txs = tx_resp.json() if tx_resp.status_code == 200 else []
+            except Exception:
+                pending_txs = []
+
+        new_index = last_block['index'] + 1
+        reward = get_mining_reward(new_index)
+        prev_hash = last_block.get('hash', '0' * 64)
+        if len(prev_hash) < 64:
+            prev_hash = prev_hash.zfill(64)
+
+        txs = []
+        tx_ids = []
+        if isinstance(pending_txs, list):
+            for tx in pending_txs[:100]:
+                tid = tx.get("id", tx.get("tx_id"))
+                if not tid:
+                    continue
+                txs.append({"id": tid, "sender": tx.get("sender", ""),
+                            "recipient": tx.get("recipient", ""),
+                            "amount": tx.get("amount", 0),
+                            "timestamp": tx.get("timestamp", "")})
+                tx_ids.append(tid)
+
+        return {
+            "index": new_index, "timestamp": int(time.time()),
+            "previous_hash": prev_hash, "difficulty": diff,
+            "reward": reward, "transactions": txs,
+            "pending_tx_ids": tx_ids
+        }
+    except Exception as e:
+        logger.error(f"get_block_template error: {e}")
+        return None
 
 
 def create_stratum_job(template, miner_address, extranonce1="00000000", extranonce2_size=4):
