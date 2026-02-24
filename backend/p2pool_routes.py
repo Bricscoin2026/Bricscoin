@@ -660,12 +660,13 @@ async def get_pool_stats():
 
 @router.get("/miners")
 async def get_pool_miners():
-    """Get detailed miner stats"""
+    """Get detailed miner stats from ALL P2Pool nodes"""
     now = datetime.now(timezone.utc)
     cutoff_10m = (now - timedelta(minutes=10)).isoformat()
     cutoff_24h = (now - timedelta(hours=24)).isoformat()
     hr_cutoff = (now - timedelta(hours=1)).isoformat()
 
+    # 1. Local miners (from this node's Stratum)
     active_docs = await db.miners.find(
         {"online": True, "last_seen": {"$gte": cutoff_10m}},
         {"_id": 0, "worker": 1, "last_seen": 1, "shares": 1, "blocks": 1, "connected_at": 1}
@@ -683,7 +684,6 @@ async def get_pool_miners():
         blocks_found = await db.miner_shares.count_documents(
             {"worker": worker, "is_block": True}
         )
-
         avg_diff = 512
         pipeline = [
             {"$match": {"worker": worker, "timestamp": {"$gte": hr_cutoff}}},
@@ -692,7 +692,6 @@ async def get_pool_miners():
         avg_res = await db.miner_shares.aggregate(pipeline).to_list(1)
         if avg_res:
             avg_diff = avg_res[0].get("avg", 512)
-
         hashrate = (shares_1h * avg_diff * (2**32)) / 3600 if shares_1h > 0 else 0
 
         miners_enriched.append({
@@ -705,7 +704,36 @@ async def get_pool_miners():
             "blocks_found": blocks_found,
             "hashrate": round(hashrate, 2),
             "hashrate_readable": format_hashrate(hashrate),
+            "node": "mainnet",
+            "pool_mode": "solo",
         })
+
+    # 2. Remote miners from peer nodes
+    peers = await db.p2pool_peers.find(
+        {"online": True, "peer_id": {"$ne": NODE_ID}},
+        {"_id": 0, "node_url": 1, "peer_id": 1}
+    ).to_list(MAX_PEERS)
+
+    for peer in peers:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as http_client:
+                resp = await http_client.get(f"{peer['node_url']}:8080/miners")
+                if resp.status_code == 200:
+                    remote_miners = resp.json().get("miners", [])
+                    for rm in remote_miners:
+                        miners_enriched.append({
+                            "worker": rm.get("worker", "unknown"),
+                            "online": rm.get("online", True),
+                            "shares_1h": 0,
+                            "shares_24h": rm.get("shares", 0),
+                            "blocks_found": rm.get("blocks_found", 0),
+                            "hashrate": 0,
+                            "hashrate_readable": "PPLNS node",
+                            "node": rm.get("node", peer["peer_id"]),
+                            "pool_mode": rm.get("pool_mode", "pplns"),
+                        })
+        except Exception:
+            pass
 
     miners_enriched.sort(key=lambda x: x["shares_24h"], reverse=True)
     return {"miners": miners_enriched, "active_count": len(miners_enriched)}
