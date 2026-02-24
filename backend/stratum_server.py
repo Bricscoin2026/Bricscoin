@@ -412,7 +412,7 @@ class StratumMiner:
                     "is_block": is_block
                 })
                 await db.miners.update_one(
-                    {"worker_name": self.worker_name},
+                    {"db_key": f"{self.worker_name}:{self.miner_ip}"},
                     {"$set": {"last_seen": now_iso, "online": True}, "$inc": {"shares": 1}},
                     upsert=True
                 )
