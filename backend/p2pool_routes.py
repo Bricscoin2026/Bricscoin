@@ -651,14 +651,15 @@ async def get_pool_stats():
             avg_share_diff = avg_result[0].get("avg_diff", 512)
     local_pool_hashrate = (shares_1h * avg_share_diff * (2**32)) / 3600 if shares_1h > 0 else 0
 
-    # Total pool hashrate = local + sum of individual miner hashrates from local DB
+    # Total pool hashrate = local miners + remote miners
     miner_hashrate_pipeline = [
         {"$match": {"online": True, "last_seen": {"$gte": miner_cutoff}}},
         {"$group": {"_id": None, "total_hashrate": {"$sum": "$hashrate"}}}
     ]
     miner_hr_result = await db.miners.aggregate(miner_hashrate_pipeline).to_list(1)
-    real_hashrate = miner_hr_result[0]["total_hashrate"] if miner_hr_result else 0
-    pool_hashrate = max(local_pool_hashrate, real_hashrate)
+    local_real_hashrate = miner_hr_result[0]["total_hashrate"] if miner_hr_result else 0
+    # Use the best local estimate + remote hashrate
+    pool_hashrate = max(local_pool_hashrate, local_real_hashrate) + remote_hashrate
 
     # Top miners (24h)
     top_pipeline = [
