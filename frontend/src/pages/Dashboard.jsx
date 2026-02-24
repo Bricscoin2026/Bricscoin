@@ -302,10 +302,10 @@ export default function Dashboard() {
             </Link>
           </Button>
           <Button asChild variant="outline" className="border-white/20 rounded-sm" data-testid="whitepaper-btn">
-            <a href={`${process.env.REACT_APP_BACKEND_URL}/api/downloads/BricsCoin_Whitepaper_v3.pdf`} target="_blank" rel="noopener noreferrer">
+            <Link to="/whitepaper">
               <FileText className="w-4 h-4 mr-2" />
               Whitepaper
-            </a>
+            </Link>
           </Button>
         </div>
       </motion.div>
