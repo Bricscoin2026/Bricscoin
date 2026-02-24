@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-01-29T21:22:16.235191+00:00",
-  "backend_url": "https://pqc-cert-launch.preview.emergentagent.com",
+  "backend_url": "https://brics-p2pool-fix.preview.emergentagent.com",
   "total_tests": 7,
   "passed_tests": 7,
   "success": true,
