@@ -818,7 +818,7 @@ async def get_balance(address: str) -> float:
 # Mining / Stratum endpoints
 
 @api_router.get("/mining/miners")
-async def get_active_miners():
+async def get_active_miners(request: Request):
     """Return active miners based on database state.
 
     IMPORTANTO:
@@ -862,7 +862,7 @@ async def get_active_miners():
 
 
 @api_router.get("/miners/stats")
-async def get_miners_stats():
+async def get_miners_stats(request: Request):
     """
     Statistiche sui minatori attivi.
     Legge dalla collezione 'miners' (aggiornata dallo Stratum server in tempo reale).
@@ -925,7 +925,7 @@ async def get_miners_stats():
 
 
 @api_router.get("/miners/count")
-async def get_miners_count():
+async def get_miners_count(request: Request):
     """Get connected miners count (backward compatible)"""
     try:
         with open('/tmp/miners_count.txt', 'r') as f:
@@ -1029,7 +1029,7 @@ async def get_network_stats(request: Request):
     )
 
 @api_router.get("/tokenomics")
-async def get_tokenomics():
+async def get_tokenomics(request: Request):
     """Get tokenomics and premine transparency info"""
     blocks_count = await db.blocks.count_documents({})
     mining_rewards = sum(get_mining_reward(i) for i in range(1, blocks_count))
@@ -1065,7 +1065,8 @@ async def get_tokenomics():
     }
 
 @api_router.get("/richlist")
-async def get_rich_list(limit: int = 100):
+@limiter.limit("30/minute")
+async def get_rich_list(request: Request, limit: int = 100):
     """Get list of wallets sorted by balance (Rich List)"""
     try:
         # Get all unique addresses from transactions
@@ -1174,14 +1175,14 @@ async def reset_blockchain(admin_key: str):
 
 # Block endpoints
 @api_router.get("/blocks")
-async def get_blocks(limit: int = 20, offset: int = 0):
+async def get_blocks(request: Request, limit: int = 20, offset: int = 0):
     """Get blocks with pagination"""
     blocks = await db.blocks.find({}, {"_id": 0}).sort("index", -1).skip(offset).limit(limit).to_list(limit)
     total = await db.blocks.count_documents({})
     return {"blocks": blocks, "total": total}
 
 @api_router.get("/blocks/{index}")
-async def get_block(index: int):
+async def get_block(request: Request, index: int):
     """Get specific block"""
     block = await db.blocks.find_one({"index": index}, {"_id": 0})
     if not block:
@@ -1189,7 +1190,7 @@ async def get_block(index: int):
     return block
 
 @api_router.get("/blocks/hash/{block_hash}")
-async def get_block_by_hash(block_hash: str):
+async def get_block_by_hash(request: Request, block_hash: str):
     """Get block by hash"""
     block = await db.blocks.find_one({"hash": block_hash}, {"_id": 0})
     if not block:
@@ -1400,7 +1401,7 @@ async def create_transaction_legacy(request: Request, tx_request: TransactionReq
     }
 
 @api_router.get("/transactions/address/{address}")
-async def get_address_transactions(address: str, limit: int = 50):
+async def get_address_transactions(request: Request, address: str, limit: int = 50):
     """Get transactions for an address"""
     transactions = await db.transactions.find(
         {"$or": [{"sender": address}, {"recipient": address}]},
@@ -1605,7 +1606,7 @@ async def import_wallet_key(request: Request, wallet_request: WalletImportPrivat
         raise HTTPException(status_code=400, detail=str(e))
 
 @api_router.get("/wallet/{address}/balance")
-async def get_wallet_balance(address: str):
+async def get_wallet_balance(request: Request, address: str):
     """Get wallet balance"""
     balance = await get_balance(address)
     return {"address": address, "balance": balance}
@@ -2001,7 +2002,7 @@ async def verify_block_pqc_signature(block_index: int):
 
 # Address lookup
 @api_router.get("/address/{address}")
-async def get_address_info(address: str):
+async def get_address_info(request: Request, address: str):
     """Get full address information"""
     balance = await get_balance(address)
     
