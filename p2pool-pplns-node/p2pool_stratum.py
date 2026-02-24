@@ -295,7 +295,7 @@ async def verify_share(job, extranonce1, extranonce2, ntime, nonce, network_diff
         block_hash_hex = reverse_bytes(header_hash).hex()
 
         hash_int = int(block_hash_hex, 16)
-        MAX_TARGET = (2 ** 256) - 1
+        MAX_TARGET = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         share_diff = max(1, job.get('share_difficulty', 1))
         network_difficulty = max(1, network_diff)
         share_target = MAX_TARGET // share_diff

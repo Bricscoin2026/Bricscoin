@@ -271,7 +271,7 @@ async def verify_share(job:dict, extranonce1:str, extranonce2:str, ntime:str, no
         # MAX_TARGET = 2^256 - 1 (massimo valore hash possibile)
         # Con difficulty=1, QUALSIASI hash è valido
         # Con difficulty=N, il target diventa MAX_TARGET/N
-        MAX_TARGET = (2 ** 256) - 1
+        MAX_TARGET = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         
         share_diff = max(1, job.get('share_difficulty', 1))
         network_difficulty = max(1, network_diff)
