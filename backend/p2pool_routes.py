@@ -841,10 +841,16 @@ async def sync_sharechain(from_height: int = 0, limit: int = 100):
 
 
 def format_hashrate(h):
-    if h >= 1e18: return f"{h/1e18:.2f} EH/s"
-    if h >= 1e15: return f"{h/1e15:.2f} PH/s"
-    if h >= 1e12: return f"{h/1e12:.2f} TH/s"
-    if h >= 1e9: return f"{h/1e9:.2f} GH/s"
-    if h >= 1e6: return f"{h/1e6:.2f} MH/s"
-    if h >= 1e3: return f"{h/1e3:.2f} KH/s"
+    if h >= 1e18:
+        return f"{h/1e18:.2f} EH/s"
+    if h >= 1e15:
+        return f"{h/1e15:.2f} PH/s"
+    if h >= 1e12:
+        return f"{h/1e12:.2f} TH/s"
+    if h >= 1e9:
+        return f"{h/1e9:.2f} GH/s"
+    if h >= 1e6:
+        return f"{h/1e6:.2f} MH/s"
+    if h >= 1e3:
+        return f"{h/1e3:.2f} KH/s"
     return f"{h:.2f} H/s"
