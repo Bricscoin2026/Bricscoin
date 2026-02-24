@@ -597,7 +597,8 @@ class StratumMiner:
         self.blocks += 1
         if self.miner_id in miners:
             miners[self.miner_id]['blocks'] += 1
-        logger.info(f"PPLNS Block #{template['index']} found! Miner: {miner_address}, Reward: {reward_amount} BRICS, Hash: {block_hash[:32]}")
+        payout_str = ", ".join(f"{p['worker'][:12]}..={p['amount']:.2f}" for p in pplns_payouts[:5])
+        logger.info(f"PPLNS Block #{template['index']} found! Finder: {finder_address[:20]}..., Payouts: [{payout_str}], Hash: {block_hash[:32]}")
         await self.server.on_new_block()
 
     async def send_job(self, job):
