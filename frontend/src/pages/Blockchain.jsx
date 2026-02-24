@@ -312,10 +312,10 @@ function ExplorerSection() {
 
       {/* Sub-tabs */}
       <div className="flex gap-2">
-        <Button variant={explorerTab === "blocks" ? "default" : "outline"} size="sm" onClick={() => { setExplorerTab("blocks"); setSearchParams({ page: "1" }); }} className={explorerTab === "blocks" ? "gold-button" : "border-white/20"}>
+        <Button variant={explorerTab === "blocks" ? "default" : "outline"} size="sm" onClick={() => { setExplorerTab("blocks"); setSearchParams(prev => ({ ...Object.fromEntries(prev), page: "1" })); }} className={explorerTab === "blocks" ? "gold-button" : "border-white/20"}>
           <Blocks className="w-3 h-3 mr-2"/>Blocks ({blocksTotal.toLocaleString()})
         </Button>
-        <Button variant={explorerTab === "transactions" ? "default" : "outline"} size="sm" onClick={() => { setExplorerTab("transactions"); setSearchParams({ page: "1" }); }} className={explorerTab === "transactions" ? "gold-button" : "border-white/20"}>
+        <Button variant={explorerTab === "transactions" ? "default" : "outline"} size="sm" onClick={() => { setExplorerTab("transactions"); setSearchParams(prev => ({ ...Object.fromEntries(prev), page: "1" })); }} className={explorerTab === "transactions" ? "gold-button" : "border-white/20"}>
           <ArrowRightLeft className="w-3 h-3 mr-2"/>Transactions ({txTotal.toLocaleString()})
         </Button>
       </div>
