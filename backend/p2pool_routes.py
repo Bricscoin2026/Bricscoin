@@ -1013,6 +1013,18 @@ async def get_pool_miners():
                         sc_blocks = await db.p2pool_sharechain.count_documents(
                             {"worker": worker, "pool_mode": "pplns", "is_block": True}
                         )
+                        # Calculate hashrate from sharechain (more reliable than remote API)
+                        pplns_hashrate = 0.0
+                        if sc_shares_1h > 0:
+                            sc_avg_pipeline = [
+                                {"$match": {"worker": worker, "pool_mode": "pplns", "timestamp": {"$gte": hr_cutoff}}},
+                                {"$group": {"_id": None, "avg": {"$avg": "$share_difficulty"}}}
+                            ]
+                            sc_avg_res = await db.p2pool_sharechain.aggregate(sc_avg_pipeline).to_list(1)
+                            sc_avg_diff = sc_avg_res[0].get("avg", 1000) if sc_avg_res else 1000
+                            pplns_hashrate = (sc_shares_1h * sc_avg_diff * (2**32)) / 3600
+                        # Use sharechain hashrate if available, otherwise remote API
+                        final_hashrate = pplns_hashrate if pplns_hashrate > 0 else rm.get("hashrate", 0)
                         miners_enriched.append({
                             "worker": worker,
                             "online": rm.get("online", True),
@@ -1020,8 +1032,8 @@ async def get_pool_miners():
                             "shares_1h": sc_shares_1h if sc_shares_1h > 0 else rm.get("shares_1h", 0),
                             "shares_24h": sc_shares_24h if sc_shares_24h > 0 else rm.get("shares_24h", rm.get("shares", 0)),
                             "blocks_found": sc_blocks if sc_blocks > 0 else rm.get("blocks_found", 0),
-                            "hashrate": rm.get("hashrate", 0),
-                            "hashrate_readable": rm.get("hashrate_readable", "—"),
+                            "hashrate": round(final_hashrate, 2),
+                            "hashrate_readable": format_hashrate(final_hashrate),
                             "node": peer.get("peer_id", "remote"),
                             "pool_mode": rm.get("pool_mode", "pplns"),
                         })
