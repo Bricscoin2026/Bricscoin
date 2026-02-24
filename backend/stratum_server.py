@@ -336,11 +336,13 @@ class StratumMiner:
         intervals = [self.share_times[i] - self.share_times[i-1] for i in range(1, len(self.share_times))]
         avg_interval = sum(intervals) / len(intervals)
         if avg_interval < VARDIFF_TARGET_TIME * (1 - VARDIFF_VARIANCE):
-            # Shares too fast → increase difficulty
-            new_diff = self.difficulty * (VARDIFF_TARGET_TIME / max(0.1, avg_interval))
+            # Shares too fast → increase difficulty (max 4x per retarget)
+            ratio = min(4.0, VARDIFF_TARGET_TIME / max(0.1, avg_interval))
+            new_diff = self.difficulty * ratio
         elif avg_interval > VARDIFF_TARGET_TIME * (1 + VARDIFF_VARIANCE):
-            # Shares too slow → decrease difficulty
-            new_diff = self.difficulty * (VARDIFF_TARGET_TIME / avg_interval)
+            # Shares too slow → decrease difficulty (max 0.25x per retarget)
+            ratio = max(0.25, VARDIFF_TARGET_TIME / avg_interval)
+            new_diff = self.difficulty * ratio
         else:
             return  # Within tolerance
         new_diff = max(VARDIFF_MIN, min(VARDIFF_MAX, round(new_diff, 6)))
