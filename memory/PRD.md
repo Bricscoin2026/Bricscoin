@@ -43,17 +43,22 @@ PPLNS Server (157.180.123.105):
 ### P0: Hashrate + Share Count Consistency - DEPLOYED TO PRODUCTION
 - `/api/network/stats`: Includes PPLNS hashrate from `p2pool_sharechain`
 - `/api/p2pool/stats`: Uses progressive window hashrate calculation (matching Blockchain page)
-- `/api/p2pool/miners`: Uses `p2pool_sharechain` as source of truth for PPLNS miners
+- `/api/p2pool/miners`: Uses `p2pool_sharechain` as source of truth for PPLNS miners, deduplicates by worker
 - Result: Blockchain 15.92 TH/s vs P2Pool 15.97 TH/s (0.3% variance)
 
-### P1: PPLNS Block Submission - DEPLOYED TO PRODUCTION
+### P1: PPLNS Block Submission + Reward Split - DEPLOYED TO PRODUCTION
 - PPLNS stratum uses `double_sha256` (was single SHA-256)
 - `get_network_difficulty()` caches last known difficulty (safe default 10000, never 1)
-- PPLNS stratum fetches block templates via HTTP API from main node (was querying empty local DB)
+- PPLNS stratum fetches block templates via HTTP API from main node
 - Added `POST /api/p2pool/submit-block` with hash validation against difficulty target
+- **PPLNS reward splitting**: When PPLNS finds a block, reward is split proportionally among all miners based on PPLNS window shares
 - Sharechain endpoint validates `is_block` flags against actual blockchain
-- Cleaned up 2 invalid blocks (2190, 2191) that entered blockchain during transition
-- PPLNS Block #2189 confirmed as VALID (first real PPLNS block!)
+- Cleaned up 2 invalid blocks and fixed block 2189 reward (split 25.22 + 24.78)
+
+### Miner Deduplication - DEPLOYED
+- PPLNS HTTP API deduplicates miners by worker address (was showing duplicates from multiple connections)
+- Main backend `/api/p2pool/miners` deduplicates by worker (keeps most recent entry)
+- Result: 4 miners total (2 SOLO + 2 PPLNS) - no more duplicates
 
 ## Prioritized Backlog
 
