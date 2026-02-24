@@ -828,13 +828,25 @@ async def get_pool_miners():
                     remote_data = resp.json()
                     remote_miners = remote_data.get("miners", [])
                     for rm in remote_miners:
+                        worker = rm.get("worker", "unknown")
+                        # Use sharechain as source of truth for PPLNS shares
+                        # This ensures consistency with the PPLNS preview tab
+                        sc_shares_1h = await db.p2pool_sharechain.count_documents(
+                            {"worker": worker, "pool_mode": "pplns", "timestamp": {"$gte": hr_cutoff}}
+                        )
+                        sc_shares_24h = await db.p2pool_sharechain.count_documents(
+                            {"worker": worker, "pool_mode": "pplns", "timestamp": {"$gte": cutoff_24h}}
+                        )
+                        sc_blocks = await db.p2pool_sharechain.count_documents(
+                            {"worker": worker, "pool_mode": "pplns", "is_block": True}
+                        )
                         miners_enriched.append({
-                            "worker": rm.get("worker", "unknown"),
+                            "worker": worker,
                             "online": rm.get("online", True),
                             "last_seen": rm.get("last_seen"),
-                            "shares_1h": rm.get("shares_1h", 0),
-                            "shares_24h": rm.get("shares_24h", rm.get("shares", 0)),
-                            "blocks_found": rm.get("blocks_found", 0),
+                            "shares_1h": sc_shares_1h if sc_shares_1h > 0 else rm.get("shares_1h", 0),
+                            "shares_24h": sc_shares_24h if sc_shares_24h > 0 else rm.get("shares_24h", rm.get("shares", 0)),
+                            "blocks_found": sc_blocks if sc_blocks > 0 else rm.get("blocks_found", 0),
                             "hashrate": rm.get("hashrate", 0),
                             "hashrate_readable": rm.get("hashrate_readable", "—"),
                             "node": peer.get("peer_id", "remote"),
