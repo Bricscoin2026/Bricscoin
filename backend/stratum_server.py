@@ -191,9 +191,16 @@ async def get_block_template() -> Optional[dict]:
     prev_hash = last_block.get('hash','0'*64)
     if len(prev_hash)<64: prev_hash = prev_hash.zfill(64)
     pending_txs = await db.transactions.find({"confirmed":False},{"_id":0}).limit(100).to_list(100)
-    txs = [{"id":tx["id"],"sender":tx["sender"],"recipient":tx["recipient"],"amount":tx["amount"],"timestamp":tx["timestamp"]} for tx in pending_txs]
+    txs = []
+    tx_ids = []
+    for tx in pending_txs:
+        tid = tx.get("id", tx.get("tx_id"))
+        if not tid:
+            continue
+        txs.append({"id":tid,"sender":tx.get("sender",""),"recipient":tx.get("recipient",""),"amount":tx.get("amount",0),"timestamp":tx.get("timestamp","")})
+        tx_ids.append(tid)
     diff = await get_network_difficulty()
-    return {"index":new_index,"timestamp":int(time.time()),"previous_hash":prev_hash,"difficulty":diff,"reward":reward,"transactions":txs,"pending_tx_ids":[tx["id"] for tx in pending_txs]}
+    return {"index":new_index,"timestamp":int(time.time()),"previous_hash":prev_hash,"difficulty":diff,"reward":reward,"transactions":txs,"pending_tx_ids":tx_ids}
 
 def create_stratum_job(template:dict, miner_address:str, extranonce1:str="00000000", extranonce2_size:int=4) -> dict:
     global job_counter, job_cache
