@@ -291,6 +291,20 @@ async def propagate_share_to_peers(share: dict):
 
 # --- Peer Management ---
 
+@router.get("/status")
+async def node_status():
+    """Health check endpoint - peers ping this to check liveness"""
+    chain_tip = await get_chain_tip()
+    active_miners = await db.miners.count_documents({"online": True})
+    return {
+        "status": "ok",
+        "node_id": NODE_ID,
+        "sharechain_height": chain_tip["height"] if chain_tip else 0,
+        "active_miners": active_miners,
+    }
+
+
+
 @router.post("/peer/register")
 async def register_peer(peer: PeerRegister):
     """Register a new P2Pool peer node"""
