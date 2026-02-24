@@ -62,6 +62,13 @@ INITIAL_REWARD = 50
 COIN = 100_000_000
 TARGET_BLOCK_TIME = 600
 
+# ================= VARDIFF SETTINGS =================
+VARDIFF_TARGET_TIME = 12      # Target seconds between shares
+VARDIFF_MIN = 0.001           # Min difficulty (NerdMiner ~350 KH/s)
+VARDIFF_MAX = 1000000         # Max difficulty (large ASICs)
+VARDIFF_RETARGET_SHARES = 6   # Retarget after this many shares
+VARDIFF_VARIANCE = 0.25       # 25% tolerance before adjusting
+
 # ================= GLOBAL STATE =================
 miners: Dict[str, dict] = {}
 current_job: Optional[dict] = None
