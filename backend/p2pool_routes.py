@@ -86,6 +86,7 @@ class PeerRegister(BaseModel):
     node_id: Optional[str] = None
     version: str = "1.0.0"
     stratum_port: int = 3333
+    api_port: int = 8080
     pool_modes: List[str] = ["solo", "pplns"]
 
 
