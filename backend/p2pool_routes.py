@@ -529,7 +529,13 @@ async def get_pool_stats():
     """Get comprehensive P2Pool statistics"""
     now = datetime.now(timezone.utc)
 
-    # Peer stats
+    # Keep mainnet node alive (this IS the mainnet node)
+    await db.p2pool_peers.update_one(
+        {"peer_id": NODE_ID},
+        {"$set": {"last_seen": now.isoformat(), "online": True}}
+    )
+
+    # Mark stale peers offline
     cutoff = (now - timedelta(seconds=PEER_TIMEOUT)).isoformat()
     await db.p2pool_peers.update_many(
         {"last_seen": {"$lt": cutoff}, "online": True}, {"$set": {"online": False}}
