@@ -363,7 +363,8 @@ class StratumMiner:
         elif method=="mining.submit": await self.handle_submit(msg_id,params)
         elif method=="mining.suggest_difficulty":
             old_diff = self.difficulty
-            self.difficulty = max(1,float(params[0]) if params else 1)
+            suggested = max(VARDIFF_MIN, min(VARDIFF_MAX, float(params[0]) if params else 0.1))
+            self.difficulty = suggested
             logger.info(f"SUGGEST_DIFF [{self.worker_name}] {old_diff} -> {self.difficulty}")
             self.respond(msg_id,True)
             self.notify("mining.set_difficulty",[self.difficulty])
