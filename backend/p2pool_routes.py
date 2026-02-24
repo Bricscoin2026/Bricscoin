@@ -770,8 +770,21 @@ async def get_pool_stats():
     ]
     miner_hr_result = await db.miners.aggregate(miner_hashrate_pipeline).to_list(1)
     local_real_hashrate = miner_hr_result[0]["total_hashrate"] if miner_hr_result else 0
-    # Use the best local estimate + remote hashrate
-    pool_hashrate = max(local_pool_hashrate, local_real_hashrate) + remote_hashrate
+
+    # Calculate PPLNS hashrate from sharechain (more accurate than remote API)
+    pplns_pool_hashrate = 0.0
+    if pplns_shares_1h > 0:
+        pplns_avg_pipeline = [
+            {"$match": {"pool_mode": "pplns", "timestamp": {"$gte": hr_cutoff}}},
+            {"$group": {"_id": None, "avg_diff": {"$avg": "$share_difficulty"}}}
+        ]
+        pplns_avg_result = await db.p2pool_sharechain.aggregate(pplns_avg_pipeline).to_list(1)
+        pplns_avg_diff = pplns_avg_result[0].get("avg_diff", 1000) if pplns_avg_result else 1000
+        pplns_pool_hashrate = (pplns_shares_1h * pplns_avg_diff * (2**32)) / 3600
+
+    # Use the best estimate: local + max(remote_api, sharechain_pplns)
+    best_pplns_hashrate = max(remote_hashrate, pplns_pool_hashrate)
+    pool_hashrate = max(local_pool_hashrate, local_real_hashrate) + best_pplns_hashrate
 
     # Top miners (24h)
     top_pipeline = [
