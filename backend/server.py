@@ -348,12 +348,10 @@ def check_difficulty(hash_value: str, difficulty: int) -> bool:
 async def get_current_difficulty() -> int:
     """
     Calcola la difficoltà per il PROSSIMO blocco.
+    Target: 1 blocco ogni 600 secondi.
     
-    Adjustment ogni 10 blocchi:
-    - Trova l'ultimo punto di adjustment (multiplo di 10)
-    - Calcola il tempo effettivo per quei 10 blocchi
-    - Aggiusta proporzionalmente con cap 4x/0.25x per ciclo
-    - Target: 1 blocco ogni 600 secondi
+    Usa la formula: new_diff = sum(block_diffs) * TARGET_TIME / actual_time
+    Questo stima l'hashrate dalla finestra e calcola la difficoltà esatta.
     """
     blocks_count = await db.blocks.count_documents({})
     
@@ -368,28 +366,30 @@ async def get_current_difficulty() -> int:
     current_index = last_block.get("index", 0)
     
     adjustment_interval = 10
-    
-    # Find the most recent adjustment point
     last_adjustment_index = (current_index // adjustment_interval) * adjustment_interval
     
     if last_adjustment_index < adjustment_interval:
         return current_difficulty
     
-    # Get the block at the adjustment point and the one 10 blocks before
     start_index = last_adjustment_index - adjustment_interval
     
-    start_block = await db.blocks.find_one({"index": start_index}, {"_id": 0, "timestamp": 1, "difficulty": 1})
-    end_block = await db.blocks.find_one({"index": last_adjustment_index}, {"_id": 0, "timestamp": 1, "difficulty": 1})
+    # Get ALL blocks in the window
+    window_blocks = await db.blocks.find(
+        {"index": {"$gt": start_index, "$lte": last_adjustment_index}},
+        {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
+    ).sort("index", 1).to_list(adjustment_interval + 1)
     
-    if not start_block or not end_block:
+    if len(window_blocks) < 2:
         return current_difficulty
     
-    # Use the difficulty from the adjustment window
-    window_difficulty = max(1, end_block.get("difficulty", current_difficulty))
+    # Get the block at start_index for the time reference
+    start_block = await db.blocks.find_one({"index": start_index}, {"_id": 0, "timestamp": 1})
+    if not start_block:
+        return current_difficulty
     
     try:
         start_time = datetime.fromisoformat(start_block["timestamp"].replace("Z", "+00:00"))
-        end_time = datetime.fromisoformat(end_block["timestamp"].replace("Z", "+00:00"))
+        end_time = datetime.fromisoformat(window_blocks[-1]["timestamp"].replace("Z", "+00:00"))
         actual_time = (end_time - start_time).total_seconds()
     except (ValueError, KeyError):
         return current_difficulty
@@ -397,18 +397,19 @@ async def get_current_difficulty() -> int:
     if actual_time <= 0:
         actual_time = 1
     
-    expected_time = TARGET_BLOCK_TIME * adjustment_interval
-    ratio = expected_time / actual_time
-    ratio = max(0.10, min(100.0, ratio))
+    # Sum difficulties of all blocks in the window
+    total_difficulty = sum(b.get("difficulty", current_difficulty) for b in window_blocks)
     
-    new_difficulty = max(1, int(window_difficulty * ratio))
+    # new_diff = target_time * sum(difficulties) / actual_time
+    new_difficulty = max(1, int(TARGET_BLOCK_TIME * total_difficulty / actual_time))
     
-    avg_block_time = actual_time / adjustment_interval
+    avg_block_time = actual_time / len(window_blocks)
+    avg_diff = total_difficulty / len(window_blocks)
     
     logging.info(
-        "DIFFICULTY ADJUSTMENT [%d-%d]: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
+        "DIFFICULTY ADJUSTMENT [%d-%d]: avg_diff=%.0f, avg_time=%.1fs, target=%ds, NEW=%d",
         start_index, last_adjustment_index,
-        window_difficulty, avg_block_time, TARGET_BLOCK_TIME, ratio, new_difficulty
+        avg_diff, avg_block_time, TARGET_BLOCK_TIME, new_difficulty
     )
     
     return new_difficulty
