@@ -304,6 +304,7 @@ async def register_peer(peer: PeerRegister):
             "node_url": peer.node_url,
             "version": peer.version,
             "stratum_port": peer.stratum_port,
+            "api_port": peer.api_port,
             "pool_modes": peer.pool_modes,
             "last_seen": now,
             "online": True,
