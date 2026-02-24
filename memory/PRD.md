@@ -9,46 +9,39 @@ Build "BricsCoin," a cryptocurrency with Post-Quantum Cryptography (PQC). The pr
 - **Mining**: SHA-256 PoW with Stratum v1 protocol
 - **Signatures**: ECDSA + ML-DSA-65 (PQC, FIPS 204)
 - **Two-Server Setup**:
-  - Main server (bricscoin26.org / 5.161.254.163): React frontend, FastAPI backend, SOLO mining pool (port 3333)
-  - PPLNS server (157.180.123.105): Dedicated PPLNS mining pool (port 3334) + HTTP API (port 8080)
+  - Main server (bricscoin26.org / 5.161.254.163): React frontend, FastAPI backend, SOLO pool (port 3333)
+  - PPLNS server (157.180.123.105): PPLNS pool (port 3334) + HTTP API (port 8080)
 
-## Core Features Implemented
-- Blockchain explorer with blocks, transactions, rich list
-- PQC wallet (BRICSPQ addresses) with browser-side signing
-- BricsChat, Time Capsule, AI Oracle (GPT-5.2 via Emergent LLM Key)
+## What's Been Implemented
+
+### Phase 1-3: Core Features (completed earlier)
+- Blockchain explorer, PQC wallet, BricsChat, Time Capsule, AI Oracle
 - BricsNFT (on-chain certificates)
-- True P2Pool decentralized mining (SOLO + PPLNS)
 - Stratum v1 mining protocol
-- P2P node discovery, share propagation, and cross-node miner aggregation
-- Whitepaper PDF generation
+- Two-server P2Pool (SOLO + PPLNS)
 
-## Latest Changes (Feb 24, 2026) - DEPLOYED TO PRODUCTION
-### P0 Bug Fixes (4 issues from user message #381)
-1. **Blockchain Transactions**: ExplorerSection loads tx count on mount - shows "Transactions (N)" immediately
-2. **Mining Tab Removed**: Dead MiningSection component + unused imports removed from Blockchain.jsx
-3. **P2Pool Miner Aggregation**: Backend `/api/p2pool/miners` now fetches remote miners from peer nodes via HTTP API; frontend shows Pool column (SOLO/PPLNS badges)
-4. **P2P Node Counter Fixed**: Stats endpoint actively pings peers; stale peers auto-cleaned; now shows 2/2
-
-### Infrastructure Deployed
-- Added `/api/p2pool/status` health-check endpoint for P2P liveness
-- Deployed HTTP API (aiohttp) on PPLNS server (port 8080) for miner data exposure
-- Opened port 8080 in PPLNS server firewall
-- Added `emergentintegrations` to Docker build
-- Rebuilt and redeployed both frontend and backend Docker containers
+### Feb 24, 2026 - Bug Fixes Deployed to Production
+1. **Transactions Navigation Fix**: setSearchParams now preserves tab=explorer parameter
+2. **Mining Tab Removed**: Dead MiningSection component cleaned from Blockchain.jsx
+3. **Active Miners Aggregation**: /stats endpoint now queries remote PPLNS node and shows total count (5 = 3 SOLO + 2 PPLNS)
+4. **Block Count Fixed**: Using db.blocks.count_documents({}) for accurate count (2188)
+5. **PPLNS Hashrate Display**: HTTP API on PPLNS node now calculates real hashrate per miner (shares * difficulty * 2^32 / time)
+6. **P2P Node Counter**: Active ping mechanism keeps both nodes showing 2/2 online
+7. **Infrastructure**: Added emergentintegrations to Dockerfile, deployed HTTP API on PPLNS server
 
 ## Key Files
-- `backend/p2pool_routes.py` - P2Pool API routes
-- `frontend/src/pages/P2Pool.jsx` - P2Pool UI
-- `frontend/src/pages/Blockchain.jsx` - Blockchain explorer
+- `backend/p2pool_routes.py` - P2Pool API (stats, miners, peers, status)
+- `frontend/src/pages/P2Pool.jsx` - P2Pool UI with Pool column
+- `frontend/src/pages/Blockchain.jsx` - Explorer with fixed navigation
 - PPLNS server: `/opt/p2pool/p2pool_stratum.py` (with integrated HTTP API)
 
 ## Prioritized Backlog
 ### P1
-- Miner Reward to PQC Address: Configure protocol to send block rewards to PQC address
+- Miner Reward to PQC Address
 
 ### P2
-- BricsID / BricsVault (decentralized identity / dead man's switch)
-- Repository Cleanup (downloads folder on Codeberg)
+- BricsID / BricsVault
+- Repository Cleanup (Codeberg)
 
 ### P3
-- Mobile Wallet development
+- Mobile Wallet
