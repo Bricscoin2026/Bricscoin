@@ -361,13 +361,11 @@ class StratumMiner:
             "blocks": 0,
             "extranonce1": self.extranonce1
         }
-        # Stato persistente per /api/mining/miners - upsert by worker_name + IP
+        # Stato persistente per /api/mining/miners - upsert by miner_id (ip:port)
         now_iso = datetime.now(timezone.utc).isoformat()
-        db_key = f"{self.worker_name}:{self.miner_ip}"
         await db.miners.update_one(
-            {"db_key": db_key},
+            {"miner_id": self.miner_id},
             {"$set": {
-                "db_key": db_key,
                 "miner_id": self.miner_id,
                 "worker_name": self.worker_name,
                 "ip": self.miner_ip,
@@ -376,7 +374,6 @@ class StratumMiner:
                 "online": True,
                 "shares": 0,
                 "blocks": 0,
-                "extranonce1": self.extranonce1
             }},
             upsert=True
         )
