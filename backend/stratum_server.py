@@ -511,7 +511,7 @@ class StratumServer:
             try:
                 now_iso = datetime.now(timezone.utc).isoformat()
                 await db.miners.update_one(
-                    {"worker_name": miner.worker_name},
+                    {"db_key": f"{miner.worker_name}:{miner.miner_ip}"},
                     {"$set": {"online": False, "last_seen": now_iso}}
                 )
             except Exception:
