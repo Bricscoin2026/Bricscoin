@@ -33,6 +33,7 @@ import time
 logger = logging.getLogger("p2pool")
 
 limiter = Limiter(key_func=get_remote_address)
+RATE_LIMIT_WHITELIST = {"157.180.123.105", "127.0.0.1", "172.19.0.1"}
 router = APIRouter(prefix="/api/p2pool", tags=["P2Pool"])
 
 mongo_url = os.environ['MONGO_URL']
