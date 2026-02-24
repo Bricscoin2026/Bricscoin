@@ -313,7 +313,8 @@ async def propagate_share_to_peers(share: dict):
 # --- Peer Management ---
 
 @router.get("/status")
-async def node_status():
+@limiter.limit("120/minute")
+async def node_status(request: Request):
     """Health check endpoint - peers ping this to check liveness"""
     chain_tip = await get_chain_tip()
     active_miners = await db.miners.count_documents({"online": True})
@@ -383,7 +384,8 @@ async def peer_heartbeat(peer_id: str, miners_count: int = 0, hashrate: float = 
 
 
 @router.get("/peers")
-async def list_peers():
+@limiter.limit("60/minute")
+async def list_peers(request: Request):
     """List all P2Pool peers with status"""
     cutoff = (datetime.now(timezone.utc) - timedelta(seconds=PEER_TIMEOUT)).isoformat()
     # Remove ancient peers that haven't been seen in 7 days
@@ -554,7 +556,8 @@ async def receive_share_from_peer(share: ShareBroadcast):
 
 
 @router.get("/sharechain")
-async def get_sharechain(limit: int = 50):
+@limiter.limit("60/minute")
+async def get_sharechain(request: Request, limit: int = 50):
     """Get the sharechain (latest shares)"""
     shares = await db.p2pool_sharechain.find(
         {}, {"_id": 0}
@@ -649,7 +652,8 @@ async def record_block_payout(share_data: dict):
 
 
 @router.get("/payouts")
-async def get_payouts(limit: int = 20, pool_mode: Optional[str] = None):
+@limiter.limit("60/minute")
+async def get_payouts(request: Request, limit: int = 20, pool_mode: Optional[str] = None):
     """Get payout history"""
     query = {}
     if pool_mode:
@@ -661,7 +665,8 @@ async def get_payouts(limit: int = 20, pool_mode: Optional[str] = None):
 
 
 @router.get("/payouts/worker/{address}")
-async def get_worker_payouts(address: str, limit: int = 20):
+@limiter.limit("60/minute")
+async def get_worker_payouts(request: Request, address: str, limit: int = 20):
     """Get payouts for a specific worker"""
     payouts = await db.p2pool_payouts.find(
         {"payouts.worker": address}, {"_id": 0}
@@ -935,7 +940,8 @@ async def get_pool_stats(request: Request):
 
 
 @router.get("/miners")
-async def get_pool_miners():
+@limiter.limit("60/minute")
+async def get_pool_miners(request: Request):
     """Get detailed miner stats from ALL P2Pool nodes"""
     now = datetime.now(timezone.utc)
     cutoff_10m = (now - timedelta(minutes=10)).isoformat()
@@ -1081,7 +1087,8 @@ async def get_pool_miners():
 
 
 @router.get("/blocks")
-async def get_pool_blocks(limit: int = 20):
+@limiter.limit("60/minute")
+async def get_pool_blocks(request: Request, limit: int = 20):
     """Get blocks found by pool miners"""
     blocks = await db.blocks.find(
         {}, {"_id": 0, "index": 1, "timestamp": 1, "miner": 1, "difficulty": 1, "hash": 1, "pqc_scheme": 1}
