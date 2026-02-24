@@ -142,9 +142,7 @@ export default function Layout() {
               </a>
               <span>•</span>
               <a 
-                href="https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/WHITEPAPER.md" 
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/whitepaper"
                 className="hover:text-foreground transition-colors"
               >
                 Whitepaper
