@@ -706,10 +706,17 @@ class PPLNSHandler(BaseHTTPRequestHandler):
         miners_docs = list(sync_db.pplns_miners.find(
             {"online": True, "last_seen": {"$gte": cutoff}}, {"_id": 0}
         ))
-        result_miners = []
+        # Deduplicate by worker address - keep the most recent entry
+        seen_workers = {}
         for doc in miners_docs:
+            worker = doc.get("worker", doc.get("worker_name", "unknown"))
+            existing = seen_workers.get(worker)
+            if not existing or doc.get("last_seen", "") > existing.get("last_seen", ""):
+                seen_workers[worker] = doc
+        result_miners = []
+        for worker, doc in seen_workers.items():
             result_miners.append({
-                "worker": doc.get("worker", doc.get("worker_name", "unknown")),
+                "worker": worker,
                 "online": True,
                 "last_seen": doc.get("last_seen"),
                 "shares_1h": doc.get("shares_1h", 0),
