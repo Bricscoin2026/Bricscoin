@@ -761,9 +761,9 @@ async def get_pool_miners():
     cutoff_24h = (now - timedelta(hours=24)).isoformat()
     hr_cutoff = (now - timedelta(hours=1)).isoformat()
 
-    # 1. Local miners (from this node's Stratum) - deduplicated by db_key
+    # 1. Local miners (from this node's Stratum) - deduplicated by db_key, exclude unknown
     active_docs = await db.miners.find(
-        {"online": True, "last_seen": {"$gte": cutoff_10m}},
+        {"online": True, "last_seen": {"$gte": cutoff_10m}, "worker_name": {"$nin": [None, "", "unknown"]}},
         {"_id": 0, "db_key": 1, "worker_name": 1, "worker": 1, "ip": 1, "last_seen": 1, "shares": 1, "blocks": 1, "connected_at": 1}
     ).to_list(200)
 
