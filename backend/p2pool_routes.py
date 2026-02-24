@@ -711,7 +711,9 @@ async def get_pool_stats():
             "this_node": NODE_ID,
         },
         "miners": {
-            "active": active_miners,
+            "active": total_active_miners,
+            "local_active": local_active_miners,
+            "remote_active": remote_active_miners,
             "top_miners": [
                 {
                     "worker": m["_id"],
