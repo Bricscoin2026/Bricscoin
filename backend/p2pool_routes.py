@@ -19,6 +19,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 from datetime import datetime, timezone, timedelta
 from motor.motor_asyncio import AsyncIOMotorClient
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 import os
 import hashlib
 import uuid
@@ -30,6 +32,7 @@ import time
 
 logger = logging.getLogger("p2pool")
 
+limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/api/p2pool", tags=["P2Pool"])
 
 mongo_url = os.environ['MONGO_URL']
