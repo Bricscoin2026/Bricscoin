@@ -224,7 +224,7 @@ export default function About() {
               tokenomics, and roadmap.
             </p>
             <Button 
-              onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/WHITEPAPER.md', '_blank')}
+              onClick={() => window.location.href = '/whitepaper'}
               className="w-full"
               data-testid="whitepaper-btn"
             >
