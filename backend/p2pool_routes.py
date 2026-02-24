@@ -441,6 +441,28 @@ async def get_sharechain(limit: int = 50):
         {}, {"_id": 0}
     ).sort("height", -1).limit(min(limit, 200)).to_list(min(limit, 200))
     tip = await get_chain_tip()
+
+    # Verify is_block flags against actual blockchain
+    # Shares marked as is_block should correspond to real blocks
+    block_shares = [s for s in shares if s.get("is_block")]
+    if block_shares:
+        block_heights = list(set(s.get("block_height") for s in block_shares if s.get("block_height")))
+        if block_heights:
+            actual_blocks = await db.blocks.find(
+                {"index": {"$in": block_heights}}, {"_id": 0, "index": 1, "miner": 1}
+            ).to_list(len(block_heights))
+            actual_block_map = {b["index"]: b.get("miner") for b in actual_blocks}
+            for s in block_shares:
+                bh = s.get("block_height")
+                if bh not in actual_block_map:
+                    # Block was never accepted - false positive from SHA-256 bug
+                    s["is_block"] = False
+                    s["is_block_orphaned"] = True
+                elif actual_block_map[bh] != s.get("worker"):
+                    # Block exists but was mined by someone else
+                    s["is_block"] = False
+                    s["is_block_orphaned"] = True
+
     return {
         "shares": shares,
         "count": len(shares),
