@@ -1,14 +1,14 @@
 # BricsCoin Whitepaper
-## A Decentralized SHA256 Proof-of-Work Cryptocurrency with Post-Quantum Security
+## A Decentralized SHA-256 Proof-of-Work Cryptocurrency with Post-Quantum Security
 
-**Version 3.0 - February 2026**
+**Version 3.1 - February 2026**
 **Author: Jabo86**
 
 ---
 
 ## Abstract
 
-BricsCoin (BRICS) is a decentralized cryptocurrency built on the proven SHA256 Proof-of-Work consensus mechanism, enhanced with post-quantum cryptographic security. Designed for hardware mining compatibility, BricsCoin enables anyone with ASIC mining equipment to participate in securing the network and earning rewards. With a fixed supply of 21 million coins, ultra-low transaction fees of 0.000005 BRICS (burned), and a hybrid ECDSA + ML-DSA-65 signature scheme providing quantum resistance, BricsCoin aims to be a fair, transparent, secure, and future-proof digital currency.
+BricsCoin (BRICS) is a decentralized cryptocurrency built on the proven SHA-256 Proof-of-Work consensus mechanism, enhanced with post-quantum cryptographic security. Designed for hardware mining compatibility, BricsCoin enables anyone with ASIC mining equipment to participate in securing the network and earning rewards. With a fixed supply of 21 million coins, ultra-low transaction fees of 0.000005 BRICS (burned), and a hybrid ECDSA + ML-DSA-65 signature scheme providing quantum resistance, BricsCoin aims to be a fair, transparent, secure, and future-proof digital currency.
 
 BricsCoin goes beyond a simple payment network by offering a suite of on-chain applications: **BricsChat** (quantum-proof encrypted messaging), **Time Capsule** (time-locked on-chain data), **BricsNFT** (PQC-signed certificates), and an **AI Oracle** (GPT-5.2 powered network intelligence).
 
@@ -18,21 +18,21 @@ BricsCoin goes beyond a simple payment network by offering a suite of on-chain a
 
 ### 1.1 Background
 
-Since Bitcoin's inception in 2009, Proof-of-Work has proven to be the most secure and decentralized consensus mechanism for digital currencies. BricsCoin builds upon this foundation, implementing a clean SHA256-based blockchain optimized for modern ASIC mining hardware.
+Since Bitcoin's inception in 2009, Proof-of-Work has proven to be the most secure and decentralized consensus mechanism for digital currencies. BricsCoin builds upon this foundation, implementing a clean SHA-256-based blockchain optimized for modern ASIC mining hardware.
 
 ### 1.2 The Quantum Threat
 
-The development of large-scale quantum computers poses a significant threat to current cryptographic systems. Shor's algorithm can break ECDSA and RSA, the foundations of most blockchain security. BricsCoin proactively addresses this threat by implementing a hybrid post-quantum cryptographic scheme.
+The development of large-scale quantum computers poses a significant threat to current cryptographic systems. Shor's algorithm can break ECDSA and RSA, the foundations of most blockchain security. BricsCoin proactively addresses this threat by implementing a hybrid post-quantum cryptographic scheme based on NIST FIPS 204 (ML-DSA-65), formerly known as CRYSTALS-Dilithium.
 
 ### 1.3 Vision
 
 BricsCoin's mission is to create a truly decentralized currency that:
-- Remains accessible to hardware miners worldwide
-- Maintains ultra-low transaction fees for all users (0.000005 BRICS, burned)
-- Provides transparent, verifiable transactions
-- Offers quantum-resistant security through ML-DSA-65
-- Hosts on-chain applications (Chat, Certificates, Time Capsules)
-- Operates as a fully open-source project
+- Remains accessible to hardware miners worldwide via SHA-256 PoW
+- Maintains ultra-low, deflationary transaction fees (0.000005 BRICS, burned)
+- Provides transparent, publicly verifiable transactions
+- Offers quantum-resistant security through ML-DSA-65 hybrid signatures
+- Hosts on-chain applications: Chat, Certificates, Time Capsules, AI Oracle
+- Operates as a fully open-source project under MIT license
 
 ---
 
@@ -40,18 +40,20 @@ BricsCoin's mission is to create a truly decentralized currency that:
 
 | Parameter | Value |
 |-----------|-------|
-| **Algorithm** | SHA256 Proof-of-Work |
-| **Consensus** | Proof-of-Work |
+| **Algorithm** | SHA-256 Proof-of-Work |
+| **Consensus** | Proof-of-Work (Nakamoto Consensus) |
 | **Max Supply** | 21,000,000 BRICS |
 | **Block Reward** | 50 BRICS (initial) |
 | **Halving Interval** | Every 210,000 blocks |
-| **Target Block Time** | ~10 minutes |
-| **Difficulty Adjustment** | Every 2016 blocks |
+| **Target Block Time** | ~600 seconds (10 minutes) |
+| **Difficulty Adjustment** | Per-block sliding window (5 blocks) |
 | **Transaction Fee** | 0.000005 BRICS (burned) |
-| **Fee Model** | Deflationary (all fees destroyed) |
+| **Fee Model** | Deflationary (all fees permanently destroyed) |
 | **Signature Algorithm** | ECDSA secp256k1 + ML-DSA-65 (hybrid) |
-| **Address Format** | Legacy: `BRICS` + 40 hex / PQC: `BRICSPQ` + 38 hex |
-| **Mining Protocol** | Stratum v1 |
+| **Address Format (Legacy)** | `BRICS` + 40 hex chars (45 total) |
+| **Address Format (PQC)** | `BRICSPQ` + 38 hex chars (45 total) |
+| **Mining Protocol** | Stratum v1 (port 3333) |
+| **Mining Pools** | SOLO + PPLNS (dual-server architecture) |
 | **License** | MIT |
 
 ---
@@ -61,14 +63,15 @@ BricsCoin's mission is to create a truly decentralized currency that:
 ### 3.1 Block Structure
 
 Each block contains:
-- **Index**: Sequential block number
-- **Timestamp**: UTC block creation time
-- **Transactions**: List of validated transactions
-- **Previous Hash**: SHA256 hash of the previous block
-- **Nonce**: Proof-of-Work solution
-- **Difficulty**: Current mining difficulty target
-- **Miner Address**: Address that receives the block reward
-- **PQC Signature**: Hybrid ECDSA + ML-DSA-65 block signature (v2.0+)
+- **Index**: Sequential block number starting from genesis (0)
+- **Timestamp**: UTC block creation time (ISO 8601)
+- **Transactions**: Ordered list of validated transactions
+- **Previous Hash**: SHA-256 hash of the preceding block
+- **Nonce**: Proof-of-Work solution value
+- **Difficulty**: Mining difficulty target at time of creation
+- **Miner Address**: BRICS/BRICSPQ address receiving block reward
+- **PQC Signature**: Hybrid ECDSA + ML-DSA-65 block signature
+- **Hash**: SHA-256 hash of the complete block header
 
 ### 3.2 Transaction Structure
 
@@ -76,14 +79,17 @@ Each transaction includes:
 - **Sender/Recipient**: BRICS or BRICSPQ addresses
 - **Amount**: Transfer amount (max 8 decimal places)
 - **Timestamp**: Transaction creation time
-- **Signature**: ECDSA digital signature (signed client-side)
+- **Signature**: ECDSA digital signature (signed client-side, never server-side)
 - **Public Key**: Sender's ECDSA public key for verification
+- **Type**: transfer, mining_reward, burn, chat, nft, timecapsule
 
-### 3.3 Mining
+### 3.3 Network Architecture
 
-BricsCoin uses the same SHA256 algorithm as Bitcoin, ensuring compatibility with existing ASIC mining hardware. Miners connect via the Stratum protocol on port 3333.
+BricsCoin operates on a dual-server architecture for maximum reliability:
+- **Main Server**: FastAPI backend (Python), React frontend, SOLO stratum, MongoDB database
+- **PPLNS Server**: Dedicated Stratum server for the PPLNS mining pool with independent share tracking
 
-**Difficulty adjustment** occurs every 2016 blocks, targeting a 10-minute block time. The algorithm increases difficulty when blocks are mined too quickly and decreases it when blocks are too slow.
+Communication between servers uses authenticated HTTP API calls for block propagation, share submission, and network synchronization.
 
 ---
 
@@ -92,8 +98,8 @@ BricsCoin uses the same SHA256 algorithm as Bitcoin, ensuring compatibility with
 ### 4.1 The Hybrid Approach
 
 BricsCoin implements a **hybrid signature scheme** combining:
-- **ECDSA (secp256k1)**: The classical algorithm used by Bitcoin
-- **ML-DSA-65 (FIPS 204)**: The NIST-standardized post-quantum signature algorithm (formerly known as Dilithium)
+- **ECDSA (secp256k1)**: The classical algorithm used by Bitcoin. Provides proven, battle-tested security against classical computers.
+- **ML-DSA-65 (FIPS 204)**: The NIST-standardized post-quantum digital signature algorithm (formerly CRYSTALS-Dilithium). Provides security against both classical and quantum computing attacks.
 
 This dual approach ensures:
 - **Backward compatibility**: Legacy wallets continue to function
@@ -102,7 +108,7 @@ This dual approach ensures:
 
 ### 4.2 Client-Side Signing
 
-A key architectural decision in BricsCoin is that **all cryptographic signing occurs in the user's browser**:
+A critical architectural decision in BricsCoin is that **all cryptographic signing occurs in the user's browser**:
 
 1. Private keys are generated locally using `@noble/post-quantum`
 2. Transactions are signed client-side before being submitted to the network
@@ -113,38 +119,64 @@ This eliminates the most common attack vector in cryptocurrency platforms: serve
 
 ### 4.3 PQC Wallet Addresses
 
-PQC wallets use the `BRICSPQ` prefix to distinguish them from legacy wallets:
-- Legacy: `BRICS` + SHA256(public_key)[:40] = 45 characters
-- PQC: `BRICSPQ` + SHA256(public_key)[:38] = 45 characters
+| Type | Format | Length |
+|------|--------|--------|
+| Legacy | `BRICS` + SHA256(public_key)[:40] | 45 characters |
+| PQC | `BRICSPQ` + SHA256(public_key)[:38] | 45 characters |
+| Migration | Zero-cost transfer from legacy to PQC | Instant |
 
 ### 4.4 Block Signing
 
-Starting with v2.0, each node maintains its own PQC key pair. When a node mines a new block, it signs the block with both its ECDSA and ML-DSA-65 private keys. This provides verifiable attribution and integrity for all blocks on the chain.
-
-### 4.5 Migration
-
-Users can migrate from legacy ECDSA wallets to PQC wallets at **zero cost** (no transaction fee). The migration endpoint `/api/pqc/migrate` transfers the full balance from a legacy address to a new PQC address.
+Starting with v2.0, each node maintains its own PQC key pair. When a node mines a new block, it signs the block header with both its ECDSA and ML-DSA-65 private keys, providing verifiable attribution, integrity, and quantum-resistant authenticity for all blocks on the chain.
 
 ---
 
-## 5. Tokenomics
+## 5. Mining & Consensus
 
-### 5.1 Supply
+### 5.1 SHA-256 Proof-of-Work
+
+BricsCoin uses the same SHA-256 hashing algorithm as Bitcoin, ensuring full compatibility with the massive installed base of ASIC mining hardware. Miners connect via the standard Stratum v1 protocol on port 3333, making it compatible with all major mining software (CGMiner, BFGMiner, NerdMiner, etc.).
+
+### 5.2 Mining Pools
+
+BricsCoin supports two mining pool modes:
+
+**SOLO Pool**: The finder of the block receives the full 50 BRICS reward. Ideal for high-hashrate miners. Integrated directly into the main server's Stratum endpoint.
+
+**PPLNS Pool**: Pay Per Last N Shares — rewards are distributed proportionally among all miners who contributed shares in the window preceding the block. Ideal for smaller miners who want consistent payouts. Runs on a dedicated server.
+
+### 5.3 Automatic Difficulty Adjustment
+
+BricsCoin implements a fully automatic, **per-block difficulty adjustment algorithm** targeting a block time of **600 seconds** (10 minutes). The algorithm:
+
+- Uses a **sliding window of the last 5 blocks** for fast convergence
+- Estimates network hashrate from total work done divided by elapsed time
+- Calculates new difficulty as: `new_diff = hashrate_estimate * 600`
+- Applies a **safety clamp** (max 4x increase or 0.25x decrease) to prevent extreme oscillations
+- Recalculates on **every single block** for maximum responsiveness to hashrate changes
+
+This design ensures the chain remains stable and responsive even with significant hashrate fluctuations, automatically lowering difficulty when miners leave and increasing it when new miners join.
+
+---
+
+## 6. Tokenomics
+
+### 6.1 Supply
 
 - **Max Supply**: 21,000,000 BRICS (hard cap)
 - **Block Reward**: 50 BRICS (halves every 210,000 blocks)
-- **Premine**: Genesis block allocation for development
+- **Premine**: 1,000,000 BRICS (genesis allocation for development)
 
-### 5.2 Fee Model (Deflationary)
+### 6.2 Deflationary Fee Model
 
-Transaction fees of **0.000005 BRICS** are **burned** (permanently destroyed), creating a deflationary pressure on the supply over time. This mechanism:
-- Reduces circulating supply with each transaction
+Transaction fees of **0.000005 BRICS** are **permanently burned** (destroyed), creating ongoing deflationary pressure on the supply. This mechanism:
+- Reduces circulating supply with every transaction
 - Provides anti-spam protection
 - Aligns incentives for long-term holders
 
 All on-chain features (BricsChat, Time Capsule, BricsNFT) use the same burn fee, contributing to the deflationary model.
 
-### 5.3 Halving Schedule
+### 6.3 Halving Schedule
 
 | Event | Block | Reward |
 |-------|-------|--------|
@@ -152,67 +184,40 @@ All on-chain features (BricsChat, Time Capsule, BricsNFT) use the same burn fee,
 | 1st Halving | 210,000 | 25 BRICS |
 | 2nd Halving | 420,000 | 12.5 BRICS |
 | 3rd Halving | 630,000 | 6.25 BRICS |
-| ... | ... | ... |
+| 4th Halving | 840,000 | 3.125 BRICS |
+| Final Coin | ~Year 2150 | 0 BRICS |
 
 ---
 
-## 6. On-Chain Applications
+## 7. On-Chain Applications
 
-BricsCoin is more than a payment network. It hosts a suite of on-chain applications that leverage PQC signatures and the burn-fee mechanism.
+BricsCoin hosts a suite of on-chain applications that leverage PQC signatures and the deflationary burn-fee mechanism.
 
-### 6.1 BricsChat — Quantum-Proof On-Chain Messaging
+### 7.1 BricsChat — Quantum-Proof On-Chain Messaging
 
 BricsChat is the **world's first PQC-encrypted on-chain messaging system**. Each message is:
 - Signed with the sender's hybrid ECDSA + ML-DSA-65 keys
 - Stored immutably on the blockchain
-- Publicly visible in the Global Feed (read-only for visitors)
+- Publicly visible in the Global Feed
 - Accompanied by a **0.000005 BRICS** fee that is burned
 
-**How it works:**
-1. User connects their PQC wallet
-2. Writes a message and specifies a recipient address
-3. The message content is hex-encoded and signed client-side
-4. A burn transaction is created on-chain
-5. The message is permanently recorded with the sender's PQC signature
+**Use cases:** Immutable declarations, public statements, provable communication timestamps, community governance.
 
-**Use cases:** Immutable declarations, public statements, provable communication timestamps.
-
-### 6.2 Decentralized Time Capsule
+### 7.2 Decentralized Time Capsule
 
 The Time Capsule feature allows users to store encrypted data on-chain that becomes accessible only at a specific future block height.
 
 - Data is locked until the target block is mined
 - Each capsule creation burns **0.000005 BRICS**
-- Capsules can be public or addressed to a specific recipient
 - Content is immutable once locked
 
-**Use cases:** Timed announcements, future predictions, proof-of-knowledge at a specific time, community events.
+**Use cases:** Timed announcements, future predictions, proof-of-knowledge, community events.
 
-### 6.3 BricsNFT — PQC-Signed On-Chain Certificates
+### 7.3 BricsNFT — PQC-Signed On-Chain Certificates
 
-BricsNFT is the **world's first NFT system with post-quantum cryptographic signatures**. It allows anyone to mint immutable certificates on the BricsCoin blockchain.
+BricsNFT is the **world's first NFT system with post-quantum cryptographic signatures**. It allows minting of immutable certificates signed with ECDSA + ML-DSA-65.
 
-**Certificate Types:**
-- Diploma / Degree
-- Property Deed
-- Authenticity Certificate
-- Professional License
-- Membership
-- Award / Achievement
-- Software License
-- Custom (user-defined)
-
-**How it works:**
-1. Issuer connects their PQC wallet
-2. Selects a certificate type (or creates a custom one)
-3. Fills in title, description, and optionally a recipient address
-4. The certificate content is SHA-256 hashed and signed with ECDSA + ML-DSA-65
-5. A burn transaction of **0.000005 BRICS** is created
-6. The certificate receives a unique ID (e.g., `BRICSNFT-A1B2C3D4E5F6`)
-7. Anyone can verify the certificate's authenticity using the Verify tool
-
-**Trust Model:**
-The blockchain records **who** signed **what** and **when** — immutably. To verify the issuer's identity, users check that the issuer's PQC address matches the one published on their official website or channels. This is the same trust model used by digital signatures and PEC (certified email).
+**Certificate Types:** Diploma/Degree, Property Deed, Authenticity Certificate, Professional License, Membership, Award/Achievement, Software License, Custom.
 
 **Features:**
 - Public gallery of all minted certificates
@@ -221,44 +226,12 @@ The blockchain records **who** signed **what** and **when** — immutably. To ve
 - Transfer history tracking
 - Deflationary burn fee
 
-### 6.4 AI Blockchain Oracle
+### 7.4 AI Blockchain Oracle (GPT-5.2)
 
 The AI Oracle is powered by **GPT-5.2** and provides real-time network intelligence:
-
-- **Network Analysis**: Health score, mining analysis, security assessment, recommendations
-- **Predictions**: Difficulty trend, hashrate forecast, halving impact, network growth outlook
-- **Ask Oracle**: Conversational AI that answers questions about BricsCoin using live network data
-
-The Oracle analyzes real blockchain data including block times, difficulty, miner distribution, transaction volume, and PQC adoption rates.
-
----
-
-## 7. Network Architecture
-
-### 7.1 API Server
-
-The BricsCoin API is built on FastAPI (Python) with:
-- Asynchronous MongoDB (Motor) for high-performance database operations
-- Rate limiting to prevent abuse
-- Security headers and CORS configuration
-- RESTful endpoints for all blockchain operations
-- Dedicated routers for Chat, Time Capsule, NFT, and Oracle features
-
-### 7.2 Mining Server
-
-The Stratum server supports:
-- Stratum v1 protocol (port 3333)
-- Variable difficulty per worker
-- Share validation and hashrate tracking
-- PQC block signing on successful mine
-
-### 7.3 Peer-to-Peer Network
-
-Nodes communicate via HTTP API calls for:
-- Block propagation
-- Transaction broadcasting
-- Blockchain synchronization
-- Peer discovery
+- Network Analysis: health score, mining analysis, security assessment
+- Predictions: difficulty trend, hashrate forecast, halving impact
+- Ask Oracle: conversational AI using live network data
 
 ---
 
@@ -266,70 +239,80 @@ Nodes communicate via HTTP API calls for:
 
 ### 8.1 Live Security Audit
 
-BricsCoin includes a built-in security audit system that runs 27 real-time tests covering:
+BricsCoin includes a built-in security audit system that runs **27 real-time tests** covering:
 - Input validation (8 tests)
 - Classical cryptography (5 tests)
 - Post-quantum cryptography (6 tests)
 - Attack prevention (8 tests)
-
-The audit can be executed at any time via `GET /api/security/audit`.
 
 ### 8.2 Attack Mitigations
 
 | Attack | Mitigation |
 |--------|-----------|
 | Replay Attack | Signature uniqueness + timestamp validation |
-| 51% Attack | SHA256 PoW (same security model as Bitcoin) |
+| 51% Attack | SHA-256 PoW (same security model as Bitcoin) |
 | Sybil Attack | Proof-of-Work requirement |
-| DDoS | Rate limiting + IP blacklisting |
-| Quantum Attack | ML-DSA-65 hybrid signatures |
+| DDoS | Rate limiting (120 req/min) + IP blacklisting |
+| Quantum Attack | ML-DSA-65 hybrid signatures (NIST FIPS 204) |
 | Key Theft | Client-side signing (keys never leave device) |
+| Double Spend | Confirmation depth + balance checks |
+
+### 8.3 Infrastructure Security
+
+- **Cloudflare** reverse proxy with DDoS protection and SSL termination
+- **Docker** containerized deployment with isolated services
+- **Rate limiting** on all public endpoints (exempt for inter-node communication)
+- **CORS** and security headers properly configured
+- **MongoDB** with authentication and network isolation
 
 ---
 
 ## 9. Roadmap
 
-### Completed
-- SHA256 PoW blockchain
-- ECDSA wallets and transactions
-- Stratum mining protocol
-- Web interface (Dashboard, Explorer, Wallet)
-- Post-Quantum Cryptography (ML-DSA-65)
-- Hybrid ECDSA + PQC signatures
-- Client-side browser signing
-- Zero-fee wallet migration
+### 9.1 Completed
+- SHA-256 PoW blockchain with Stratum v1 mining
+- ECDSA wallets, transactions, and client-side signing
+- Web interface: Dashboard, Explorer, Wallet, Mining
+- Post-Quantum Cryptography (ML-DSA-65) hybrid signatures
+- PQC wallets with zero-cost migration
 - Live security audit (27/27 tests)
-- BricsChat — On-chain PQC-encrypted messaging
+- BricsChat: on-chain PQC-encrypted messaging
 - Decentralized Time Capsule
-- BricsNFT — PQC-signed on-chain certificates
-- AI Blockchain Oracle (GPT-5.2)
+- BricsNFT: PQC-signed on-chain certificates
+- AI Oracle powered by GPT-5.2
 - Deflationary burn-fee mechanism
-- Production deployment
+- SOLO + PPLNS dual mining pools
+- Automatic per-block difficulty adjustment
+- Production deployment with Docker and Cloudflare
 
-### Future
+### 9.2 Future
+- Miner reward routing to PQC addresses
 - Mobile wallet application
 - Stratum v2 protocol
-- P2Pool decentralized mining
+- Variable difficulty for low-power miners
 - Lightning-style payment channels
+- CI/CD pipeline
 
 ---
 
 ## 10. Conclusion
 
-BricsCoin combines the proven security of SHA256 Proof-of-Work with forward-looking post-quantum cryptographic protection. By implementing ML-DSA-65 alongside ECDSA in a hybrid scheme, BricsCoin is positioned to remain secure even as quantum computing technology advances.
+BricsCoin combines the proven security of SHA-256 Proof-of-Work with forward-looking post-quantum cryptographic protection. By implementing ML-DSA-65 alongside ECDSA in a hybrid scheme, BricsCoin is positioned to remain secure even as quantum computing technology advances.
 
 Beyond a simple payment network, BricsCoin offers a complete ecosystem of on-chain applications — from quantum-proof messaging to PQC-signed certificates — all contributing to a deflationary token economy through burn fees.
 
-The commitment to client-side signing, open-source development, and community-driven governance ensures that BricsCoin remains transparent, accessible, and trustworthy.
+The commitment to client-side signing, open-source development, and community-driven governance ensures that BricsCoin remains transparent, accessible, and trustworthy for the post-quantum era.
 
 ---
 
 ## References
 
-1. NIST FIPS 204: Module-Lattice-Based Digital Signature Standard (ML-DSA)
-2. Nakamoto, S. "Bitcoin: A Peer-to-Peer Electronic Cash System" (2008)
-3. Bernstein, D.J. et al. "CRYSTALS-Dilithium: A Lattice-Based Digital Signature Scheme"
-4. SEC 2: Recommended Elliptic Curve Domain Parameters (secp256k1)
+1. NIST FIPS 204: Module-Lattice-Based Digital Signature Standard (ML-DSA). National Institute of Standards and Technology, 2024.
+2. Nakamoto, S. "Bitcoin: A Peer-to-Peer Electronic Cash System." 2008.
+3. Ducas, L. et al. "CRYSTALS-Dilithium: A Lattice-Based Digital Signature Scheme." IACR, 2018.
+4. SEC 2: Recommended Elliptic Curve Domain Parameters (secp256k1). Certicom Research, 2010.
+5. Grover, L. K. "A fast quantum mechanical algorithm for database search." STOC, 1996.
+6. Shor, P. W. "Algorithms for quantum computation: discrete logarithms and factoring." FOCS, 1994.
 
 ---
 
