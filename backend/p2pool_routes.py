@@ -537,11 +537,44 @@ async def get_pool_stats():
         {"$set": {"last_seen": now.isoformat(), "online": True}}
     )
 
-    # Mark stale peers offline
+    # Actively ping peer nodes to check if they're alive
     cutoff = (now - timedelta(seconds=PEER_TIMEOUT)).isoformat()
-    await db.p2pool_peers.update_many(
-        {"last_seen": {"$lt": cutoff}, "online": True}, {"$set": {"online": False}}
-    )
+    remote_peers = await db.p2pool_peers.find(
+        {"peer_id": {"$ne": NODE_ID}},
+        {"_id": 0, "peer_id": 1, "node_url": 1, "api_port": 1, "last_seen": 1}
+    ).to_list(MAX_PEERS)
+
+    for peer in remote_peers:
+        api_port = peer.get("api_port", 8080)
+        node_url = peer.get("node_url", "")
+        # Try to reach the peer's API
+        try:
+            base = node_url.rstrip("/").split("://")
+            scheme = base[0] if len(base) > 1 else "http"
+            host = base[-1].split(":")[0]  # strip existing port
+            ping_url = f"{scheme}://{host}:{api_port}/status"
+            async with httpx.AsyncClient(timeout=3.0) as http_client:
+                resp = await http_client.get(ping_url)
+                if resp.status_code == 200:
+                    await db.p2pool_peers.update_one(
+                        {"peer_id": peer["peer_id"]},
+                        {"$set": {"last_seen": now.isoformat(), "online": True}}
+                    )
+                else:
+                    # Peer responded but not healthy
+                    if peer.get("last_seen", "") < cutoff:
+                        await db.p2pool_peers.update_one(
+                            {"peer_id": peer["peer_id"]},
+                            {"$set": {"online": False}}
+                        )
+        except Exception:
+            # Peer unreachable - mark offline if heartbeat expired
+            if peer.get("last_seen", "") < cutoff:
+                await db.p2pool_peers.update_one(
+                    {"peer_id": peer["peer_id"]},
+                    {"$set": {"online": False}}
+                )
+
     online_peers = await db.p2pool_peers.count_documents({"online": True})
     total_peers = await db.p2pool_peers.count_documents({})
 
