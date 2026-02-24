@@ -13,6 +13,7 @@ import TimeCapsule from "./pages/TimeCapsule";
 import AiOracle from "./pages/AiOracle";
 import BricsNFT from "./pages/BricsNFT";
 import P2Pool from "./pages/P2Pool";
+import Whitepaper from "./pages/Whitepaper";
 import "./App.css";
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="oracle" element={<AiOracle />} />
             <Route path="nft" element={<BricsNFT />} />
             <Route path="p2pool" element={<P2Pool />} />
+            <Route path="whitepaper" element={<Whitepaper />} />
             <Route path="downloads" element={<Downloads />} />
             <Route path="about" element={<About />} />
           </Route>
