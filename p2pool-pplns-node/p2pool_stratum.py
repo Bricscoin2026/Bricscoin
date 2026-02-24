@@ -124,17 +124,23 @@ def format_hashrate(h):
 
 
 # ================= NETWORK DIFFICULTY =================
+_cached_difficulty = 10000  # Safe default, updated by successful API calls
+
 async def get_network_difficulty() -> int:
-    """Fetch current difficulty from main node API."""
+    """Fetch current difficulty from main node API.
+    Caches last known difficulty to avoid defaulting to 1 on API failure."""
+    global _cached_difficulty
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
             resp = await http_client.get(f"{MAIN_NODE_URL}/api/network/stats")
             if resp.status_code == 200:
                 stats = resp.json()
-                return max(1, stats.get("current_difficulty", INITIAL_DIFFICULTY))
+                diff = max(1, stats.get("current_difficulty", _cached_difficulty))
+                _cached_difficulty = diff  # Cache for next failure
+                return diff
     except Exception as e:
         logger.warning(f"Failed to fetch difficulty from main node: {e}")
-    return INITIAL_DIFFICULTY
+    return _cached_difficulty  # Return cached value, never default to 1
 
 
 # ================= COINBASE =================
