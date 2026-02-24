@@ -755,15 +755,23 @@ async def get_pool_miners():
     cutoff_24h = (now - timedelta(hours=24)).isoformat()
     hr_cutoff = (now - timedelta(hours=1)).isoformat()
 
-    # 1. Local miners (from this node's Stratum)
+    # 1. Local miners (from this node's Stratum) - deduplicated by worker_name
     active_docs = await db.miners.find(
         {"online": True, "last_seen": {"$gte": cutoff_10m}},
-        {"_id": 0, "worker": 1, "last_seen": 1, "shares": 1, "blocks": 1, "connected_at": 1}
+        {"_id": 0, "worker_name": 1, "worker": 1, "last_seen": 1, "shares": 1, "blocks": 1, "connected_at": 1}
     ).to_list(200)
 
-    miners_enriched = []
+    # Deduplicate by worker address (keep most recent)
+    seen_workers = {}
     for doc in active_docs:
-        worker = doc.get("worker", "unknown")
+        worker = doc.get("worker_name", doc.get("worker", "unknown"))
+        if worker not in seen_workers or doc.get("last_seen", "") > seen_workers[worker].get("last_seen", ""):
+            seen_workers[worker] = doc
+    unique_docs = list(seen_workers.values())
+
+    miners_enriched = []
+    for doc in unique_docs:
+        worker = doc.get("worker_name", doc.get("worker", "unknown"))
         shares_1h = await db.miner_shares.count_documents(
             {"worker": worker, "timestamp": {"$gte": hr_cutoff}}
         )
