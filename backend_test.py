@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List
 
 # URL del backend dal file .env del frontend
-BACKEND_URL = "https://mining-rate-limiter.preview.emergentagent.com"
+BACKEND_URL = "https://stratum-stabilizer.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class BricsCoinDifficultyTester:
