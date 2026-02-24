@@ -64,7 +64,12 @@ PPLNS Server (157.180.123.105):
 - **Block Count Bug**: Changed `blocks_found` to validate against actual `blocks` collection (`db.blocks.count_documents({"miner": worker})`) instead of counting `is_block` flags from `p2pool_sharechain` which included old invalid shares from before the double_sha256 fix.
 - **Hashrate Bug**: Replaced fixed 1-hour calculation window with progressive window (5min → 15min → 1h). Uses shortest window with data for real-time accuracy, especially for newly connected miners.
 - **blocks_24h**: Changed to count from actual `blocks` collection instead of `is_block` flags.
-- Result: PPLNS miners now show blocks_found=1,0 (was 10,16) and hashrate ~4.5 TH/s (was ~2.5 TH/s)
+- **Share Pruning Fix**: Changed from height-based pruning (kept only ~4032 shares ≈ 30min) to time-based pruning (keeps 25h of history). Added compound index on (worker, pool_mode, timestamp) for efficient queries.
+- Result: PPLNS miners now show correct blocks_found, accurate hashrate ~4.5 TH/s, and shares_1h ≠ shares_24h
+
+### Oracle Fix - DEPLOYED TO PRODUCTION (Feb 24, 2026)
+- Added `EMERGENT_LLM_KEY` to production Docker container environment via docker-compose.prod.yml
+- Oracle /analysis and /predict endpoints now working correctly
 
 ## Prioritized Backlog
 
