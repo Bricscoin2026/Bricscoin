@@ -388,7 +388,7 @@ class StratumMiner:
                     miners[self.miner_id]['shares'] += 1
                 now_iso = datetime.now(timezone.utc).isoformat()
 
-                # Track share in pplns_shares collection
+                # Track share in local pplns_shares collection
                 await db.pplns_shares.insert_one({
                     "miner_id": self.miner_id,
                     "worker": self.worker_name,
@@ -399,28 +399,50 @@ class StratumMiner:
                     "pool_mode": "pplns"
                 })
 
-                # Also submit to the main node's sharechain for consistency
+                # Submit share to main node's sharechain via API
+                share_hash = hashlib.sha256(f"{self.worker_name}{block_hash}{now_iso}".encode()).hexdigest()
+                share_data = {
+                    "share_id": share_hash[:24],
+                    "worker": self.worker_name,
+                    "share_hash": block_hash,
+                    "share_difficulty": self.difficulty,
+                    "network_difficulty": net_diff,
+                    "block_height": job['template']['index'],
+                    "nonce": nonce,
+                    "timestamp": now_iso,
+                    "peer_origin": NODE_ID,
+                    "is_block": is_block,
+                    "pool_mode": "pplns",
+                }
+
+                # Try HTTP API first (proper P2Pool propagation)
                 try:
-                    share_hash = hashlib.sha256(f"{self.worker_name}{block_hash}{now_iso}".encode()).hexdigest()
-                    await db.p2pool_sharechain.insert_one({
-                        "share_id": share_hash[:24],
-                        "height": 0,  # Will be set by the chain logic
-                        "previous_share_id": "genesis",
-                        "worker": self.worker_name,
-                        "share_hash": block_hash,
-                        "share_difficulty": self.difficulty,
-                        "network_difficulty": net_diff,
-                        "block_height": job['template']['index'],
-                        "nonce": nonce,
-                        "timestamp": now_iso,
-                        "peer_origin": NODE_ID,
-                        "is_block": is_block,
-                        "pool_mode": "pplns",
-                        "validated": True,
-                        "validated_by": [NODE_ID],
-                    })
+                    async with httpx.AsyncClient(timeout=5.0) as http_client:
+                        resp = await http_client.post(
+                            f"{MAIN_NODE_URL}/api/p2pool/share/submit",
+                            json=share_data
+                        )
+                        if resp.status_code == 200:
+                            logger.debug(f"Share submitted to main node: {share_hash[:16]}")
+                        else:
+                            logger.warning(f"Main node share submit failed: {resp.status_code}")
+                            # Fallback: direct DB insert
+                            share_data["height"] = 0
+                            share_data["previous_share_id"] = "genesis"
+                            share_data["validated"] = True
+                            share_data["validated_by"] = [NODE_ID]
+                            await db.p2pool_sharechain.insert_one(share_data)
                 except Exception as e:
-                    logger.debug(f"Sharechain insert note: {e}")
+                    logger.debug(f"Main node API unreachable, using direct DB: {e}")
+                    # Fallback: direct DB insert (works if same MongoDB)
+                    try:
+                        share_data["height"] = 0
+                        share_data["previous_share_id"] = "genesis"
+                        share_data["validated"] = True
+                        share_data["validated_by"] = [NODE_ID]
+                        await db.p2pool_sharechain.insert_one(share_data)
+                    except Exception:
+                        pass
 
                 # Update miner stats
                 await db.pplns_miners.update_one(
