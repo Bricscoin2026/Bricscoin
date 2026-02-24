@@ -125,33 +125,16 @@ def format_hashrate(h):
 
 # ================= NETWORK DIFFICULTY =================
 async def get_network_difficulty() -> int:
-    blocks_count = await db.blocks.count_documents({})
-    if blocks_count == 0:
-        return INITIAL_DIFFICULTY
-    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
-    if not last_block:
-        return INITIAL_DIFFICULTY
-    current_difficulty = max(1, last_block.get("difficulty", INITIAL_DIFFICULTY))
-    current_index = last_block.get("index", 0)
-    adjustment_interval = 10 if blocks_count < 2016 else 2016
-    if current_index > 0 and current_index % adjustment_interval == 0:
-        last_blocks = await db.blocks.find(
-            {}, {"_id": 0, "timestamp": 1, "index": 1}
-        ).sort("index", -1).limit(adjustment_interval + 1).to_list(adjustment_interval + 1)
-        if len(last_blocks) >= 2:
-            last_blocks.sort(key=lambda x: x.get("index", 0))
-            try:
-                first_time = datetime.fromisoformat(last_blocks[0]["timestamp"].replace("Z", "+00:00"))
-                last_time = datetime.fromisoformat(last_blocks[-1]["timestamp"].replace("Z", "+00:00"))
-                actual_time = (last_time - first_time).total_seconds()
-            except Exception:
-                actual_time = TARGET_BLOCK_TIME * len(last_blocks)
-            if actual_time <= 0:
-                actual_time = 1
-            expected_time = TARGET_BLOCK_TIME * (len(last_blocks) - 1)
-            ratio = max(0.25, min(4.0, expected_time / actual_time))
-            return max(1, int(current_difficulty * ratio))
-    return current_difficulty
+    """Fetch current difficulty from main node API."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as http_client:
+            resp = await http_client.get(f"{MAIN_NODE_URL}/api/network/stats")
+            if resp.status_code == 200:
+                stats = resp.json()
+                return max(1, stats.get("current_difficulty", INITIAL_DIFFICULTY))
+    except Exception as e:
+        logger.warning(f"Failed to fetch difficulty from main node: {e}")
+    return INITIAL_DIFFICULTY
 
 
 # ================= COINBASE =================
