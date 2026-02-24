@@ -433,7 +433,7 @@ async def submit_p2pool_block(block: P2PoolBlockSubmit):
     # CRITICAL: Validate block hash meets difficulty target
     try:
         hash_int = int(block.hash, 16)
-        MAX_TARGET = (2 ** 256) - 1
+        MAX_TARGET = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         block_target = MAX_TARGET // max(1, block.difficulty)
         if hash_int > block_target:
             raise HTTPException(
