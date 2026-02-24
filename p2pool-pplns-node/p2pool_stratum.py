@@ -514,6 +514,7 @@ class StratumMiner:
                 )
 
                 logger.info(f"PPLNS SHARE [{self.worker_name}] diff={self.difficulty} hash={block_hash[:16]}... is_block={is_block}")
+                self.vardiff_update()
 
                 if is_block:
                     logger.info(f"BLOCK FOUND by PPLNS miner {self.worker_name}! Hash: {block_hash}")
