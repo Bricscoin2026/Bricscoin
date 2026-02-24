@@ -462,7 +462,8 @@ class StratumMiner:
             self.respond(msg_id, True)
 
     async def save_block(self, job, nonce, block_hash):
-        """Save a found block. Uses double_sha256 consistent hash."""
+        """Save a found block. Uses double_sha256 consistent hash.
+        Submits block to main node via HTTP API first, falls back to direct DB."""
         template = job['template']
         miner_address = self.worker_name
         reward_amount = template['reward'] / COIN
@@ -485,10 +486,33 @@ class StratumMiner:
             "miner": miner_address, "difficulty": template['difficulty'],
             "nonce": int(nonce, 16)
         }
-        existing = await db.blocks.find_one({"index": template['index']})
-        if existing: return
-        await db.blocks.insert_one(block)
-        await db.transactions.insert_one(reward_tx)
+
+        # Try submitting to main node via HTTP API first
+        block_submitted = False
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as http_client:
+                resp = await http_client.post(
+                    f"{MAIN_NODE_URL}/api/mining/submit-block",
+                    json=block
+                )
+                if resp.status_code == 200:
+                    block_submitted = True
+                    logger.info(f"PPLNS Block #{template['index']} submitted to main node via API!")
+                else:
+                    logger.warning(f"Main node block submit returned {resp.status_code}: {resp.text[:200]}")
+        except Exception as e:
+            logger.warning(f"Main node API unreachable for block submit: {e}")
+
+        # Fallback: direct DB insert (works if same MongoDB)
+        if not block_submitted:
+            existing = await db.blocks.find_one({"index": template['index']})
+            if existing:
+                logger.info(f"Block #{template['index']} already exists, skipping")
+                return
+            await db.blocks.insert_one(block)
+            await db.transactions.insert_one(reward_tx)
+            logger.info(f"PPLNS Block #{template['index']} saved directly to DB")
+
         pending_tx_ids = template.get('pending_tx_ids', [])
         if pending_tx_ids:
             await db.transactions.update_many(
@@ -498,7 +522,7 @@ class StratumMiner:
         self.blocks += 1
         if self.miner_id in miners:
             miners[self.miner_id]['blocks'] += 1
-        logger.info(f"PPLNS Block #{template['index']} saved! Miner: {miner_address}, Reward: {reward_amount} BRICS")
+        logger.info(f"PPLNS Block #{template['index']} found! Miner: {miner_address}, Reward: {reward_amount} BRICS, Hash: {block_hash[:32]}")
         await self.server.on_new_block()
 
     async def send_job(self, job):
