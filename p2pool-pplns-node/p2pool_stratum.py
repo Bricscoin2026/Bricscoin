@@ -18,6 +18,7 @@ import os
 import logging
 import uuid
 import threading
+import httpx
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
 from motor.motor_asyncio import AsyncIOMotorClient
