@@ -2457,11 +2457,18 @@ from timecapsule_routes import router as timecapsule_router
 from oracle_routes import router as oracle_router
 from nft_routes import router as nft_router
 from p2pool_routes import router as p2pool_router
+from p2pool_routes import submit_share, submit_p2pool_block, receive_share_from_peer
 app.include_router(chat_router)
 app.include_router(timecapsule_router)
 app.include_router(oracle_router)
 app.include_router(nft_router)
 app.include_router(p2pool_router)
+
+# Exempt critical PPLNS mining endpoints from rate limiting
+# These are called frequently by the PPLNS stratum server and must never be blocked
+limiter.exempt(submit_share)
+limiter.exempt(submit_p2pool_block)
+limiter.exempt(receive_share_from_peer)
 
 # Security Headers Middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
