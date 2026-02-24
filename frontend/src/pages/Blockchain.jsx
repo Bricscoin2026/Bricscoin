@@ -560,7 +560,7 @@ export default function Blockchain() {
               <Blocks className="w-7 h-7 text-primary" />
               <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text">Blockchain</h1>
             </div>
-            <p className="text-muted-foreground">Network, Explorer, Mining & Rich List</p>
+            <p className="text-muted-foreground">Network, Explorer & Rich List</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => { setRefreshing(true); fetchData(); }} disabled={refreshing}>
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}/>Refresh
@@ -572,7 +572,6 @@ export default function Blockchain() {
         <TabsList className="bg-card border border-white/10 flex-wrap">
           <TabsTrigger value="overview" data-testid="tab-overview"><NetworkIcon className="w-4 h-4 mr-2"/>Overview</TabsTrigger>
           <TabsTrigger value="explorer" data-testid="tab-explorer"><Search className="w-4 h-4 mr-2"/>Explorer</TabsTrigger>
-          <TabsTrigger value="mining" data-testid="tab-mining"><Pickaxe className="w-4 h-4 mr-2"/>Mining</TabsTrigger>
           <TabsTrigger value="richlist" data-testid="tab-richlist"><Trophy className="w-4 h-4 mr-2"/>Rich List</TabsTrigger>
           <TabsTrigger value="runnode" data-testid="tab-runnode"><MonitorCog className="w-4 h-4 mr-2"/>Run a Node</TabsTrigger>
         </TabsList>
@@ -581,7 +580,6 @@ export default function Blockchain() {
           <NetworkOverview stats={stats} blocks={blocks} nodeInfo={nodeInfo} peers={peers} onRefresh={fetchData} refreshing={refreshing}/>
         </TabsContent>
         <TabsContent value="explorer"><ExplorerSection/></TabsContent>
-        <TabsContent value="mining"><MiningSection stats={stats} minerStats={minerStats}/></TabsContent>
         <TabsContent value="richlist"><RichListSection/></TabsContent>
         <TabsContent value="runnode"><RunNode/></TabsContent>
       </Tabs>
