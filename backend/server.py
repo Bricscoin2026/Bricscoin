@@ -350,9 +350,10 @@ async def get_current_difficulty() -> int:
     Calcola la difficoltà per il PROSSIMO blocco.
     
     Adjustment ogni 10 blocchi:
-    - Calcola il tempo medio effettivo degli ultimi 10 blocchi
-    - Confronta con TARGET_BLOCK_TIME (600s)
+    - Trova l'ultimo punto di adjustment (multiplo di 10)
+    - Calcola il tempo effettivo per quei 10 blocchi
     - Aggiusta proporzionalmente con cap 4x/0.25x per ciclo
+    - Target: 1 blocco ogni 600 secondi
     """
     blocks_count = await db.blocks.count_documents({})
     
@@ -368,45 +369,49 @@ async def get_current_difficulty() -> int:
     
     adjustment_interval = 10
     
-    if current_index > 0 and current_index % adjustment_interval == 0:
-        last_blocks = await db.blocks.find(
-            {}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
-        ).sort("index", -1).limit(adjustment_interval + 1).to_list(adjustment_interval + 1)
-        
-        if len(last_blocks) >= 2:
-            last_blocks.sort(key=lambda x: x.get("index", 0))
-            
-            try:
-                first_time = datetime.fromisoformat(last_blocks[0]["timestamp"].replace("Z", "+00:00"))
-                last_time = datetime.fromisoformat(last_blocks[-1]["timestamp"].replace("Z", "+00:00"))
-                actual_time = (last_time - first_time).total_seconds()
-            except (ValueError, KeyError):
-                actual_time = TARGET_BLOCK_TIME * len(last_blocks)
-            
-            if actual_time <= 0:
-                actual_time = 1
-            
-            expected_time = TARGET_BLOCK_TIME * (len(last_blocks) - 1)
-            ratio = expected_time / actual_time
-            ratio = max(0.25, min(4.0, ratio))
-            
-            new_difficulty = max(1, int(current_difficulty * ratio))
-            
-            avg_block_time = actual_time / max(1, len(last_blocks) - 1)
-            
-            logging.info(
-                "DIFFICULTY ADJUSTMENT @ block %d: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
-                current_index,
-                current_difficulty,
-                avg_block_time,
-                TARGET_BLOCK_TIME,
-                ratio,
-                new_difficulty
-            )
-            
-            return new_difficulty
+    # Find the most recent adjustment point
+    last_adjustment_index = (current_index // adjustment_interval) * adjustment_interval
     
-    return current_difficulty
+    if last_adjustment_index < adjustment_interval:
+        return current_difficulty
+    
+    # Get the block at the adjustment point and the one 10 blocks before
+    start_index = last_adjustment_index - adjustment_interval
+    
+    start_block = await db.blocks.find_one({"index": start_index}, {"_id": 0, "timestamp": 1, "difficulty": 1})
+    end_block = await db.blocks.find_one({"index": last_adjustment_index}, {"_id": 0, "timestamp": 1, "difficulty": 1})
+    
+    if not start_block or not end_block:
+        return current_difficulty
+    
+    # Use the difficulty from the adjustment window
+    window_difficulty = max(1, end_block.get("difficulty", current_difficulty))
+    
+    try:
+        start_time = datetime.fromisoformat(start_block["timestamp"].replace("Z", "+00:00"))
+        end_time = datetime.fromisoformat(end_block["timestamp"].replace("Z", "+00:00"))
+        actual_time = (end_time - start_time).total_seconds()
+    except (ValueError, KeyError):
+        return current_difficulty
+    
+    if actual_time <= 0:
+        actual_time = 1
+    
+    expected_time = TARGET_BLOCK_TIME * adjustment_interval
+    ratio = expected_time / actual_time
+    ratio = max(0.25, min(4.0, ratio))
+    
+    new_difficulty = max(1, int(window_difficulty * ratio))
+    
+    avg_block_time = actual_time / adjustment_interval
+    
+    logging.info(
+        "DIFFICULTY ADJUSTMENT [%d-%d]: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
+        start_index, last_adjustment_index,
+        window_difficulty, avg_block_time, TARGET_BLOCK_TIME, ratio, new_difficulty
+    )
+    
+    return new_difficulty
 
 async def get_circulating_supply() -> float:
     """Calculate total circulating supply (premine + mining rewards)"""
