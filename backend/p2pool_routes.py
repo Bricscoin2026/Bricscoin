@@ -221,10 +221,11 @@ async def add_share_to_chain(share_data: dict) -> dict:
     await db.p2pool_sharechain.insert_one(share)
     share.pop("_id", None)
 
-    # Prune old shares beyond the window
-    if height > SHARECHAIN_WINDOW * 2:
-        cutoff_height = height - SHARECHAIN_WINDOW * 2
-        await db.p2pool_sharechain.delete_many({"height": {"$lt": cutoff_height}})
+    # Prune old shares beyond 24 hours (time-based, not height-based)
+    # This ensures 24h stats remain accurate regardless of share submission rate
+    if height % 1000 == 0:  # Only prune every 1000 shares to reduce DB load
+        prune_cutoff = (datetime.now(timezone.utc) - timedelta(hours=25)).isoformat()
+        await db.p2pool_sharechain.delete_many({"timestamp": {"$lt": prune_cutoff}})
 
     return share
 
