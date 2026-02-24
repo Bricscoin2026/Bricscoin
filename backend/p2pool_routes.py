@@ -686,7 +686,8 @@ async def get_worker_payouts(address: str, limit: int = 20):
 # --- Pool Statistics ---
 
 @router.get("/stats")
-async def get_pool_stats():
+@limiter.limit("120/minute")
+async def get_pool_stats(request: Request):
     """Get comprehensive P2Pool statistics"""
     now = datetime.now(timezone.utc)
 
