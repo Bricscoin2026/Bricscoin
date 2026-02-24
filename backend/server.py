@@ -1489,10 +1489,10 @@ async def submit_mined_block(submission: MiningSubmit):
     await db.blocks.insert_one(new_block)
     
     # Mark transactions as confirmed
-    tx_ids = [tx['id'] for tx in pending_txs]
+    tx_ids = [tx.get('id', tx.get('tx_id')) for tx in pending_txs if tx.get('id') or tx.get('tx_id')]
     if tx_ids:
         await db.transactions.update_many(
-            {"id": {"$in": tx_ids}},
+            {"$or": [{"id": {"$in": tx_ids}}, {"tx_id": {"$in": tx_ids}}]},
             {"$set": {"confirmed": True, "block_index": new_index}}
         )
     
