@@ -746,29 +746,38 @@ async def get_pool_miners():
     # 2. Remote miners from peer nodes
     peers = await db.p2pool_peers.find(
         {"online": True, "peer_id": {"$ne": NODE_ID}},
-        {"_id": 0, "node_url": 1, "peer_id": 1}
+        {"_id": 0, "node_url": 1, "peer_id": 1, "api_port": 1, "pool_modes": 1}
     ).to_list(MAX_PEERS)
 
     for peer in peers:
         try:
+            api_port = peer.get("api_port", 8080)
+            node_url = peer.get("node_url", "")
+            # Extract host from URL, handle both http:// and plain host
+            base = node_url.rstrip("/").split("://")
+            scheme = base[0] if len(base) > 1 else "http"
+            host = base[-1].split(":")[0]  # strip existing port
+            miners_url = f"{scheme}://{host}:{api_port}/miners"
             async with httpx.AsyncClient(timeout=5.0) as http_client:
-                resp = await http_client.get(f"{peer['node_url']}:8080/miners")
+                resp = await http_client.get(miners_url)
                 if resp.status_code == 200:
-                    remote_miners = resp.json().get("miners", [])
+                    remote_data = resp.json()
+                    remote_miners = remote_data.get("miners", [])
                     for rm in remote_miners:
                         miners_enriched.append({
                             "worker": rm.get("worker", "unknown"),
                             "online": rm.get("online", True),
-                            "shares_1h": 0,
-                            "shares_24h": rm.get("shares", 0),
+                            "last_seen": rm.get("last_seen"),
+                            "shares_1h": rm.get("shares_1h", 0),
+                            "shares_24h": rm.get("shares_24h", rm.get("shares", 0)),
                             "blocks_found": rm.get("blocks_found", 0),
-                            "hashrate": 0,
-                            "hashrate_readable": "PPLNS node",
-                            "node": rm.get("node", peer["peer_id"]),
+                            "hashrate": rm.get("hashrate", 0),
+                            "hashrate_readable": rm.get("hashrate_readable", "—"),
+                            "node": peer.get("peer_id", "remote"),
                             "pool_mode": rm.get("pool_mode", "pplns"),
                         })
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Could not fetch miners from peer {peer.get('peer_id')}: {e}")
 
     miners_enriched.sort(key=lambda x: x["shares_24h"], reverse=True)
     return {"miners": miners_enriched, "active_count": len(miners_enriched)}
