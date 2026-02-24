@@ -751,17 +751,27 @@ async def get_pool_stats():
     shares_1h = local_shares_1h + pplns_shares_1h
     shares_24h = local_shares_24h + pplns_shares_24h
 
-    # Pool hashrate (local SOLO pool) — use local_shares_1h for hashrate calc
-    avg_share_diff = 512
-    if local_shares_1h > 0:
+    # Pool hashrate (local SOLO pool) — use progressive windows like /api/network/stats
+    HASHRATE_MULTIPLIER = 2 ** 32
+    local_pool_hashrate = 0.0
+    for window_minutes in [5, 60, 1440]:
+        window_cutoff = (now - timedelta(minutes=window_minutes)).isoformat()
         pipeline = [
-            {"$match": {"timestamp": {"$gte": hr_cutoff}}},
-            {"$group": {"_id": None, "avg_diff": {"$avg": "$share_difficulty"}}}
+            {"$match": {"timestamp": {"$gte": window_cutoff}}},
+            {"$group": {
+                "_id": None,
+                "total_shares": {"$sum": 1},
+                "weighted_difficulty": {"$sum": "$share_difficulty"}
+            }}
         ]
-        avg_result = await db.miner_shares.aggregate(pipeline).to_list(1)
-        if avg_result:
-            avg_share_diff = avg_result[0].get("avg_diff", 512)
-    local_pool_hashrate = (local_shares_1h * avg_share_diff * (2**32)) / 3600 if local_shares_1h > 0 else 0
+        result = await db.miner_shares.aggregate(pipeline).to_list(1)
+        if result and result[0].get("total_shares", 0) > 0:
+            total = result[0]["total_shares"]
+            weighted = result[0].get("weighted_difficulty", total)
+            avg_diff = weighted / total
+            time_window = window_minutes * 60
+            local_pool_hashrate = (total * avg_diff * HASHRATE_MULTIPLIER) / time_window
+            break
 
     # Total pool hashrate = local miners + remote miners
     miner_hashrate_pipeline = [
