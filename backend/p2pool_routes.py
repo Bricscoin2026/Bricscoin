@@ -93,7 +93,7 @@ class PeerRegister(BaseModel):
 class ShareBroadcast(BaseModel):
     """A share to be propagated across the P2P network"""
     share_id: str
-    previous_share_id: str
+    previous_share_id: str = "genesis"
     worker: str
     share_hash: str
     share_difficulty: float
