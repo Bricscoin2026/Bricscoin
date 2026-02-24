@@ -596,11 +596,32 @@ async def get_pool_stats():
     online_peers = await db.p2pool_peers.count_documents({"online": True})
     total_peers = await db.p2pool_peers.count_documents({})
 
-    # Active miners from Stratum
+    # Active miners from local Stratum
     miner_cutoff = (now - timedelta(minutes=10)).isoformat()
-    active_miners = await db.miners.count_documents(
+    local_active_miners = await db.miners.count_documents(
         {"online": True, "last_seen": {"$gte": miner_cutoff}}
     )
+
+    # Aggregate remote miners from peer nodes
+    remote_active_miners = 0
+    remote_hashrate = 0
+    for peer in remote_peers:
+        api_port = peer.get("api_port", 8080)
+        node_url = peer.get("node_url", "")
+        try:
+            base = node_url.rstrip("/").split("://")
+            scheme = base[0] if len(base) > 1 else "http"
+            host = base[-1].split(":")[0]
+            miners_url = f"{scheme}://{host}:{api_port}/miners"
+            async with httpx.AsyncClient(timeout=5.0) as http_client:
+                resp = await http_client.get(miners_url)
+                if resp.status_code == 200:
+                    remote_data = resp.json()
+                    remote_active_miners += remote_data.get("active_count", 0)
+        except Exception:
+            pass
+
+    total_active_miners = local_active_miners + remote_active_miners
 
     # Sharechain stats
     chain_tip = await get_chain_tip()
