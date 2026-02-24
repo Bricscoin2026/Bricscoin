@@ -256,6 +256,21 @@ function ExplorerSection() {
   const limit = 20;
 
   useEffect(() => {
+    // Load both counts on mount
+    async function loadCounts() {
+      try {
+        const [bRes, tRes] = await Promise.all([
+          getBlocks(1, 0),
+          getTransactions(1, 0),
+        ]);
+        setBlocksTotal(bRes.data.total);
+        setTxTotal(tRes.data.total);
+      } catch {}
+    }
+    loadCounts();
+  }, []);
+
+  useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
