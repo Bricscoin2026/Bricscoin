@@ -351,6 +351,10 @@ async def peer_heartbeat(peer_id: str, miners_count: int = 0, hashrate: float = 
 async def list_peers():
     """List all P2Pool peers with status"""
     cutoff = (datetime.now(timezone.utc) - timedelta(seconds=PEER_TIMEOUT)).isoformat()
+    # Remove ancient peers that haven't been seen in 7 days
+    week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    await db.p2pool_peers.delete_many({"last_seen": {"$lt": week_ago}})
+    # Mark stale peers offline
     await db.p2pool_peers.update_many(
         {"last_seen": {"$lt": cutoff}, "online": True},
         {"$set": {"online": False}}
