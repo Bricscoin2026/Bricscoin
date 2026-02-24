@@ -350,67 +350,51 @@ async def get_current_difficulty() -> int:
     Calcola la difficoltà per il PROSSIMO blocco.
     Target: 1 blocco ogni 600 secondi.
     
-    Usa la formula: new_diff = sum(block_diffs) * TARGET_TIME / actual_time
-    Questo stima l'hashrate dalla finestra e calcola la difficoltà esatta.
+    Ricalcola su OGNI blocco usando una finestra scorrevole degli ultimi 20 blocchi.
+    Formula: new_diff = hashrate_stimato * TARGET_TIME
+    dove hashrate_stimato = sum(block_diffs) / actual_total_time
     """
     blocks_count = await db.blocks.count_documents({})
     
-    if blocks_count == 0:
+    if blocks_count < 2:
         return INITIAL_DIFFICULTY
     
-    last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
-    if not last_block:
+    window_size = min(20, blocks_count)
+    
+    recent_blocks = await db.blocks.find(
+        {}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
+    ).sort("index", -1).limit(window_size + 1).to_list(window_size + 1)
+    
+    if len(recent_blocks) < 2:
         return INITIAL_DIFFICULTY
     
-    current_difficulty = max(1, last_block.get("difficulty", INITIAL_DIFFICULTY))
-    current_index = last_block.get("index", 0)
-    
-    adjustment_interval = 10
-    last_adjustment_index = (current_index // adjustment_interval) * adjustment_interval
-    
-    if last_adjustment_index < adjustment_interval:
-        return current_difficulty
-    
-    start_index = last_adjustment_index - adjustment_interval
-    
-    # Get ALL blocks in the window
-    window_blocks = await db.blocks.find(
-        {"index": {"$gt": start_index, "$lte": last_adjustment_index}},
-        {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
-    ).sort("index", 1).to_list(adjustment_interval + 1)
-    
-    if len(window_blocks) < 2:
-        return current_difficulty
-    
-    # Get the block at start_index for the time reference
-    start_block = await db.blocks.find_one({"index": start_index}, {"_id": 0, "timestamp": 1})
-    if not start_block:
-        return current_difficulty
+    recent_blocks.sort(key=lambda x: x.get("index", 0))
     
     try:
-        start_time = datetime.fromisoformat(start_block["timestamp"].replace("Z", "+00:00"))
-        end_time = datetime.fromisoformat(window_blocks[-1]["timestamp"].replace("Z", "+00:00"))
-        actual_time = (end_time - start_time).total_seconds()
+        first_time = datetime.fromisoformat(recent_blocks[0]["timestamp"].replace("Z", "+00:00"))
+        last_time = datetime.fromisoformat(recent_blocks[-1]["timestamp"].replace("Z", "+00:00"))
+        actual_time = (last_time - first_time).total_seconds()
     except (ValueError, KeyError):
-        return current_difficulty
+        last_block = recent_blocks[-1]
+        return max(1, last_block.get("difficulty", INITIAL_DIFFICULTY))
     
     if actual_time <= 0:
         actual_time = 1
     
-    # Sum difficulties of all blocks in the window
-    total_difficulty = sum(b.get("difficulty", current_difficulty) for b in window_blocks)
+    num_blocks = len(recent_blocks) - 1
+    total_difficulty = sum(b.get("difficulty", INITIAL_DIFFICULTY) for b in recent_blocks[1:])
     
-    # new_diff = target_time * sum(difficulties) / actual_time
-    new_difficulty = max(1, int(TARGET_BLOCK_TIME * total_difficulty / actual_time))
+    hashrate_estimate = total_difficulty / actual_time
+    new_difficulty = max(1, int(hashrate_estimate * TARGET_BLOCK_TIME))
     
-    avg_block_time = actual_time / len(window_blocks)
-    avg_diff = total_difficulty / len(window_blocks)
+    avg_block_time = actual_time / num_blocks
     
-    logging.info(
-        "DIFFICULTY ADJUSTMENT [%d-%d]: avg_diff=%.0f, avg_time=%.1fs, target=%ds, NEW=%d",
-        start_index, last_adjustment_index,
-        avg_diff, avg_block_time, TARGET_BLOCK_TIME, new_difficulty
-    )
+    current_index = recent_blocks[-1].get("index", 0)
+    if current_index % 5 == 0:
+        logging.info(
+            "DIFFICULTY [%d]: window=%d blocks, avg_time=%.0fs, target=%ds, NEW=%d",
+            current_index, num_blocks, avg_block_time, TARGET_BLOCK_TIME, new_difficulty
+        )
     
     return new_difficulty
 
