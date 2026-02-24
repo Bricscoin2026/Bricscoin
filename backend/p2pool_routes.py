@@ -1003,7 +1003,24 @@ async def get_pool_miners():
         except Exception as e:
             logger.debug(f"Could not fetch miners from peer {peer.get('peer_id')}: {e}")
 
-    miners_enriched.sort(key=lambda x: x["shares_24h"], reverse=True)
+    # Deduplicate all miners by worker address (keep most recent)
+    deduped = {}
+    for m in miners_enriched:
+        w = m["worker"]
+        existing = deduped.get(w)
+        if not existing or (m.get("last_seen", "") > existing.get("last_seen", "")):
+            # Keep more recent entry, but sum shares/blocks if both have data
+            if existing and existing["pool_mode"] == m["pool_mode"]:
+                m["hashrate"] = max(m.get("hashrate", 0), existing.get("hashrate", 0))
+                m["hashrate_readable"] = format_hashrate(m["hashrate"]) if m["hashrate"] > 0 else existing.get("hashrate_readable", "0 H/s")
+            deduped[w] = m
+        elif existing and existing["pool_mode"] == m["pool_mode"]:
+            # Same worker, keep existing (more recent) but update hashrate if needed
+            existing["hashrate"] = max(existing.get("hashrate", 0), m.get("hashrate", 0))
+            if existing["hashrate"] > 0:
+                existing["hashrate_readable"] = format_hashrate(existing["hashrate"])
+
+    miners_enriched = sorted(deduped.values(), key=lambda x: x["shares_24h"], reverse=True)
     return {"miners": miners_enriched, "active_count": len(miners_enriched)}
 
 
