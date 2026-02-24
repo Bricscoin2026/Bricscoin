@@ -2,9 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Blocks, ArrowRightLeft, ChevronLeft, ChevronRight, Search,
-  Coins, TrendingUp, Activity, Clock, Shield, Server, Pickaxe,
+  TrendingUp, Activity, Clock, Shield, Server, Pickaxe,
   Network as NetworkIcon, RefreshCw, Globe, Copy, Users, Trophy,
-  AlertCircle, Cpu, CheckCircle, Eye, ExternalLink, Check, MonitorCog
+  Check, MonitorCog
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
