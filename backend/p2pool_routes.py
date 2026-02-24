@@ -123,6 +123,8 @@ class P2PoolBlockSubmit(BaseModel):
     miner: str
     difficulty: int
     nonce: int
+    pool_mode: str = "pplns"
+    pplns_payouts: list = []  # [{"worker": "...", "amount": 0.5, "pct": 50.0}]
 
 
 # ==================== SHARECHAIN ENGINE ====================
