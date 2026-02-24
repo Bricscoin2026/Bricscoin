@@ -9,7 +9,7 @@ import os
 import uuid
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://brics-p2pool-fix.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://pqc-hashrate.preview.emergentagent.com').rstrip('/')
 ADMIN_KEY = "bricscoin-admin-2026"
 
 # Test users

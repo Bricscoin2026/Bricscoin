@@ -10,7 +10,7 @@
 
 ## Risultati Test Difficoltà BricsCoin
 
-**Backend URL testato:** https://brics-p2pool-fix.preview.emergentagent.com
+**Backend URL testato:** https://pqc-hashrate.preview.emergentagent.com
 
 ### ✅ Tutti i test superati (7/7)
 

@@ -9,7 +9,7 @@ import json
 from datetime import datetime, timezone
 
 # URL del backend
-BACKEND_URL = "https://brics-p2pool-fix.preview.emergentagent.com"
+BACKEND_URL = "https://pqc-hashrate.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_stratum_api_consistency():
