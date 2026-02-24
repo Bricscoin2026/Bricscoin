@@ -773,14 +773,8 @@ async def get_pool_stats():
     day_cutoff = (now - timedelta(hours=24)).isoformat()
     local_shares_1h = await db.miner_shares.count_documents({"timestamp": {"$gte": hr_cutoff}})
     local_shares_24h = await db.miner_shares.count_documents({"timestamp": {"$gte": day_cutoff}})
-    blocks_24h = await db.miner_shares.count_documents(
-        {"timestamp": {"$gte": day_cutoff}, "is_block": True}
-    )
-    # Also count blocks found by PPLNS miners
-    pplns_blocks_24h = await db.p2pool_sharechain.count_documents(
-        {"pool_mode": "pplns", "timestamp": {"$gte": day_cutoff}, "is_block": True}
-    )
-    blocks_24h += pplns_blocks_24h
+    # Count blocks from the actual blockchain (not from is_block flags which may include orphans)
+    blocks_24h = await db.blocks.count_documents({"timestamp": {"$gte": day_cutoff}})
 
     # Also count PPLNS shares from the sharechain for a complete total
     pplns_shares_1h = await db.p2pool_sharechain.count_documents(
