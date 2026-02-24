@@ -596,11 +596,17 @@ async def get_pool_stats():
     online_peers = await db.p2pool_peers.count_documents({"online": True})
     total_peers = await db.p2pool_peers.count_documents({})
 
-    # Active miners from local Stratum
+    # Active miners from local Stratum (deduplicated by worker_name)
     miner_cutoff = (now - timedelta(minutes=10)).isoformat()
-    local_active_miners = await db.miners.count_documents(
-        {"online": True, "last_seen": {"$gte": miner_cutoff}}
-    )
+    local_miner_docs = await db.miners.find(
+        {"online": True, "last_seen": {"$gte": miner_cutoff}},
+        {"_id": 0, "worker_name": 1, "worker": 1}
+    ).to_list(200)
+    local_unique_workers = set()
+    for doc in local_miner_docs:
+        w = doc.get("worker_name", doc.get("worker", "unknown"))
+        local_unique_workers.add(w)
+    local_active_miners = len(local_unique_workers)
 
     # Aggregate remote miners from peer nodes
     remote_active_miners = 0
