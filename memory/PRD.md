@@ -44,6 +44,9 @@ Build "BricsCoin," a cryptocurrency with Post-Quantum Cryptography (PQC) featuri
 - [x] Generate whitepaper PDF with professional cover image and deploy to production
 - [x] Update Dashboard subtitle: "A Decentralized SHA256 PoW Cryptocurrency with PQ Security" + Author
 - [x] P2Pool v2.0: True decentralized mining with sharechain, P2P validation, SOLO + PPLNS modes
+- [x] PPLNS Stratum node deployed on 157.180.123.105:3334 (separate server)
+- [x] 2 live P2P nodes: mainnet (SOLO) + p2pool-pplns-node1 (PPLNS)
+- [x] Auto-registration of nodes at startup
 
 ## Prioritized Backlog
 - **P1:** Configure miner block rewards to PQC address
