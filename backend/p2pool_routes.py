@@ -638,6 +638,11 @@ async def get_pool_stats():
     blocks_24h = await db.miner_shares.count_documents(
         {"timestamp": {"$gte": day_cutoff}, "is_block": True}
     )
+    # Also count blocks found by PPLNS miners
+    pplns_blocks_24h = await db.p2pool_sharechain.count_documents(
+        {"pool_mode": "pplns", "timestamp": {"$gte": day_cutoff}, "is_block": True}
+    )
+    blocks_24h += pplns_blocks_24h
 
     # Also count PPLNS shares from the sharechain for a complete total
     pplns_shares_1h = await db.p2pool_sharechain.count_documents(
