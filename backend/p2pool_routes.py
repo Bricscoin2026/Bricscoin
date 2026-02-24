@@ -434,14 +434,36 @@ async def submit_p2pool_block(block: P2PoolBlockSubmit):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid block hash format")
 
-    # Create reward transaction
+    # Create reward transactions — PPLNS split if payouts provided
     reward_amount = 50.0  # Current block reward
-    reward_tx = {
-        "id": str(uuid.uuid4()), "sender": "COINBASE", "recipient": block.miner,
-        "amount": reward_amount, "timestamp": block.timestamp,
-        "signature": "COINBASE_REWARD", "type": "mining_reward",
-        "confirmed": True, "block_index": block.index
-    }
+    reward_txs = []
+
+    if block.pplns_payouts:
+        # PPLNS mode: split reward among miners based on shares
+        total_pct = sum(p.get("pct", 0) for p in block.pplns_payouts)
+        for payout in block.pplns_payouts:
+            pct = payout.get("pct", 0)
+            amount = round(reward_amount * pct / 100, 8) if total_pct > 0 else 0
+            if amount <= 0:
+                continue
+            reward_txs.append({
+                "id": str(uuid.uuid4()), "sender": "COINBASE",
+                "recipient": payout.get("worker", block.miner),
+                "amount": amount,
+                "timestamp": block.timestamp,
+                "signature": "COINBASE_REWARD", "type": "mining_reward",
+                "confirmed": True, "block_index": block.index,
+                "pool_mode": "pplns", "pplns_percentage": pct
+            })
+        logger.info(f"PPLNS block #{block.index}: reward split among {len(reward_txs)} miners")
+    else:
+        # SOLO mode: full reward to finder
+        reward_txs.append({
+            "id": str(uuid.uuid4()), "sender": "COINBASE", "recipient": block.miner,
+            "amount": reward_amount, "timestamp": block.timestamp,
+            "signature": "COINBASE_REWARD", "type": "mining_reward",
+            "confirmed": True, "block_index": block.index
+        })
 
     block_data = block.dict()
 
@@ -461,7 +483,8 @@ async def submit_p2pool_block(block: P2PoolBlockSubmit):
         logger.warning(f"PQC signing not available for P2Pool block: {e}")
 
     await db.blocks.insert_one(block_data)
-    await db.transactions.insert_one(reward_tx)
+    for tx in reward_txs:
+        await db.transactions.insert_one(tx)
 
     # Confirm pending transactions
     tx_ids = [t.get("id") for t in block.transactions if t.get("id")]
