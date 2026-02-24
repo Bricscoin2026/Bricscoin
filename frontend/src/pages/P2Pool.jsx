@@ -299,9 +299,10 @@ export default function P2Pool() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-sm" data-testid="miners-table">
                     <thead><tr className="border-b border-white/10">
                       <th className="text-left py-2 text-xs text-muted-foreground">Worker</th>
+                      <th className="text-center py-2 text-xs text-muted-foreground">Pool</th>
                       <th className="text-right py-2 text-xs text-muted-foreground">Hashrate</th>
                       <th className="text-right py-2 text-xs text-muted-foreground">Shares (1h)</th>
                       <th className="text-right py-2 text-xs text-muted-foreground">Shares (24h)</th>
@@ -311,11 +312,16 @@ export default function P2Pool() {
                     </tr></thead>
                     <tbody>
                       {miners.map(m => (
-                        <tr key={m.worker} className="border-b border-white/5 hover:bg-white/5">
+                        <tr key={`${m.worker}-${m.node}`} className="border-b border-white/5 hover:bg-white/5">
                           <td className="py-2 font-mono text-xs text-primary">{truncAddr(m.worker)}</td>
+                          <td className="py-2 text-center">
+                            <Badge variant="outline" className={m.pool_mode === "solo" ? "border-primary/50 text-primary text-xs" : "border-green-500/50 text-green-400 text-xs"}>
+                              {(m.pool_mode || "solo").toUpperCase()}
+                            </Badge>
+                          </td>
                           <td className="py-2 text-right font-mono">{m.hashrate_readable}</td>
-                          <td className="py-2 text-right">{m.shares_1h.toLocaleString()}</td>
-                          <td className="py-2 text-right">{m.shares_24h.toLocaleString()}</td>
+                          <td className="py-2 text-right">{(m.shares_1h || 0).toLocaleString()}</td>
+                          <td className="py-2 text-right">{(m.shares_24h || 0).toLocaleString()}</td>
                           <td className="py-2 text-right">{m.blocks_found}</td>
                           <td className="py-2 text-right text-xs text-muted-foreground">{timeAgo(m.last_seen)}</td>
                           <td className="py-2 text-center"><Badge variant="outline" className={m.online ? "border-green-500/50 text-green-400" : "border-red-500/50 text-red-400"}>{m.online ? "Online" : "Offline"}</Badge></td>
