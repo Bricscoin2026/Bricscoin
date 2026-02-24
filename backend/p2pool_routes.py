@@ -783,14 +783,24 @@ async def get_pool_stats():
 
     # Calculate PPLNS hashrate from sharechain (more accurate than remote API)
     pplns_pool_hashrate = 0.0
-    if pplns_shares_1h > 0:
-        pplns_avg_pipeline = [
-            {"$match": {"pool_mode": "pplns", "timestamp": {"$gte": hr_cutoff}}},
-            {"$group": {"_id": None, "avg_diff": {"$avg": "$share_difficulty"}}}
+    for window_minutes in [5, 60, 1440]:
+        window_cutoff = (now - timedelta(minutes=window_minutes)).isoformat()
+        pplns_hr_pipeline = [
+            {"$match": {"pool_mode": "pplns", "timestamp": {"$gte": window_cutoff}}},
+            {"$group": {
+                "_id": None,
+                "total_shares": {"$sum": 1},
+                "weighted_difficulty": {"$sum": "$share_difficulty"}
+            }}
         ]
-        pplns_avg_result = await db.p2pool_sharechain.aggregate(pplns_avg_pipeline).to_list(1)
-        pplns_avg_diff = pplns_avg_result[0].get("avg_diff", 1000) if pplns_avg_result else 1000
-        pplns_pool_hashrate = (pplns_shares_1h * pplns_avg_diff * (2**32)) / 3600
+        pplns_hr_result = await db.p2pool_sharechain.aggregate(pplns_hr_pipeline).to_list(1)
+        if pplns_hr_result and pplns_hr_result[0].get("total_shares", 0) > 0:
+            total = pplns_hr_result[0]["total_shares"]
+            weighted = pplns_hr_result[0].get("weighted_difficulty", total)
+            avg_diff = weighted / total
+            time_window = window_minutes * 60
+            pplns_pool_hashrate = (total * avg_diff * HASHRATE_MULTIPLIER) / time_window
+            break
 
     # Use the best estimate: local + max(remote_api, sharechain_pplns)
     best_pplns_hashrate = max(remote_hashrate, pplns_pool_hashrate)
