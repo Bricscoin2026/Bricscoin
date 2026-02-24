@@ -10,7 +10,7 @@ import os
 import uuid
 import pyotp
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bricscoin-pqc.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://mining-rate-limiter.preview.emergentagent.com').rstrip('/')
 ADMIN_KEY = "bricscoin-admin-2026"
 
 # Unique test user for 2FA tests
