@@ -112,6 +112,19 @@ class PoolModeSwitch(BaseModel):
     pool_mode: str  # "solo" or "pplns"
 
 
+class P2PoolBlockSubmit(BaseModel):
+    """Block submitted by a P2Pool node (PPLNS stratum)"""
+    index: int
+    timestamp: str
+    transactions: list = []
+    proof: int
+    previous_hash: str
+    hash: str
+    miner: str
+    difficulty: int
+    nonce: int
+
+
 # ==================== SHARECHAIN ENGINE ====================
 
 async def get_chain_tip():
