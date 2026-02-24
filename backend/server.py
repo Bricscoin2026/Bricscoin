@@ -350,16 +350,16 @@ async def get_current_difficulty() -> int:
     Calcola la difficoltà per il PROSSIMO blocco.
     Target: 1 blocco ogni 600 secondi.
     
-    Ricalcola su OGNI blocco usando una finestra scorrevole degli ultimi 20 blocchi.
-    Formula: new_diff = hashrate_stimato * TARGET_TIME
-    dove hashrate_stimato = sum(block_diffs) / actual_total_time
+    Usa una finestra scorrevole di 5 blocchi per convergenza rapida.
+    Formula: hashrate = sum(block_diffs) / actual_time, new_diff = hashrate * TARGET_TIME
+    Clamp: massimo 4x aumento o 0.25x riduzione per blocco.
     """
     blocks_count = await db.blocks.count_documents({})
     
     if blocks_count < 2:
         return INITIAL_DIFFICULTY
     
-    window_size = min(20, blocks_count)
+    window_size = min(5, blocks_count)
     
     recent_blocks = await db.blocks.find(
         {}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
@@ -375,8 +375,7 @@ async def get_current_difficulty() -> int:
         last_time = datetime.fromisoformat(recent_blocks[-1]["timestamp"].replace("Z", "+00:00"))
         actual_time = (last_time - first_time).total_seconds()
     except (ValueError, KeyError):
-        last_block = recent_blocks[-1]
-        return max(1, last_block.get("difficulty", INITIAL_DIFFICULTY))
+        return max(1, recent_blocks[-1].get("difficulty", INITIAL_DIFFICULTY))
     
     if actual_time <= 0:
         actual_time = 1
@@ -387,14 +386,18 @@ async def get_current_difficulty() -> int:
     hashrate_estimate = total_difficulty / actual_time
     new_difficulty = max(1, int(hashrate_estimate * TARGET_BLOCK_TIME))
     
+    # Clamp: max 4x up or 0.25x down vs current difficulty
+    current_diff = recent_blocks[-1].get("difficulty", INITIAL_DIFFICULTY)
+    new_difficulty = max(current_diff // 4, min(current_diff * 4, new_difficulty))
+    new_difficulty = max(1, new_difficulty)
+    
     avg_block_time = actual_time / num_blocks
     
     current_index = recent_blocks[-1].get("index", 0)
-    if current_index % 5 == 0:
-        logging.info(
-            "DIFFICULTY [%d]: window=%d blocks, avg_time=%.0fs, target=%ds, NEW=%d",
-            current_index, num_blocks, avg_block_time, TARGET_BLOCK_TIME, new_difficulty
-        )
+    logging.info(
+        "DIFFICULTY [block %d]: window=%d, avg_time=%.0fs, target=%ds, curr=%d, NEW=%d",
+        current_index, num_blocks, avg_block_time, TARGET_BLOCK_TIME, current_diff, new_difficulty
+    )
     
     return new_difficulty
 
