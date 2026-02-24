@@ -982,6 +982,32 @@ async def get_network_stats():
                 break
     except Exception:
         pass
+
+    # ============ HASHRATE PPLNS (dalla sharechain) ============
+    # Include anche l'hashrate dei miner PPLNS per un totale corretto
+    pplns_hashrate = 0.0
+    try:
+        for window_minutes in [5, 60, 1440]:
+            cutoff = (datetime.now(timezone.utc) - timedelta(minutes=window_minutes)).isoformat()
+            pipeline = [
+                {"$match": {"pool_mode": "pplns", "timestamp": {"$gte": cutoff}}},
+                {"$group": {
+                    "_id": None,
+                    "total_shares": {"$sum": 1},
+                    "weighted_difficulty": {"$sum": "$share_difficulty"}
+                }}
+            ]
+            result = await db.p2pool_sharechain.aggregate(pipeline).to_list(1)
+            if result and result[0].get("total_shares", 0) > 0:
+                total_shares = result[0]["total_shares"]
+                weighted_difficulty = result[0].get("weighted_difficulty", total_shares)
+                avg_share_diff = weighted_difficulty / total_shares
+                time_window = window_minutes * 60
+                pplns_hashrate = (total_shares * avg_share_diff * HASHRATE_MULTIPLIER) / time_window
+                break
+    except Exception:
+        pass
+    hashrate_from_shares += pplns_hashrate
     
     # ============ HASHRATE ESTIMATE (FALLBACK) ============
     # Formula dalla difficulty: hashrate = difficulty * 2^32 / target_block_time
