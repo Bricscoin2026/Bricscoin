@@ -1,63 +1,55 @@
 # BricsCoin - Product Requirements Document
 
 ## Original Problem Statement
-Build "BricsCoin," a cryptocurrency with Post-Quantum Cryptography (PQC) featuring SHA256 Proof-of-Work, hybrid ECDSA + ML-DSA-65 signatures, and on-chain applications.
+Build "BricsCoin," a cryptocurrency with Post-Quantum Cryptography (PQC). The project includes core blockchain features, mining infrastructure, and a web-based UI for managing wallets, transactions, and mining operations.
 
 ## Architecture
-- **Frontend:** React (CRA + CRACO) with Tailwind CSS, Shadcn/UI, Framer Motion
-- **Backend:** FastAPI (Python) with Motor (async MongoDB driver)
-- **Database:** MongoDB
-- **Production:** Docker Compose on Hetzner VPS (5.161.254.163), domain: bricscoin26.org
-- **Repository:** https://codeberg.org/Bricscoin_26/Bricscoin
+- **Frontend**: React + Shadcn/UI + Tailwind CSS
+- **Backend**: FastAPI + MongoDB (Motor async driver)
+- **Mining**: SHA-256 PoW with Stratum v1 protocol
+- **Signatures**: ECDSA + ML-DSA-65 (PQC, FIPS 204)
+- **Two-Server Setup**:
+  - Main server (bricscoin26.org): React frontend, FastAPI backend, SOLO mining pool (port 3333)
+  - PPLNS server (157.180.123.105): Dedicated PPLNS mining pool (port 3334)
 
-## What's Been Implemented
+## Core Features Implemented
+- Blockchain explorer with blocks, transactions, rich list
+- PQC wallet (BRICSPQ addresses) with browser-side signing
+- BricsChat, Time Capsule, AI Oracle (GPT-5.2 via Emergent LLM Key)
+- BricsNFT (on-chain certificates)
+- True P2Pool decentralized mining (SOLO + PPLNS)
+- Stratum v1 mining protocol
+- P2P node discovery and share propagation
+- Whitepaper PDF generation
 
-### Core Blockchain
-- SHA256 PoW consensus, 21M max supply, 50 BRICS block reward, halving every 210,000 blocks
-- Hybrid ECDSA + ML-DSA-65 PQC signatures
-- Stratum mining server (port 3333)
-- P2P network, difficulty adjustment
+## What's Been Implemented (Latest - Feb 24, 2026)
+### P0 Bug Fixes (4 issues from user message #381)
+1. **Blockchain Transactions**: ExplorerSection loads tx count on mount via `loadCounts()` - shows "Transactions (9)" without clicking
+2. **Mining Tab Removed**: Dead `MiningSection` component removed from Blockchain.jsx, unused imports cleaned up
+3. **P2Pool Miner Aggregation**: `/api/p2pool/miners` now fetches remote miners from peer nodes using `api_port` field; added Pool column with SOLO/PPLNS badges to miners table
+4. **P2P Node Counter Fixed**: `/api/p2pool/stats` actively pings peers to check liveness; stale duplicate peers cleaned up; `/peers` endpoint auto-deletes 7-day-old peers
+5. **New**: Added `/api/p2pool/status` health check endpoint for peer-to-peer liveness checks
+6. **New**: Created `pplns-node-api/pplns_http_api.py` - HTTP API to deploy on the PPLNS server for miner data exposure
 
-### On-Chain Applications
-- **BricsChat:** PQC-encrypted on-chain messaging
-- **Time Capsule:** Time-locked on-chain data storage
-- **AI Oracle:** GPT-5.2 powered blockchain intelligence (via Emergent LLM Key)
-- **BricsNFT:** PQC-signed on-chain certificates (mint, verify, transfer, gallery)
-
-### UI/UX
-- Consolidated tabbed interface (Blockchain.jsx, WalletHub.jsx, AIOracle.jsx)
-- URL-based tab state persistence (useSearchParams)
-- Professional dark theme with gold accents
-
-### Bug Fixes (All Deployed)
-- BricsChat visibility for users without PQC wallet
-- AI Oracle crash and data accuracy (real-time network data)
-- Rich List filtering (>= 1 BRICS)
-- Tab state persistence on page refresh
-
-## Completed Tasks (Feb 2026)
-- [x] BricsNFT feature development (backend + frontend)
-- [x] Deploy BricsNFT to production (bricscoin26.org)
-- [x] Update Whitepaper v3.0 (Markdown + PDF with cover image)
-- [x] Push all code to Codeberg repository
-- [x] Fix frontend build URL (was pointing to preview instead of production)
-- [x] Generate whitepaper PDF with professional cover image and deploy to production
-- [x] Update Dashboard subtitle: "A Decentralized SHA256 PoW Cryptocurrency with PQ Security" + Author
-- [x] P2Pool v2.0: True decentralized mining with sharechain, P2P validation, SOLO + PPLNS modes
-- [x] PPLNS Stratum node deployed on 157.180.123.105:3334 (separate server)
-- [x] 2 live P2P nodes: mainnet (SOLO) + p2pool-pplns-node1 (PPLNS)
-- [x] Auto-registration of nodes at startup
+## Key Files
+- `backend/p2pool_routes.py` - P2Pool API routes (stats, miners, peers, sharechain)
+- `frontend/src/pages/P2Pool.jsx` - P2Pool UI
+- `frontend/src/pages/Blockchain.jsx` - Blockchain explorer
+- `pplns-node-api/pplns_http_api.py` - PPLNS node HTTP API (to deploy on 157.180.123.105)
+- `backend/server.py` - Main FastAPI server
 
 ## Prioritized Backlog
-- **P1:** Configure miner block rewards to PQC address
-- **P2:** BricsID / BricsVault (decentralized identity, dead man's switch)
-- **P3:** Cleanup downloads folder on Codeberg
-- **P5:** Mobile Wallet
+### P1
+- Miner Reward to PQC Address: Configure protocol to send block rewards to PQC address
+- Deploy `pplns_http_api.py` to PPLNS server (157.180.123.105) for full miner aggregation
+
+### P2
+- BricsID / BricsVault (decentralized identity / dead man's switch)
+- Repository Cleanup (downloads folder on Codeberg)
+
+### P3
+- Mobile Wallet development
 
 ## 3rd Party Integrations
 - OpenAI GPT-5.2 via Emergent LLM Key (AI Oracle)
 - Codeberg for Git hosting
-
-## Key Credentials
-- Production SSH: root@5.161.254.163
-- Codeberg: Bricscoin_26
