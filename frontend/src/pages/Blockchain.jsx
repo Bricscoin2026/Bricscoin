@@ -366,9 +366,9 @@ function ExplorerSection() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setSearchParams({ page: (page - 1).toString() })}><ChevronLeft className="w-4 h-4"/>Prev</Button>
+          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setSearchParams(prev => ({ ...Object.fromEntries(prev), page: (page - 1).toString() }))}><ChevronLeft className="w-4 h-4"/>Prev</Button>
           <span className="text-xs text-muted-foreground px-3">Page {page} of {totalPages}</span>
-          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setSearchParams({ page: (page + 1).toString() })}>Next<ChevronRight className="w-4 h-4"/></Button>
+          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setSearchParams(prev => ({ ...Object.fromEntries(prev), page: (page + 1).toString() }))}>Next<ChevronRight className="w-4 h-4"/></Button>
         </div>
       )}
     </div>
