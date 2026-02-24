@@ -761,22 +761,14 @@ async def get_pool_miners():
     cutoff_24h = (now - timedelta(hours=24)).isoformat()
     hr_cutoff = (now - timedelta(hours=1)).isoformat()
 
-    # 1. Local miners (from this node's Stratum) - deduplicated by db_key, exclude unknown
+    # 1. Local miners (from this node's Stratum) - exclude unknown
     active_docs = await db.miners.find(
         {"online": True, "last_seen": {"$gte": cutoff_10m}, "worker_name": {"$nin": [None, "", "unknown"]}},
-        {"_id": 0, "db_key": 1, "worker_name": 1, "worker": 1, "ip": 1, "last_seen": 1, "shares": 1, "blocks": 1, "connected_at": 1}
+        {"_id": 0, "miner_id": 1, "worker_name": 1, "worker": 1, "ip": 1, "last_seen": 1, "shares": 1, "blocks": 1, "connected_at": 1}
     ).to_list(200)
 
-    # Deduplicate by db_key (worker+ip), keep most recent
-    seen_keys = {}
-    for doc in active_docs:
-        key = doc.get("db_key", doc.get("worker_name", doc.get("worker", "unknown")))
-        if key not in seen_keys or doc.get("last_seen", "") > seen_keys[key].get("last_seen", ""):
-            seen_keys[key] = doc
-    unique_docs = list(seen_keys.values())
-
     miners_enriched = []
-    for doc in unique_docs:
+    for doc in active_docs:
         worker = doc.get("worker_name", doc.get("worker", "unknown"))
         shares_1h = await db.miner_shares.count_documents(
             {"worker": worker, "timestamp": {"$gte": hr_cutoff}}
