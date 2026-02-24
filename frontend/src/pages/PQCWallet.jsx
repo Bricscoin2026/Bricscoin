@@ -239,7 +239,7 @@ export default function PQCWallet({ embedded }) {
 
   return (
     <div className="space-y-6" data-testid="pqc-wallet-page">
-      {/* Header */}
+      {/* Header - title only when standalone */}
       {!embedded && (
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -251,107 +251,118 @@ export default function PQCWallet({ embedded }) {
             Hybrid signature ECDSA + ML-DSA-65 (FIPS 204) - Private keys never leave the browser
           </p>
         </div>
-        <div className="flex gap-2">
-          <Dialog open={importOpen} onOpenChange={setImportOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" data-testid="pqc-import-btn">
-                <Key className="w-4 h-4 mr-1" /> Import
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-card border-white/10">
-              <DialogHeader>
-                <DialogTitle>Import PQC Wallet</DialogTitle>
-                <DialogDescription>Enter your ECDSA and Dilithium private keys</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div>
-                  <Label>Name</Label>
-                  <Input value={importForm.name} onChange={e => setImportForm(p => ({...p, name: e.target.value}))}
-                    placeholder="Wallet name" data-testid="pqc-import-name" />
-                </div>
-                <div>
-                  <Label>ECDSA Private Key (hex)</Label>
-                  <Input value={importForm.ecdsa_key} onChange={e => setImportForm(p => ({...p, ecdsa_key: e.target.value}))}
-                    placeholder="64 hex characters" className="font-mono text-xs" data-testid="pqc-import-ecdsa" />
-                </div>
-                <div>
-                  <Label>Dilithium Secret Key (hex)</Label>
-                  <Input value={importForm.dilithium_sk} onChange={e => setImportForm(p => ({...p, dilithium_sk: e.target.value}))}
-                    placeholder="Dilithium secret key hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-sk" />
-                </div>
-                <div>
-                  <Label>Dilithium Public Key (hex)</Label>
-                  <Input value={importForm.dilithium_pk} onChange={e => setImportForm(p => ({...p, dilithium_pk: e.target.value}))}
-                    placeholder="Dilithium public key hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-pk" />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={handleImport} data-testid="pqc-import-submit">Import Wallet</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setNewWalletData(null); }}>
-            <DialogTrigger asChild>
-              <Button className="bg-emerald-600 hover:bg-emerald-700" data-testid="pqc-create-btn">
-                <Plus className="w-4 h-4 mr-1" /> Create PQC Wallet
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-card border-white/10 max-w-lg">
-              <DialogHeader>
-                <DialogTitle>New Quantum-Safe Wallet</DialogTitle>
-                <DialogDescription>
-                  Generate a wallet with hybrid ECDSA + ML-DSA-65 (FIPS 204) signature
-                </DialogDescription>
-              </DialogHeader>
-              {!newWalletData ? (
-                <div className="space-y-4">
-                  <div className="p-4 rounded bg-emerald-500/10 border border-emerald-500/20">
-                    <h4 className="font-semibold text-emerald-400 flex items-center gap-2 mb-2">
-                      <Atom className="w-4 h-4" /> What will be generated
-                    </h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>ECDSA key pair (secp256k1) - legacy compatibility</li>
-                      <li>ML-DSA-65 key pair (FIPS 204) - quantum resistance</li>
-                      <li>Hybrid address BRICSPQ... derived from both keys</li>
-                      <li>12-word seed phrase for backup</li>
-                    </ul>
-                  </div>
-                  <Button onClick={handleCreate} disabled={creating} className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    data-testid="pqc-create-confirm">
-                    {creating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
-                    {creating ? "Generating..." : "Generate Quantum-Safe Wallet"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="p-3 rounded bg-amber-500/10 border border-amber-500/30">
-                    <p className="text-amber-400 text-sm font-semibold flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4" /> Save this information! It cannot be recovered.
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Address</Label>
-                    <code className="block text-xs font-mono p-2 bg-background/50 rounded break-all" data-testid="pqc-new-address">
-                      {newWalletData.address}
-                    </code>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Seed Phrase</Label>
-                    <code className="block text-xs font-mono p-2 bg-background/50 rounded text-amber-400" data-testid="pqc-new-seed">
-                      {newWalletData.seed_phrase}
-                    </code>
-                  </div>
-                  <Button onClick={downloadBackup} variant="outline" className="w-full" data-testid="pqc-download-backup">
-                    <Download className="w-4 h-4 mr-2" /> Download Full Backup (JSON)
-                  </Button>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
-        </div>
       </div>
       )}
+
+      {/* Action buttons - always visible */}
+      <div className="flex gap-2 flex-wrap">
+        <Button variant="outline" size="sm" onClick={() => {
+          const saved = localStorage.getItem("bricscoin_pqc_wallets");
+          if (saved) setWallets(JSON.parse(saved));
+          getPQCStats().then(r => setStats(r.data)).catch(() => {});
+          toast.success("Refreshed");
+        }} data-testid="pqc-refresh-btn">
+          <RefreshCw className="w-4 h-4 mr-1" /> Aggiorna
+        </Button>
+
+        <Dialog open={importOpen} onOpenChange={setImportOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" data-testid="pqc-import-btn">
+              <Key className="w-4 h-4 mr-1" /> Importa Wallet
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-card border-white/10">
+            <DialogHeader>
+              <DialogTitle>Import PQC Wallet</DialogTitle>
+              <DialogDescription>Enter your ECDSA and Dilithium private keys</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>Name</Label>
+                <Input value={importForm.name} onChange={e => setImportForm(p => ({...p, name: e.target.value}))}
+                  placeholder="Wallet name" data-testid="pqc-import-name" />
+              </div>
+              <div>
+                <Label>ECDSA Private Key (hex)</Label>
+                <Input value={importForm.ecdsa_key} onChange={e => setImportForm(p => ({...p, ecdsa_key: e.target.value}))}
+                  placeholder="64 hex characters" className="font-mono text-xs" data-testid="pqc-import-ecdsa" />
+              </div>
+              <div>
+                <Label>Dilithium Secret Key (hex)</Label>
+                <Input value={importForm.dilithium_sk} onChange={e => setImportForm(p => ({...p, dilithium_sk: e.target.value}))}
+                  placeholder="Dilithium secret key hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-sk" />
+              </div>
+              <div>
+                <Label>Dilithium Public Key (hex)</Label>
+                <Input value={importForm.dilithium_pk} onChange={e => setImportForm(p => ({...p, dilithium_pk: e.target.value}))}
+                  placeholder="Dilithium public key hex" className="font-mono text-xs" data-testid="pqc-import-dilithium-pk" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleImport} data-testid="pqc-import-submit">Import Wallet</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setNewWalletData(null); }}>
+          <DialogTrigger asChild>
+            <Button className="bg-emerald-600 hover:bg-emerald-700" size="sm" data-testid="pqc-create-btn">
+              <Plus className="w-4 h-4 mr-1" /> Nuovo Wallet PQC
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-card border-white/10 max-w-lg">
+            <DialogHeader>
+              <DialogTitle>New Quantum-Safe Wallet</DialogTitle>
+              <DialogDescription>
+                Generate a wallet with hybrid ECDSA + ML-DSA-65 (FIPS 204) signature
+              </DialogDescription>
+            </DialogHeader>
+            {!newWalletData ? (
+              <div className="space-y-4">
+                <div className="p-4 rounded bg-emerald-500/10 border border-emerald-500/20">
+                  <h4 className="font-semibold text-emerald-400 flex items-center gap-2 mb-2">
+                    <Atom className="w-4 h-4" /> What will be generated
+                  </h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>ECDSA key pair (secp256k1) - legacy compatibility</li>
+                    <li>ML-DSA-65 key pair (FIPS 204) - quantum resistance</li>
+                    <li>Hybrid address BRICSPQ... derived from both keys</li>
+                    <li>12-word seed phrase for backup</li>
+                  </ul>
+                </div>
+                <Button onClick={handleCreate} disabled={creating} className="w-full bg-emerald-600 hover:bg-emerald-700"
+                  data-testid="pqc-create-confirm">
+                  {creating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
+                  {creating ? "Generating..." : "Generate Quantum-Safe Wallet"}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="p-3 rounded bg-amber-500/10 border border-amber-500/30">
+                  <p className="text-amber-400 text-sm font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Save this information! It cannot be recovered.
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Address</Label>
+                  <code className="block text-xs font-mono p-2 bg-background/50 rounded break-all" data-testid="pqc-new-address">
+                    {newWalletData.address}
+                  </code>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Seed Phrase</Label>
+                  <code className="block text-xs font-mono p-2 bg-background/50 rounded text-amber-400" data-testid="pqc-new-seed">
+                    {newWalletData.seed_phrase}
+                  </code>
+                </div>
+                <Button onClick={downloadBackup} variant="outline" className="w-full" data-testid="pqc-download-backup">
+                  <Download className="w-4 h-4 mr-2" /> Download Full Backup (JSON)
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* PQC Stats Banner */}
       {stats && (
