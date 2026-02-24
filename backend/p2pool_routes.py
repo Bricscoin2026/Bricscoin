@@ -941,6 +941,8 @@ async def get_pool_miners():
     cutoff_24h = (now - timedelta(hours=24)).isoformat()
     hr_cutoff = (now - timedelta(hours=1)).isoformat()
 
+    HASHRATE_MULTIPLIER = 2 ** 32
+
     # 1. Local miners (from this node's Stratum) - exclude unknown
     active_docs = await db.miners.find(
         {"online": True, "last_seen": {"$gte": cutoff_10m}, "worker_name": {"$nin": [None, "", "unknown"]}},
@@ -956,18 +958,25 @@ async def get_pool_miners():
         shares_24h = await db.miner_shares.count_documents(
             {"worker": worker, "timestamp": {"$gte": cutoff_24h}}
         )
-        blocks_found = await db.miner_shares.count_documents(
-            {"worker": worker, "is_block": True}
-        )
-        avg_diff = 512
-        pipeline = [
-            {"$match": {"worker": worker, "timestamp": {"$gte": hr_cutoff}}},
-            {"$group": {"_id": None, "avg": {"$avg": "$share_difficulty"}}}
-        ]
-        avg_res = await db.miner_shares.aggregate(pipeline).to_list(1)
-        if avg_res:
-            avg_diff = avg_res[0].get("avg", 512)
-        hashrate = (shares_1h * avg_diff * (2**32)) / 3600 if shares_1h > 0 else 0
+        # Validated block count: only count blocks that exist in the actual blockchain
+        blocks_found = await db.blocks.count_documents({"miner": worker})
+
+        # Progressive window hashrate (5min -> 15min -> 1h)
+        hashrate = 0.0
+        for window_minutes in [5, 15, 60]:
+            window_cutoff = (now - timedelta(minutes=window_minutes)).isoformat()
+            w_shares = await db.miner_shares.count_documents(
+                {"worker": worker, "timestamp": {"$gte": window_cutoff}}
+            )
+            if w_shares > 0:
+                avg_pipeline = [
+                    {"$match": {"worker": worker, "timestamp": {"$gte": window_cutoff}}},
+                    {"$group": {"_id": None, "avg": {"$avg": "$share_difficulty"}}}
+                ]
+                avg_res = await db.miner_shares.aggregate(avg_pipeline).to_list(1)
+                avg_diff = avg_res[0].get("avg", 512) if avg_res else 512
+                hashrate = (w_shares * avg_diff * HASHRATE_MULTIPLIER) / (window_minutes * 60)
+                break
 
         miners_enriched.append({
             "worker": worker,
@@ -1013,19 +1022,25 @@ async def get_pool_miners():
                         sc_shares_24h = await db.p2pool_sharechain.count_documents(
                             {"worker": worker, "pool_mode": "pplns", "timestamp": {"$gte": cutoff_24h}}
                         )
-                        sc_blocks = await db.p2pool_sharechain.count_documents(
-                            {"worker": worker, "pool_mode": "pplns", "is_block": True}
-                        )
-                        # Calculate hashrate from sharechain (more reliable than remote API)
+                        # Validated block count: only count blocks in the actual blockchain for this miner
+                        sc_blocks = await db.blocks.count_documents({"miner": worker})
+
+                        # Progressive window hashrate (5min -> 15min -> 1h) from sharechain
                         pplns_hashrate = 0.0
-                        if sc_shares_1h > 0:
-                            sc_avg_pipeline = [
-                                {"$match": {"worker": worker, "pool_mode": "pplns", "timestamp": {"$gte": hr_cutoff}}},
-                                {"$group": {"_id": None, "avg": {"$avg": "$share_difficulty"}}}
-                            ]
-                            sc_avg_res = await db.p2pool_sharechain.aggregate(sc_avg_pipeline).to_list(1)
-                            sc_avg_diff = sc_avg_res[0].get("avg", 1000) if sc_avg_res else 1000
-                            pplns_hashrate = (sc_shares_1h * sc_avg_diff * (2**32)) / 3600
+                        for window_minutes in [5, 15, 60]:
+                            window_cutoff = (now - timedelta(minutes=window_minutes)).isoformat()
+                            w_shares = await db.p2pool_sharechain.count_documents(
+                                {"worker": worker, "pool_mode": "pplns", "timestamp": {"$gte": window_cutoff}}
+                            )
+                            if w_shares > 0:
+                                sc_avg_pipeline = [
+                                    {"$match": {"worker": worker, "pool_mode": "pplns", "timestamp": {"$gte": window_cutoff}}},
+                                    {"$group": {"_id": None, "avg": {"$avg": "$share_difficulty"}}}
+                                ]
+                                sc_avg_res = await db.p2pool_sharechain.aggregate(sc_avg_pipeline).to_list(1)
+                                sc_avg_diff = sc_avg_res[0].get("avg", 1000) if sc_avg_res else 1000
+                                pplns_hashrate = (w_shares * sc_avg_diff * HASHRATE_MULTIPLIER) / (window_minutes * 60)
+                                break
                         # Use sharechain hashrate if available, otherwise remote API
                         final_hashrate = pplns_hashrate if pplns_hashrate > 0 else rm.get("hashrate", 0)
                         miners_enriched.append({
