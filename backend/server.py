@@ -349,38 +349,31 @@ async def get_current_difficulty() -> int:
     """
     Calcola la difficoltà per il PROSSIMO blocco.
     
-    Bitcoin-style adjustment:
-    - Ogni 10 blocchi (o 2016 dopo 2016 blocchi), ricalcola la difficoltà
-    - Se i blocchi sono troppo veloci → aumenta difficoltà
-    - Se i blocchi sono troppo lenti → diminuisce difficoltà
-    - Limiti: max 4x aumento, min 0.25x diminuzione per adjustment
-    - NO decay temporale (causa il bug difficulty=1)
+    Adjustment ogni 10 blocchi:
+    - Calcola il tempo medio effettivo degli ultimi 10 blocchi
+    - Confronta con TARGET_BLOCK_TIME (600s)
+    - Aggiusta proporzionalmente con cap 4x/0.25x per ciclo
     """
     blocks_count = await db.blocks.count_documents({})
     
-    # Primo blocco: difficoltà iniziale
     if blocks_count == 0:
         return INITIAL_DIFFICULTY
     
-    # Prendi l'ultimo blocco
     last_block = await db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
     if not last_block:
         return INITIAL_DIFFICULTY
     
-    # Difficoltà corrente dall'ultimo blocco
     current_difficulty = max(1, last_block.get("difficulty", INITIAL_DIFFICULTY))
     current_index = last_block.get("index", 0)
     
-    # Intervallo di adjustment: 10 blocchi all'inizio, poi 2016
-    adjustment_interval = 10 if blocks_count < 2016 else 2016
+    adjustment_interval = 10
     
-    # Calcola solo ai blocchi di adjustment (es: 10, 20, 30... o 2016, 4032...)
     if current_index > 0 and current_index % adjustment_interval == 0:
-        # Prendi gli ultimi N blocchi per calcolare il tempo medio
-        last_blocks = await db.blocks.find({}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}).sort("index", -1).limit(adjustment_interval + 1).to_list(adjustment_interval + 1)
+        last_blocks = await db.blocks.find(
+            {}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
+        ).sort("index", -1).limit(adjustment_interval + 1).to_list(adjustment_interval + 1)
         
         if len(last_blocks) >= 2:
-            # Ordina per index crescente
             last_blocks.sort(key=lambda x: x.get("index", 0))
             
             try:
@@ -393,14 +386,8 @@ async def get_current_difficulty() -> int:
             if actual_time <= 0:
                 actual_time = 1
             
-            # Tempo previsto per N blocchi
             expected_time = TARGET_BLOCK_TIME * (len(last_blocks) - 1)
-            
-            # Ratio: se actual < expected, blocchi veloci → aumenta diff
-            # se actual > expected, blocchi lenti → diminuisce diff
             ratio = expected_time / actual_time
-            
-            # Limiti Bitcoin: max 4x, min 0.25x
             ratio = max(0.25, min(4.0, ratio))
             
             new_difficulty = max(1, int(current_difficulty * ratio))
@@ -408,7 +395,7 @@ async def get_current_difficulty() -> int:
             avg_block_time = actual_time / max(1, len(last_blocks) - 1)
             
             logging.info(
-                "⚙️ DIFFICULTY ADJUSTMENT @ block %d: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
+                "DIFFICULTY ADJUSTMENT @ block %d: current=%d, avg_time=%.1fs, target=%ds, ratio=%.2f, NEW=%d",
                 current_index,
                 current_difficulty,
                 avg_block_time,
@@ -419,7 +406,6 @@ async def get_current_difficulty() -> int:
             
             return new_difficulty
     
-    # Non siamo a un blocco di adjustment: mantieni la difficoltà corrente
     return current_difficulty
 
 async def get_circulating_supply() -> float:
