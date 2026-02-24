@@ -74,6 +74,5 @@ PPLNS Server (157.180.123.105):
 ## Prioritized Backlog
 
 ### P1: Miner Reward to PQC Address
-### P2: BricsID / BricsVault
-### P3: Repository Cleanup (Codeberg)
-### P4: Mobile Wallet
+### P2: Repository Cleanup (Codeberg)
+### P3: Mobile Wallet
