@@ -39,7 +39,16 @@ load_dotenv(ROOT_DIR / '.env')
 
 # ==================== SECURITY CONFIGURATION ====================
 # Rate Limiting
-limiter = Limiter(key_func=get_remote_address, default_limits=["120/minute"])
+# Whitelist internal server IPs from rate limiting
+RATE_LIMIT_WHITELIST = {"157.180.123.105", "127.0.0.1", "172.19.0.1"}
+
+def get_rate_limit_key(request: Request) -> str:
+    client_ip = get_remote_address(request)
+    if client_ip in RATE_LIMIT_WHITELIST:
+        return "whitelisted"  # All whitelisted IPs share one bucket with no real limit
+    return client_ip
+
+limiter = Limiter(key_func=get_rate_limit_key, default_limits=["120/minute"])
 
 # Security logging
 security_logger = logging.getLogger("security")
