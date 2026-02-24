@@ -326,8 +326,7 @@ class StratumMiner:
         elif method=="mining.submit": await self.handle_submit(msg_id,params)
         elif method=="mining.suggest_difficulty":
             old_diff = self.difficulty
-            suggested = max(VARDIFF_MIN, min(VARDIFF_MAX, float(params[0]) if params else 0.1))
-            self.difficulty = suggested
+            self.difficulty = max(1,float(params[0]) if params else 1)
             logger.info(f"SUGGEST_DIFF [{self.worker_name}] {old_diff} -> {self.difficulty}")
             self.respond(msg_id,True)
             self.notify("mining.set_difficulty",[self.difficulty])
@@ -415,7 +414,6 @@ class StratumMiner:
                     upsert=True
                 )
                 logger.info(f"SHARE_OK [{self.worker_name}] diff={self.difficulty} hash={block_hash[:16]}... is_block={is_block}")
-                self.vardiff_update()
                 if is_block:
                     logger.info(f"BLOCK FOUND by {self.worker_name}! Hash: {block_hash[:16]}...")
                     await self.save_block(job, nonce, block_hash)
