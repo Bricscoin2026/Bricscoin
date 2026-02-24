@@ -618,6 +618,9 @@ async def get_pool_stats():
                 if resp.status_code == 200:
                     remote_data = resp.json()
                     remote_active_miners += remote_data.get("active_count", 0)
+                    # Sum hashrate from remote miners
+                    for rm in remote_data.get("miners", []):
+                        remote_hashrate += rm.get("hashrate", 0)
         except Exception:
             pass
 
