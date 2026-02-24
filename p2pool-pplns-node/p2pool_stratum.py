@@ -37,7 +37,7 @@ MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'bricscoin')
 HTTP_API_PORT = int(os.environ.get('PPLNS_API_PORT', 8080))
 NODE_ID = os.environ.get('NODE_ID', 'pplns-node')
-MAIN_NODE_URL = os.environ.get('MAIN_NODE_URL', 'https://bricscoin26.org')
+MAIN_NODE_URL = os.environ.get('MAIN_NODE_URL', 'http://5.161.254.163:8001')
 
 # ================= LOGGING =================
 logging.basicConfig(
