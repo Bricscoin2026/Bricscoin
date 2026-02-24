@@ -433,7 +433,6 @@ export default function Blockchain() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
   const [stats, setStats] = useState(null);
-  const [minerStats, setMinerStats] = useState(null);
   const [blocks, setBlocks] = useState([]);
   const [nodeInfo, setNodeInfo] = useState(null);
   const [peers, setPeers] = useState([]);
@@ -442,17 +441,15 @@ export default function Blockchain() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [statsR, blocksR, nodeR, peersR, minerR] = await Promise.all([
+      const [statsR, blocksR, nodeR, peersR] = await Promise.all([
         getNetworkStats(), getBlocks(50),
         getNodeInfo().catch(() => ({ data: null })),
         getPeers().catch(() => ({ data: { peers: [] } })),
-        fetch(`${BACKEND_URL}/api/miners/stats`).then(r => r.json()).catch(() => null),
       ]);
       setStats(statsR.data);
       setBlocks(blocksR.data.blocks);
       setNodeInfo(nodeR.data);
       setPeers(peersR.data?.peers || []);
-      setMinerStats(minerR);
     } catch {}
     finally { setLoading(false); setRefreshing(false); }
   }, []);
