@@ -46,8 +46,33 @@ PPLNS_WINDOW = 2016               # PPLNS lookback window
 BLOCK_REWARD = 50.0               # current block reward
 
 # Node identity (unique per instance)
-NODE_ID = os.environ.get('NODE_ID', hashlib.sha256(str(uuid.uuid4()).encode()).hexdigest()[:16])
+NODE_ID = os.environ.get('NODE_ID', 'mainnet-solo')
 NODE_URL = os.environ.get('BRICS_NODE_URL', '')
+
+
+async def auto_register_node():
+    """Auto-register this node as a P2Pool peer on startup"""
+    now = datetime.now(timezone.utc).isoformat()
+    await db.p2pool_peers.update_one(
+        {"peer_id": NODE_ID},
+        {"$set": {
+            "peer_id": NODE_ID,
+            "node_url": NODE_URL or "https://bricscoin26.org",
+            "version": "2.0.0",
+            "stratum_port": 3333,
+            "pool_modes": ["solo"],
+            "last_seen": now,
+            "online": True,
+            "registered_at": now,
+        }},
+        upsert=True
+    )
+    logger.info(f"Auto-registered node: {NODE_ID}")
+
+
+@router.on_event("startup")
+async def startup_event():
+    await auto_register_node()
 
 
 # ==================== MODELS ====================
