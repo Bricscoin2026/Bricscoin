@@ -401,7 +401,7 @@ async def list_peers():
 @router.post("/submit-block")
 async def submit_p2pool_block(block: P2PoolBlockSubmit):
     """Accept a block found by a P2Pool peer node (e.g., PPLNS stratum).
-    Validates the block index and previous_hash before inserting."""
+    Validates the block index, previous_hash, and hash against difficulty."""
     # Check if block already exists
     existing = await db.blocks.find_one({"index": block.index})
     if existing:
@@ -418,6 +418,19 @@ async def submit_p2pool_block(block: P2PoolBlockSubmit):
 
     if block.previous_hash != last_block.get("hash", ""):
         raise HTTPException(status_code=400, detail="Previous hash mismatch")
+
+    # CRITICAL: Validate block hash meets difficulty target
+    try:
+        hash_int = int(block.hash, 16)
+        MAX_TARGET = (2 ** 256) - 1
+        block_target = MAX_TARGET // max(1, block.difficulty)
+        if hash_int > block_target:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Block hash does not meet difficulty target. hash_int={hash_int:.2e} > target={block_target:.2e}"
+            )
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid block hash format")
 
     # Create reward transaction
     reward_amount = 50.0  # Current block reward
