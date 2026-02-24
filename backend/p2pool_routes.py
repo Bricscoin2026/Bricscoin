@@ -76,6 +76,8 @@ async def startup_event():
     # Create indexes
     await db.p2pool_sharechain.create_index("height")
     await db.p2pool_sharechain.create_index("share_id", unique=True, sparse=True)
+    await db.p2pool_sharechain.create_index("timestamp")
+    await db.p2pool_sharechain.create_index([("worker", 1), ("pool_mode", 1), ("timestamp", 1)])
     await db.p2pool_peers.create_index("peer_id", unique=True)
 
 
