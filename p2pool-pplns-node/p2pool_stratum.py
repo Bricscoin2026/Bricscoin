@@ -509,8 +509,8 @@ class StratumMiner:
                     for payout in preview.get("payouts", []):
                         pplns_payouts.append({
                             "worker": payout["worker"],
-                            "percentage": payout["percentage"],
-                            "amount": round(reward_amount * payout["percentage"] / 100, 8)
+                            "percentage": payout.get("share_percentage", payout.get("percentage", 0)),
+                            "amount": round(reward_amount * payout.get("share_percentage", payout.get("percentage", 0)) / 100, 8)
                         })
         except Exception as e:
             logger.warning(f"Failed to get PPLNS preview: {e}")
