@@ -73,6 +73,10 @@ async def auto_register_node():
 @router.on_event("startup")
 async def startup_event():
     await auto_register_node()
+    # Create indexes
+    await db.p2pool_sharechain.create_index("height")
+    await db.p2pool_sharechain.create_index("share_id", unique=True, sparse=True)
+    await db.p2pool_peers.create_index("peer_id", unique=True)
 
 
 # ==================== MODELS ====================
