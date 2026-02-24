@@ -64,7 +64,12 @@ def reverse_bytes(data: bytes) -> bytes:
     return data[::-1]
 
 def swap_endian_words(hex_str: str) -> str:
-    return "".join([hex_str[i:i+2] for i in range(0, len(hex_str), 2)][::-1])
+    """Standard Stratum protocol: reverse bytes within each 4-byte word."""
+    result = ""
+    for i in range(0, len(hex_str), 8):
+        word = hex_str[i:i+8]
+        result += "".join([word[j:j+2] for j in range(6, -1, -2)])
+    return result
 
 def var_int(n: int) -> bytes:
     if n < 0xfd: return bytes([n])
