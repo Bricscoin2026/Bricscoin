@@ -387,8 +387,18 @@ export default function Network() {
                 data-testid="copy-docker-cmd-btn"
               >
                 <Copy className="w-4 h-4 mr-2" />
-                Copy Setup Command
+                Copy Command
               </Button>
+              <a
+                href={`${process.env.REACT_APP_BACKEND_URL}/api/node/download`}
+                download
+                data-testid="download-node-btn"
+              >
+                <Button className="gold-button">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Node v2.0
+                </Button>
+              </a>
             </div>
             <div className="mt-4 p-4 bg-background/50 rounded-sm border border-white/10">
               <pre className="font-mono text-xs text-muted-foreground overflow-x-auto">
