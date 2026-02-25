@@ -53,20 +53,6 @@ function NetworkOverview({ stats, blocks, nodeInfo, peers, onRefresh, refreshing
     block: b.index, difficulty: b.difficulty, txs: b.transactions?.length || 0
   })) || [];
 
-  const [connectOpen, setConnectOpen] = useState(false);
-  const [peerUrl, setPeerUrl] = useState("");
-
-  const handleConnectPeer = async () => {
-    if (!peerUrl) return;
-    try {
-      await registerPeer({ node_id: `web-${Date.now()}`, url: peerUrl, version: "1.0.0" });
-      toast.success("Connected to peer!");
-      setConnectOpen(false);
-      setPeerUrl("");
-      onRefresh();
-    } catch { toast.error("Failed to connect to peer"); }
-  };
-
   if (!stats) return <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">{[...Array(8)].map((_, i) => <Skeleton key={i} className="h-28 bg-card" />)}</div>;
 
   return (
