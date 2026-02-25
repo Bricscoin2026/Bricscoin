@@ -544,6 +544,12 @@ class BroadcastTxRequest(BaseModel):
     transaction: dict
     sender_id: str = ""
 
+class PeerRegisterRequest(BaseModel):
+    node_id: str
+    url: str
+    version: str = "1.0.0"
+    chain_height: int = 0
+
 # --- Node Info ---
 @app.get("/api/node/info")
 async def node_info():
@@ -551,13 +557,32 @@ async def node_info():
     tip = await sync_engine.get_local_tip()
     return {
         "node_id": NODE_ID,
+        "node_url": NODE_URL or None,
         "version": NODE_VERSION,
         "chain_height": height,
         "latest_block_hash": tip["hash"] if tip else None,
-        "peers_count": len(p2p_node.known_peers),
+        "peers_count": len(p2p_node.peers),
+        "peers": [
+            {"node_id": nid, "url": info["url"], "height": info.get("height", 0)}
+            for nid, info in p2p_node.peers.items()
+        ],
         "syncing": sync_engine.syncing,
         "sync_progress": sync_engine.sync_progress,
         "sync_total": sync_engine.sync_total,
+    }
+
+# --- P2P Registration ---
+@app.post("/api/p2p/register")
+async def register_peer(req: PeerRegisterRequest):
+    """A remote node registers with us. We record it and return our info."""
+    await p2p_node.register_peer_locally(req.node_id, req.url, req.version, req.chain_height)
+    height = await sync_engine.get_local_height()
+    log.info(f"Peer registered: {req.node_id[:8]} at {req.url} (height={req.chain_height})")
+    return {
+        "node_id": NODE_ID,
+        "version": NODE_VERSION,
+        "chain_height": height,
+        "message": "Peer registered successfully",
     }
 
 # --- P2P Chain Info (compatible with central node) ---
