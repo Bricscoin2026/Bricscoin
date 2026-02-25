@@ -457,21 +457,29 @@ async def register_with_peer(peer_url: str) -> bool:
                 json={
                     "node_id": NODE_ID,
                     "url": NODE_URL,
-                    "version": "1.0.0"
+                    "version": "2.0.0",
+                    "chain_height": blocks_count
                 }
             )
             if response.status_code == 200:
                 peer_data = response.json()
-                connected_peers[peer_data['node_id']] = {
-                    "url": peer_url,
-                    "node_id": peer_data['node_id'],
-                    "version": peer_data.get('version', '1.0.0'),
-                    "last_seen": datetime.now(timezone.utc).isoformat()
-                }
-                logging.info(f"Registered with peer: {peer_url}")
+                remote_id = peer_data.get('node_id', '')
+                if remote_id and remote_id != NODE_ID:
+                    peer_info = {
+                        "url": peer_url,
+                        "node_id": remote_id,
+                        "version": peer_data.get('version', '1.0.0'),
+                        "height": peer_data.get('chain_height', 0),
+                        "last_seen": datetime.now(timezone.utc).isoformat()
+                    }
+                    connected_peers[remote_id] = peer_info
+                    await db.peers.update_one(
+                        {"node_id": remote_id}, {"$set": peer_info}, upsert=True
+                    )
+                    logging.info(f"Registered with peer: {peer_url} (id={remote_id[:8]})")
                 return True
     except Exception as e:
-        logging.error(f"Failed to register with peer {peer_url}: {e}")
+        logging.debug(f"Failed to register with peer {peer_url}: {e}")
     return False
 
 async def broadcast_to_peers(endpoint: str, data: dict, exclude_node: str = None):
