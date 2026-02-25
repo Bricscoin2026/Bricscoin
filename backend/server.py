@@ -2015,11 +2015,22 @@ async def register_peer(peer: PeerRegister):
 
 @api_router.get("/p2p/peers")
 async def get_peers():
-    """Get list of connected peers"""
+    """Get list of connected peers with full info"""
     return {
         "node_id": NODE_ID,
-        "peers": list(connected_peers.values()),
-        "peer_count": len(connected_peers)
+        "node_url": NODE_URL,
+        "peers": [
+            {
+                "node_id": p.get("node_id", ""),
+                "url": p.get("url", ""),
+                "height": p.get("height", 0),
+                "version": p.get("version", "?"),
+                "last_seen": p.get("last_seen", ""),
+            }
+            for p in connected_peers.values()
+        ],
+        "count": len(connected_peers),
+        "peer_count": len(connected_peers),
     }
 
 @api_router.get("/p2p/chain/info")
