@@ -101,9 +101,10 @@ TRANSACTION_FEE = 0.000005  # Fee per transaction in BRICS
 GENESIS_WALLET_ADDRESS = None  # Set dynamically when genesis block is created
 
 # P2P Network Configuration
-NODE_ID = os.environ.get('NODE_ID', str(uuid.uuid4())[:8])
-NODE_URL = os.environ.get('NODE_URL', '')
+NODE_ID = os.environ.get('NODE_ID', 'mainnet')  # Stable ID for the central node
+NODE_URL = os.environ.get('NODE_URL', 'https://bricscoin26.org')
 SEED_NODES = os.environ.get('SEED_NODES', '').split(',') if os.environ.get('SEED_NODES') else []
+PEER_MAX_AGE = 600  # Seconds before a peer is considered stale
 
 # Store connected peers
 connected_peers: Dict[str, Dict] = {}
