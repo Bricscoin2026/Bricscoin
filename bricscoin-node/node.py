@@ -753,6 +753,147 @@ async def validate_chain():
         "total_errors": len(errors)
     }
 
+
+# ==================== WALLET API ====================
+
+class WalletCreateRequest(BaseModel):
+    seed_phrase: Optional[str] = None
+
+class WalletImportKeyRequest(BaseModel):
+    private_key: str
+
+class WalletSendRequest(BaseModel):
+    recipient: str
+    amount: float
+
+# In-memory wallet (loaded from file on startup)
+_active_wallet: Optional[dict] = None
+
+def get_wallet() -> dict:
+    global _active_wallet
+    if not _active_wallet:
+        raise HTTPException(status_code=400, detail="No wallet loaded. Create or import one first.")
+    return _active_wallet
+
+@app.post("/api/wallet/create")
+async def api_wallet_create(req: WalletCreateRequest = WalletCreateRequest()):
+    """Create a new wallet or recover from seed phrase."""
+    global _active_wallet
+    try:
+        wallet = generate_wallet(req.seed_phrase)
+        save_wallet_to_file(wallet)
+        _active_wallet = wallet
+        return {
+            "address": wallet["address"],
+            "seed_phrase": wallet.get("seed_phrase", ""),
+            "message": "Wallet created. SAVE YOUR SEED PHRASE — it cannot be recovered!",
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/wallet/import")
+async def api_wallet_import(req: WalletImportKeyRequest):
+    """Import wallet from private key."""
+    global _active_wallet
+    try:
+        wallet = recover_from_private_key(req.private_key)
+        save_wallet_to_file(wallet)
+        _active_wallet = wallet
+        return {"address": wallet["address"], "message": "Wallet imported successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/wallet/info")
+async def api_wallet_info():
+    """Get wallet address and balance."""
+    w = get_wallet()
+    address = w["address"]
+
+    # Calculate balance from local blockchain
+    recv_pipeline = [
+        {"$match": {"recipient": address}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
+    ]
+    sent_pipeline = [
+        {"$match": {"sender": address}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}, "fees": {"$sum": "$fee"}}},
+    ]
+    recv = await db.transactions.aggregate(recv_pipeline).to_list(1)
+    sent = await db.transactions.aggregate(sent_pipeline).to_list(1)
+
+    received = recv[0]["total"] if recv else 0
+    spent = (sent[0]["total"] + sent[0].get("fees", 0)) if sent else 0
+    balance = round(max(0.0, received - spent), 8)
+
+    return {
+        "address": address,
+        "balance": balance,
+        "received": round(received, 8),
+        "spent": round(spent, 8),
+    }
+
+@app.post("/api/wallet/send")
+async def api_wallet_send(req: WalletSendRequest):
+    """Send BRICS to another address. Signs locally, broadcasts via P2P."""
+    w = get_wallet()
+
+    # Check balance
+    info = await api_wallet_info()
+    if info["balance"] < req.amount + TRANSACTION_FEE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Insufficient balance. Have {info['balance']}, need {req.amount + TRANSACTION_FEE}",
+        )
+
+    # Create and sign transaction
+    tx = create_transaction(w["private_key"], w["address"], req.recipient, req.amount)
+
+    # Store in local mempool
+    tx.pop("_id", None)
+    await db.transactions.update_one({"id": tx["id"]}, {"$set": tx}, upsert=True)
+
+    # Broadcast to all peers + seed
+    asyncio.create_task(p2p_node.broadcast_transaction(tx))
+
+    # Also submit to seed node directly
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            await client.post(
+                f"{CENTRAL_NODE}/api/transactions/send",
+                json={
+                    "sender_address": tx["sender"],
+                    "recipient_address": tx["recipient"],
+                    "amount": tx["amount"],
+                    "signature": tx["signature"],
+                    "public_key": tx["public_key"],
+                    "timestamp": tx["timestamp"],
+                },
+            )
+    except Exception as e:
+        log.warning(f"Failed to submit tx to seed: {e}")
+
+    return {
+        "tx_id": tx["id"],
+        "sender": tx["sender"],
+        "recipient": tx["recipient"],
+        "amount": tx["amount"],
+        "fee": tx["fee"],
+        "status": "broadcast",
+        "message": "Transaction signed and broadcast to the network.",
+    }
+
+@app.get("/api/wallet/transactions")
+async def api_wallet_transactions(limit: int = Query(default=50, le=200)):
+    """Get transaction history for the active wallet."""
+    w = get_wallet()
+    address = w["address"]
+    txs = await db.transactions.find(
+        {"$or": [{"sender": address}, {"recipient": address}]},
+        {"_id": 0},
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+    return {"address": address, "transactions": txs, "count": len(txs)}
+
+
 # ==================== BACKGROUND TASKS ====================
 async def periodic_sync_task():
     """Sync with the best available peer every 30 seconds."""
