@@ -660,6 +660,8 @@ async def receive_tx(data: BroadcastTxRequest):
     tx.pop("_id", None)
     await db.transactions.insert_one(tx)
     log.info(f"Received tx {tx.get('id', '?')[:16]}...")
+    # Re-broadcast to other peers
+    asyncio.create_task(p2p_node.broadcast_transaction(tx, exclude_id=data.sender_id))
     return {"status": "accepted"}
 
 # --- Block Explorer APIs ---
