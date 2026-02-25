@@ -76,8 +76,8 @@ async def gather_network_data():
     blocks_to_halving = next_halving - blocks_count
     estimated_halving_days = (blocks_to_halving * avg_block_time) / 86400
 
-    # Supply info
-    circulating = 1_000_000  # premine
+    # Supply info (no premine — 100% fair launch)
+    circulating = 0
     for i in range(1, blocks_count):
         circulating += get_mining_reward(i)
     circulating = min(circulating, MAX_SUPPLY)
