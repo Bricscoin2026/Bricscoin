@@ -41,7 +41,7 @@ class TestNodeInfo:
         
         # Node should have synced significant blockchain
         assert data["chain_height"] >= MIN_EXPECTED_HEIGHT, f"Expected >= {MIN_EXPECTED_HEIGHT} blocks, got {data['chain_height']}"
-        assert data["version"] == "1.0.0"
+        assert data["version"] == "2.0.0"  # Updated to v2.0.0 for Phase 2
         assert isinstance(data["syncing"], bool)
         print(f"Node ID: {data['node_id']}, Height: {data['chain_height']}, Syncing: {data['syncing']}")
 
