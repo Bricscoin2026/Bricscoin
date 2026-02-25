@@ -1984,7 +1984,7 @@ async def register_peer(peer: PeerRegister):
         "url": peer.url,
         "node_id": peer.node_id,
         "version": peer.version,
-        "height": getattr(peer, 'chain_height', 0),
+        "height": peer.chain_height,
         "last_seen": datetime.now(timezone.utc).isoformat()
     }
     
