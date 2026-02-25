@@ -48,7 +48,8 @@ A decentralized cryptocurrency powered by SHA256 Proof-of-Work with Post-Quantum
 | **Block Reward** | 50 BRICS |
 | **Halving Interval** | Every 210,000 blocks |
 | **Target Block Time** | ~10 minutes |
-| **Difficulty Adjustment** | Every 2016 blocks |
+| **Difficulty Adjustment** | Per-block sliding window (5 blocks) |
+| **Premine** | None — 100% Fair Launch |
 | **Transaction Fee** | 0.000005 BRICS (burned) |
 | **Signature Algorithm** | ECDSA (secp256k1) + ML-DSA-65 (hybrid PQC) |
 | **Address Format** | Legacy: `BRICS...` / PQC: `BRICSPQ...` |
