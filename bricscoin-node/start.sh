@@ -16,4 +16,4 @@ sleep 5
 
 # Start the node
 echo "Starting BricsCoin node..."
-exec uvicorn server:app --host 0.0.0.0 --port 8001 --log-level info
+exec python node.py
