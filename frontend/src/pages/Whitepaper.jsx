@@ -128,6 +128,9 @@ export default function Whitepaper() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-4">
               BricsCoin <span className="gold-text">Whitepaper</span>
             </h1>
+            <p className="text-sm font-medium text-primary/80 tracking-wide mb-3">
+              <strong>B</strong>lockchain <strong>R</strong>esilient <strong>I</strong>nfrastructure for <strong>C</strong>onnectivity and <strong>S</strong>ecurity &mdash; A <strong>C</strong>ertified <strong>O</strong>pen <strong>I</strong>nfrastructure <strong>N</strong>etwork
+            </p>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
               A Decentralized SHA-256 Proof-of-Work Cryptocurrency with Post-Quantum Cryptographic Security
             </p>

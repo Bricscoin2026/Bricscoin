@@ -276,6 +276,9 @@ export default function Dashboard() {
         <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text mb-4">
           BRICSCOIN
         </h1>
+        <p className="text-sm font-medium text-primary/80 tracking-wide mb-3">
+          <strong>B</strong>lockchain <strong>R</strong>esilient <strong>I</strong>nfrastructure for <strong>C</strong>onnectivity and <strong>S</strong>ecurity &mdash; A <strong>C</strong>ertified <strong>O</strong>pen <strong>I</strong>nfrastructure <strong>N</strong>etwork
+        </p>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
           A Decentralized SHA256 Proof-of-Work Cryptocurrency with Post-Quantum Security
         </p>
