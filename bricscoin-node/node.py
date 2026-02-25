@@ -688,7 +688,8 @@ async def network_stats():
         "latest_hash": tip["hash"] if tip else None,
         "current_difficulty": tip.get("difficulty", INITIAL_DIFFICULTY) if tip else INITIAL_DIFFICULTY,
         "node_id": NODE_ID,
-        "peers": len(p2p_node.known_peers),
+        "node_url": NODE_URL or None,
+        "peers": len(p2p_node.peers),
         "syncing": sync_engine.syncing,
     }
 
