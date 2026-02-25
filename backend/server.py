@@ -2502,7 +2502,7 @@ security_logger.addHandler(security_handler)
 async def startup_event():
     await create_genesis_block()
     await init_node_pqc_keys()
-    logger.info(f"BricsCoin node started - ID: {NODE_ID}")
+    logger.info(f"BricsCoin node started - ID: {NODE_ID}, URL: {NODE_URL}")
     
     # Load peers from database
     await load_peers_from_db()
@@ -2511,11 +2511,10 @@ async def startup_event():
     if SEED_NODES:
         asyncio.create_task(discover_peers())
     
-    # Start periodic sync task
+    # Start periodic tasks
     asyncio.create_task(periodic_sync())
-    
-    # Start periodic cleanup of stale miners
     asyncio.create_task(periodic_miners_cleanup())
+    asyncio.create_task(periodic_peer_heartbeat())
 
 
 async def periodic_miners_cleanup():
