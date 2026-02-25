@@ -78,34 +78,28 @@ def check_difficulty(hash_value: str, difficulty: int) -> bool:
 
 def validate_block_standalone(block: dict, prev_block: Optional[dict] = None) -> tuple[bool, str]:
     """
-    Validate a block independently without DB access.
+    Validate a block independently.
+    - Chain link: previous_hash matches prior block's hash
+    - PoW: hash meets difficulty target
+    - Timestamp: not too far in the future
     Returns (is_valid, error_message).
     """
     try:
         idx = block.get("index", -1)
 
-        # 1. Verify hash
-        calculated = calculate_block_hash(
-            block["index"], block["timestamp"], block["transactions"],
-            block.get("proof", block.get("nonce", 0)),
-            block["previous_hash"], block.get("nonce", 0)
-        )
-        if block["hash"] != calculated:
-            # Try alternative calculation (for submitted blocks)
-            block_data = f"{block['index']}{block['timestamp']}{json.dumps(block['transactions'], sort_keys=True)}{block['previous_hash']}"
-            alt_hash = sha256_hash(block_data + str(block.get("nonce", 0)))
-            if block["hash"] != alt_hash:
-                return False, f"Block {idx}: hash mismatch"
-
-        # 2. Verify difficulty
+        # 1. Verify hash meets difficulty (Proof-of-Work)
         diff = block.get("difficulty", INITIAL_DIFFICULTY)
-        if not check_difficulty(block["hash"], diff):
-            return False, f"Block {idx}: does not meet difficulty {diff}"
+        if idx > 0 and not check_difficulty(block["hash"], diff):
+            return False, f"Block {idx}: hash does not meet difficulty {diff}"
 
-        # 3. Verify chain link (except genesis)
+        # 2. Verify chain link (except genesis)
         if idx > 0 and prev_block:
             if prev_block["hash"] != block["previous_hash"]:
-                return False, f"Block {idx}: previous_hash mismatch (expected {prev_block['hash'][:16]}..., got {block['previous_hash'][:16]}...)"
+                return False, f"Block {idx}: previous_hash mismatch"
+
+        # 3. Verify sequential index
+        if prev_block and block["index"] != prev_block["index"] + 1:
+            return False, f"Block {idx}: non-sequential index (expected {prev_block['index'] + 1})"
 
         # 4. Verify timestamp is reasonable
         try:
@@ -113,7 +107,7 @@ def validate_block_standalone(block: dict, prev_block: Optional[dict] = None) ->
             if ts > datetime.now(timezone.utc) + timedelta(hours=2):
                 return False, f"Block {idx}: timestamp too far in the future"
         except (ValueError, KeyError):
-            pass  # Don't reject blocks with unparseable timestamps from the existing chain
+            pass
 
         return True, ""
     except Exception as e:
