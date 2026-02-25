@@ -23,14 +23,16 @@ from pydantic import BaseModel
 import uvicorn
 
 # ==================== CONFIGURATION ====================
-NODE_VERSION = "1.0.0"
+NODE_VERSION = "2.0.0"
 CENTRAL_NODE = os.environ.get("SEED_NODE", "https://bricscoin26.org")
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/")
 DB_NAME = os.environ.get("DB_NAME", "bricscoin_node")
 NODE_PORT = int(os.environ.get("NODE_PORT", "8333"))
 NODE_HOST = os.environ.get("NODE_HOST", "0.0.0.0")
-P2P_PORT = int(os.environ.get("P2P_PORT", "8334"))
-NODE_ID = os.environ.get("NODE_ID", hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
+NODE_URL = os.environ.get("NODE_URL", "")  # Public URL for P2P (e.g. https://my-node.example.com)
+NODE_ID = os.environ.get("NODE_ID", "")
+PEER_MAX_AGE = 600  # Seconds before a peer is considered stale
+PEER_HEARTBEAT_INTERVAL = 60  # Seconds between heartbeat checks
 
 # ==================== CONSENSUS CONSTANTS ====================
 MAX_SUPPLY = 21_000_000
