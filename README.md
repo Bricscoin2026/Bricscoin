@@ -1,12 +1,17 @@
 # BricsCoin
 
+**Blockchain Resilient Infrastructure for Connectivity and Security — A Certified Open Infrastructure Network**
+
+> *The name BRICSCOIN is a technical acronym. This project has no political, geopolitical, or institutional affiliation of any kind.*
+
 ![Security Audit](https://img.shields.io/badge/Security%20Audit-PASSED-brightgreen?style=for-the-badge&logo=shield)
 ![Tests](https://img.shields.io/badge/Tests-27%2F27%20Passed-success?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![SHA256](https://img.shields.io/badge/Algorithm-SHA256-orange?style=for-the-badge)
 ![Quantum Safe](https://img.shields.io/badge/Quantum-ML--DSA--65-10b981?style=for-the-badge)
+![Fair Launch](https://img.shields.io/badge/Premine-NONE-brightgreen?style=for-the-badge)
 
-A decentralized cryptocurrency powered by SHA256 Proof-of-Work with Post-Quantum Cryptography (PQC).
+A decentralized cryptocurrency powered by SHA256 Proof-of-Work with Post-Quantum Cryptography (PQC). **100% Fair Launch — no premine, no ICO, no presale. All 21,000,000 BRICS are exclusively mineable.**
 
 ## Security Audit Status
 
