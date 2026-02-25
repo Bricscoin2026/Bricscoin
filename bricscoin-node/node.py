@@ -99,7 +99,9 @@ def validate_block_standalone(block: dict, prev_block: Optional[dict] = None) ->
             return False, f"Block {idx}: hash does not meet difficulty {diff}"
 
         # 2. Verify chain link (except genesis)
-        if idx > 0 and prev_block:
+        if idx > 0:
+            if prev_block is None:
+                return False, f"Block {idx}: orphan block — parent block not found"
             if prev_block["hash"] != block["previous_hash"]:
                 return False, f"Block {idx}: previous_hash mismatch"
 
