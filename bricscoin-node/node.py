@@ -607,8 +607,14 @@ async def get_chain_blocks(from_height: int = 0, limit: int = 500):
 @app.get("/api/p2p/peers")
 async def get_peers():
     return {
-        "peers": [{"url": url, **info} for url, info in p2p_node.known_peers.items()],
-        "count": len(p2p_node.known_peers)
+        "node_id": NODE_ID,
+        "node_url": NODE_URL or None,
+        "peers": [
+            {"node_id": nid, "url": info["url"], "height": info.get("height", 0),
+             "version": info.get("version", "?"), "last_seen": info.get("last_seen", "")}
+            for nid, info in p2p_node.peers.items()
+        ],
+        "count": len(p2p_node.peers),
     }
 
 # --- Receive Broadcast ---
