@@ -103,7 +103,15 @@ export default function About() {
           About <span className="gold-text">BricsCoin</span>
         </h1>
         <p className="text-sm font-medium text-primary/80 tracking-wide">
-          <strong>B</strong>lockchain <strong>R</strong>esilient <strong>I</strong>nfrastructure for <strong>C</strong>onnectivity and <strong>S</strong>ecurity &mdash; A <strong>C</strong>ertified <strong>O</strong>pen <strong>I</strong>nfrastructure <strong>N</strong>etwork
+          <span className="text-lg font-bold text-primary">B</span>lockchain{" "}
+          <span className="text-lg font-bold text-primary">R</span>esilient{" "}
+          <span className="text-lg font-bold text-primary">I</span>nfrastructure for{" "}
+          <span className="text-lg font-bold text-primary">C</span>ryptographic{" "}
+          <span className="text-lg font-bold text-primary">S</span>ecurity &mdash;{" "}
+          <span className="text-lg font-bold text-primary">C</span>ertified{" "}
+          <span className="text-lg font-bold text-primary">O</span>pen{" "}
+          <span className="text-lg font-bold text-primary">I</span>nnovation{" "}
+          <span className="text-lg font-bold text-primary">N</span>etwork
         </p>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           A decentralized SHA256 Proof-of-Work cryptocurrency. Open source, transparent, and community-driven. No political, geopolitical, or institutional affiliation of any kind.
