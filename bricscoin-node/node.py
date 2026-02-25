@@ -176,10 +176,17 @@ class SyncEngine:
                     if not blocks:
                         break
 
+                    # Deduplicate: keep last occurrence per index (canonical chain)
+                    seen = {}
                     for block in blocks:
-                        # Skip if already have it
-                        if await db.blocks.find_one({"index": block["index"]}):
-                            prev_block = block
+                        seen[block["index"]] = block
+                    unique_blocks = [seen[i] for i in sorted(seen.keys())]
+
+                    for block in unique_blocks:
+                        # Skip if already stored — use stored version as prev
+                        existing = await db.blocks.find_one({"index": block["index"]}, {"_id": 0})
+                        if existing:
+                            prev_block = existing
                             continue
 
                         # Validate independently
@@ -187,7 +194,6 @@ class SyncEngine:
                         if valid:
                             block.pop("_id", None)
                             await db.blocks.insert_one(block)
-                            # Also store transactions
                             for tx in block.get("transactions", []):
                                 tx.pop("_id", None)
                                 tx["block_index"] = block["index"]
@@ -208,7 +214,7 @@ class SyncEngine:
                         if validated > 0 and validated % 200 == 0:
                             log.info(f"Sync progress: {validated}/{blocks_needed} blocks validated")
 
-                    current = blocks[-1]["index"] + 1 if blocks else current + batch_size
+                    current = unique_blocks[-1]["index"] + 1 if unique_blocks else current + batch_size
 
                 log.info(f"Sync complete: {validated} blocks validated, {rejected} rejected. Chain height: {await self.get_local_height()}")
         except Exception as e:
