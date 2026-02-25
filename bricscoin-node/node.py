@@ -22,6 +22,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 
+from wallet import (
+    generate_wallet, recover_from_private_key, load_wallet_from_file,
+    save_wallet_to_file, create_transaction, address_from_pubkey,
+    verify_signature, build_tx_data, TRANSACTION_FEE
+)
+
 # ==================== CONFIGURATION ====================
 NODE_VERSION = "2.0.0"
 CENTRAL_NODE = os.environ.get("SEED_NODE", "https://bricscoin26.org")
