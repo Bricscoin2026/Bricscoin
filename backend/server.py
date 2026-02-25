@@ -254,6 +254,7 @@ class PeerRegister(BaseModel):
     node_id: str
     url: str
     version: str = "1.0.0"
+    chain_height: int = 0
 
 class ChainSync(BaseModel):
     blocks: List[Dict[str, Any]]
