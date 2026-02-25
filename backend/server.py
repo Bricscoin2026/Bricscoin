@@ -975,29 +975,22 @@ async def get_network_stats(request: Request):
 
 @api_router.get("/tokenomics")
 async def get_tokenomics(request: Request):
-    """Get tokenomics and premine transparency info"""
+    """Get tokenomics info - 100% fair launch, no premine"""
     blocks_count = await db.blocks.count_documents({})
     mining_rewards = sum(get_mining_reward(i) for i in range(1, blocks_count))
     
-    # Get genesis wallet address
-    genesis_wallet = await db.genesis_wallet.find_one({}, {"_id": 0, "private_key": 0, "seed_phrase": 0})
-    genesis_address = genesis_wallet.get('address') if genesis_wallet else None
-    
     return {
         "total_supply": MAX_SUPPLY,
+        "fair_launch": True,
         "premine": {
-            "amount": PREMINE_AMOUNT,
-            "percentage": round((PREMINE_AMOUNT / MAX_SUPPLY) * 100, 2),
-            "wallet_address": genesis_address,
-            "allocation": {
-                "team": {"amount": 1000000, "percentage": 100, "description": "Founder and core team"}
-            },
-            "note": "Premine is held by the founder (Jabo86) for project development and growth."
+            "amount": 0,
+            "percentage": 0,
+            "note": "BRICScoin is a 100% fair launch cryptocurrency. All 21,000,000 BRICS are mineable. No premine, no ICO, no presale."
         },
         "mining_rewards": {
-            "total_available": MAX_SUPPLY - PREMINE_AMOUNT,
+            "total_available": MAX_SUPPLY,
             "mined_so_far": mining_rewards,
-            "percentage_mined": round((mining_rewards / (MAX_SUPPLY - PREMINE_AMOUNT)) * 100, 4),
+            "percentage_mined": round((mining_rewards / MAX_SUPPLY) * 100, 4),
             "current_block_reward": get_mining_reward(blocks_count),
             "halving_interval": HALVING_INTERVAL,
             "next_halving": ((blocks_count // HALVING_INTERVAL) + 1) * HALVING_INTERVAL
