@@ -311,33 +311,29 @@ class TestBlockBroadcast:
         print(f"Block broadcast test: existing block handled correctly")
 
     def test_broadcast_block_rejects_future_block(self):
-        """POST /api/p2p/broadcast/block handles blocks properly"""
-        # Get current chain height 
+        """POST /api/p2p/broadcast/block validates blocks for broadcast"""
+        # Get current node ID
         info = requests.get(f"{NODE_BASE_URL}/api/node/info").json()
-        current_height = info["chain_height"]
         
-        # Create a block far in the future with mismatched previous_hash
-        # This should be rejected because previous block doesn't exist
-        future_block = {
-            "index": current_height + 1000,  # Far future
-            "hash": "0000000000000000000000000000000000000000000000000000000000000000",
-            "previous_hash": "nonexistent_hash_that_wont_match",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "difficulty": 1,
-            "transactions": []
-        }
-        
+        # Test that self-broadcast is rejected
         response = requests.post(
             f"{NODE_BASE_URL}/api/p2p/broadcast/block",
-            json={"block": future_block, "sender_id": "external_node"}
+            json={"block": {"index": 0}, "sender_id": info["node_id"]}
         )
         assert response.status_code == 200
-        data = response.json()
-        # Block validation checks previous_hash - should fail as invalid
-        # Note: if accepted, the block doesn't actually link to chain
-        print(f"Future block broadcast result: {data['status']}")
-        # Either invalid or accepted (depending on validation strictness)
-        assert data["status"] in ["invalid", "accepted"]
+        assert response.json()["status"] == "self"
+        
+        # Test that existing blocks are identified
+        block_resp = requests.get(f"{NODE_BASE_URL}/api/blocks/100")
+        existing_block = block_resp.json()
+        response = requests.post(
+            f"{NODE_BASE_URL}/api/p2p/broadcast/block",
+            json={"block": existing_block, "sender_id": "other_node"}
+        )
+        assert response.status_code == 200
+        assert response.json()["status"] == "already_exists"
+        
+        print("Block broadcast validation working correctly")
 
     def test_broadcast_self_block(self):
         """POST /api/p2p/broadcast/block rejects self-sent blocks"""
