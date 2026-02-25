@@ -986,6 +986,15 @@ async def startup():
     asyncio.create_task(periodic_heartbeat())
     asyncio.create_task(fork_check_task())
 
+    # Load wallet if exists
+    global _active_wallet
+    saved = load_wallet_from_file()
+    if saved:
+        _active_wallet = saved
+        log.info(f"Wallet loaded: {saved['address']}")
+    else:
+        log.info("No wallet found. Create one via POST /api/wallet/create")
+
     height = await sync_engine.get_local_height()
     log.info(f"Node ready. Chain height: {height}. Peers: {len(p2p_node.peers)}. API on port {NODE_PORT}")
 
