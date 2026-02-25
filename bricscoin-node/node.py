@@ -645,8 +645,8 @@ async def receive_block(data: BroadcastBlockRequest):
 
     log.info(f"Accepted broadcast block #{block['index']} from {data.sender_id[:8]}")
 
-    # Re-broadcast to other peers
-    await p2p_node.broadcast_block(block)
+    # Re-broadcast to other peers (exclude sender to avoid loops)
+    asyncio.create_task(p2p_node.broadcast_block(block, exclude_id=data.sender_id))
     return {"status": "accepted"}
 
 @app.post("/api/p2p/broadcast/tx")
