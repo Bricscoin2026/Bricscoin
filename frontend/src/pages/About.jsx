@@ -102,8 +102,11 @@ export default function About() {
         <h1 className="text-4xl sm:text-5xl font-heading font-bold">
           About <span className="gold-text">BricsCoin</span>
         </h1>
+        <p className="text-sm font-medium text-primary/80 tracking-wide">
+          <strong>B</strong>lockchain <strong>R</strong>esilient <strong>I</strong>nfrastructure for <strong>C</strong>onnectivity and <strong>S</strong>ecurity &mdash; A <strong>C</strong>ertified <strong>O</strong>pen <strong>I</strong>nfrastructure <strong>N</strong>etwork
+        </p>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          A decentralized SHA256 Proof-of-Work cryptocurrency. Open source, transparent, and community-driven.
+          A decentralized SHA256 Proof-of-Work cryptocurrency. Open source, transparent, and community-driven. No political, geopolitical, or institutional affiliation of any kind.
         </p>
       </div>
 
