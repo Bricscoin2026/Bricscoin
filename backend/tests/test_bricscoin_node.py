@@ -361,9 +361,9 @@ class TestSyncFromMainServer:
         local_resp = requests.get(f"{NODE_BASE_URL}/api/blocks/0")
         local_genesis = local_resp.json()
         
-        # Get main server genesis
+        # Get main server genesis using /api/blocks/0 endpoint
         try:
-            main_resp = requests.get("https://bricscoin26.org/api/blockchain/blocks/0", timeout=10)
+            main_resp = requests.get("https://bricscoin26.org/api/blocks/0", timeout=10)
             main_genesis = main_resp.json()
             
             assert local_genesis["hash"] == main_genesis["hash"], \
