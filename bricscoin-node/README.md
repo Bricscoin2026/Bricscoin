@@ -1,171 +1,79 @@
-# BricsCoin Node
+# BRICScoin Full Node
 
-Run your own BricsCoin node and help decentralize the network!
+**Blockchain Resilient Infrastructure for Cryptographic Security — Certified Open Innovation Network**
 
-## Quick Start (Docker)
+Run your own independent BRICScoin node to help decentralize the network.
+
+## What does this node do?
+
+1. **Downloads the entire blockchain** from a seed node and validates every block independently
+2. **Stays in sync** — fetches new blocks every 30 seconds
+3. **Validates independently** — verifies hash chains, difficulty, and block integrity
+4. **Serves the blockchain** — provides REST API for wallets/explorers
+5. **P2P networking** — discovers peers, propagates blocks and transactions
+6. **Fork resolution** — follows the longest valid chain (Nakamoto consensus)
+
+## Quick Start
+
+### With Docker (recommended)
 
 ```bash
-# Clone the repository
 git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
 cd Bricscoin/bricscoin-node
-
-# Start your node
 docker compose up -d
-
-# Check logs
-docker compose logs -f
 ```
 
-## Requirements
+The node will:
+- Start MongoDB
+- Connect to the seed node (bricscoin26.org)
+- Download and validate the entire blockchain
+- Start serving the API on port 8333
 
-| Resource | Minimum | Recommended |
-|----------|---------|-------------|
-| CPU | 1 core | 2 cores |
-| RAM | 1 GB | 2 GB |
-| Storage | 10 GB | 20 GB |
-| Bandwidth | 100 Mbps | 1 Gbps |
-| OS | Linux (Ubuntu 22.04+) | Linux |
+### Without Docker
 
-**Estimated Cost**: €4-10/month on Hetzner, DigitalOcean, Vultr, etc.
+```bash
+pip install -r requirements.txt
+export SEED_NODE=https://bricscoin26.org
+export MONGO_URL=mongodb://localhost:27017/
+python node.py
+```
 
 ## Configuration
 
-Edit `.env` file before starting:
-
-```env
-# Your node's unique ID (auto-generated if empty)
-NODE_ID=
-
-# Your node's public URL (required for other nodes to connect)
-NODE_URL=https://your-domain.com
-
-# Seed nodes to connect to (comma-separated)
-SEED_NODES=https://bricscoin26.org
-
-# MongoDB connection (local by default)
-MONGO_URL=mongodb://bricscoin-db:27017
-DB_NAME=bricscoin
-```
-
-## Installation Options
-
-### Option 1: Docker (Recommended)
-
-```bash
-docker compose up -d
-```
-
-### Option 2: Manual Installation
-
-```bash
-# Install dependencies
-apt update && apt install -y python3 python3-pip mongodb
-
-# Install Python packages
-pip3 install -r requirements.txt
-
-# Start MongoDB
-systemctl start mongodb
-
-# Start the node
-python3 server.py
-```
-
-## Ports
-
-| Port | Service | Description |
-|------|---------|-------------|
-| 8001 | HTTP API | REST API for blockchain |
-| 3333 | Stratum | Mining pool (optional) |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SEED_NODE` | `https://bricscoin26.org` | Primary seed node URL |
+| `SEED_NODES` | (empty) | Comma-separated additional seed nodes |
+| `MONGO_URL` | `mongodb://localhost:27017/` | MongoDB connection string |
+| `DB_NAME` | `bricscoin_node` | Database name |
+| `NODE_PORT` | `8333` | API port |
+| `NODE_ID` | (auto-generated) | Unique node identifier |
 
 ## API Endpoints
 
-Once running, your node exposes:
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/node/info` | Node status, chain height, sync progress |
+| `GET /api/blocks?page=1` | Browse blocks |
+| `GET /api/blocks/{index}` | Get specific block |
+| `GET /api/balance/{address}` | Check address balance |
+| `GET /api/network/stats` | Network statistics |
+| `POST /api/node/sync` | Trigger manual sync |
+| `POST /api/node/validate` | Validate entire local chain |
+| `GET /api/p2p/chain/info` | Chain info for P2P |
+| `GET /api/p2p/chain/blocks` | Blocks for P2P sync |
+| `GET /api/p2p/peers` | Known peers |
 
-- `GET /api/network/stats` - Network statistics
-- `GET /api/blocks` - List blocks
-- `GET /api/blocks/{index}` - Get specific block
-- `GET /api/transactions` - List transactions
-- `POST /api/p2p/register` - Register with network
-- `GET /api/p2p/peers` - List connected peers
+## Verify Your Node
 
-## Sync Status
-
-Check if your node is synced:
-
-```bash
-curl http://localhost:8001/api/network/stats
-```
-
-Compare `total_blocks` with the main network at https://bricscoin26.org/api/network/stats
-
-## Firewall Configuration
+After sync, validate the entire chain:
 
 ```bash
-# Allow API port
-ufw allow 8001/tcp
-
-# Allow Stratum (if running mining pool)
-ufw allow 3333/tcp
+curl http://localhost:8333/api/node/validate
 ```
 
-## Running as a Mining Pool
-
-To also run a Stratum mining server:
-
-```bash
-docker compose --profile with-stratum up -d
-```
-
-Miners can connect to: `stratum+tcp://your-domain.com:3333`
-
-## Monitoring
-
-View logs:
-```bash
-docker compose logs -f bricscoin-node
-```
-
-Check node status:
-```bash
-curl http://localhost:8001/api/p2p/peers
-```
-
-## Troubleshooting
-
-### Node not syncing
-```bash
-# Restart with fresh sync
-docker compose down
-docker volume rm bricscoin-node_bricscoin-data
-docker compose up -d
-```
-
-### Port already in use
-```bash
-# Check what's using the port
-lsof -i :8001
-```
-
-### MongoDB connection failed
-```bash
-# Check MongoDB status
-docker compose logs bricscoin-db
-```
-
-## Contributing
-
-Help improve BricsCoin:
-- Report bugs on [Codeberg](https://codeberg.org/Bricscoin_26/Bricscoin/issues)
-- Submit pull requests
-- Run a node!
-
-## Links
-
-- **Main Website**: https://bricscoin26.org
-- **Codeberg**: https://codeberg.org/Bricscoin_26/Bricscoin
-- **Twitter**: https://x.com/Bricscoin26
+Expected: `{"chain_height": XXXX, "valid": true, "errors": [], "total_errors": 0}`
 
 ## License
 
-MIT License - See [LICENSE](../LICENSE)
+MIT
