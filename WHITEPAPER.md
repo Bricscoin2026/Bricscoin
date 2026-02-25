@@ -1,5 +1,5 @@
 # BricsCoin Whitepaper
-## **B**lockchain **R**esilient **I**nfrastructure for **C**onnectivity and **S**ecurity — A **C**ertified **O**pen **I**nfrastructure **N**etwork
+## **B**lockchain **R**esilient **I**nfrastructure for **C**ryptographic **S**ecurity — **C**ertified **O**pen **I**nnovation **N**etwork
 
 **Version 3.2 - February 2026**
 **Author: Jabo86**
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-**BRICSCOIN** — **B**lockchain **R**esilient **I**nfrastructure for **C**onnectivity and **S**ecurity: A **C**ertified **O**pen **I**nfrastructure **N**etwork — is a decentralized cryptocurrency built on the proven SHA-256 Proof-of-Work consensus mechanism, enhanced with post-quantum cryptographic security. The name reflects the project's core mission: building resilient, open, and secure digital infrastructure for a post-quantum world. **It has no political, geopolitical, or institutional affiliation of any kind.**
+**BRICSCOIN** — **B**lockchain **R**esilient **I**nfrastructure for **C**ryptographic **S**ecurity: **C**ertified **O**pen **I**nnovation **N**etwork — is a decentralized cryptocurrency built on the proven SHA-256 Proof-of-Work consensus mechanism, enhanced with post-quantum cryptographic security. The name reflects the project's core mission: building resilient, open, and secure digital infrastructure for a post-quantum world. **It has no political, geopolitical, or institutional affiliation of any kind.**
 
 Designed for hardware mining compatibility, BricsCoin enables anyone with ASIC mining equipment to participate in securing the network and earning rewards. With a fixed supply of 21 million coins, ultra-low transaction fees of 0.000005 BRICS (burned), and a hybrid ECDSA + ML-DSA-65 signature scheme providing quantum resistance, BricsCoin is a fair, transparent, secure, and future-proof digital currency. **100% Fair Launch — no premine, no ICO, no presale.**
 

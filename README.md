@@ -1,6 +1,6 @@
 # BricsCoin
 
-**Blockchain Resilient Infrastructure for Connectivity and Security — A Certified Open Infrastructure Network**
+**Blockchain Resilient Infrastructure for Cryptographic Security — Certified Open Innovation Network**
 
 > *The name BRICSCOIN is a technical acronym. This project has no political, geopolitical, or institutional affiliation of any kind.*
 
