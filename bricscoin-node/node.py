@@ -741,33 +741,50 @@ async def validate_chain():
 
 # ==================== BACKGROUND TASKS ====================
 async def periodic_sync_task():
-    """Sync with peers every 30 seconds."""
-    await asyncio.sleep(10)  # Wait for startup
+    """Sync with the best available peer every 30 seconds."""
+    await asyncio.sleep(10)
     while True:
         try:
-            # Sync from seed node
+            # Always sync from seed
             await sync_engine.sync_new_blocks(CENTRAL_NODE)
-            # Sync from known peers
-            for peer_url in list(p2p_node.known_peers.keys()):
-                await sync_engine.sync_new_blocks(peer_url)
+            # Also sync from known peers (prefer highest chain)
+            best_url = p2p_node.get_best_peer_url()
+            if best_url and best_url != CENTRAL_NODE:
+                await sync_engine.sync_new_blocks(best_url)
         except Exception as e:
             log.debug(f"Periodic sync error: {e}")
         await asyncio.sleep(30)
 
 async def periodic_peer_discovery():
-    """Discover new peers every 5 minutes."""
-    await asyncio.sleep(5)
+    """Discover new peers every 2 minutes."""
+    await asyncio.sleep(15)
     while True:
-        await p2p_node.discover_peers()
-        await asyncio.sleep(300)
+        try:
+            await p2p_node.discover_peers()
+        except Exception:
+            pass
+        await asyncio.sleep(120)
+
+async def periodic_heartbeat():
+    """Health-check peers every 60 seconds."""
+    await asyncio.sleep(30)
+    while True:
+        try:
+            await p2p_node.heartbeat()
+        except Exception:
+            pass
+        await asyncio.sleep(PEER_HEARTBEAT_INTERVAL)
 
 async def fork_check_task():
     """Check for forks every 2 minutes."""
     await asyncio.sleep(60)
     while True:
         try:
-            for peer_url in [CENTRAL_NODE] + list(p2p_node.known_peers.keys()):
-                await resolve_fork(peer_url)
+            # Check seed node
+            await resolve_fork(CENTRAL_NODE)
+            # Check peers
+            for nid, info in list(p2p_node.peers.items()):
+                await resolve_fork(info["url"])
         except Exception:
             pass
         await asyncio.sleep(120)
@@ -775,9 +792,10 @@ async def fork_check_task():
 @app.on_event("startup")
 async def startup():
     log.info(f"BRICScoin Node {NODE_VERSION} starting...")
-    log.info(f"Node ID: {NODE_ID}")
+    log.info(f"Node ID:   {NODE_ID}")
+    log.info(f"Node URL:  {NODE_URL or '(not set — P2P registration disabled)'}")
     log.info(f"Seed node: {CENTRAL_NODE}")
-    log.info(f"Database: {DB_NAME}")
+    log.info(f"Database:  {DB_NAME}")
 
     # Create indexes
     await db.blocks.create_index("index", unique=True)
@@ -785,8 +803,12 @@ async def startup():
     await db.transactions.create_index("id")
     await db.transactions.create_index("sender")
     await db.transactions.create_index("recipient")
+    await db.peers.create_index("node_id", unique=True)
 
-    # Bootstrap from seed
+    # Load peers from previous session
+    await p2p_node.load_peers_from_db()
+
+    # Bootstrap blockchain from seed
     local_height = await sync_engine.get_local_height()
     if local_height == 0:
         log.info("Empty chain — starting full bootstrap from seed node...")
@@ -795,13 +817,22 @@ async def startup():
         log.info(f"Existing chain with {local_height} blocks. Syncing new blocks...")
         await sync_engine.sync_new_blocks(CENTRAL_NODE)
 
+    # Register with seed nodes (announce ourselves to the network)
+    if NODE_URL:
+        for seed in p2p_node.seed_nodes:
+            await p2p_node.register_with_node(seed)
+        log.info(f"Announced to {len(p2p_node.seed_nodes)} seed node(s)")
+    else:
+        log.warning("NODE_URL not set — this node can sync but won't be discoverable by others")
+
     # Start background tasks
     asyncio.create_task(periodic_sync_task())
     asyncio.create_task(periodic_peer_discovery())
+    asyncio.create_task(periodic_heartbeat())
     asyncio.create_task(fork_check_task())
 
     height = await sync_engine.get_local_height()
-    log.info(f"Node ready. Chain height: {height}. API on port {NODE_PORT}")
+    log.info(f"Node ready. Chain height: {height}. Peers: {len(p2p_node.peers)}. API on port {NODE_PORT}")
 
 # ==================== ENTRYPOINT ====================
 if __name__ == "__main__":
