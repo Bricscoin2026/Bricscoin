@@ -2408,6 +2408,14 @@ async def download_file(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_path, filename=filename, media_type="application/octet-stream")
 
+@api_router.get("/node/download")
+async def download_node():
+    """Download the standalone BRICScoin node package"""
+    file_path = os.path.join(os.path.dirname(__file__), "static", "downloads", "bricscoin-node-v2.zip")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Node package not found")
+    return FileResponse(file_path, filename="bricscoin-node-v2.zip", media_type="application/zip")
+
 # Include the router
 app.include_router(api_router)
 
