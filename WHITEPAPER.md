@@ -165,7 +165,7 @@ This design ensures the chain remains stable and responsive even with significan
 
 - **Max Supply**: 21,000,000 BRICS (hard cap)
 - **Block Reward**: 50 BRICS (halves every 210,000 blocks)
-- **Premine**: 1,000,000 BRICS (genesis allocation for development)
+- **Premine**: None — 100% Fair Launch. All 21,000,000 BRICS are exclusively mineable.
 
 ### 6.2 Deflationary Fee Model
 
