@@ -714,9 +714,10 @@ export default function Network() {
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-heading font-bold text-lg gold-text">Run Your Own Node</h3>
+                <h3 className="font-heading font-bold text-lg gold-text">Run Your Own Full Node</h3>
                 <p className="text-muted-foreground text-sm mt-1">
-                  Download the Docker image and join the BricsCoin network. Mine blocks and earn rewards!
+                  Help decentralize BricsCoin! Download and run a full node with P2P networking.
+                  Your node will sync the blockchain, validate blocks, and connect to the network.
                 </p>
               </div>
               <div className="flex gap-2">
@@ -724,23 +725,33 @@ export default function Network() {
                   variant="outline"
                   className="border-white/20"
                   onClick={() => {
-                    navigator.clipboard.writeText("docker-compose up -d");
+                    navigator.clipboard.writeText("docker compose up -d");
                     toast.success("Command copied!");
                   }}
                   data-testid="copy-docker-cmd-btn"
                 >
+                  <Copy className="w-4 h-4 mr-2" />
                   Copy Docker Command
                 </Button>
               </div>
             </div>
             <div className="mt-4 p-4 bg-background/50 rounded-sm border border-white/10">
               <pre className="font-mono text-xs text-muted-foreground overflow-x-auto">
-{`# Quick Start
+{`# Quick Start - BRICScoin Full Node v2.0
 git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
-cd Bricscoin26
-docker-compose up -d
+cd Bricscoin/bricscoin-node
+cp .env.example .env
 
-# Your node will sync with the network automatically!`}
+# IMPORTANT: Set your public URL in .env for P2P
+# NODE_URL=https://your-node.example.com
+
+docker compose up -d
+
+# Your node will:
+# 1. Sync the entire blockchain from bricscoin26.org
+# 2. Register with the P2P network
+# 3. Discover and connect to other nodes
+# 4. Validate all blocks independently`}
               </pre>
             </div>
           </CardContent>
