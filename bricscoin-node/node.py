@@ -55,6 +55,10 @@ log = logging.getLogger("bricscoin-node")
 mongo_client = AsyncIOMotorClient(MONGO_URL)
 db = mongo_client[DB_NAME]
 
+# Generate stable NODE_ID from DB_NAME if not set (persists across restarts)
+if not NODE_ID:
+    NODE_ID = hashlib.sha256(f"{DB_NAME}-{MONGO_URL}".encode()).hexdigest()[:16]
+
 # ==================== PEER MANAGEMENT ====================
 peers: dict[str, dict] = {}  # url -> {last_seen, height, node_id}
 sync_lock = asyncio.Lock()
