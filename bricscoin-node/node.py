@@ -952,6 +952,19 @@ async def startup():
     log.info(f"Seed node: {CENTRAL_NODE}")
     log.info(f"Database:  {DB_NAME}")
 
+    # Wait for MongoDB to be ready (critical for Docker Compose)
+    for attempt in range(30):
+        try:
+            await db.command("ping")
+            log.info("MongoDB connected!")
+            break
+        except Exception:
+            log.info(f"Waiting for MongoDB... ({attempt + 1}/30)")
+            await asyncio.sleep(2)
+    else:
+        log.error("Failed to connect to MongoDB after 60 seconds!")
+        return
+
     # Create indexes
     await db.blocks.create_index("index", unique=True)
     await db.blocks.create_index("hash")
