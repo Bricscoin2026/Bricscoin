@@ -291,58 +291,192 @@ sync_engine = SyncEngine()
 
 # ==================== P2P PROTOCOL ====================
 class P2PNode:
-    """Manages peer connections and block/transaction propagation."""
+    """Manages peer connections, discovery, health and propagation."""
 
     def __init__(self):
-        self.known_peers: dict[str, dict] = {}  # url -> info
+        self.peers: dict[str, dict] = {}  # node_id -> {url, height, last_seen, version}
         self.seed_nodes = [CENTRAL_NODE]
-        # Add extra seeds from env
         extra = os.environ.get("SEED_NODES", "")
         if extra:
             self.seed_nodes += [s.strip() for s in extra.split(",") if s.strip()]
 
+    # ---------- persistence ----------
+    async def load_peers_from_db(self):
+        """Load previously known peers from MongoDB."""
+        docs = await db.peers.find({}, {"_id": 0}).to_list(200)
+        for doc in docs:
+            nid = doc.get("node_id", "")
+            if nid and nid != NODE_ID:
+                self.peers[nid] = doc
+        if self.peers:
+            log.info(f"Loaded {len(self.peers)} peers from database")
+
+    async def save_peer(self, node_id: str, info: dict):
+        """Persist a single peer to MongoDB."""
+        info_copy = {**info, "node_id": node_id}
+        await db.peers.update_one(
+            {"node_id": node_id}, {"$set": info_copy}, upsert=True
+        )
+
+    async def remove_peer_from_db(self, node_id: str):
+        await db.peers.delete_one({"node_id": node_id})
+
+    # ---------- registration ----------
+    async def register_with_node(self, target_url: str) -> bool:
+        """Register ourselves with a remote node and learn about it."""
+        if not NODE_URL:
+            return False
+        try:
+            height = await sync_engine.get_local_height()
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(
+                    f"{target_url}/api/p2p/register",
+                    json={
+                        "node_id": NODE_ID,
+                        "url": NODE_URL,
+                        "version": NODE_VERSION,
+                        "chain_height": height,
+                    },
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    remote_id = data.get("node_id", "")
+                    if remote_id and remote_id != NODE_ID:
+                        peer_info = {
+                            "url": target_url,
+                            "version": data.get("version", "?"),
+                            "height": data.get("chain_height", 0),
+                            "last_seen": datetime.now(timezone.utc).isoformat(),
+                        }
+                        self.peers[remote_id] = peer_info
+                        await self.save_peer(remote_id, peer_info)
+                        log.info(f"Registered with {target_url} (id={remote_id[:8]})")
+                    return True
+        except Exception as e:
+            log.debug(f"Failed to register with {target_url}: {e}")
+        return False
+
+    async def register_peer_locally(self, node_id: str, url: str, version: str, height: int):
+        """Record a peer that registered with us."""
+        if node_id == NODE_ID:
+            return
+        peer_info = {
+            "url": url,
+            "version": version,
+            "height": height,
+            "last_seen": datetime.now(timezone.utc).isoformat(),
+        }
+        self.peers[node_id] = peer_info
+        await self.save_peer(node_id, peer_info)
+
+    # ---------- discovery ----------
     async def discover_peers(self):
-        """Ask seed nodes for their peer list."""
-        for seed in self.seed_nodes:
+        """Ask seed nodes and known peers for their peer lists, then register with new ones."""
+        sources = list(self.seed_nodes) + [p["url"] for p in self.peers.values()]
+        new_urls: list[str] = []
+
+        for source_url in sources:
             try:
                 async with httpx.AsyncClient(timeout=10.0) as client:
-                    resp = await client.get(f"{seed}/api/p2p/peers")
+                    resp = await client.get(f"{source_url}/api/p2p/peers")
+                    if resp.status_code == 200:
+                        for p in resp.json().get("peers", []):
+                            url = p.get("url", "")
+                            nid = p.get("node_id", "")
+                            if url and nid != NODE_ID and nid not in self.peers:
+                                new_urls.append(url)
+            except Exception:
+                pass
+
+        # Register with newly discovered peers
+        registered = 0
+        for url in set(new_urls):
+            if await self.register_with_node(url):
+                registered += 1
+        if registered:
+            log.info(f"Discovered and registered with {registered} new peers (total: {len(self.peers)})")
+
+        # Also re-register with seeds to keep ourselves visible
+        for seed in self.seed_nodes:
+            await self.register_with_node(seed)
+
+    # ---------- heartbeat ----------
+    async def heartbeat(self):
+        """Ping all peers; remove unresponsive ones."""
+        dead = []
+        for nid, info in list(self.peers.items()):
+            try:
+                async with httpx.AsyncClient(timeout=8.0) as client:
+                    resp = await client.get(f"{info['url']}/api/p2p/chain/info")
                     if resp.status_code == 200:
                         data = resp.json()
-                        for p in data.get("peers", []):
-                            url = p.get("url", "")
-                            if url and url not in self.known_peers:
-                                self.known_peers[url] = {
-                                    "last_seen": datetime.now(timezone.utc).isoformat(),
-                                    "height": p.get("height", 0)
-                                }
-                        log.info(f"Discovered {len(self.known_peers)} peers from {seed}")
+                        info["height"] = data.get("height", 0)
+                        info["last_seen"] = datetime.now(timezone.utc).isoformat()
+                        await self.save_peer(nid, info)
+                    else:
+                        dead.append(nid)
             except Exception:
-                pass
+                # Check if peer has been unreachable for too long
+                try:
+                    last = datetime.fromisoformat(info.get("last_seen", "2000-01-01").replace("Z", "+00:00"))
+                    if (datetime.now(timezone.utc) - last).total_seconds() > PEER_MAX_AGE:
+                        dead.append(nid)
+                except Exception:
+                    dead.append(nid)
 
-    async def broadcast_block(self, block: dict):
-        """Broadcast a new block to all known peers."""
-        for peer_url in list(self.known_peers.keys()):
-            try:
-                async with httpx.AsyncClient(timeout=10.0) as client:
-                    await client.post(
-                        f"{peer_url}/api/p2p/broadcast/block",
-                        json={"block": block, "sender_id": NODE_ID}
-                    )
-            except Exception:
-                pass
+        for nid in dead:
+            url = self.peers.pop(nid, {}).get("url", "?")
+            await self.remove_peer_from_db(nid)
+            log.info(f"Removed stale peer {nid[:8]} ({url})")
 
-    async def broadcast_transaction(self, tx: dict):
-        """Broadcast a new transaction to all known peers."""
-        for peer_url in list(self.known_peers.keys()):
-            try:
-                async with httpx.AsyncClient(timeout=5.0) as client:
-                    await client.post(
-                        f"{peer_url}/api/p2p/broadcast/tx",
-                        json={"transaction": tx, "sender_id": NODE_ID}
-                    )
-            except Exception:
-                pass
+    # ---------- broadcast ----------
+    async def broadcast_block(self, block: dict, exclude_id: str = ""):
+        """Broadcast a block to all peers except the sender."""
+        tasks = []
+        for nid, info in list(self.peers.items()):
+            if nid == exclude_id:
+                continue
+            tasks.append(self._send_block(info["url"], block))
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    async def _send_block(self, url: str, block: dict):
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                await client.post(
+                    f"{url}/api/p2p/broadcast/block",
+                    json={"block": block, "sender_id": NODE_ID},
+                )
+        except Exception:
+            pass
+
+    async def broadcast_transaction(self, tx: dict, exclude_id: str = ""):
+        """Broadcast a transaction to all peers."""
+        tasks = []
+        for nid, info in list(self.peers.items()):
+            if nid == exclude_id:
+                continue
+            tasks.append(self._send_tx(info["url"], tx))
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    async def _send_tx(self, url: str, tx: dict):
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                await client.post(
+                    f"{url}/api/p2p/broadcast/tx",
+                    json={"transaction": tx, "sender_id": NODE_ID},
+                )
+        except Exception:
+            pass
+
+    # ---------- best peer ----------
+    def get_best_peer_url(self) -> Optional[str]:
+        """Return URL of the peer with the highest chain."""
+        if not self.peers:
+            return None
+        best = max(self.peers.values(), key=lambda p: p.get("height", 0))
+        return best["url"] if best.get("height", 0) > 0 else None
 
 
 p2p_node = P2PNode()
