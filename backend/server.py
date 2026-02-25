@@ -94,10 +94,10 @@ HALVING_INTERVAL = 210_000
 DIFFICULTY_ADJUSTMENT_INTERVAL = 2016
 TARGET_BLOCK_TIME = 600  # 10 minutes in seconds
 INITIAL_DIFFICULTY = 1000000  # Bitcoin-style difficulty (higher = harder)
-PREMINE_AMOUNT = 1_000_000  # Initial premine for development/distribution
+PREMINE_AMOUNT = 0  # No premine - 100% fair launch, all 21M coins are mineable
 TRANSACTION_FEE = 0.000005  # Fee per transaction in BRICS
 
-# Genesis wallet for premine (will be created on first run)
+# Genesis wallet (legacy, no longer receives premine)
 GENESIS_WALLET_ADDRESS = None  # Set dynamically when genesis block is created
 
 # P2P Network Configuration
@@ -402,16 +402,16 @@ async def get_current_difficulty() -> int:
     return new_difficulty
 
 async def get_circulating_supply() -> float:
-    """Calculate total circulating supply (premine + mining rewards)"""
+    """Calculate total circulating supply from mining rewards only (no premine)"""
     blocks_count = await db.blocks.count_documents({})
-    supply = PREMINE_AMOUNT  # Start with premine
+    supply = 0
     # Start from block 1 (not 0) - genesis block doesn't give mining reward
     for i in range(1, blocks_count):
         supply += get_mining_reward(i)
     return min(supply, MAX_SUPPLY)
 
 async def create_genesis_block():
-    """Create genesis block with premine transaction if it doesn't exist"""
+    """Create genesis block (no premine - 100% fair launch)"""
     global GENESIS_WALLET_ADDRESS
     
     existing = await db.blocks.find_one({"index": 0})
@@ -421,49 +421,10 @@ async def create_genesis_block():
             GENESIS_WALLET_ADDRESS = existing['transactions'][0].get('recipient')
         return
     
-    # Create genesis wallet
-    mnemo = Mnemonic("english")
-    seed_phrase = mnemo.generate(strength=128)
-    seed = mnemo.to_seed(seed_phrase)
-    private_key = SigningKey.from_string(seed[:32], curve=SECP256k1)
-    public_key = private_key.get_verifying_key()
-    
-    # Generate address
-    public_key_hex = public_key.to_string().hex()
-    address_hash = hashlib.sha256(public_key_hex.encode()).hexdigest()[:40]
-    genesis_address = f"BRICS{address_hash}"
-    GENESIS_WALLET_ADDRESS = genesis_address
-    
-    # Store genesis wallet in database
-    genesis_wallet = {
-        "address": genesis_address,
-        "public_key": public_key_hex,
-        "private_key": private_key.to_string().hex(),
-        "seed_phrase": seed_phrase,
-        "name": "Genesis Wallet (Premine)",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "is_genesis": True
-    }
-    await db.genesis_wallet.delete_many({})  # Clear old genesis wallet
-    await db.genesis_wallet.insert_one(genesis_wallet)
-    
-    # Create premine transaction
-    premine_tx = {
-        "id": "genesis-premine-tx",
-        "sender": "COINBASE",
-        "recipient": genesis_address,
-        "amount": PREMINE_AMOUNT,
-        "fee": 0,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "signature": "genesis",
-        "confirmed": True,
-        "block_index": 0
-    }
-    
     genesis_block = {
         "index": 0,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "transactions": [premine_tx],
+        "transactions": [],
         "proof": 0,
         "previous_hash": "0" * 64,
         "nonce": 0,
@@ -480,11 +441,7 @@ async def create_genesis_block():
     )
     
     await db.blocks.insert_one(genesis_block)
-    await db.transactions.insert_one(premine_tx)
-    
-    logging.info(f"Genesis block created with premine to {genesis_address}")
-    logging.info(f"Genesis wallet seed phrase: {seed_phrase}")
-    logging.info(f"IMPORTANT: Save this seed phrase securely!")
+    logging.info("Genesis block created (no premine - 100% fair launch)")
 
 # ==================== P2P NETWORK FUNCTIONS ====================
 async def register_with_peer(peer_url: str) -> bool:
