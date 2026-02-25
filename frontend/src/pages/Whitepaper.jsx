@@ -160,7 +160,16 @@ export default function Whitepaper() {
           {/* ABSTRACT */}
           <SectionHeading id="abstract" level={2}>Abstract</SectionHeading>
           <p>
-            <strong>BRICSCOIN</strong> &mdash; <strong>B</strong>lockchain <strong>R</strong>esilient <strong>I</strong>nfrastructure for <strong>C</strong>onnectivity and <strong>S</strong>ecurity: A <strong>C</strong>ertified <strong>O</strong>pen <strong>I</strong>nfrastructure <strong>N</strong>etwork &mdash; is a decentralized cryptocurrency built on the proven SHA-256 Proof-of-Work consensus mechanism, enhanced with <strong>post-quantum cryptographic security</strong>. The name reflects the project's core mission: building resilient, open, and secure digital infrastructure for a post-quantum world. It has no political, geopolitical, or institutional affiliation of any kind.
+            <strong>BRICSCOIN</strong> &mdash;{" "}
+            <span className="text-base font-bold text-primary">B</span>lockchain{" "}
+            <span className="text-base font-bold text-primary">R</span>esilient{" "}
+            <span className="text-base font-bold text-primary">I</span>nfrastructure for{" "}
+            <span className="text-base font-bold text-primary">C</span>ryptographic{" "}
+            <span className="text-base font-bold text-primary">S</span>ecurity:{" "}
+            <span className="text-base font-bold text-primary">C</span>ertified{" "}
+            <span className="text-base font-bold text-primary">O</span>pen{" "}
+            <span className="text-base font-bold text-primary">I</span>nnovation{" "}
+            <span className="text-base font-bold text-primary">N</span>etwork &mdash; is a decentralized cryptocurrency built on the proven SHA-256 Proof-of-Work consensus mechanism, enhanced with <strong>post-quantum cryptographic security</strong>. The name reflects the project's core mission: building resilient, open, and secure digital infrastructure for a post-quantum world. It has no political, geopolitical, or institutional affiliation of any kind.
           </p>
           <p className="mt-3">
             With a fixed supply of <strong>21,000,000 coins</strong>, ultra-low transaction fees of <strong>0.000005 BRICS</strong> (burned), and a hybrid <strong>ECDSA + ML-DSA-65</strong> signature scheme providing quantum resistance, BricsCoin is a fair, transparent, secure, and future-proof digital currency.
