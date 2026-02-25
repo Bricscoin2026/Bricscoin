@@ -1978,11 +1978,12 @@ async def get_address_info(request: Request, address: str):
 # ==================== P2P ENDPOINTS ====================
 @api_router.post("/p2p/register")
 async def register_peer(peer: PeerRegister):
-    """Register a new peer node"""
+    """Register a new peer node and optionally register back (bidirectional)"""
     peer_data = {
         "url": peer.url,
         "node_id": peer.node_id,
         "version": peer.version,
+        "height": getattr(peer, 'chain_height', 0),
         "last_seen": datetime.now(timezone.utc).isoformat()
     }
     
@@ -1996,14 +1997,19 @@ async def register_peer(peer: PeerRegister):
         upsert=True
     )
     
-    logging.info(f"Peer registered: {peer.node_id} at {peer.url}")
+    logging.info(f"Peer registered: {peer.node_id[:8]} at {peer.url}")
     
     blocks_count = await db.blocks.count_documents({})
     
+    # Try to register back (bidirectional P2P)
+    if NODE_URL and peer.node_id != NODE_ID:
+        asyncio.create_task(register_with_peer(peer.url))
+    
     return {
         "node_id": NODE_ID,
-        "version": "1.0.0",
+        "version": "2.0.0",
         "blocks_height": blocks_count,
+        "chain_height": blocks_count,
         "message": "Peer registered successfully"
     }
 
