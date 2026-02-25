@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Globe, Server, Users, RefreshCw, Shield, Activity,
-  Blocks, Copy, Pickaxe, Link as LinkIcon, Wifi, WifiOff
+  Blocks, Copy, Pickaxe, Link as LinkIcon, Wifi, WifiOff, Download
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
