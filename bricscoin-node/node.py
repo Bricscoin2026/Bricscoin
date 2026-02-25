@@ -714,8 +714,14 @@ async def get_balance(address: str):
 async def trigger_sync():
     if sync_engine.syncing:
         return {"status": "already_syncing", "progress": sync_engine.sync_progress}
-    asyncio.create_task(sync_engine.bootstrap_from_seed(CENTRAL_NODE))
-    return {"status": "sync_started"}
+    # Sync from seed + best peer
+    async def do_sync():
+        await sync_engine.bootstrap_from_seed(CENTRAL_NODE)
+        best = p2p_node.get_best_peer_url()
+        if best and best != CENTRAL_NODE:
+            await sync_engine.sync_new_blocks(best)
+    asyncio.create_task(do_sync())
+    return {"status": "sync_started", "seed": CENTRAL_NODE, "peers": len(p2p_node.peers)}
 
 @app.post("/api/node/validate")
 async def validate_chain():
