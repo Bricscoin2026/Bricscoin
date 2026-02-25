@@ -245,12 +245,19 @@ class SyncEngine:
                     return
 
                 blocks = resp.json().get("blocks", [])
+                # Deduplicate: keep last occurrence per index
+                seen = {}
+                for block in blocks:
+                    seen[block["index"]] = block
+                unique_blocks = [seen[i] for i in sorted(seen.keys())]
+
                 prev_block = await self.get_local_tip()
                 added = 0
 
-                for block in blocks:
-                    if await db.blocks.find_one({"index": block["index"]}):
-                        prev_block = block
+                for block in unique_blocks:
+                    existing = await db.blocks.find_one({"index": block["index"]}, {"_id": 0})
+                    if existing:
+                        prev_block = existing
                         continue
                     valid, err = validate_block_standalone(block, prev_block)
                     if valid:
