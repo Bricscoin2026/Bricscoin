@@ -592,7 +592,38 @@ export default function Network() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y divide-white/5">
-              {/* Stratum Pool - Always visible */}
+              {/* Main Seed Node - Always visible */}
+              <div
+                className="flex items-center justify-between p-4 table-row-hover bg-primary/5"
+                data-testid="peer-seed-node"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-sm bg-primary/20 flex items-center justify-center">
+                    <Globe className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-mono text-sm text-primary font-bold">mainnet</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      https://bricscoin26.org
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-right">
+                  <div className="hidden sm:block">
+                    <p className="text-xs text-muted-foreground">Height</p>
+                    <p className="font-mono text-sm">{stats?.total_blocks?.toLocaleString() || "..."}</p>
+                  </div>
+                  <div className="hidden sm:block">
+                    <p className="text-xs text-muted-foreground">Version</p>
+                    <p className="font-mono text-sm">v2.0.0</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs font-medium bg-emerald-500/20 text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Seed Node
+                  </span>
+                </div>
+              </div>
+              {/* Stratum Pool */}
               <div
                 className="flex items-center justify-between p-4 table-row-hover bg-orange-500/5"
                 data-testid="peer-stratum-pool"
@@ -609,32 +640,65 @@ export default function Network() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="confirmed-badge">Active</span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs font-medium bg-orange-500/20 text-orange-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                    Mining
+                  </span>
                 </div>
               </div>
               {/* Dynamic Peers */}
-              {peers.map((peer, idx) => (
-                <div
-                  key={peer.node_id || idx}
-                  className="flex items-center justify-between p-4 table-row-hover"
-                  data-testid={`peer-${peer.node_id}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-sm bg-secondary/20 flex items-center justify-center">
-                      <Server className="w-5 h-5 text-secondary" />
+              {peers.map((peer, idx) => {
+                const isRecent = peer.last_seen && 
+                  (Date.now() - new Date(peer.last_seen).getTime()) < 600000;
+                return (
+                  <div
+                    key={peer.node_id || idx}
+                    className="flex items-center justify-between p-4 table-row-hover"
+                    data-testid={`peer-${peer.node_id}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-sm bg-secondary/20 flex items-center justify-center">
+                        <Server className="w-5 h-5 text-secondary" />
+                      </div>
+                      <div>
+                        <p className="font-mono text-sm">{peer.node_id?.slice(0, 12) || "unknown"}</p>
+                        <p className="text-xs text-muted-foreground font-mono truncate max-w-[200px] sm:max-w-none">
+                          {peer.url}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-mono text-sm">{peer.node_id}</p>
-                      <p className="text-xs text-muted-foreground font-mono">
-                        {peer.url}
-                      </p>
+                    <div className="flex items-center gap-4 text-right">
+                      {peer.height > 0 && (
+                        <div className="hidden sm:block">
+                          <p className="text-xs text-muted-foreground">Height</p>
+                          <p className="font-mono text-sm">{peer.height?.toLocaleString()}</p>
+                        </div>
+                      )}
+                      {peer.version && (
+                        <div className="hidden sm:block">
+                          <p className="text-xs text-muted-foreground">Version</p>
+                          <p className="font-mono text-sm">v{peer.version}</p>
+                        </div>
+                      )}
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs font-medium ${
+                        isRecent 
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-zinc-500/20 text-zinc-400"
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          isRecent ? "bg-emerald-400 animate-pulse" : "bg-zinc-400"
+                        }`} />
+                        {isRecent ? "Online" : "Stale"}
+                      </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="confirmed-badge">Connected</span>
-                  </div>
+                );
+              })}
+              {peers.length === 0 && (
+                <div className="p-8 text-center text-muted-foreground text-sm">
+                  No external peers connected yet. Run your own node to join the network!
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
