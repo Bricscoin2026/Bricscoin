@@ -4,12 +4,15 @@ services:
     container_name: bricscoin-node
     ports:
       - "8333:8333"
+    env_file:
+      - .env
     environment:
-      - SEED_NODE=https://bricscoin26.org
+      - SEED_NODE=${SEED_NODE:-https://bricscoin26.org}
       - MONGO_URL=mongodb://mongo:27017/
-      - DB_NAME=bricscoin_node
+      - DB_NAME=${DB_NAME:-bricscoin_node}
       - NODE_PORT=8333
-      - NODE_ID=node-${HOSTNAME:-default}
+      - NODE_URL=${NODE_URL:-}
+      - NODE_ID=${NODE_ID:-}
     depends_on:
       - mongo
     restart: unless-stopped
