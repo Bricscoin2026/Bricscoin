@@ -402,21 +402,22 @@ export default function Network() {
             </div>
             <div className="mt-4 p-4 bg-background/50 rounded-sm border border-white/10">
               <pre className="font-mono text-xs text-muted-foreground overflow-x-auto">
-{`# BRICScoin Full Node v2.0 — Quick Start
-git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
-cd Bricscoin/bricscoin-node
-cp .env.example .env
-
-# Set your public URL in .env for P2P discovery:
-# NODE_URL=https://your-node.example.com
-
+{`# BRICScoin Full Node v2.0 + Integrated Wallet
+# Option 1: Docker (recommended)
 docker compose up -d
 
+# Option 2: Manual
+pip install -r requirements.txt
+python node.py
+
+# Create your wallet:
+# curl -X POST http://localhost:8333/api/wallet/create
+#
 # Your node will automatically:
 #   Sync the entire blockchain
 #   Register with the P2P network
 #   Validate all blocks independently
-#   Stay in sync with new blocks`}
+#   Include a built-in wallet for sending/receiving BRICS`}
               </pre>
             </div>
           </CardContent>
