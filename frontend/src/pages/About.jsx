@@ -287,12 +287,12 @@ export default function About() {
         </CardContent>
       </Card>
 
-      {/* Tokenomics - Premine Transparency */}
+      {/* Tokenomics - 100% Fair Launch */}
       <Card className="bg-card/50 border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Coins className="w-5 h-5 text-primary" />
-            Tokenomics & Transparency
+            Tokenomics & Fair Launch
             <Badge variant="outline" className="ml-2 text-xs">Live Data</Badge>
           </CardTitle>
         </CardHeader>
@@ -303,48 +303,16 @@ export default function About() {
               <p className="text-2xl font-bold">{tokenomics?.total_supply?.toLocaleString() || "21,000,000"} BRICS</p>
               <p className="text-sm text-muted-foreground">Fixed, like Bitcoin</p>
             </div>
-            <div className="p-4 bg-yellow-500/5 rounded-lg border border-yellow-500/20">
-              <h4 className="font-bold text-yellow-500 mb-2">Premine ({tokenomics?.premine?.percentage || 4.76}%)</h4>
-              <p className="text-2xl font-bold">{tokenomics?.premine?.amount?.toLocaleString() || "1,000,000"} BRICS</p>
-              <p className="text-sm text-muted-foreground">Development & marketing</p>
+            <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
+              <h4 className="font-bold text-green-500 mb-2">100% Fair Launch</h4>
+              <p className="text-2xl font-bold">No Premine</p>
+              <p className="text-sm text-muted-foreground">All 21M BRICS are exclusively mineable</p>
             </div>
-          </div>
-          
-          <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <h4 className="font-bold mb-3">Premine Allocation (Transparent)</h4>
-            <div className="space-y-2">
-              {tokenomics?.premine?.allocation ? (
-                Object.entries(tokenomics.premine.allocation).map(([key, value]) => (
-                  <div key={key} className="flex justify-between items-center">
-                    <div>
-                      <span className="text-sm text-muted-foreground capitalize">{key} ({value.percentage}%)</span>
-                      <p className="text-xs text-muted-foreground/60">{value.description}</p>
-                    </div>
-                    <span className="font-mono">{value.amount?.toLocaleString()} BRICS</span>
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-sm text-muted-foreground">Team (100%)</span>
-                      <p className="text-xs text-muted-foreground/60">Founder and core team</p>
-                    </div>
-                    <span className="font-mono">1,000,000 BRICS</span>
-                  </div>
-                </>
-              )}
-            </div>
-            {tokenomics?.premine?.note && (
-              <p className="text-xs text-muted-foreground/70 mt-3 italic">
-                {tokenomics.premine.note}
-              </p>
-            )}
           </div>
 
           <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
-            <h4 className="font-bold text-green-500 mb-2">Mining Rewards (95.24%)</h4>
-            <p className="text-2xl font-bold">{tokenomics?.mining_rewards?.total_available?.toLocaleString() || "20,000,000"} BRICS</p>
+            <h4 className="font-bold text-green-500 mb-2">Mining Rewards (100%)</h4>
+            <p className="text-2xl font-bold">{tokenomics?.mining_rewards?.total_available?.toLocaleString() || "21,000,000"} BRICS</p>
             <p className="text-sm text-muted-foreground">
               Block reward: {tokenomics?.mining_rewards?.current_block_reward || 50} BRICS, halving every {tokenomics?.mining_rewards?.halving_interval?.toLocaleString() || "210,000"} blocks.
             </p>
