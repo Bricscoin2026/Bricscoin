@@ -2533,6 +2533,40 @@ async def periodic_miners_cleanup():
             logging.error(f"Miners cleanup error: {e}")
         await asyncio.sleep(900)  # Ogni 15 minuti
 
+
+async def periodic_peer_heartbeat():
+    """Health-check peers every 60s, remove stale ones after PEER_MAX_AGE"""
+    while True:
+        await asyncio.sleep(60)
+        dead = []
+        for nid, info in list(connected_peers.items()):
+            try:
+                async with httpx.AsyncClient(timeout=8.0) as client:
+                    resp = await client.get(f"{info['url']}/api/p2p/chain/info")
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        info["height"] = data.get("height", 0)
+                        info["last_seen"] = datetime.now(timezone.utc).isoformat()
+                        await db.peers.update_one(
+                            {"node_id": nid}, {"$set": info}, upsert=True
+                        )
+                    else:
+                        dead.append(nid)
+            except Exception:
+                try:
+                    last = datetime.fromisoformat(
+                        info.get("last_seen", "2000-01-01").replace("Z", "+00:00")
+                    )
+                    if (datetime.now(timezone.utc) - last).total_seconds() > PEER_MAX_AGE:
+                        dead.append(nid)
+                except Exception:
+                    dead.append(nid)
+
+        for nid in dead:
+            url = connected_peers.pop(nid, {}).get("url", "?")
+            await db.peers.delete_one({"node_id": nid})
+            logging.info(f"Removed stale peer {nid[:8]} ({url})")
+
 async def load_peers_from_db():
     """Load saved peers from database on startup"""
     try:
