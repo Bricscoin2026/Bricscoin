@@ -2,26 +2,21 @@ import { useEffect, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Blocks, ArrowRightLeft, ChevronLeft, ChevronRight, Search,
-  TrendingUp, Activity, Clock, Shield, Server, Pickaxe,
-  Network as NetworkIcon, RefreshCw, Globe, Copy, Users, Trophy,
-  Check, MonitorCog
+  TrendingUp, Activity, Clock, Shield, Server,
+  Network as NetworkIcon, RefreshCw, Copy
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { Skeleton } from "../components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter
-} from "../components/ui/dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
   getNetworkStats, getBlocks, getTransactions, getNodeInfo,
-  getPeers, registerPeer, triggerSync
+  getPeers
 } from "../lib/api";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
