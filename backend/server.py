@@ -2145,11 +2145,15 @@ async def get_node_info():
     return {
         "node_id": NODE_ID,
         "node_url": NODE_URL,
-        "version": "1.0.0",
+        "version": "2.0.0",
+        "chain_height": blocks_count,
         "blocks_height": blocks_count,
         "pending_transactions": pending_count,
         "connected_peers": len(connected_peers),
-        "peer_list": [{"node_id": p['node_id'], "url": p['url']} for p in connected_peers.values()]
+        "peer_list": [
+            {"node_id": p.get("node_id", ""), "url": p.get("url", ""), "height": p.get("height", 0)}
+            for p in connected_peers.values()
+        ],
     }
 
 # ==================== DOWNLOADS ENDPOINTS ====================
