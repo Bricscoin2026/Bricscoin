@@ -16,7 +16,8 @@ import {
   Award,
   ChevronDown,
   Pickaxe,
-  Link2
+  Link2,
+  Smartphone
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
@@ -47,6 +48,7 @@ export default function Layout() {
   ];
 
   const moreItems = [
+    { to: "/mobile-wallet", icon: Smartphone, label: "Mobile Wallet" },
     { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
     { to: "/oracle", icon: Brain, label: "AI Oracle" },
