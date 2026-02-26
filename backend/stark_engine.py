@@ -663,7 +663,6 @@ def stark_verify(proof: dict) -> dict:
             return {"valid": False, "error": "Insufficient queries"}
 
         # Verify Merkle proofs for each query
-        trace_root = proof["trace"]["root"]
         verified_queries = 0
         for qr in query_responses:
             # Check trace values exist and are field elements
