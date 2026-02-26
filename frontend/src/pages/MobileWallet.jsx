@@ -442,8 +442,20 @@ export default function MobileWallet() {
         </button>
         <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><ArrowDownLeft className="w-5 h-5 text-emerald-400" /> Receive BRICS</h2>
         <div className="text-center space-y-6">
-          <div className="w-48 h-48 mx-auto bg-white rounded-xl flex items-center justify-center">
-            <QrCode className="w-32 h-32 text-black" />
+          <div className="w-56 h-56 mx-auto bg-white rounded-xl flex items-center justify-center p-3">
+            <QRCodeSVG
+              value={activeWallet?.address || "BRICSPQ"}
+              size={200}
+              bgColor="#ffffff"
+              fgColor="#000000"
+              level="M"
+              imageSettings={{
+                src: LOGO_URL,
+                height: 40,
+                width: 40,
+                excavate: true,
+              }}
+            />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">Your PQC Address</Label>
