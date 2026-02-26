@@ -1363,6 +1363,11 @@ async def get_address_transactions(request: Request, address: str, limit: int = 
         {"$or": [{"sender": address}, {"recipient": address}]},
         {"_id": 0}
     ).sort("timestamp", -1).limit(limit).to_list(limit)
+    # Hide amount for shielded transactions
+    for tx in transactions:
+        if tx.get("type") == "shielded":
+            tx["amount"] = "SHIELDED"
+            tx["display_amount"] = "SHIELDED"
     return {"transactions": transactions}
 
 # Mining endpoints
