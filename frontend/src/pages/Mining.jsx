@@ -29,6 +29,7 @@ export default function Mining() {
   const [stats, setStats] = useState(null);
   const [minerStats, setMinerStats] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
+  const [auxpowStatus, setAuxpowStatus] = useState(null);
 
   const fetchStats = async () => {
     try {
@@ -36,12 +37,14 @@ export default function Mining() {
       if (typeof window !== "undefined" && window.location.protocol === "https:" && base.startsWith("http://")) {
         base = "https://" + base.slice("http://".length);
       }
-      const [netRes, minRes] = await Promise.all([
+      const [netRes, minRes, auxRes] = await Promise.all([
         fetch(`${base}/api/network/stats`),
-        fetch(`${base}/api/miners/stats`)
+        fetch(`${base}/api/miners/stats`),
+        fetch(`${base}/api/auxpow/status`)
       ]);
       if (netRes.ok) setStats(await netRes.json());
       if (minRes.ok) setMinerStats(await minRes.json());
+      if (auxRes.ok) setAuxpowStatus(await auxRes.json());
     } catch (error) {
       console.error("Error loading stats:", error);
     }
