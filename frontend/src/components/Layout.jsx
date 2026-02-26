@@ -145,7 +145,7 @@ export default function Layout() {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <nav className="md:hidden border-t border-white/10 bg-card/95 backdrop-blur-xl">
-            {navItems.map((item) => (
+            {allItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
