@@ -2548,6 +2548,8 @@ from zk_routes import router as zk_router
 from zk_routes import set_db as zk_set_db
 from privacy_routes import router as privacy_router
 from privacy_routes import set_db as privacy_set_db
+from auxpow_routes import router as auxpow_router
+from auxpow_routes import init_auxpow
 app.include_router(chat_router)
 app.include_router(timecapsule_router)
 app.include_router(oracle_router)
@@ -2555,6 +2557,7 @@ app.include_router(nft_router)
 app.include_router(p2pool_router)
 app.include_router(zk_router)
 app.include_router(privacy_router)
+app.include_router(auxpow_router)
 zk_set_db(db)
 privacy_set_db(db)
 security_set_db(db)
@@ -2638,7 +2641,18 @@ security_logger.addHandler(security_handler)
 async def startup_event():
     await create_genesis_block()
     await init_node_pqc_keys()
-    logger.info(f"BricsCoin node started - ID: {NODE_ID}, URL: {NODE_URL}")
+    
+    # Initialize Merge Mining (AuxPoW) module
+    init_auxpow(
+        db=db,
+        get_difficulty_fn=get_current_difficulty,
+        get_mining_reward_fn=get_mining_reward,
+        auto_checkpoint_fn=auto_checkpoint,
+        broadcast_fn=broadcast_to_peers,
+        node_id=NODE_ID,
+        pqc_keys_ref=node_pqc_keys,
+    )
+    logger.info(f"BricsCoin node started - ID: {NODE_ID}, URL: {NODE_URL}, Merge Mining: ENABLED")
     
     # Load peers from database
     await load_peers_from_db()
