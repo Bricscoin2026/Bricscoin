@@ -606,29 +606,42 @@ async def sync_blockchain_from_peer(peer_url: str, full_sync: bool = False):
             return False
 
 async def validate_block(block: dict) -> bool:
-    """Validate a block (including PQC signature if present)"""
+    """Validate a block (including PQC signature if present, and AuxPoW if merge-mined)"""
     try:
-        # Verify hash
-        calculated_hash = calculate_block_hash(
-            block['index'],
-            block['timestamp'],
-            block['transactions'],
-            block.get('proof', block.get('nonce', 0)),
-            block['previous_hash'],
-            block.get('nonce', 0)
-        )
-        
-        if block['hash'] != calculated_hash:
-            # Try alternative calculation for submitted blocks
-            block_data = f"{block['index']}{block['timestamp']}{json.dumps(block['transactions'], sort_keys=True)}{block['previous_hash']}"
-            full_data = block_data + str(block.get('nonce', 0))
-            alt_hash = sha256_hash(full_data)
-            if block['hash'] != alt_hash:
+        # Check if this is an AuxPoW (merge-mined) block
+        if block.get("block_type") == "auxpow" and block.get("auxpow"):
+            from auxpow_engine import validate_auxpow
+            auxpow_result = validate_auxpow(
+                block["auxpow"],
+                block["hash"],
+                block.get("difficulty", INITIAL_DIFFICULTY),
+            )
+            if not auxpow_result["valid"]:
+                logging.warning(f"AuxPoW block {block['index']} invalid: {auxpow_result['reason']}")
                 return False
-        
-        # Verify difficulty
-        if not check_difficulty(block['hash'], block.get('difficulty', INITIAL_DIFFICULTY)):
-            return False
+            # AuxPoW validated — skip normal PoW check, continue with other validations
+        else:
+            # Normal PoW block — verify hash
+            calculated_hash = calculate_block_hash(
+                block['index'],
+                block['timestamp'],
+                block['transactions'],
+                block.get('proof', block.get('nonce', 0)),
+                block['previous_hash'],
+                block.get('nonce', 0)
+            )
+            
+            if block['hash'] != calculated_hash:
+                # Try alternative calculation for submitted blocks
+                block_data = f"{block['index']}{block['timestamp']}{json.dumps(block['transactions'], sort_keys=True)}{block['previous_hash']}"
+                full_data = block_data + str(block.get('nonce', 0))
+                alt_hash = sha256_hash(full_data)
+                if block['hash'] != alt_hash:
+                    return False
+            
+            # Verify difficulty
+            if not check_difficulty(block['hash'], block.get('difficulty', INITIAL_DIFFICULTY)):
+                return False
         
         # Verify previous hash (except genesis)
         if block['index'] > 0:
