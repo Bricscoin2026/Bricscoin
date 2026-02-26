@@ -277,6 +277,29 @@ export default function MobileWallet() {
     toast.success("Backup downloaded & copied!");
   };
 
+  // Rename wallet
+  const handleRename = () => {
+    if (!activeWallet || !renameValue.trim()) return;
+    const updated = wallets.map(w =>
+      w.address === activeWallet.address ? { ...w, name: renameValue.trim() } : w
+    );
+    saveWallets(updated);
+    setActiveWallet({ ...activeWallet, name: renameValue.trim() });
+    setRenameOpen(false);
+    toast.success("Wallet renamed!");
+  };
+
+  // Delete wallet
+  const handleDelete = () => {
+    if (!activeWallet) return;
+    const updated = wallets.filter(w => w.address !== activeWallet.address);
+    saveWallets(updated);
+    setActiveWallet(updated.length > 0 ? updated[0] : null);
+    setDeleteOpen(false);
+    setView("home");
+    toast.success("Wallet deleted!");
+  };
+
   const balStr = balance != null ? parseFloat(balance).toFixed(8).replace(/\.?0+$/, "") : "0";
 
   // ======== RENDER ========
