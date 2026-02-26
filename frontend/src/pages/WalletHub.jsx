@@ -219,7 +219,7 @@ export default function WalletHub() {
           <WalletIcon className="w-7 h-7 text-primary" />
           <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text">Wallet</h1>
         </div>
-        <p className="text-muted-foreground">Manage your BRICS wallets — Legacy, Quantum-Proof, Zero-Knowledge & Migration</p>
+        <p className="text-muted-foreground">Manage your BRICS wallets — Legacy, Quantum-Proof, Zero-Knowledge, Total Privacy & Migration</p>
       </motion.div>
 
       <PortfolioSummary />
