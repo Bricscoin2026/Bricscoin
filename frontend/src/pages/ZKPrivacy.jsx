@@ -20,7 +20,7 @@ function StatusBadge({ label, ok }) {
   );
 }
 
-export default function ZKPrivacy() {
+export default function ZKPrivacy({ embedded = false }) {
   const [zkStatus, setZkStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
