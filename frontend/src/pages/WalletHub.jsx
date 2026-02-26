@@ -9,6 +9,9 @@ import PQCWalletPage from "./PQCWallet";
 import WalletMigrationPage from "./WalletMigration";
 
 const CRYPTO_PAIRS = [
+  { id: "tether", symbol: "USDT", color: "#26A17B" },
+  { id: "usd-coin", symbol: "USDC", color: "#2775CA" },
+  { id: "bitcoin", symbol: "BTC", color: "#F7931A" },
   { id: "solana", symbol: "SOL", color: "#9945FF" },
   { id: "ethereum", symbol: "ETH", color: "#627EEA" },
   { id: "binancecoin", symbol: "BNB", color: "#F3BA2F" },
