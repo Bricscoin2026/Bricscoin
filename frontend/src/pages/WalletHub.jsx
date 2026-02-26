@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Wallet as WalletIcon, ShieldCheck, ArrowRight, RefreshCw, TrendingUp, ChevronDown, Lock, Atom } from "lucide-react";
+import { Wallet as WalletIcon, ShieldCheck, ArrowRight, RefreshCw, TrendingUp, ChevronDown, Lock, Atom, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { motion } from "framer-motion";
 import { getWalletBalance, getPQCWalletInfo } from "../lib/api";
@@ -8,6 +8,7 @@ import LegacyWallet from "./Wallet";
 import PQCWalletPage from "./PQCWallet";
 import WalletMigrationPage from "./WalletMigration";
 import ZKPrivacy from "./ZKPrivacy";
+import PrivacySuite from "./PrivacySuite";
 
 const CRYPTO_PAIRS = [
   { id: "tether", symbol: "USDT", color: "#26A17B" },
@@ -234,6 +235,9 @@ export default function WalletHub() {
           <TabsTrigger value="zk" data-testid="tab-zk-stark" className="text-xs sm:text-sm">
             <Lock className="w-4 h-4 mr-1.5" />zk-STARK
           </TabsTrigger>
+          <TabsTrigger value="privacy" data-testid="tab-privacy" className="text-xs sm:text-sm">
+            <Shield className="w-4 h-4 mr-1.5" />Total Privacy
+          </TabsTrigger>
           <TabsTrigger value="migration" data-testid="tab-migration" className="text-xs sm:text-sm">
             <ArrowRight className="w-4 h-4 mr-1.5" />Migration
           </TabsTrigger>
@@ -247,6 +251,9 @@ export default function WalletHub() {
         </TabsContent>
         <TabsContent value="zk">
           <ZKPrivacy embedded />
+        </TabsContent>
+        <TabsContent value="privacy">
+          <PrivacySuite embedded />
         </TabsContent>
         <TabsContent value="migration">
           <WalletMigrationPage embedded />
