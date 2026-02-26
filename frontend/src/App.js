@@ -40,6 +40,7 @@ function App() {
             <Route path="whitepaper" element={<Whitepaper />} />
             <Route path="downloads" element={<Downloads />} />
             <Route path="about" element={<About />} />
+            <Route path="zk-privacy" element={<ZKPrivacy />} />
           </Route>
         </Routes>
       </BrowserRouter>
