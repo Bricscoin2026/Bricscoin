@@ -15,12 +15,14 @@ import {
   DialogFooter, DialogDescription
 } from "../components/ui/dialog";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 import {
   createPQCWallet, importPQCWallet, getPQCWalletInfo, createPQCTransaction
 } from "../lib/api";
 import { preparePQCTransaction } from "../lib/pqc-crypto";
 
 const API = process.env.REACT_APP_BACKEND_URL;
+const LOGO_URL = "/bricscoin-logo.png";
 
 function copyText(text) {
   navigator.clipboard.writeText(text);
