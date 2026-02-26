@@ -90,8 +90,8 @@ export default function ZKPrivacy({ embedded = false }) {
   };
 
   const generateProof = async () => {
-    if (!sender || !recipient || !amount || !balance) {
-      toast.error("Fill all fields");
+    if (!selectedWallet || !recipient || !amount || !balance) {
+      toast.error("Select a wallet and fill all fields");
       return;
     }
     setProving(true);
@@ -99,7 +99,7 @@ export default function ZKPrivacy({ embedded = false }) {
     setVerifyResult(null);
     try {
       const res = await api.post("/zk/prove-transaction", {
-        sender_address: sender,
+        sender_address: selectedWallet.address,
         recipient_address: recipient,
         amount: parseFloat(amount),
         balance: parseFloat(balance),
