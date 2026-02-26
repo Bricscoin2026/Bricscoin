@@ -209,10 +209,18 @@ export default function TransactionDetail() {
             <InfoRow label="Transaction ID" value={transaction.id} mono copyable />
             <InfoRow label="Sender" value={transaction.sender} mono copyable />
             <InfoRow label="Recipient" value={transaction.recipient} mono copyable />
-            <InfoRow 
-              label="Amount" 
-              value={`${transaction.amount} BRICS`}
-            />
+            {transaction.type === "shielded" || transaction.type === "private" ? (
+              <InfoRow label="Amount" value="SHIELDED" />
+            ) : (
+              <InfoRow label="Amount" value={`${transaction.amount} BRICS`} />
+            )}
+            {transaction.type && (
+              <InfoRow label="Privacy" value={
+                transaction.type === "private" ? "TOTAL (Ring+Stealth+STARK)" :
+                transaction.type === "shielded" ? "SHIELDED (zk-STARK)" :
+                "Standard"
+              } />
+            )}
             <InfoRow 
               label="Timestamp" 
               value={new Date(transaction.timestamp).toLocaleString()} 
@@ -247,24 +255,24 @@ export default function TransactionDetail() {
               <div className="flex-1 text-center p-6 bg-background rounded-sm border border-white/10">
                 <User className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground mb-1">From</p>
-                <p className="font-mono text-sm break-all">{transaction.sender}</p>
+                <p className={`font-mono text-sm break-all ${transaction.sender?.startsWith("SHIELDED_") || transaction.sender === "RING_HIDDEN" ? "text-emerald-400 font-bold" : ""}`}>{transaction.sender}</p>
               </div>
 
               {/* Arrow */}
               <div className="flex flex-col items-center gap-2">
                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
                   <span className="font-heading font-bold text-primary">
-                    {transaction.amount}
+                    {transaction.amount === "SHIELDED" ? "?" : transaction.amount}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground">BRICS</span>
+                <span className="text-xs text-muted-foreground">{transaction.amount === "SHIELDED" ? "SHIELDED" : "BRICS"}</span>
               </div>
 
               {/* Recipient */}
               <div className="flex-1 text-center p-6 bg-background rounded-sm border border-white/10">
                 <User className="w-8 h-8 mx-auto mb-2 text-primary" />
                 <p className="text-sm text-muted-foreground mb-1">To</p>
-                <p className="font-mono text-sm break-all">{transaction.recipient}</p>
+                <p className={`font-mono text-sm break-all ${transaction.recipient?.startsWith("SHIELDED_") || transaction.recipient?.startsWith("BRICSX") ? "text-cyan-400 font-bold" : ""}`}>{transaction.recipient}</p>
               </div>
             </div>
           </CardContent>
