@@ -1162,10 +1162,18 @@ async def get_transactions(request: Request, limit: int = 20, offset: int = 0, c
     for tx in transactions:
         if "confirmed" not in tx:
             tx["confirmed"] = True  # Old transactions without field are confirmed
-        # Hide amount for shielded/private transactions in public API
+        # Hide data for shielded/private transactions in public API
         if tx.get("type") in ("shielded", "private"):
             tx["amount"] = "SHIELDED"
             tx["display_amount"] = "SHIELDED"
+            # Mask sender address with hash
+            if tx.get("sender") and tx["sender"] != "COINBASE":
+                sender_hash = hashlib.sha256(tx["sender"].encode()).hexdigest()
+                tx["sender"] = f"SHIELDED_{sender_hash[:8]}"
+            # Mask recipient address with hash
+            if tx.get("recipient"):
+                recipient_hash = hashlib.sha256(tx["recipient"].encode()).hexdigest()
+                tx["recipient"] = f"SHIELDED_{recipient_hash[:8]}"
         if tx.get("type") == "private":
             tx["sender"] = "RING_HIDDEN"
             tx.pop("real_sender", None)
@@ -1186,10 +1194,18 @@ async def get_transaction(request: Request, tx_id: str):
         raise HTTPException(status_code=404, detail="Transaction not found")
     if "confirmed" not in tx:
         tx["confirmed"] = True  # Old transactions without field are confirmed
-    # Hide amount for shielded/private transactions in public API
+    # Hide data for shielded/private transactions in public API
     if tx.get("type") in ("shielded", "private"):
         tx["amount"] = "SHIELDED"
         tx["display_amount"] = "SHIELDED"
+        # Mask sender address with hash
+        if tx.get("sender") and tx["sender"] != "COINBASE":
+            sender_hash = hashlib.sha256(tx["sender"].encode()).hexdigest()
+            tx["sender"] = f"SHIELDED_{sender_hash[:8]}"
+        # Mask recipient address with hash
+        if tx.get("recipient"):
+            recipient_hash = hashlib.sha256(tx["recipient"].encode()).hexdigest()
+            tx["recipient"] = f"SHIELDED_{recipient_hash[:8]}"
     if tx.get("type") == "private":
         tx["sender"] = "RING_HIDDEN"
         tx.pop("real_sender", None)
