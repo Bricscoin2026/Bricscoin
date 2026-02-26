@@ -259,9 +259,31 @@ function ExplorerSection() {
                   )) : transactions.map((tx) => (
                     <tr key={tx.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                       <td className="p-3"><Link to={`/tx/${tx.id}`} className="font-mono text-xs text-primary hover:underline">{truncateHash(tx.id, 8)}</Link></td>
-                      <td className="p-3 font-mono text-xs text-muted-foreground">{truncateHash(tx.sender, 8)}</td>
-                      <td className="p-3 font-mono text-xs text-muted-foreground">{truncateHash(tx.recipient, 8)}</td>
-                      <td className="p-3 font-mono text-sm text-primary">{tx.amount} BRICS</td>
+                      <td className="p-3 font-mono text-xs">
+                        {tx.type === "private" ? (
+                          <span className="text-violet-400 font-bold">RING_HIDDEN</span>
+                        ) : tx.sender?.startsWith("SHIELDED_") ? (
+                          <span className="text-emerald-400 font-bold">{tx.sender}</span>
+                        ) : (
+                          <span className="text-muted-foreground">{truncateHash(tx.sender, 8)}</span>
+                        )}
+                      </td>
+                      <td className="p-3 font-mono text-xs">
+                        {tx.recipient?.startsWith("SHIELDED_") ? (
+                          <span className="text-emerald-400 font-bold">{tx.recipient}</span>
+                        ) : tx.recipient?.startsWith("BRICSX") ? (
+                          <span className="text-cyan-400 font-bold">STEALTH_{tx.recipient.slice(6, 14)}</span>
+                        ) : (
+                          <span className="text-muted-foreground">{truncateHash(tx.recipient, 8)}</span>
+                        )}
+                      </td>
+                      <td className="p-3 font-mono text-sm">
+                        {tx.amount === "SHIELDED" || tx.display_amount === "SHIELDED" ? (
+                          <span className="text-amber-400 font-bold">SHIELDED</span>
+                        ) : (
+                          <span className="text-primary">{tx.amount} BRICS</span>
+                        )}
+                      </td>
                       <td className="p-3"><Badge variant="outline" className={tx.confirmed ? "border-green-500/50 text-green-400 text-xs" : "border-yellow-500/50 text-yellow-400 text-xs"}>{tx.confirmed ? "Confirmed" : "Pending"}</Badge></td>
                     </tr>
                   ))}
