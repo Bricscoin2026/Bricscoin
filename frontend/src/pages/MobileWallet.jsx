@@ -56,6 +56,12 @@ export default function MobileWallet() {
   const [view, setView] = useState("home"); // home | wallet | send | receive | history | create | import | shielded
   const [loadingBal, setLoadingBal] = useState(false);
 
+  // Price ticker
+  const [selectedPair, setSelectedPair] = useState(CRYPTO_PAIRS[0]);
+  const [cryptoPrices, setCryptoPrices] = useState({});
+  const [pricesLoading, setPricesLoading] = useState(true);
+  const [pairDropdownOpen, setPairDropdownOpen] = useState(false);
+
   // Send form
   const [sendForm, setSendForm] = useState({ recipient: "", amount: "" });
   const [sending, setSending] = useState(false);
