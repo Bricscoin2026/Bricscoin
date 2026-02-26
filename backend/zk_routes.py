@@ -215,8 +215,7 @@ async def send_shielded_transaction(req: ShieldedSendRequest):
         "type": "shielded",
         "sender": req.sender_address,
         "recipient": req.recipient_address,
-        "amount": 0,  # Hidden on blockchain!
-        "display_amount": "SHIELDED",
+        "amount": req.amount,  # Real amount stored internally for balance tracking
         "commitment": commitment,
         "proof_hash": proof_hash,
         "encrypted_amount": encrypted_amount,
