@@ -109,9 +109,9 @@ export default function Landing() {
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-black leading-[1.05] mb-6">
-            Total Privacy.{" "}
+            The Chain That{" "}
             <span className="gold-text relative">
-              Zero Trust.
+              Thinks Ahead.
               <div className="absolute -bottom-2 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-primary to-transparent" />
             </span>
           </h1>
