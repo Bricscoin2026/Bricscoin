@@ -2493,6 +2493,7 @@ app.include_router(zk_router)
 app.include_router(privacy_router)
 zk_set_db(db)
 privacy_set_db(db)
+security_set_db(db)
 
 # Exempt critical PPLNS mining endpoints from rate limiting
 # These are called frequently by the PPLNS stratum server and must never be blocked
