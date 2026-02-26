@@ -180,6 +180,10 @@ class TestAuxPoWSubmit:
 
     def test_submit_rejects_invalid_header_length(self):
         """Test that invalid parent_header length is rejected"""
+        # First create a valid work template
+        work_response = requests.get(f"{BASE_URL}/api/auxpow/create-work?miner_address=BRICStest_invalid1")
+        work = work_response.json()
+        
         response = requests.post(f"{BASE_URL}/api/auxpow/submit", json={
             "parent_header": "invalid_header",
             "coinbase_tx": "test",
@@ -189,7 +193,7 @@ class TestAuxPoWSubmit:
             "blockchain_index": 0,
             "parent_chain": "bitcoin",
             "miner_address": "BRICStest_invalid1",
-            "block_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+            "block_hash": work["block_hash"]
         })
         
         assert response.status_code == 400
