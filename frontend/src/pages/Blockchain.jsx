@@ -241,7 +241,7 @@ function ExplorerSection() {
                 <thead>
                   <tr className="border-b border-white/10 text-left">
                     {explorerTab === "blocks" ? (
-                      <><th className="p-3 text-xs text-muted-foreground">Height</th><th className="p-3 text-xs text-muted-foreground">Hash</th><th className="p-3 text-xs text-muted-foreground">Miner</th><th className="p-3 text-xs text-muted-foreground">Txs</th><th className="p-3 text-xs text-muted-foreground">Time</th></>
+                      <><th className="p-3 text-xs text-muted-foreground">Height</th><th className="p-3 text-xs text-muted-foreground">Hash</th><th className="p-3 text-xs text-muted-foreground">Miner</th><th className="p-3 text-xs text-muted-foreground">Type</th><th className="p-3 text-xs text-muted-foreground">Txs</th><th className="p-3 text-xs text-muted-foreground">Time</th></>
                     ) : (
                       <><th className="p-3 text-xs text-muted-foreground">TX ID</th><th className="p-3 text-xs text-muted-foreground">From</th><th className="p-3 text-xs text-muted-foreground">To</th><th className="p-3 text-xs text-muted-foreground">Amount</th><th className="p-3 text-xs text-muted-foreground">Status</th></>
                     )}
@@ -253,6 +253,7 @@ function ExplorerSection() {
                       <td className="p-3"><Link to={`/block/${b.index}`} className="font-mono text-sm text-primary hover:underline">#{b.index}</Link></td>
                       <td className="p-3 font-mono text-xs text-muted-foreground">{truncateHash(b.hash)}</td>
                       <td className="p-3 font-mono text-xs text-muted-foreground">{truncateHash(b.miner, 8)}</td>
+                      <td className="p-3">{b.block_type === "auxpow" ? <Badge variant="outline" className="border-orange-500/50 text-orange-400 text-xs" data-testid={`block-type-${b.index}`}>AuxPoW</Badge> : <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-xs" data-testid={`block-type-${b.index}`}>Native</Badge>}</td>
                       <td className="p-3 text-sm">{b.transactions?.length || 0}</td>
                       <td className="p-3 text-xs text-muted-foreground">{new Date(b.timestamp).toLocaleString()}</td>
                     </tr>
@@ -288,7 +289,7 @@ function ExplorerSection() {
                     </tr>
                   ))}
                   {((explorerTab === "blocks" && blocks.length === 0) || (explorerTab === "transactions" && transactions.length === 0)) && (
-                    <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No data yet</td></tr>
+                    <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No data yet</td></tr>
                   )}
                 </tbody>
               </table>
