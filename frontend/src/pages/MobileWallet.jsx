@@ -309,8 +309,8 @@ export default function MobileWallet() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12" data-testid="mobile-wallet-onboard">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm w-full">
-          <div className="w-28 h-28 rounded-full mx-auto mb-6 overflow-hidden border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
-            <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-cover" />
+          <div className="w-28 h-28 mx-auto mb-6">
+            <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-contain drop-shadow-lg" />
           </div>
           <h1 className="text-2xl font-heading font-black mb-2">BricsCoin Wallet</h1>
           <p className="text-sm text-muted-foreground mb-8">Post-Quantum Secure. Your keys never leave this device.</p>
@@ -348,8 +348,8 @@ export default function MobileWallet() {
         {newWalletData && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
             <div className="text-center mb-6">
-              <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-2 border-amber-500/30">
-                <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-cover" />
+              <div className="w-20 h-20 mx-auto mb-3">
+                <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-contain drop-shadow-lg" />
               </div>
               <h2 className="text-xl font-bold">Wallet Created!</h2>
             </div>
@@ -617,8 +617,8 @@ export default function MobileWallet() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           className="rounded-2xl p-6 mb-6 bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 border border-emerald-500/20">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-6 h-6 rounded-full overflow-hidden">
-              <img src={LOGO_URL} alt="" className="w-full h-full object-cover" />
+            <div className="w-6 h-6">
+              <img src={LOGO_URL} alt="" className="w-full h-full object-contain" />
             </div>
             <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-[10px]">
               <Atom className="w-3 h-3 mr-1" /> PQC HYBRID
@@ -769,7 +769,7 @@ export default function MobileWallet() {
     <div className="min-h-screen px-4 py-6 max-w-lg mx-auto" data-testid="mobile-wallet-home">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-heading font-bold flex items-center gap-2">
-          <img src={LOGO_URL} alt="BricsCoin" className="w-7 h-7 rounded-full" /> BricsCoin Wallet
+          <img src={LOGO_URL} alt="BricsCoin" className="w-7 h-7 object-contain" /> BricsCoin Wallet
         </h1>
         <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => { setView("create"); handleCreate(); }}
           data-testid="home-create">
@@ -786,8 +786,8 @@ export default function MobileWallet() {
             onClick={() => { setActiveWallet(w); setView("wallet"); }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden border border-amber-500/20">
-                  <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-cover" />
+                <div className="w-10 h-10">
+                  <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <p className="font-medium text-sm">{w.name}</p>
