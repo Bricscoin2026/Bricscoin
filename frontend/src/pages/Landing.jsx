@@ -365,11 +365,6 @@ export default function Landing() {
               color="#06B6D4" delay={7} tag="Infrastructure"
               description="A fully decentralized peer-to-peer network. Nodes discover each other automatically, sync the blockchain, and propagate transactions. Download the node and join."
             />
-            <FeatureCard
-              icon={BarChart3} title="Exchange" link="/blockchain"
-              color="#EF4444" delay={8} tag="Trading"
-              description="Trade BRICS on the integrated exchange. Real-time candlestick charts, order book, and instant execution. Deposit and withdraw with full control of your funds."
-            />
           </div>
         </div>
       </section>
