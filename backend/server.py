@@ -2131,7 +2131,8 @@ async def get_chain_info():
         "node_id": NODE_ID,
         "height": blocks_count,
         "last_block_hash": last_block['hash'] if last_block else None,
-        "difficulty": await get_current_difficulty()
+        "difficulty": await get_current_difficulty(),
+        "merge_mining": True,
     }
 
 @api_router.get("/p2p/chain/blocks")
