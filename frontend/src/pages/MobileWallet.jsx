@@ -722,12 +722,62 @@ export default function MobileWallet() {
             <span className="flex items-center gap-3 text-sm"><Download className="w-4 h-4 text-muted-foreground" /> Backup Wallet</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
+          <button onClick={() => { setRenameValue(activeWallet.name || ""); setRenameOpen(true); }}
+            className="w-full flex items-center justify-between p-4 rounded-lg border border-white/[0.06] bg-white/[0.02] active:bg-white/[0.05]"
+            data-testid="action-rename">
+            <span className="flex items-center gap-3 text-sm"><Pencil className="w-4 h-4 text-muted-foreground" /> Rename Wallet</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
           <button onClick={() => setView("create")} className="w-full flex items-center justify-between p-4 rounded-lg border border-white/[0.06] bg-white/[0.02] active:bg-white/[0.05]"
             data-testid="action-new-wallet">
             <span className="flex items-center gap-3 text-sm"><Plus className="w-4 h-4 text-muted-foreground" /> Create New Wallet</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
+          <button onClick={() => setDeleteOpen(true)}
+            className="w-full flex items-center justify-between p-4 rounded-lg border border-red-500/20 bg-red-500/5 active:bg-red-500/10"
+            data-testid="action-delete">
+            <span className="flex items-center gap-3 text-sm text-red-400"><Trash2 className="w-4 h-4" /> Delete Wallet</span>
+            <ChevronRight className="w-4 h-4 text-red-400/50" />
+          </button>
         </div>
+
+        {/* Rename Dialog */}
+        <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Rename Wallet</DialogTitle>
+              <DialogDescription>Enter a new name for this wallet.</DialogDescription>
+            </DialogHeader>
+            <Input value={renameValue} onChange={e => setRenameValue(e.target.value)}
+              placeholder="Wallet name" className="h-12" data-testid="rename-input"
+              onKeyDown={e => e.key === "Enter" && handleRename()} />
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setRenameOpen(false)} data-testid="rename-cancel">Cancel</Button>
+              <Button onClick={handleRename} className="bg-emerald-600 hover:bg-emerald-700" data-testid="rename-confirm">Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Dialog */}
+        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-red-400">Delete Wallet</DialogTitle>
+              <DialogDescription>
+                Are you sure? This will remove <strong>{activeWallet.name}</strong> from this device. Make sure you have a backup of your keys.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <p className="text-amber-400 text-xs font-bold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" /> Without a backup, your funds will be lost forever.
+              </p>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setDeleteOpen(false)} data-testid="delete-cancel">Cancel</Button>
+              <Button onClick={handleDelete} className="bg-red-600 hover:bg-red-700" data-testid="delete-confirm">Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Recent Transactions */}
         <div>
