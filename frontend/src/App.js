@@ -14,6 +14,7 @@ import AiOracle from "./pages/AiOracle";
 import BricsNFT from "./pages/BricsNFT";
 import P2Pool from "./pages/P2Pool";
 import Mining from "./pages/Mining";
+import MergeMiningGuide from "./pages/MergeMiningGuide";
 import Network from "./pages/Network";
 import Whitepaper from "./pages/Whitepaper";
 import "./App.css";
@@ -36,6 +37,7 @@ function App() {
             <Route path="nft" element={<BricsNFT />} />
             <Route path="p2pool" element={<P2Pool />} />
             <Route path="mining" element={<Mining />} />
+            <Route path="merge-mining" element={<MergeMiningGuide />} />
             <Route path="network" element={<Network />} />
             <Route path="whitepaper" element={<Whitepaper />} />
             <Route path="downloads" element={<Downloads />} />
