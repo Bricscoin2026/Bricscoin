@@ -435,6 +435,7 @@ export default function Landing() {
                   { feature: "Hidden Receiver", brics: true, btc: false, xmr: true },
                   { feature: "Hidden Amount", brics: true, btc: false, xmr: true },
                   { feature: "Post-Quantum", brics: true, btc: false, xmr: false },
+                  { feature: "Merge Mining", brics: true, btc: false, xmr: false },
                   { feature: "No Trusted Setup", brics: true, btc: true, xmr: true },
                   { feature: "On-chain NFTs", brics: true, btc: false, xmr: false },
                   { feature: "Encrypted Messaging", brics: true, btc: false, xmr: false },
