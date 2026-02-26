@@ -92,18 +92,20 @@ export default function ZKPrivacy({ embedded = false }) {
 
   return (
     <div className="space-y-6 pb-12" data-testid="zk-privacy-page">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center gap-3 mb-1">
-          <ShieldCheck className="w-7 h-7 text-emerald-400" />
-          <h1 className="text-4xl sm:text-5xl font-heading font-bold">
-            <span className="text-emerald-400">zk-STARK</span> Privacy
-          </h1>
-        </div>
-        <p className="text-muted-foreground">
-          Zero-Knowledge proofs — prove transaction validity without revealing amounts or balances
-        </p>
-      </motion.div>
+      {/* Header - only show when standalone */}
+      {!embedded && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="flex items-center gap-3 mb-1">
+            <ShieldCheck className="w-7 h-7 text-emerald-400" />
+            <h1 className="text-4xl sm:text-5xl font-heading font-bold">
+              <span className="text-emerald-400">zk-STARK</span> Privacy
+            </h1>
+          </div>
+          <p className="text-muted-foreground">
+            Zero-Knowledge proofs — prove transaction validity without revealing amounts or balances
+          </p>
+        </motion.div>
+      )}
 
       {/* Security Features Banner */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
