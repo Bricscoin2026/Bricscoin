@@ -512,7 +512,8 @@ async def send_to_peer(peer_url: str, endpoint: str, data: dict) -> bool:
         return False
 
 async def sync_blockchain_from_peer(peer_url: str, full_sync: bool = False):
-    """Sync blockchain from a peer if they have a longer chain"""
+    """Sync blockchain from a peer if they have a longer chain.
+    Protected by: checkpoint validation + deep reorg rejection."""
     async with sync_lock:
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
@@ -553,6 +554,18 @@ async def sync_blockchain_from_peer(peer_url: str, full_sync: bool = False):
                     if not blocks:
                         break
                     
+                    # SECURITY: Validate blocks against checkpoints
+                    cp_check = await validate_against_checkpoints(blocks)
+                    if not cp_check["valid"]:
+                        logging.warning(f"SECURITY: Rejected blocks from {peer_url} — checkpoint violation: {cp_check['violation']}")
+                        return False
+                    
+                    # SECURITY: Check for deep reorganization
+                    reorg_check = await check_reorg_depth(blocks, our_height)
+                    if not reorg_check["allowed"]:
+                        logging.warning(f"SECURITY: Rejected deep reorg from {peer_url} — depth {reorg_check['reorg_depth']} > {MAX_REORG_DEPTH}")
+                        return False
+                    
                     # Add blocks in order
                     for block in blocks:
                         existing = await db.blocks.find_one({"index": block['index']})
@@ -581,7 +594,11 @@ async def sync_blockchain_from_peer(peer_url: str, full_sync: bool = False):
                         logging.info(f"Sync progress: {total_synced} blocks synced...")
                 
                 if total_synced > 0:
-                    logging.info(f"✓ Synced {total_synced} blocks from {peer_url}")
+                    logging.info(f"Synced {total_synced} blocks from {peer_url}")
+                    # SECURITY: Auto-checkpoint after sync
+                    created = await auto_checkpoint()
+                    if created > 0:
+                        logging.info(f"Created {created} new checkpoints after sync")
                 return True
                 
         except Exception as e:
