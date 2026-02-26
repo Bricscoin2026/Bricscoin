@@ -273,7 +273,9 @@ export default function MobileWallet() {
         {newWalletData && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
             <div className="text-center mb-6">
-              <ShieldCheck className="w-12 h-12 text-emerald-400 mx-auto mb-2" />
+              <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-2 border-amber-500/30">
+                <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-cover" />
+              </div>
               <h2 className="text-xl font-bold">Wallet Created!</h2>
             </div>
             <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
