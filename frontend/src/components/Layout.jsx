@@ -13,9 +13,10 @@ import {
   MessageSquareLock,
   Clock,
   Brain,
-  Award
+  Award,
+  ChevronDown
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import HashStreamBackground from "./HashStreamBackground";
 
