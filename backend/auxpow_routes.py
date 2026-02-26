@@ -75,7 +75,7 @@ async def create_auxpow_work(miner_address: str = ""):
     - The commitment data (hex) to insert in coinbase scriptSig
     - Current difficulty target
     """
-    if not _db:
+    if _db is None:
         raise HTTPException(status_code=500, detail="AuxPoW not initialized")
 
     last_block = await _db.blocks.find_one({}, {"_id": 0}, sort=[("index", -1)])
@@ -146,7 +146,7 @@ async def submit_auxpow_block(submission: AuxPowSubmission):
     - The coinbase tx containing BricsCoin hash
     - Merkle branches proving the coinbase is in the parent block
     """
-    if not _db:
+    if _db is None:
         raise HTTPException(status_code=500, detail="AuxPoW not initialized")
 
     # Find the work template for this block hash
@@ -314,7 +314,7 @@ async def submit_auxpow_block(submission: AuxPowSubmission):
 @router.get("/status")
 async def get_auxpow_status():
     """Get merge mining status and statistics."""
-    if not _db:
+    if _db is None:
         raise HTTPException(status_code=500, detail="AuxPoW not initialized")
 
     total_blocks = await _db.blocks.count_documents({})
@@ -361,7 +361,7 @@ async def get_auxpow_status():
 @router.get("/work-history")
 async def get_work_history(limit: int = 20):
     """Get recent AuxPoW work items and their status."""
-    if not _db:
+    if _db is None:
         raise HTTPException(status_code=500, detail="AuxPoW not initialized")
 
     works = await _db.auxpow_work.find(
