@@ -542,6 +542,9 @@ export default function MobileWallet() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           className="rounded-2xl p-6 mb-6 bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 border border-emerald-500/20">
           <div className="flex items-center gap-2 mb-1">
+            <div className="w-6 h-6 rounded-full overflow-hidden">
+              <img src={LOGO_URL} alt="" className="w-full h-full object-cover" />
+            </div>
             <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-[10px]">
               <Atom className="w-3 h-3 mr-1" /> PQC HYBRID
             </Badge>
