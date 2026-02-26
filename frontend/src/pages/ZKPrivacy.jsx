@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   ShieldCheck, Lock, Zap, Eye, EyeOff, Send, CheckCircle, XCircle,
-  Info, Loader2, Shield, Atom, ArrowRight
+  Info, Loader2, Shield, Atom, ArrowRight, ChevronDown, Wallet
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import { toast } from "sonner";
-import api from "../lib/api";
+import api, { getWalletBalance, getPQCWalletInfo } from "../lib/api";
 
 function StatusBadge({ label, ok }) {
   return (
