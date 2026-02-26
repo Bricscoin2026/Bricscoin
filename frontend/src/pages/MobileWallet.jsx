@@ -632,7 +632,7 @@ export default function MobileWallet() {
     <div className="min-h-screen px-4 py-6 max-w-lg mx-auto" data-testid="mobile-wallet-home">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-heading font-bold flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-emerald-400" /> BricsCoin Wallet
+          <img src={LOGO_URL} alt="BricsCoin" className="w-7 h-7 rounded-full" /> BricsCoin Wallet
         </h1>
         <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => { setView("create"); handleCreate(); }}
           data-testid="home-create">
