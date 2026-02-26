@@ -359,16 +359,16 @@ async def get_current_difficulty() -> int:
     Calcola la difficoltà per il PROSSIMO blocco.
     Target: 1 blocco ogni 600 secondi.
     
-    Usa una finestra scorrevole di 5 blocchi per convergenza rapida.
+    Usa una finestra scorrevole di 20 blocchi per stabilità.
     Formula: hashrate = sum(block_diffs) / actual_time, new_diff = hashrate * TARGET_TIME
-    Clamp: massimo 4x aumento o 0.25x riduzione per blocco.
+    Clamp: massimo 1.5x aumento o 0.67x riduzione per step (smooth adjustments).
     """
     blocks_count = await db.blocks.count_documents({})
     
     if blocks_count < 2:
         return INITIAL_DIFFICULTY
     
-    window_size = min(5, blocks_count)
+    window_size = min(20, blocks_count)
     
     recent_blocks = await db.blocks.find(
         {}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
@@ -395,9 +395,11 @@ async def get_current_difficulty() -> int:
     hashrate_estimate = total_difficulty / actual_time
     new_difficulty = max(1, int(hashrate_estimate * TARGET_BLOCK_TIME))
     
-    # Clamp: max 4x up or 0.25x down vs current difficulty
+    # Clamp: max 1.5x up or 0.67x down per adjustment (smooth, no spikes)
     current_diff = recent_blocks[-1].get("difficulty", INITIAL_DIFFICULTY)
-    new_difficulty = max(current_diff // 4, min(current_diff * 4, new_difficulty))
+    max_up = int(current_diff * 1.5)
+    max_down = int(current_diff * 0.67)
+    new_difficulty = max(max_down, min(max_up, new_difficulty))
     new_difficulty = max(1, new_difficulty)
     
     avg_block_time = actual_time / num_blocks
