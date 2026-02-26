@@ -105,6 +105,35 @@ export default function MobileWallet() {
 
   useEffect(() => { fetchBalance(); }, [fetchBalance]);
 
+  // Fetch crypto prices from CoinGecko
+  const fetchCryptoPrices = useCallback(async () => {
+    setPricesLoading(true);
+    try {
+      const ids = CRYPTO_PAIRS.map(p => p.id).join(",");
+      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+      const data = await res.json();
+      setCryptoPrices(data);
+    } catch {
+      setCryptoPrices({});
+    } finally {
+      setPricesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchCryptoPrices(); }, [fetchCryptoPrices]);
+
+  useEffect(() => {
+    const interval = setInterval(() => { fetchCryptoPrices(); }, 60000);
+    return () => clearInterval(interval);
+  }, [fetchCryptoPrices]);
+
+  useEffect(() => {
+    if (!pairDropdownOpen) return;
+    const handler = () => setPairDropdownOpen(false);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [pairDropdownOpen]);
+
   // Fetch transactions
   const fetchTxs = useCallback(async () => {
     if (!activeWallet) return;
