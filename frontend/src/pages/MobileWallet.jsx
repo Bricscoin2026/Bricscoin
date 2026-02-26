@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck, Plus, Copy, Check, Eye, EyeOff, Download, RefreshCw,
   Send, Atom, Key, Lock, ArrowLeft, QrCode, ArrowDownLeft,
-  History, ChevronRight, AlertTriangle, EyeOff as EyeOffIcon
+  History, ChevronRight, AlertTriangle, EyeOff as EyeOffIcon,
+  TrendingUp, ChevronDown
 } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
