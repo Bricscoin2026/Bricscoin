@@ -1182,6 +1182,10 @@ async def get_transaction(request: Request, tx_id: str):
         raise HTTPException(status_code=404, detail="Transaction not found")
     if "confirmed" not in tx:
         tx["confirmed"] = True  # Old transactions without field are confirmed
+    # Hide amount for shielded transactions in public API
+    if tx.get("type") == "shielded":
+        tx["amount"] = "SHIELDED"
+        tx["display_amount"] = "SHIELDED"
     return tx
 
 @api_router.post("/transactions/secure")
