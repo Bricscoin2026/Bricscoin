@@ -119,7 +119,7 @@ export default function Landing() {
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
             The first blockchain with 6 layers of cryptographic security.
             Ring Signatures hide the sender. Stealth Addresses hide the receiver.
-            zk-STARKs hide the amount. Post-quantum cryptography protects the future.
+            zk-STARKs hide the amount. Merge Mining with Bitcoin secures the network.
           </p>
 
           {/* Privacy badges inline */}
