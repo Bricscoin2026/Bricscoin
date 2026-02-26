@@ -160,17 +160,17 @@ export default function Landing() {
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-black leading-[1.05] mb-6">
-            The Future of{" "}
+            Built for Tomorrow.{" "}
             <span className="gold-text relative">
-              Digital Money
+              Live Today.
               <div className="absolute -bottom-2 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-primary to-transparent" />
             </span>
           </h1>
 
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            BricsCoin is a decentralized SHA-256 cryptocurrency with post-quantum security,
-            encrypted messaging, on-chain NFTs, AI-powered analytics, and a peer-to-peer network
-            anyone can join.
+            Your money. Your rules. No middlemen.
+            A decentralized SHA-256 blockchain with post-quantum security,
+            encrypted messaging, on-chain NFTs, and a peer-to-peer network anyone can join.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
