@@ -24,8 +24,13 @@ export default function ZKPrivacy({ embedded = false }) {
   const [zkStatus, setZkStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
+  // Wallets from localStorage
+  const [wallets, setWallets] = useState([]);
+  const [selectedWallet, setSelectedWallet] = useState(null);
+  const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+
   // Prove transaction
-  const [sender, setSender] = useState("");
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [balance, setBalance] = useState("");
@@ -35,6 +40,42 @@ export default function ZKPrivacy({ embedded = false }) {
   // Verify
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState(null);
+
+  // Load wallets from localStorage
+  useEffect(() => {
+    const legacyRaw = localStorage.getItem("bricscoin_wallets");
+    const pqcRaw = localStorage.getItem("bricscoin_pqc_wallets");
+    const legacy = legacyRaw ? JSON.parse(legacyRaw).map(w => ({ ...w, type: "Legacy" })) : [];
+    const pqc = pqcRaw ? JSON.parse(pqcRaw).map(w => ({ ...w, type: "PQC" })) : [];
+    setWallets([...legacy, ...pqc]);
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!walletDropdownOpen) return;
+    const handler = () => setWalletDropdownOpen(false);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [walletDropdownOpen]);
+
+  // Fetch balance when wallet selected
+  const selectWallet = useCallback(async (wallet) => {
+    setSelectedWallet(wallet);
+    setWalletDropdownOpen(false);
+    setBalance("");
+    setBalanceLoading(true);
+    try {
+      const res = wallet.type === "Legacy"
+        ? await getWalletBalance(wallet.address)
+        : await getPQCWalletInfo(wallet.address);
+      const bal = res.data.balance ?? 0;
+      setBalance(String(bal));
+    } catch {
+      setBalance("0");
+    } finally {
+      setBalanceLoading(false);
+    }
+  }, []);
 
   const fetchStatus = async () => {
     setStatusLoading(true);
