@@ -204,17 +204,17 @@ export default function Landing() {
       <section className="relative z-10 border-y border-white/[0.06] bg-white/[0.01] backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
           {[
-            { label: "Max Supply", value: <AnimCounter target={21000000} />, suffix: "BRICS" },
+            { label: "Max Supply", value: "21M", suffix: "BRICS" },
             { label: "Algorithm", value: "SHA-256", static: true },
             { label: "Premine", value: "0%", static: true },
             { label: "Quantum-Proof", value: "ML-DSA-65", static: true },
           ].map((stat, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-              <p className="text-2xl sm:text-3xl font-heading font-bold gold-text">
+              <p className="text-xl sm:text-2xl md:text-3xl font-heading font-bold gold-text break-words">
                 {stat.static ? stat.value : stat.value}
               </p>
-              <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{stat.label}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 uppercase tracking-wider">{stat.label}</p>
             </motion.div>
           ))}
         </div>
