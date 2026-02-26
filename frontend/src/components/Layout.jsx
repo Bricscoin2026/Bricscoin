@@ -42,11 +42,11 @@ export default function Layout() {
     { to: "/wallet", icon: Wallet, label: "Wallet" },
     { to: "/network", icon: Globe, label: "Network" },
     { to: "/p2pool", icon: Network, label: "P2Pool" },
+    { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/merge-mining", icon: Link2, label: "Merge Mining" },
   ];
 
   const moreItems = [
-    { to: "/mining", icon: Pickaxe, label: "Mining" },
     { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
     { to: "/oracle", icon: Brain, label: "AI Oracle" },
