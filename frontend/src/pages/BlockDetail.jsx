@@ -311,8 +311,10 @@ export default function BlockDetail() {
                 <p className="font-mono text-lg">{block.difficulty?.toLocaleString() || "-"}</p>
               </div>
               <div className="text-center p-4 bg-background rounded-sm border border-white/10">
-                <p className="text-muted-foreground text-sm mb-1">Proof of Work</p>
-                <p className="font-mono text-lg text-green-500">Valid</p>
+                <p className="text-muted-foreground text-sm mb-1">Mining Type</p>
+                <p className={`font-mono text-lg ${block.block_type === "auxpow" ? "text-orange-400" : "text-green-500"}`}>
+                  {block.block_type === "auxpow" ? "Merge Mined" : "Native PoW"}
+                </p>
               </div>
             </div>
           </CardContent>
