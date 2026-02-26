@@ -23,18 +23,23 @@ export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/blockchain", icon: Network, label: "Blockchain" },
     { to: "/wallet", icon: Wallet, label: "Wallet" },
+    { to: "/network", icon: Globe, label: "Network" },
+    { to: "/p2pool", icon: Network, label: "P2Pool" },
+  ];
+
+  const moreItems = [
     { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
     { to: "/oracle", icon: Brain, label: "AI Oracle" },
     { to: "/nft", icon: Award, label: "BricsNFT" },
-    { to: "/p2pool", icon: Network, label: "P2Pool" },
-    { to: "/network", icon: Globe, label: "Network" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
+
+  const allItems = [...navItems, ...moreItems];
 
   return (
     <div className="min-h-screen bg-background relative">
