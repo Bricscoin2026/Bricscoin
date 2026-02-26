@@ -5,7 +5,7 @@ import {
   Blocks, Shield, Wallet, MessageSquareLock, Clock, Award,
   Brain, Pickaxe, Globe, ArrowRight, Zap, Lock, Eye, EyeOff,
   ChevronDown, Atom, Network, ShieldCheck, UserX, Fingerprint,
-  CheckCircle, Layers, Scan
+  CheckCircle, Layers, Scan, Link2
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 
