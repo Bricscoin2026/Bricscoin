@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import Layout from "./components/Layout";
+import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Blockchain from "./pages/Blockchain";
 import BlockDetail from "./pages/BlockDetail";
@@ -23,7 +24,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Landing />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="blockchain" element={<Blockchain />} />
             <Route path="block/:index" element={<BlockDetail />} />
             <Route path="tx/:txId" element={<TransactionDetail />} />
