@@ -390,7 +390,6 @@ export default function Blockchain() {
           <TabsTrigger value="overview" data-testid="tab-overview"><NetworkIcon className="w-4 h-4 mr-2"/>Overview</TabsTrigger>
           <TabsTrigger value="explorer" data-testid="tab-explorer"><Search className="w-4 h-4 mr-2"/>Explorer</TabsTrigger>
           <TabsTrigger value="richlist" data-testid="tab-richlist"><Trophy className="w-4 h-4 mr-2"/>Rich List</TabsTrigger>
-          <TabsTrigger value="runnode" data-testid="tab-runnode"><MonitorCog className="w-4 h-4 mr-2"/>Run a Node</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -398,7 +397,6 @@ export default function Blockchain() {
         </TabsContent>
         <TabsContent value="explorer"><ExplorerSection/></TabsContent>
         <TabsContent value="richlist"><RichListSection/></TabsContent>
-        <TabsContent value="runnode"><RunNode/></TabsContent>
       </Tabs>
     </div>
   );
