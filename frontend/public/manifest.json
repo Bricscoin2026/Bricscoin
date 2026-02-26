@@ -1,8 +1,9 @@
 {
   "name": "BricsCoin Wallet",
   "short_name": "BRICS Wallet",
-  "description": "Desktop & Mobile wallet for BricsCoin cryptocurrency",
+  "description": "Post-Quantum Secure Wallet for BricsCoin",
   "start_url": "/mobile-wallet",
+  "scope": "/mobile-wallet",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#FFD700",
