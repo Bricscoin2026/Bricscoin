@@ -220,26 +220,77 @@ export default function ZKPrivacy({ embedded = false }) {
             The verifier will only know that you have sufficient funds — nothing more.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-3">
+            {/* Wallet Selector */}
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Sender Address</label>
-              <Input value={sender} onChange={e => setSender(e.target.value)}
-                placeholder="BRICS..." className="font-mono text-sm" data-testid="zk-sender-input" />
+              <label className="text-xs text-muted-foreground mb-1 block">Sender Wallet</label>
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => setWalletDropdownOpen(!walletDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-sm border border-white/10 bg-background hover:border-primary/40 transition-colors text-sm text-left"
+                  data-testid="zk-wallet-selector"
+                >
+                  {selectedWallet ? (
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Wallet className="w-4 h-4 text-primary shrink-0" />
+                      <span className="font-mono truncate">{selectedWallet.address}</span>
+                      <Badge variant="outline" className="text-[10px] shrink-0 ml-1">{selectedWallet.type}</Badge>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">Select a wallet...</span>
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 ml-2 transition-transform ${walletDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+                {walletDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-card border border-white/10 rounded-sm shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                    {wallets.length === 0 ? (
+                      <p className="px-3 py-4 text-sm text-muted-foreground text-center">No wallets found. Create one in the Legacy or PQC tab.</p>
+                    ) : wallets.map((w, i) => (
+                      <button
+                        key={i}
+                        onClick={() => selectWallet(w)}
+                        className={`w-full text-left px-3 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 border-b border-white/[0.03] last:border-0 ${
+                          selectedWallet?.address === w.address ? "bg-white/5" : ""
+                        }`}
+                        data-testid={`zk-select-wallet-${i}`}
+                      >
+                        <Wallet className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <span className="font-mono text-xs truncate flex-1">{w.address}</span>
+                        <Badge variant="outline" className="text-[10px] shrink-0">{w.type}</Badge>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Balance (auto-fetched, read-only) */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Your Balance (auto-detected, private)</label>
+                <div className="relative">
+                  <Input
+                    value={balanceLoading ? "Loading..." : balance}
+                    readOnly
+                    className="font-mono text-sm bg-white/[0.02] cursor-default"
+                    data-testid="zk-balance-input"
+                  />
+                  {balanceLoading && <Loader2 className="w-4 h-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />}
+                </div>
+              </div>
+              {/* Amount */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Amount to Send (private)</label>
+                <Input type="number" value={amount} onChange={e => setAmount(e.target.value)}
+                  placeholder="0.00" className="font-mono text-sm" data-testid="zk-amount-input" />
+              </div>
+            </div>
+
+            {/* Recipient */}
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Recipient Address</label>
               <Input value={recipient} onChange={e => setRecipient(e.target.value)}
                 placeholder="BRICS..." className="font-mono text-sm" data-testid="zk-recipient-input" />
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Your Balance (private)</label>
-              <Input type="number" value={balance} onChange={e => setBalance(e.target.value)}
-                placeholder="0.00" className="font-mono text-sm" data-testid="zk-balance-input" />
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Amount to Send (private)</label>
-              <Input type="number" value={amount} onChange={e => setAmount(e.target.value)}
-                placeholder="0.00" className="font-mono text-sm" data-testid="zk-amount-input" />
             </div>
           </div>
 
