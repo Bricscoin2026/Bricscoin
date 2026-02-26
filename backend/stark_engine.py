@@ -403,7 +403,7 @@ class FRICommitment:
             queries.append(query)
 
         return {
-            "layers": [{"root": l["root"], "size": len(l["evaluations"])} for l in layers],
+            "layers": [{"root": layer["root"], "size": len(layer["evaluations"])} for layer in layers],
             "final_values": layers[-1]["evaluations"],
             "queries": queries,
             "num_queries": num_queries,
