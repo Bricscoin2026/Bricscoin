@@ -4,10 +4,13 @@ import {
   Copy, 
   AlertCircle,
   Cpu,
-  CheckCircle
+  CheckCircle,
+  Link2,
+  Activity
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
