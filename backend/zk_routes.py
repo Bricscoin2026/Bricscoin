@@ -230,9 +230,15 @@ async def send_shielded_transaction(req: ShieldedSendRequest):
 
     await db.transactions.insert_one(transaction)
 
-    # Public response: hide real amount
+    # Public response: hide real data
     tx_response = {k: v for k, v in transaction.items() if k != "_id"}
     tx_response["display_amount"] = "SHIELDED"
+    tx_response["amount"] = "SHIELDED"
+    # Mask addresses in response
+    sender_hash = hashlib.sha256(req.sender_address.encode()).hexdigest()
+    tx_response["sender"] = f"SHIELDED_{sender_hash[:8]}"
+    recipient_hash = hashlib.sha256(req.recipient_address.encode()).hexdigest()
+    tx_response["recipient"] = f"SHIELDED_{recipient_hash[:8]}"
 
     return {
         "success": True,
