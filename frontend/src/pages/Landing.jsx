@@ -366,7 +366,7 @@ export default function Landing() {
               description="A fully decentralized peer-to-peer network. Nodes discover each other automatically, sync the blockchain, and propagate transactions. Download the node and join."
             />
             <FeatureCard
-              icon={ShieldCheck} title="zk-STARK Privacy" link="/zk-privacy"
+              icon={ShieldCheck} title="zk-STARK Privacy" link="/wallet?tab=zk"
               color="#10B981" delay={8} tag="Zero Knowledge"
               description="Generate STARK proofs to verify transactions without revealing amounts or balances. 128-bit security, quantum-resistant, no trusted setup. Based on the FRI protocol with SHA-256."
             />
