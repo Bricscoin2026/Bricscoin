@@ -1162,6 +1162,10 @@ async def get_transactions(request: Request, limit: int = 20, offset: int = 0, c
     for tx in transactions:
         if "confirmed" not in tx:
             tx["confirmed"] = True  # Old transactions without field are confirmed
+        # Hide amount for shielded transactions in public API
+        if tx.get("type") == "shielded":
+            tx["amount"] = "SHIELDED"
+            tx["display_amount"] = "SHIELDED"
     total = await db.transactions.count_documents(query)
     return {"transactions": transactions, "total": total}
 
