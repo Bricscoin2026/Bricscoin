@@ -234,8 +234,8 @@ export default function MobileWallet() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12" data-testid="mobile-wallet-onboard">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm w-full">
-          <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
-            <ShieldCheck className="w-10 h-10 text-emerald-400" />
+          <div className="w-28 h-28 rounded-full mx-auto mb-6 overflow-hidden border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
+            <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-heading font-black mb-2">BricsCoin Wallet</h1>
           <p className="text-sm text-muted-foreground mb-8">Post-Quantum Secure. Your keys never leave this device.</p>
