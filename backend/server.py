@@ -97,6 +97,13 @@ INITIAL_DIFFICULTY = 1000000  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 0  # No premine - 100% fair launch, all 21M coins are mineable
 TRANSACTION_FEE = 0.000005  # Fee per transaction in BRICS
 
+# Chain Security
+from chain_security import (
+    set_db as security_set_db, auto_checkpoint, can_accept_block,
+    validate_against_checkpoints, check_reorg_depth, get_security_status,
+    get_checkpoints, get_security_events, create_checkpoint, MAX_REORG_DEPTH,
+)
+
 # Genesis wallet (legacy, no longer receives premine)
 GENESIS_WALLET_ADDRESS = None  # Set dynamically when genesis block is created
 
