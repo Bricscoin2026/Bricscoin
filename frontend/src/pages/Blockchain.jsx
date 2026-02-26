@@ -18,6 +18,9 @@ import {
   getNetworkStats, getBlocks, getTransactions, getNodeInfo,
   getPeers
 } from "../lib/api";
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
+} from "recharts";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
