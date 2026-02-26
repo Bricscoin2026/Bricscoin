@@ -610,6 +610,65 @@ export default function MobileWallet() {
           </div>
         </motion.div>
 
+        {/* Price Ticker Card */}
+        <div className="rounded-2xl p-5 mb-6 border border-white/10 bg-white/[0.02]" data-testid="mobile-price-ticker">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground font-medium">BRICS Pair</span>
+            </div>
+            <div className="relative" onClick={e => e.stopPropagation()}>
+              <button
+                onClick={() => setPairDropdownOpen(!pairDropdownOpen)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-background hover:border-emerald-500/40 transition-colors text-sm font-medium"
+                data-testid="mobile-currency-selector-btn"
+              >
+                <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${pairDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+              {pairDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1 z-50 bg-card border border-white/10 rounded-lg shadow-xl overflow-hidden min-w-[140px]">
+                  {CRYPTO_PAIRS.map(pair => (
+                    <button
+                      key={pair.id}
+                      onClick={() => { setSelectedPair(pair); setPairDropdownOpen(false); }}
+                      className={`w-full text-left px-3 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center justify-between ${
+                        selectedPair.id === pair.id ? "bg-white/5" : ""
+                      }`}
+                      data-testid={`mobile-select-pair-${pair.symbol.toLowerCase()}`}
+                    >
+                      <span style={{ color: pair.color }} className="font-medium">{pair.symbol}</span>
+                      <span className="text-xs text-muted-foreground font-mono">
+                        {cryptoPrices[pair.id]?.usd ? `$${cryptoPrices[pair.id].usd.toLocaleString()}` : "..."}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <p className="text-3xl font-black text-muted-foreground" data-testid="mobile-price-ticker-value">
+            0 <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span>
+          </p>
+          <p className="text-xs text-muted-foreground mt-1" data-testid="mobile-brics-pair-label">
+            1 BRICS = 0 {selectedPair.symbol}
+          </p>
+          <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              <span style={{ color: selectedPair.color }} className="font-medium">{selectedPair.symbol}</span> Price
+            </span>
+            <span className="text-sm font-mono font-medium" data-testid="mobile-real-crypto-price">
+              {pricesLoading ? (
+                <span className="animate-pulse text-muted-foreground">...</span>
+              ) : cryptoPrices[selectedPair.id]?.usd != null ? (
+                `$${cryptoPrices[selectedPair.id].usd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ) : (
+                "N/A"
+              )}
+            </span>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           {[
