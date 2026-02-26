@@ -24,6 +24,17 @@ import { preparePQCTransaction } from "../lib/pqc-crypto";
 const API = process.env.REACT_APP_BACKEND_URL;
 const LOGO_URL = "/bricscoin-logo.png";
 
+const CRYPTO_PAIRS = [
+  { id: "tether", symbol: "USDT", color: "#26A17B" },
+  { id: "usd-coin", symbol: "USDC", color: "#2775CA" },
+  { id: "bitcoin", symbol: "BTC", color: "#F7931A" },
+  { id: "solana", symbol: "SOL", color: "#9945FF" },
+  { id: "ethereum", symbol: "ETH", color: "#627EEA" },
+  { id: "binancecoin", symbol: "BNB", color: "#F3BA2F" },
+  { id: "ripple", symbol: "XRP", color: "#23292F" },
+  { id: "dogecoin", symbol: "DOGE", color: "#C2A633" },
+];
+
 function copyText(text) {
   navigator.clipboard.writeText(text);
   toast.success("Copied!");
