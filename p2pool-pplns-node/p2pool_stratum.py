@@ -713,10 +713,13 @@ class StratumServer:
             miners.pop(miner.miner_id, None)
             try:
                 now_iso = datetime.now(timezone.utc).isoformat()
+                # Zero hashrate on disconnect for this specific miner_id
                 await db.pplns_miners.update_one(
                     {"miner_id": miner.miner_id},
-                    {"$set": {"online": False, "last_seen": now_iso}}
+                    {"$set": {"online": False, "last_seen": now_iso,
+                              "hashrate": 0, "hashrate_readable": "0 H/s"}}
                 )
+                logger.info(f"Miner disconnected: {miner.miner_id} (hashrate zeroed)")
             except Exception:
                 pass
             try:
