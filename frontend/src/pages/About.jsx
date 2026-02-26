@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { 
-  FileText, 
-  Code, 
-  User, 
-  Target, 
-  Shield, 
+import {
+  FileText,
+  Code,
+  User,
+  Target,
+  Shield,
   Zap,
   CheckCircle,
   Clock,
@@ -19,10 +19,18 @@ import {
   RefreshCw,
   Atom,
   Loader2,
-  XCircle
+  XCircle,
+  Globe,
+  Wallet,
+  Pickaxe,
+  Network,
+  HelpCircle,
+  ArrowRight,
+  Eye
 } from "lucide-react";
 import { getTokenomics } from "../lib/api";
 import api from "../lib/api";
+import { motion } from "framer-motion";
 
 const ICON_MAP = {
   "check-circle": CheckCircle,
@@ -48,7 +56,7 @@ function AuditCategory({ category }) {
       <div className="space-y-1.5">
         {category.tests.map((test, i) => (
           <div key={i} className="flex items-center gap-2 text-xs">
-            {test.passed 
+            {test.passed
               ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               : <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
             }
@@ -57,6 +65,32 @@ function AuditCategory({ category }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function InfoSection({ icon: Icon, title, children, color = "primary", delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: delay * 0.1, duration: 0.4 }}
+    >
+      <Card className="bg-card/50 border-white/10 overflow-hidden" data-testid={`section-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex items-start gap-4">
+            <div className={`w-12 h-12 rounded-sm bg-${color}/10 flex items-center justify-center shrink-0`}>
+              <Icon className={`w-6 h-6 text-${color}`} />
+            </div>
+            <div className="space-y-3 min-w-0">
+              <h3 className="text-lg sm:text-xl font-heading font-bold">{title}</h3>
+              <div className="text-sm sm:text-base text-muted-foreground leading-relaxed space-y-2">
+                {children}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -91,16 +125,16 @@ export default function About() {
 
   useEffect(() => { runAudit(); }, []);
 
-  const roadmapItems = [
-    { phase: "January 2026", status: "done", items: ["Mainnet launch", "Web wallet with instant transactions", "Block explorer", "Hardware mining (Stratum)", "Desktop wallet (Linux, Windows, Mac)", "Open source on Codeberg", "Security audit completed"] },
-  ];
-
   return (
-    <div className="space-y-8 pb-12">
-      {/* Header */}
-      <div className="text-center space-y-4">
+    <div className="space-y-8 pb-12" data-testid="about-page">
+      {/* Hero */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center space-y-4 py-4"
+      >
         <h1 className="text-4xl sm:text-5xl font-heading font-bold">
-          About <span className="gold-text">BricsCoin</span>
+          Cos'è <span className="gold-text">BricsCoin</span>?
         </h1>
         <p className="text-sm font-medium text-primary/80 tracking-wide">
           <span className="text-lg font-bold text-primary">B</span>lockchain{" "}
@@ -113,9 +147,115 @@ export default function About() {
           <span className="text-lg font-bold text-primary">I</span>nnovation{" "}
           <span className="text-lg font-bold text-primary">N</span>etwork
         </p>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          A decentralized SHA256 Proof-of-Work cryptocurrency. Open source, transparent, and community-driven. No political, geopolitical, or institutional affiliation of any kind.
+        <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg">
+          Immagina dei soldi digitali che nessuno controlla, nessuna banca, nessun governo, nessuna azienda.
+          BricsCoin è esattamente questo: una moneta digitale libera, sicura e trasparente.
         </p>
+      </motion.div>
+
+      {/* Simple Explanation Sections */}
+      <div className="space-y-4">
+
+        <InfoSection icon={HelpCircle} title="In parole semplici" color="primary" delay={1}>
+          <p>
+            BricsCoin è una <strong className="text-foreground">criptovaluta</strong>, cioè una moneta digitale che esiste solo su internet.
+            Come l'euro o il dollaro, puoi usarla per inviare e ricevere pagamenti. Ma a differenza delle monete tradizionali,
+            non c'è nessuna banca o istituzione che la controlla.
+          </p>
+          <p>
+            Funziona grazie a una tecnologia chiamata <strong className="text-foreground">blockchain</strong>: un registro pubblico dove
+            ogni transazione viene scritta in modo permanente e verificabile da tutti. Nessuno può cancellare o modificare una transazione
+            una volta confermata.
+          </p>
+        </InfoSection>
+
+        <InfoSection icon={Shield} title="Sicurezza" color="emerald" delay={2}>
+          <p>
+            BricsCoin usa lo stesso sistema di sicurezza di Bitcoin: l'algoritmo <strong className="text-foreground">SHA-256</strong>.
+            Per intenderci, è lo stesso livello di crittografia usato dalle banche e dai governi di tutto il mondo.
+          </p>
+          <p>
+            Ma BricsCoin va oltre: integra anche la <strong className="text-foreground">crittografia post-quantistica (PQC)</strong>,
+            un sistema di protezione progettato per resistere anche ai futuri computer quantistici. Questo significa che i tuoi fondi
+            sono protetti non solo oggi, ma anche nel futuro.
+          </p>
+          <p>
+            Le transazioni vengono <strong className="text-foreground">firmate direttamente nel tuo browser</strong>.
+            La tua chiave privata (la "password" del tuo wallet) non lascia mai il tuo dispositivo.
+          </p>
+        </InfoSection>
+
+        <InfoSection icon={Network} title="Decentralizzazione" color="primary" delay={3}>
+          <p>
+            <strong className="text-foreground">Decentralizzato</strong> significa che non esiste un singolo punto di controllo.
+            La rete BricsCoin è composta da tanti computer indipendenti (chiamati <strong className="text-foreground">nodi</strong>)
+            sparsi nel mondo che collaborano tra loro.
+          </p>
+          <p>
+            Se un nodo si spegne, gli altri continuano a funzionare. Nessuno può censurare le transazioni o spegnere la rete.
+            Chiunque può scaricare il software e far funzionare un nodo dal proprio computer, contribuendo alla sicurezza della rete.
+          </p>
+          <p>
+            I nodi comunicano tra loro tramite una rete <strong className="text-foreground">peer-to-peer (P2P)</strong>,
+            lo stesso principio usato per condividere file su internet. Non c'è un server centrale: tutti sono uguali.
+          </p>
+        </InfoSection>
+
+        <InfoSection icon={Wallet} title="Il Wallet (Portafoglio)" color="primary" delay={4}>
+          <p>
+            Il <strong className="text-foreground">wallet</strong> è il tuo portafoglio digitale. Funziona come un'app bancaria,
+            ma senza banca. Ti permette di:
+          </p>
+          <ul className="list-none space-y-1.5 ml-1">
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Ricevere</strong> BRICS da chiunque, condividendo il tuo indirizzo</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Inviare</strong> BRICS a qualsiasi indirizzo nel mondo</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Controllare il saldo</strong> e la cronologia delle transazioni</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Esportare e importare</strong> il wallet con una seed phrase di 12 parole</span>
+            </li>
+          </ul>
+          <p>
+            La <strong className="text-foreground">seed phrase</strong> è una serie di 12 parole che funziona come backup del tuo wallet.
+            Se perdi il dispositivo, puoi recuperare i tuoi fondi inserendo queste 12 parole. Conservala in un posto sicuro e non condividerla mai!
+          </p>
+        </InfoSection>
+
+        <InfoSection icon={Pickaxe} title="Il Mining" color="primary" delay={5}>
+          <p>
+            Il <strong className="text-foreground">mining</strong> è il processo con cui vengono creati nuovi BRICS e verificate le transazioni.
+            I miner (minatori) usano la potenza del proprio computer per risolvere problemi matematici complessi.
+            Chi trova la soluzione per primo, aggiunge un nuovo "blocco" alla blockchain e riceve una ricompensa.
+          </p>
+          <p>
+            Attualmente, ogni blocco minato produce <strong className="text-foreground">50 BRICS</strong> come ricompensa.
+            Questa ricompensa si dimezza ogni 210.000 blocchi (come Bitcoin), rendendo BRICS sempre più raro nel tempo.
+          </p>
+          <p>
+            BricsCoin è stato lanciato con un <strong className="text-foreground">Fair Launch al 100%</strong>: nessun premine,
+            nessuna riserva per i fondatori. Tutti i 21 milioni di BRICS possono essere ottenuti solo tramite mining.
+          </p>
+        </InfoSection>
+
+        <InfoSection icon={Eye} title="Trasparenza" color="primary" delay={6}>
+          <p>
+            Tutto in BricsCoin è <strong className="text-foreground">pubblico e verificabile</strong>.
+            Il codice sorgente è aperto (open source) e disponibile su Codeberg. Chiunque può leggere, verificare e contribuire al codice.
+          </p>
+          <p>
+            Ogni transazione, ogni blocco, ogni indirizzo è visibile nel <strong className="text-foreground">Block Explorer</strong>
+            del sito. Non ci sono operazioni nascoste o segrete.
+          </p>
+        </InfoSection>
       </div>
 
       {/* Security Audit - Live */}
@@ -127,17 +267,17 @@ export default function About() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="w-6 h-6 text-emerald-400" />
-              Security Audit
+              Audit di Sicurezza
               {audit?.all_passed && (
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ml-2">
-                  {audit.total_passed}/{audit.total_tests} PASSED
+                  {audit.total_passed}/{audit.total_tests} SUPERATI
                 </Badge>
               )}
             </CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={runAudit} 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={runAudit}
               disabled={auditLoading}
               className="border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 rounded-sm"
               data-testid="run-audit-btn"
@@ -149,10 +289,10 @@ export default function About() {
         </CardHeader>
         <CardContent className="space-y-4 relative z-10">
           <p className="text-muted-foreground text-sm">
-            Audit di sicurezza completo con test reali eseguiti in tempo reale. Copre validazione input,
-            crittografia classica (ECDSA/SHA-256), crittografia post-quantistica (ML-DSA-65), e prevenzione attacchi.
+            Questo audit esegue test di sicurezza reali in tempo reale sulla blockchain. Verifica la crittografia,
+            la validazione degli input, la protezione post-quantistica e la prevenzione degli attacchi.
           </p>
-          
+
           {audit ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -160,16 +300,12 @@ export default function About() {
                   <AuditCategory key={i} category={cat} />
                 ))}
               </div>
-              
+
               <div className="flex flex-wrap gap-2 pt-4 border-t border-white/5">
                 <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">SHA-256</Badge>
                 <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">ECDSA secp256k1</Badge>
                 <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">ML-DSA-65 (FIPS 204)</Badge>
-                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Hybrid Signatures</Badge>
-                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Client-Side Signing</Badge>
-                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">DER Format</Badge>
-                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">CORS Protected</Badge>
-                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Rate Limiting</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Firma Client-Side</Badge>
               </div>
 
               {audit.timestamp && (
@@ -187,34 +323,112 @@ export default function About() {
         </CardContent>
       </Card>
 
-      {/* Mission */}
-      <Card className="bg-card/50 border-primary/20">
+      {/* Tokenomics Simplified */}
+      <Card className="bg-card/50 border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            Our Mission
+            <Coins className="w-5 h-5 text-primary" />
+            Numeri Chiave
+            <Badge variant="outline" className="ml-2 text-xs">Dati Live</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            BricsCoin aims to create a truly decentralized currency that remains accessible to hardware miners worldwide, 
-            with minimal transaction fees (0.000005 BRICS), and operates with full transparency as an open-source project.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-              <Shield className="w-8 h-8 text-primary mb-2" />
-              <h4 className="font-bold">Secure</h4>
-              <p className="text-sm text-muted-foreground">SHA256 PoW, the same proven algorithm as Bitcoin</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 bg-primary/5 rounded-sm border border-primary/10 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Massima Fornitura</p>
+              <p className="text-xl font-heading font-bold gold-text">21.000.000</p>
+              <p className="text-xs text-muted-foreground">BRICS totali</p>
             </div>
-            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-              <Zap className="w-8 h-8 text-primary mb-2" />
-              <h4 className="font-bold">Deflationary</h4>
-              <p className="text-sm text-muted-foreground">0.000005 BRICS fee per transaction - fees are BURNED (destroyed)</p>
+            <div className="p-4 bg-emerald-500/5 rounded-sm border border-emerald-500/20 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Premine</p>
+              <p className="text-xl font-heading font-bold text-emerald-400">0%</p>
+              <p className="text-xs text-muted-foreground">Fair Launch</p>
             </div>
-            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-              <Code className="w-8 h-8 text-primary mb-2" />
-              <h4 className="font-bold">Open Source</h4>
-              <p className="text-sm text-muted-foreground">100% transparent, MIT licensed code</p>
+            <div className="p-4 bg-primary/5 rounded-sm border border-primary/10 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Ricompensa Blocco</p>
+              <p className="text-xl font-heading font-bold gold-text">{tokenomics?.mining_rewards?.current_block_reward || 50}</p>
+              <p className="text-xs text-muted-foreground">BRICS per blocco</p>
+            </div>
+            <div className="p-4 bg-primary/5 rounded-sm border border-primary/10 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Fee Transazione</p>
+              <p className="text-xl font-heading font-bold gold-text">0.000005</p>
+              <p className="text-xs text-muted-foreground">BRICS (quasi zero)</p>
+            </div>
+          </div>
+
+          {tokenomics?.mining_rewards?.mined_so_far > 0 && (
+            <div className="p-4 bg-card rounded-sm border border-white/10">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">Minati finora</span>
+                <span className="text-sm font-mono font-bold gold-text">
+                  {tokenomics.mining_rewards.mined_so_far?.toLocaleString()} BRICS
+                </span>
+              </div>
+              <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${Math.min(tokenomics.mining_rewards.percentage_mined, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 text-right">
+                {tokenomics.mining_rewards.percentage_mined}% del totale
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Tech Specs */}
+      <Card className="bg-card/50 border-white/10">
+        <CardHeader>
+          <CardTitle>Specifiche Tecniche</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Algoritmo", value: "SHA-256" },
+              { label: "Fornitura Max", value: "21M BRICS" },
+              { label: "Ricompensa", value: "50 BRICS" },
+              { label: "Halving", value: "210.000 blocchi" },
+              { label: "Tempo Blocco", value: "~10 min" },
+              { label: "Difficolta", value: "Dinamica" },
+              { label: "Fee TX", value: "0.000005 BRICS" },
+              { label: "Post-Quantistico", value: "ML-DSA-65" },
+              { label: "Firme", value: "ECDSA + PQC" },
+              { label: "Firma Client", value: "Nel browser" },
+              { label: "Licenza", value: "MIT" },
+              { label: "Mining", value: "Aperto a tutti" },
+            ].map((spec, i) => (
+              <div key={i} className="p-3 bg-white/5 rounded-sm text-center">
+                <p className="text-xs text-muted-foreground">{spec.label}</p>
+                <p className="font-bold text-primary text-sm">{spec.value}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Team */}
+      <Card className="bg-card/50 border-white/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" />
+            Team
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4 p-4 bg-primary/5 rounded-sm border border-primary/10">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+              <User className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">Jabo86</h3>
+              <p className="text-muted-foreground">Fondatore & Lead Developer</p>
+              <div className="flex gap-2 mt-2">
+                <Badge variant="outline" className="text-xs">SHA-256</Badge>
+                <Badge variant="outline" className="text-xs">Blockchain</Badge>
+                <Badge variant="outline" className="text-xs">PQC</Badge>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -231,16 +445,15 @@ export default function About() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              Read our technical whitepaper for detailed information about BricsCoin's architecture, 
-              tokenomics, and roadmap.
+              Il documento tecnico ufficiale con tutti i dettagli su architettura, tokenomics e roadmap di BricsCoin.
             </p>
-            <Button 
+            <Button
               onClick={() => window.location.href = '/whitepaper'}
               className="w-full"
               data-testid="whitepaper-btn"
             >
               <FileText className="w-4 h-4 mr-2" />
-              Read Whitepaper
+              Leggi il Whitepaper
             </Button>
           </CardContent>
         </Card>
@@ -249,185 +462,40 @@ export default function About() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Code className="w-5 h-5 text-primary" />
-              Source Code
+              Codice Sorgente
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              BricsCoin is fully open source. Review the code, submit improvements, or run your own node.
+              BricsCoin è completamente open source. Chiunque può leggere il codice, proporre miglioramenti o eseguire un proprio nodo.
             </p>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}
               className="w-full border-white/20"
               data-testid="codeberg-btn"
             >
               <Code className="w-4 h-4 mr-2" />
-              View on Codeberg
+              Vedi su Codeberg
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Team */}
-      <Card className="bg-card/50 border-white/10">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5 text-primary" />
-            Team
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold">Jabo86</h3>
-              <p className="text-muted-foreground">Founder & Lead Developer</p>
-              <div className="flex gap-2 mt-2">
-                <Badge variant="outline" className="text-xs">SHA256 Expert</Badge>
-                <Badge variant="outline" className="text-xs">Blockchain Developer</Badge>
-              </div>
-            </div>
-          </div>
-          <p className="text-muted-foreground text-sm mt-4">
-            Passionate about decentralization and cryptocurrency. Building BricsCoin as a community-driven, 
-            open-source project to bring the power of SHA256 mining to everyone.
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Tokenomics - 100% Fair Launch */}
-      <Card className="bg-card/50 border-white/10">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Coins className="w-5 h-5 text-primary" />
-            Tokenomics & Fair Launch
-            <Badge variant="outline" className="ml-2 text-xs">Live Data</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-              <h4 className="font-bold text-primary mb-2">Total Supply</h4>
-              <p className="text-2xl font-bold">{tokenomics?.total_supply?.toLocaleString() || "21,000,000"} BRICS</p>
-              <p className="text-sm text-muted-foreground">Fixed, like Bitcoin</p>
-            </div>
-            <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
-              <h4 className="font-bold text-green-500 mb-2">100% Fair Launch</h4>
-              <p className="text-2xl font-bold">No Premine</p>
-              <p className="text-sm text-muted-foreground">All 21M BRICS are exclusively mineable</p>
-            </div>
-          </div>
-
-          <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
-            <h4 className="font-bold text-green-500 mb-2">Mining Rewards (100%)</h4>
-            <p className="text-2xl font-bold">{tokenomics?.mining_rewards?.total_available?.toLocaleString() || "21,000,000"} BRICS</p>
-            <p className="text-sm text-muted-foreground">
-              Block reward: {tokenomics?.mining_rewards?.current_block_reward || 50} BRICS, halving every {tokenomics?.mining_rewards?.halving_interval?.toLocaleString() || "210,000"} blocks.
-            </p>
-            {tokenomics?.mining_rewards?.mined_so_far > 0 && (
-              <div className="mt-2 pt-2 border-t border-green-500/20">
-                <p className="text-xs text-muted-foreground">
-                  Mined so far: <span className="text-green-400 font-mono">{tokenomics.mining_rewards.mined_so_far?.toLocaleString()} BRICS</span>
-                  ({tokenomics.mining_rewards.percentage_mined}%)
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Transaction Fee */}
-          <div className="p-4 bg-blue-500/5 rounded-lg border border-blue-500/20">
-            <h4 className="font-bold text-blue-500 mb-2">Transaction Fee</h4>
-            <p className="text-2xl font-bold">{tokenomics?.fees?.transaction_fee || 0.000005} BRICS</p>
-            <p className="text-sm text-muted-foreground">
-              {tokenomics?.fees?.note || "Fees are collected by miners who include transactions in blocks."}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Roadmap */}
-      <Card className="bg-card/50 border-white/10">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            Roadmap
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {roadmapItems.map((phase, idx) => (
-              <div key={idx} className="relative pl-8 border-l-2 border-white/10 pb-6 last:pb-0">
-                <div className={`absolute -left-[9px] w-4 h-4 rounded-full ${
-                  phase.status === 'done' ? 'bg-green-500' : 
-                  phase.status === 'current' ? 'bg-primary animate-pulse' : 'bg-white/20'
-                }`} />
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className="font-bold">{phase.phase}</h4>
-                  {phase.status === 'done' && <Badge className="bg-green-500/20 text-green-400 text-xs">Completed</Badge>}
-                  {phase.status === 'current' && <Badge className="bg-primary/20 text-primary text-xs">In Progress</Badge>}
-                  {phase.status === 'upcoming' && <Badge variant="outline" className="text-xs">Upcoming</Badge>}
-                </div>
-                <ul className="space-y-1">
-                  {phase.items.map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      {phase.status === 'done' ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <Clock className="w-4 h-4 text-white/30" />
-                      )}
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tech Specs */}
-      <Card className="bg-card/50 border-white/10">
-        <CardHeader>
-          <CardTitle>Technical Specifications</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: "Algorithm", value: "SHA256" },
-              { label: "Max Supply", value: "21M BRICS" },
-              { label: "Block Reward", value: "50 BRICS" },
-              { label: "Halving", value: "210,000 blocks" },
-              { label: "Block Time", value: "~10 min" },
-              { label: "Difficulty", value: "Dynamic" },
-              { label: "TX Fees", value: "0.000005 BRICS" },
-              { label: "Quantum", value: "ML-DSA-65" },
-              { label: "Signatures", value: "ECDSA + PQC" },
-              { label: "Client Sign", value: "Browser-side" },
-              { label: "License", value: "MIT" },
-              { label: "Mining", value: "Open to all" },
-            ].map((spec, i) => (
-              <div key={i} className="p-3 bg-white/5 rounded-lg text-center">
-                <p className="text-xs text-muted-foreground">{spec.label}</p>
-                <p className="font-bold text-primary">{spec.value}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* CTA */}
       <div className="text-center space-y-4 pt-8">
-        <h2 className="text-2xl font-bold">Ready to join the BricsCoin community?</h2>
+        <h2 className="text-xl sm:text-2xl font-heading font-bold">Pronto a scoprire BricsCoin?</h2>
+        <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+          Crea il tuo primo wallet in pochi secondi. Non servono documenti, email o registrazioni.
+        </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button onClick={() => window.location.href = '/wallet'} data-testid="get-started-btn">
-            Get Started
+            <Wallet className="w-4 h-4 mr-2" />
+            Crea il tuo Wallet
           </Button>
-          <Button variant="outline" className="border-white/20" onClick={() => window.open('https://codeberg.org/Bricscoin_26/Bricscoin', '_blank')}>
-            <Code className="w-4 h-4 mr-2" />
-            Codeberg
+          <Button variant="outline" className="border-white/20" onClick={() => window.location.href = '/blockchain'}>
+            <Globe className="w-4 h-4 mr-2" />
+            Esplora la Blockchain
           </Button>
           <Button variant="outline" className="border-white/20" onClick={() => window.open('https://x.com/Bricscoin26', '_blank')}>
             <ExternalLink className="w-4 h-4 mr-2" />
