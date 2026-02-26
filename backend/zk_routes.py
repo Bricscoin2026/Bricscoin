@@ -286,6 +286,17 @@ async def get_shielded_history(address: str, limit: int = 50):
         {"_id": 0}
     ).sort("timestamp", -1).limit(limit).to_list(limit)
 
+    # Mask addresses in shielded transactions
+    for tx in txs:
+        tx["amount"] = "SHIELDED"
+        tx["display_amount"] = "SHIELDED"
+        if tx.get("sender"):
+            s_hash = hashlib.sha256(tx["sender"].encode()).hexdigest()
+            tx["sender"] = f"SHIELDED_{s_hash[:8]}"
+        if tx.get("recipient"):
+            r_hash = hashlib.sha256(tx["recipient"].encode()).hexdigest()
+            tx["recipient"] = f"SHIELDED_{r_hash[:8]}"
+
     return {
         "address": address,
         "shielded_transactions": txs,
