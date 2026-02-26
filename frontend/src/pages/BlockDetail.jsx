@@ -215,6 +215,37 @@ export default function BlockDetail() {
         </motion.div>
       )}
 
+      {/* AuxPoW Merge Mining Details */}
+      {block.block_type === "auxpow" && block.auxpow && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.03 }}
+        >
+          <Card className="bg-card border-orange-500/20" data-testid="block-auxpow-card">
+            <CardHeader className="border-b border-orange-500/10">
+              <CardTitle className="font-heading flex items-center gap-2">
+                <Shield className="w-5 h-5 text-orange-400" />
+                Merge Mining (AuxPoW)
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 ml-2">
+                  {(block.auxpow.parent_chain || "bitcoin").toUpperCase()}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-3">
+              <InfoRow label="Parent Chain" value={(block.auxpow.parent_chain || "Bitcoin").charAt(0).toUpperCase() + (block.auxpow.parent_chain || "bitcoin").slice(1)} />
+              <InfoRow label="Parent Block Hash" value={block.auxpow.parent_hash} mono copyable />
+              <InfoRow label="Coinbase Branch Size" value={`${block.auxpow.coinbase_branch?.length || 0} nodes`} />
+              <div className="p-3 rounded bg-orange-500/5 border border-orange-500/10">
+                <p className="text-xs text-muted-foreground">
+                  This block was mined via Auxiliary Proof of Work (AuxPoW). A Bitcoin miner embedded BricsCoin's block hash in their coinbase transaction, allowing both chains to share the same proof of work.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Transactions */}
       {block.transactions && block.transactions.length > 0 && (
         <motion.div
