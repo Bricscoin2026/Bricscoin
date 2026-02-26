@@ -84,28 +84,23 @@ async def get_db():
 async def get_address_balance(address: str) -> float:
     """Calculate balance for an address from confirmed transactions."""
     db = await get_db()
-    # Sum received
+    # Sum received (including shielded)
     received_cursor = db.transactions.find(
         {"recipient": address, "confirmed": True},
-        {"amount": 1, "type": 1, "_id": 0}
+        {"amount": 1, "_id": 0}
     )
     received = 0.0
     async for tx in received_cursor:
-        if tx.get("type") == "shielded":
-            continue  # Shielded amounts are hidden, tracked separately
         received += tx.get("amount", 0)
 
-    # Sum sent
+    # Sum sent (including shielded)
     sent_cursor = db.transactions.find(
         {"sender": address, "confirmed": True},
-        {"amount": 1, "fee": 1, "type": 1, "_id": 0}
+        {"amount": 1, "fee": 1, "_id": 0}
     )
     sent = 0.0
     async for tx in sent_cursor:
-        if tx.get("type") == "shielded":
-            sent += tx.get("fee", 0)  # Only fee is visible
-        else:
-            sent += tx.get("amount", 0) + tx.get("fee", 0)
+        sent += tx.get("amount", 0) + tx.get("fee", 0)
 
     # Mining rewards
     blocks_cursor = db.blocks.find(
