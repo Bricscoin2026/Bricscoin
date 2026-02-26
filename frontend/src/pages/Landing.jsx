@@ -412,16 +412,16 @@ export default function Landing() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: "Total Supply", value: "21,000,000", sub: "Fixed forever" },
+              { label: "Total Supply", value: "21M", sub: "Fixed forever" },
               { label: "Block Reward", value: "50 BRICS", sub: "Halves every 210K blocks" },
-              { label: "Transaction Fee", value: "0.000005", sub: "Near zero cost" },
+              { label: "TX Fee", value: "0.000005", sub: "Near zero cost" },
               { label: "Premine", value: "0%", sub: "100% fair launch" },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="p-5 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
-                <p className="text-2xl font-heading font-bold gold-text">{item.value}</p>
-                <p className="text-xs text-muted-foreground mt-1 font-medium">{item.label}</p>
+                className="p-4 sm:p-5 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
+                <p className="text-lg sm:text-2xl font-heading font-bold gold-text">{item.value}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium">{item.label}</p>
                 <p className="text-[10px] text-muted-foreground/60 mt-0.5">{item.sub}</p>
               </motion.div>
             ))}
