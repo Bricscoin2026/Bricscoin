@@ -703,3 +703,61 @@ def generate_balance_proof(balance: int, threshold: int) -> dict:
 def verify_balance_proof(proof: dict) -> dict:
     """Verify a balance proof."""
     return stark_verify(proof)
+
+
+# ═══════════════════════════════════════════════
+#  SHIELDED TRANSACTIONS — Pedersen-style hash commitments
+# ═══════════════════════════════════════════════
+
+def create_amount_commitment(amount: float, blinding_factor: str) -> str:
+    """
+    Create a Pedersen-style commitment hiding the amount.
+    C = SHA256(amount || blinding_factor)
+    The commitment binds the prover to the amount without revealing it.
+    """
+    amount_bytes = struct.pack('>d', amount)
+    h = hashlib.sha256()
+    h.update(b'BRICS_COMMITMENT_V1')
+    h.update(amount_bytes)
+    h.update(blinding_factor.encode())
+    return h.hexdigest()
+
+
+def verify_amount_commitment(amount: float, blinding_factor: str, commitment: str) -> bool:
+    """Verify a commitment matches the claimed amount."""
+    expected = create_amount_commitment(amount, blinding_factor)
+    return expected == commitment
+
+
+def encrypt_amount_for_parties(amount: float, sender_address: str, recipient_address: str, blinding_factor: str) -> str:
+    """
+    Encrypt the amount so only sender and recipient can decrypt it.
+    Uses a shared secret derived from both addresses + blinding factor.
+    """
+    # Derive encryption key from shared context
+    key = hashlib.sha256(
+        f"BRICS_SHIELDED_{sender_address}_{recipient_address}_{blinding_factor}".encode()
+    ).digest()
+
+    # Simple XOR encryption of the amount bytes
+    amount_bytes = struct.pack('>d', amount)
+    encrypted = bytes(a ^ b for a, b in zip(amount_bytes, key[:8]))
+    return encrypted.hex()
+
+
+def decrypt_shielded_amount(encrypted_hex: str, sender_address: str, recipient_address: str, blinding_factor: str) -> float:
+    """
+    Decrypt a shielded amount. Only works if you know the blinding factor.
+    """
+    key = hashlib.sha256(
+        f"BRICS_SHIELDED_{sender_address}_{recipient_address}_{blinding_factor}".encode()
+    ).digest()
+
+    encrypted = bytes.fromhex(encrypted_hex)
+    decrypted = bytes(a ^ b for a, b in zip(encrypted, key[:8]))
+    return struct.unpack('>d', decrypted)[0]
+
+
+def generate_blinding_factor() -> str:
+    """Generate a cryptographically secure random blinding factor."""
+    return hashlib.sha256(os.urandom(32)).hexdigest()
