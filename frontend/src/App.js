@@ -25,6 +25,7 @@ function App() {
     <div className="App noise-overlay min-h-screen bg-background">
       <BrowserRouter>
         <Routes>
+          <Route path="/mobile-wallet" element={<MobileWallet />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Landing />} />
             <Route path="dashboard" element={<Dashboard />} />
@@ -39,7 +40,6 @@ function App() {
             <Route path="p2pool" element={<P2Pool />} />
             <Route path="mining" element={<Mining />} />
             <Route path="merge-mining" element={<MergeMiningGuide />} />
-            <Route path="mobile-wallet" element={<MobileWallet />} />
             <Route path="network" element={<Network />} />
             <Route path="whitepaper" element={<Whitepaper />} />
             <Route path="downloads" element={<Downloads />} />
