@@ -2,7 +2,7 @@
   "name": "BricsCoin Wallet",
   "short_name": "BRICS Wallet",
   "description": "Desktop & Mobile wallet for BricsCoin cryptocurrency",
-  "start_url": "/wallet",
+  "start_url": "/mobile-wallet",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#FFD700",
