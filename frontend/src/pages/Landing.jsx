@@ -346,12 +346,12 @@ export default function Landing() {
               description="Mint quantum-proof certificates — diplomas, property deeds, authenticity proofs. Verified with ML-DSA-65 signatures, immutable forever." />
             <FeatureCard icon={Brain} title="AI Oracle" link="/oracle" color="#10B981" delay={8} tag="Intelligence"
               description="An AI-powered blockchain analyst. Ask it anything about BricsCoin — network health, mining stats, security status. Real-time chain analysis." />
-            <FeatureCard icon={Pickaxe} title="Mining" link="/p2pool" color="#F59E0B" delay={9} tag="Earn"
+            <FeatureCard icon={Pickaxe} title="Mining" link="/mining" color="#F59E0B" delay={9} tag="Earn"
               description="Mine BRICS with SHA-256 hardware. Join the PPLNS pool for steady rewards or mine solo for 50 BRICS/block. Fair launch — zero premine." />
-            <FeatureCard icon={Network} title="P2P Network" link="/network" color="#06B6D4" delay={10} tag="Infrastructure"
+            <FeatureCard icon={Link2} title="Merge Mining" link="/merge-mining" color="#F97316" delay={10} tag="AuxPoW"
+              description="Bitcoin miners can mine BricsCoin simultaneously at zero extra cost. AuxPoW leverages Bitcoin's massive hashrate to secure BricsCoin. Fully reversible." />
+            <FeatureCard icon={Network} title="P2P Network" link="/network" color="#06B6D4" delay={11} tag="Infrastructure"
               description="Fully decentralized peer-to-peer network. Nodes discover each other, sync the blockchain, and propagate transactions. Download and join." />
-            <FeatureCard icon={Scan} title="Security Audit" link="/blockchain" color="#10B981" delay={11} tag="Verification"
-              description="Run a real-time security audit on the blockchain. Every test — input validation, cryptography, attack prevention — is publicly verifiable." />
           </div>
         </div>
       </section>
