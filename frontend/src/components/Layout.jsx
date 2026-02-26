@@ -82,7 +82,7 @@ export default function Layout() {
                   to={item.to}
                   data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium transition-colors ${
+                    `flex items-center gap-2 px-3 py-2 rounded-sm text-sm font-medium transition-colors ${
                       isActive
                         ? "bg-primary/10 text-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-white/5"
@@ -93,6 +93,40 @@ export default function Layout() {
                   {item.label}
                 </NavLink>
               ))}
+              {/* More dropdown */}
+              <div className="relative" ref={moreRef}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setMoreOpen(!moreOpen); }}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-colors
+                    ${moreOpen ? "bg-white/5 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"}`}
+                  data-testid="nav-more-btn"
+                >
+                  More
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
+                </button>
+                {moreOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-card border border-white/10 rounded-sm shadow-xl z-50 overflow-hidden">
+                    {moreItems.map((item) => (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setMoreOpen(false)}
+                        data-testid={`nav-more-${item.label.toLowerCase().replace(' ', '-')}`}
+                        className={({ isActive }) =>
+                          `flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
+                            isActive
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                          }`
+                        }
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
             </nav>
 
             {/* Mobile menu button */}
