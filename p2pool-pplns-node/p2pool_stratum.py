@@ -616,7 +616,8 @@ class StratumMiner:
 
 # ================= HASHRATE UPDATER =================
 async def update_miner_hashrates():
-    """Periodically update hashrate estimates for PPLNS miners."""
+    """Periodically update hashrate estimates for PPLNS miners.
+    FIX: use update_many to update ALL documents for each worker (not just the first)."""
     while True:
         await asyncio.sleep(60)
         try:
@@ -625,13 +626,18 @@ async def update_miner_hashrates():
             day_cutoff = (now - timedelta(hours=24)).isoformat()
             cutoff_10m = (now - timedelta(minutes=10)).isoformat()
 
-            # Get active miners
+            # Get unique active workers (deduplicate by worker address)
             active_miners = await db.pplns_miners.find(
                 {"online": True, "last_seen": {"$gte": cutoff_10m}}, {"_id": 0}
-            ).to_list(100)
+            ).to_list(200)
 
+            seen_workers = set()
             for miner_doc in active_miners:
                 worker = miner_doc.get("worker", miner_doc.get("worker_name", "unknown"))
+                if worker in seen_workers:
+                    continue
+                seen_workers.add(worker)
+
                 shares_1h = await db.pplns_shares.count_documents(
                     {"worker": worker, "timestamp": {"$gte": hr_cutoff}}
                 )
@@ -648,7 +654,8 @@ async def update_miner_hashrates():
                     avg_diff = avg_res[0].get("avg", 512)
                 hashrate = (shares_1h * avg_diff * (2**32)) / 3600 if shares_1h > 0 else 0
 
-                await db.pplns_miners.update_one(
+                # FIX: update_many to hit ALL documents for this worker
+                await db.pplns_miners.update_many(
                     {"worker": worker},
                     {"$set": {
                         "shares_1h": shares_1h, "shares_24h": shares_24h,
@@ -656,11 +663,12 @@ async def update_miner_hashrates():
                         "hashrate_readable": format_hashrate(hashrate),
                     }}
                 )
+                logger.info(f"HASHRATE [{worker[:20]}...] {format_hashrate(hashrate)} ({shares_1h} shares/1h, avg_diff={avg_diff})")
 
-            # Mark stale miners offline
+            # Mark stale miners offline AND zero their hashrate
             await db.pplns_miners.update_many(
                 {"online": True, "last_seen": {"$lt": cutoff_10m}},
-                {"$set": {"online": False}}
+                {"$set": {"online": False, "hashrate": 0, "hashrate_readable": "0 H/s"}}
             )
         except Exception as e:
             logger.error(f"Hashrate update error: {e}")
