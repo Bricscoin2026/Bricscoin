@@ -1162,10 +1162,14 @@ async def get_transactions(request: Request, limit: int = 20, offset: int = 0, c
     for tx in transactions:
         if "confirmed" not in tx:
             tx["confirmed"] = True  # Old transactions without field are confirmed
-        # Hide amount for shielded transactions in public API
-        if tx.get("type") == "shielded":
+        # Hide amount for shielded/private transactions in public API
+        if tx.get("type") in ("shielded", "private"):
             tx["amount"] = "SHIELDED"
             tx["display_amount"] = "SHIELDED"
+        if tx.get("type") == "private":
+            tx["sender"] = "RING_HIDDEN"
+            tx.pop("real_sender", None)
+            tx.pop("real_recipient_scan_pubkey", None)
     total = await db.transactions.count_documents(query)
     return {"transactions": transactions, "total": total}
 
@@ -1182,10 +1186,14 @@ async def get_transaction(request: Request, tx_id: str):
         raise HTTPException(status_code=404, detail="Transaction not found")
     if "confirmed" not in tx:
         tx["confirmed"] = True  # Old transactions without field are confirmed
-    # Hide amount for shielded transactions in public API
-    if tx.get("type") == "shielded":
+    # Hide amount for shielded/private transactions in public API
+    if tx.get("type") in ("shielded", "private"):
         tx["amount"] = "SHIELDED"
         tx["display_amount"] = "SHIELDED"
+    if tx.get("type") == "private":
+        tx["sender"] = "RING_HIDDEN"
+        tx.pop("real_sender", None)
+        tx.pop("real_recipient_scan_pubkey", None)
     return tx
 
 @api_router.post("/transactions/secure")
@@ -1363,11 +1371,15 @@ async def get_address_transactions(request: Request, address: str, limit: int = 
         {"$or": [{"sender": address}, {"recipient": address}]},
         {"_id": 0}
     ).sort("timestamp", -1).limit(limit).to_list(limit)
-    # Hide amount for shielded transactions
+    # Hide amount for shielded/private transactions
     for tx in transactions:
-        if tx.get("type") == "shielded":
+        if tx.get("type") in ("shielded", "private"):
             tx["amount"] = "SHIELDED"
             tx["display_amount"] = "SHIELDED"
+        if tx.get("type") == "private":
+            tx["sender"] = "RING_HIDDEN"
+            tx.pop("real_sender", None)
+            tx.pop("real_recipient_scan_pubkey", None)
     return {"transactions": transactions}
 
 # Mining endpoints
