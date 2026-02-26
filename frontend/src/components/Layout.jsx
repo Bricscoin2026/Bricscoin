@@ -14,7 +14,9 @@ import {
   Clock,
   Brain,
   Award,
-  ChevronDown
+  ChevronDown,
+  Pickaxe,
+  Link2
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
@@ -43,6 +45,8 @@ export default function Layout() {
   ];
 
   const moreItems = [
+    { to: "/mining", icon: Pickaxe, label: "Mining" },
+    { to: "/merge-mining", icon: Link2, label: "Merge Mining" },
     { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
     { to: "/oracle", icon: Brain, label: "AI Oracle" },
