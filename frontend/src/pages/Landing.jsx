@@ -168,7 +168,7 @@ export default function Landing() {
             { label: "Algorithm", value: "SHA-256" },
             { label: "Premine", value: "0%" },
             { label: "Quantum-Proof", value: "ML-DSA-65" },
-            { label: "Privacy Layers", value: "6" },
+            { label: "Merge Mining", value: "Bitcoin" },
             { label: "Trusted Setup", value: "None" },
           ].map((stat, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
