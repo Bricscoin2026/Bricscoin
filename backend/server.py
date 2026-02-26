@@ -1547,6 +1547,9 @@ async def submit_mined_block(submission: MiningSubmit):
     
     logging.info(f"Block {new_index} mined by {submission.miner_address}")
     
+    # SECURITY: Auto-checkpoint after mining
+    await auto_checkpoint()
+    
     # Broadcast new block to peers
     asyncio.create_task(broadcast_to_peers(
         "broadcast/block",
