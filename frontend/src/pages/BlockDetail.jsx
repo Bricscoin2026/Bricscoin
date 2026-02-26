@@ -161,6 +161,7 @@ export default function BlockDetail() {
               label="Timestamp" 
               value={new Date(block.timestamp).toLocaleString()} 
             />
+            <InfoRow label="Block Type" value={block.block_type === "auxpow" ? "Merge Mined (AuxPoW)" : "Native PoW"} />
             <InfoRow label="Miner" value={block.miner} mono copyable />
             <InfoRow label="Nonce" value={block.nonce?.toLocaleString()} mono />
             <InfoRow label="Difficulty" value={block.difficulty} />
