@@ -14,7 +14,8 @@ import {
   Clock,
   Brain,
   Award,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
