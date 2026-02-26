@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   Blocks, ArrowRightLeft, ChevronLeft, ChevronRight, Search,
   TrendingUp, Activity, Clock, Shield, Server,
-  Network as NetworkIcon, RefreshCw, Copy, Trophy, Check, MonitorCog
+  Network as NetworkIcon, RefreshCw, Copy, Trophy, Check
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
