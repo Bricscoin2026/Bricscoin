@@ -15,7 +15,6 @@ import BricsNFT from "./pages/BricsNFT";
 import P2Pool from "./pages/P2Pool";
 import Network from "./pages/Network";
 import Whitepaper from "./pages/Whitepaper";
-import ZKPrivacy from "./pages/ZKPrivacy";
 import "./App.css";
 
 function App() {
