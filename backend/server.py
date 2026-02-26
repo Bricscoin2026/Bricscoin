@@ -2427,12 +2427,14 @@ from nft_routes import router as nft_router
 from p2pool_routes import router as p2pool_router
 from p2pool_routes import submit_share, submit_p2pool_block, receive_share_from_peer
 from zk_routes import router as zk_router
+from zk_routes import set_db as zk_set_db
 app.include_router(chat_router)
 app.include_router(timecapsule_router)
 app.include_router(oracle_router)
 app.include_router(nft_router)
 app.include_router(p2pool_router)
 app.include_router(zk_router)
+zk_set_db(db)
 
 # Exempt critical PPLNS mining endpoints from rate limiting
 # These are called frequently by the PPLNS stratum server and must never be blocked
