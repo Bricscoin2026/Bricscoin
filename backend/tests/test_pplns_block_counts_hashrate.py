@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 
 # Use production API for miner-specific tests
 PRODUCTION_BASE_URL = "https://bricscoin26.org"
-PREVIEW_BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bricc-network.preview.emergentagent.com').rstrip('/')
+PREVIEW_BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://crypto-privacy-3.preview.emergentagent.com').rstrip('/')
 
 
 class TestPPLNSBlockCounts:
