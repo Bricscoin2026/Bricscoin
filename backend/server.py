@@ -1387,11 +1387,17 @@ async def get_address_transactions(request: Request, address: str, limit: int = 
         {"$or": [{"sender": address}, {"recipient": address}]},
         {"_id": 0}
     ).sort("timestamp", -1).limit(limit).to_list(limit)
-    # Hide amount for shielded/private transactions
+    # Hide data for shielded/private transactions
     for tx in transactions:
         if tx.get("type") in ("shielded", "private"):
             tx["amount"] = "SHIELDED"
             tx["display_amount"] = "SHIELDED"
+            if tx.get("sender") and tx["sender"] != "COINBASE":
+                sender_hash = hashlib.sha256(tx["sender"].encode()).hexdigest()
+                tx["sender"] = f"SHIELDED_{sender_hash[:8]}"
+            if tx.get("recipient"):
+                recipient_hash = hashlib.sha256(tx["recipient"].encode()).hexdigest()
+                tx["recipient"] = f"SHIELDED_{recipient_hash[:8]}"
         if tx.get("type") == "private":
             tx["sender"] = "RING_HIDDEN"
             tx.pop("real_sender", None)
