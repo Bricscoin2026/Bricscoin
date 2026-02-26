@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Wallet as WalletIcon, ShieldCheck, ArrowRight, RefreshCw, TrendingUp, ChevronDown } from "lucide-react";
+import { Wallet as WalletIcon, ShieldCheck, ArrowRight, RefreshCw, TrendingUp, ChevronDown, Lock, Atom } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { motion } from "framer-motion";
 import { getWalletBalance, getPQCWalletInfo } from "../lib/api";
 import LegacyWallet from "./Wallet";
 import PQCWalletPage from "./PQCWallet";
 import WalletMigrationPage from "./WalletMigration";
+import ZKPrivacy from "./ZKPrivacy";
 
 const CRYPTO_PAIRS = [
   { id: "tether", symbol: "USDT", color: "#26A17B" },
@@ -93,7 +94,6 @@ function PortfolioSummary() {
     return () => clearInterval(interval);
   }, [fetchTotalBalance, fetchCryptoPrices]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!dropdownOpen) return;
     const handler = () => setDropdownOpen(false);
@@ -116,7 +116,7 @@ function PortfolioSummary() {
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="relative">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm text-muted-foreground font-medium">Bilancio Totale</p>
+            <p className="text-sm text-muted-foreground font-medium">Total Balance</p>
             <button
               onClick={fetchTotalBalance}
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -127,28 +127,27 @@ function PortfolioSummary() {
           </div>
           <p className="text-3xl sm:text-4xl font-heading font-bold gold-text" data-testid="total-balance-value">
             {loading ? (
-              <span className="animate-pulse text-2xl">Caricamento...</span>
+              <span className="animate-pulse text-2xl">Loading...</span>
             ) : totalBalance !== null ? (
-              `${totalBalance.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BRICS`
+              `${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BRICS`
             ) : (
-              "Errore"
+              "Error"
             )}
           </p>
           <p className="text-xs text-muted-foreground mt-2" data-testid="wallet-count-label">
-            {walletCount} wallet{walletCount !== 1 ? "s" : ""} collegati
+            {walletCount} wallet{walletCount !== 1 ? "s" : ""} connected
           </p>
         </div>
       </div>
 
-      {/* Price Ticker Card with Currency Selector */}
+      {/* Price Ticker Card */}
       <div className="relative overflow-hidden rounded-sm border border-white/10 bg-card p-5">
         <div className="relative">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground font-medium">Coppia BRICS</p>
+              <p className="text-sm text-muted-foreground font-medium">BRICS Pair</p>
             </div>
-            {/* Currency Selector Dropdown */}
             <div className="relative" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -180,7 +179,6 @@ function PortfolioSummary() {
             </div>
           </div>
 
-          {/* BRICS/CRYPTO pair price = 0 */}
           <p className="text-3xl sm:text-4xl font-heading font-bold text-muted-foreground" data-testid="price-ticker-value">
             0 <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span>
           </p>
@@ -188,11 +186,10 @@ function PortfolioSummary() {
             1 BRICS = 0 {selectedPair.symbol}
           </p>
 
-          {/* Real price of selected crypto */}
           <div className="mt-3 pt-3 border-t border-white/5">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
-                Prezzo <span style={{ color: selectedPair.color }} className="font-medium">{selectedPair.symbol}</span>
+                <span style={{ color: selectedPair.color }} className="font-medium">{selectedPair.symbol}</span> Price
               </span>
               <span className="text-sm font-mono font-medium" data-testid="real-crypto-price">
                 {pricesLoading ? (
@@ -221,21 +218,24 @@ export default function WalletHub() {
           <WalletIcon className="w-7 h-7 text-primary" />
           <h1 className="text-4xl sm:text-5xl font-heading font-bold gold-text">Wallet</h1>
         </div>
-        <p className="text-muted-foreground">Gestisci i tuoi wallet BRICS — Legacy, Quantum-Proof e Migrazione</p>
+        <p className="text-muted-foreground">Manage your BRICS wallets — Legacy, Quantum-Proof, Zero-Knowledge & Migration</p>
       </motion.div>
 
       <PortfolioSummary />
 
       <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v })} className="space-y-5">
-        <TabsList className="bg-card border border-white/10">
-          <TabsTrigger value="legacy" data-testid="tab-legacy-wallet">
-            <WalletIcon className="w-4 h-4 mr-2" />Legacy Wallet
+        <TabsList className="bg-card border border-white/10 flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="legacy" data-testid="tab-legacy-wallet" className="text-xs sm:text-sm">
+            <WalletIcon className="w-4 h-4 mr-1.5" />Legacy
           </TabsTrigger>
-          <TabsTrigger value="pqc" data-testid="tab-pqc-wallet">
-            <ShieldCheck className="w-4 h-4 mr-2" />PQC Wallet
+          <TabsTrigger value="pqc" data-testid="tab-pqc-wallet" className="text-xs sm:text-sm">
+            <Atom className="w-4 h-4 mr-1.5" />PQC
           </TabsTrigger>
-          <TabsTrigger value="migration" data-testid="tab-migration">
-            <ArrowRight className="w-4 h-4 mr-2" />Migrazione
+          <TabsTrigger value="zk" data-testid="tab-zk-stark" className="text-xs sm:text-sm">
+            <Lock className="w-4 h-4 mr-1.5" />zk-STARK
+          </TabsTrigger>
+          <TabsTrigger value="migration" data-testid="tab-migration" className="text-xs sm:text-sm">
+            <ArrowRight className="w-4 h-4 mr-1.5" />Migration
           </TabsTrigger>
         </TabsList>
 
@@ -244,6 +244,9 @@ export default function WalletHub() {
         </TabsContent>
         <TabsContent value="pqc">
           <PQCWalletPage embedded />
+        </TabsContent>
+        <TabsContent value="zk">
+          <ZKPrivacy embedded />
         </TabsContent>
         <TabsContent value="migration">
           <WalletMigrationPage embedded />
