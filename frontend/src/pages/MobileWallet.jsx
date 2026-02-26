@@ -4,7 +4,7 @@ import {
   ShieldCheck, Plus, Copy, Check, Eye, EyeOff, Download, RefreshCw,
   Send, Atom, Key, Lock, ArrowLeft, QrCode, ArrowDownLeft,
   History, ChevronRight, AlertTriangle, EyeOff as EyeOffIcon,
-  TrendingUp, ChevronDown
+  TrendingUp, ChevronDown, Pencil, Trash2
 } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -62,6 +62,11 @@ export default function MobileWallet() {
   const [cryptoPrices, setCryptoPrices] = useState({});
   const [pricesLoading, setPricesLoading] = useState(true);
   const [pairDropdownOpen, setPairDropdownOpen] = useState(false);
+
+  // Rename & Delete
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   // Send form
   const [sendForm, setSendForm] = useState({ recipient: "", amount: "" });
