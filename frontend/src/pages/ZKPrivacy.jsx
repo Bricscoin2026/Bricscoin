@@ -431,6 +431,8 @@ export default function ZKPrivacy({ embedded = false }) {
               { layer: "L2", tech: "ECDSA secp256k1", desc: "Legacy signatures", color: "text-blue-400" },
               { layer: "L3", tech: "ML-DSA-65 (PQC)", desc: "Post-quantum (FIPS 204)", color: "text-cyan-400" },
               { layer: "L4", tech: "zk-STARK (FRI)", desc: "Shielded transactions", color: "text-emerald-400" },
+              { layer: "L5", tech: "Ring Signatures (LSAG)", desc: "Hidden sender", color: "text-violet-400" },
+              { layer: "L6", tech: "Stealth Addresses (DHKE)", desc: "Hidden receiver", color: "text-pink-400" },
             ].map((l, i) => (
               <div key={i} className="flex items-center gap-3 p-2.5 rounded-sm border border-white/[0.06] bg-white/[0.02]">
                 <Badge variant="outline" className="text-[10px] shrink-0 border-white/10 w-7 justify-center">{l.layer}</Badge>
