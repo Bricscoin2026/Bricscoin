@@ -2500,6 +2500,40 @@ async def download_node():
         raise HTTPException(status_code=404, detail="Node package not found")
     return FileResponse(file_path, filename="bricscoin-node-v2.zip", media_type="application/zip")
 
+# ─── Chain Security API ───
+
+@api_router.get("/security/status")
+async def api_security_status():
+    """Get chain security status: checkpoints, reorg protection, events."""
+    return await get_security_status()
+
+@api_router.get("/security/checkpoints")
+async def api_get_checkpoints(limit: int = 50):
+    """Get all chain checkpoints."""
+    checkpoints = await get_checkpoints(limit)
+    return {"checkpoints": checkpoints, "total": len(checkpoints)}
+
+@api_router.post("/security/checkpoint")
+async def api_create_checkpoint(block_index: int):
+    """Manually create a checkpoint for a specific block."""
+    block = await db.blocks.find_one({"index": block_index}, {"_id": 0, "index": 1, "hash": 1})
+    if not block:
+        raise HTTPException(status_code=404, detail=f"Block #{block_index} not found")
+    result = await create_checkpoint(block["index"], block["hash"], reason="manual")
+    return result
+
+@api_router.get("/security/events")
+async def api_security_events(limit: int = 50):
+    """Get security events (reorg attempts, checkpoint violations)."""
+    events = await get_security_events(limit)
+    return {"events": events, "total": len(events)}
+
+@api_router.post("/security/initialize")
+async def api_initialize_checkpoints():
+    """Initialize checkpoints for existing chain. Run once after deployment."""
+    created = await auto_checkpoint()
+    return {"checkpoints_created": created}
+
 # Include the router
 app.include_router(api_router)
 
