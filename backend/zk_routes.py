@@ -230,8 +230,9 @@ async def send_shielded_transaction(req: ShieldedSendRequest):
 
     await db.transactions.insert_one(transaction)
 
-    # Return without _id
+    # Public response: hide real amount
     tx_response = {k: v for k, v in transaction.items() if k != "_id"}
+    tx_response["display_amount"] = "SHIELDED"
 
     return {
         "success": True,
