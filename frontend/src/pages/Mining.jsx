@@ -382,10 +382,17 @@ export default function Mining() {
           </div>
 
           {/* API Documentation link */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Activity className="w-4 h-4 text-orange-400" />
-            <span>API Status: <code className="bg-white/10 px-1.5 py-0.5 rounded">/api/auxpow/status</code></span>
-            <span className="text-green-400 font-bold">ONLINE</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Activity className="w-4 h-4 text-orange-400" />
+              <span>API Status: <code className="bg-white/10 px-1.5 py-0.5 rounded">/api/auxpow/status</code></span>
+              <span className="text-green-400 font-bold">ONLINE</span>
+            </div>
+            <Link to="/merge-mining">
+              <Button variant="outline" size="sm" className="border-orange-500/30 text-orange-400 hover:bg-orange-500/5" data-testid="merge-mining-guide-link">
+                <ArrowRight className="w-4 h-4 mr-1" /> Guida Completa
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
