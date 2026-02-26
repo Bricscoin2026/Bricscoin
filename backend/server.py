@@ -2137,13 +2137,20 @@ async def get_chain_blocks(from_height: int = 0, limit: int = 500):
 
 @api_router.post("/p2p/broadcast/block")
 async def receive_broadcast_block(data: BroadcastBlock):
-    """Receive a broadcasted block from a peer"""
+    """Receive a broadcasted block from a peer.
+    Protected by: checkpoint validation + deep reorg rejection."""
     block = data.block
     
     # Check if we already have this block
     existing = await db.blocks.find_one({"index": block['index']})
     if existing:
         return {"status": "already_exists"}
+    
+    # SECURITY: Combined checkpoint + reorg check
+    security_check = await can_accept_block(block)
+    if not security_check["accepted"]:
+        logging.warning(f"SECURITY: Rejected block #{block.get('index')} from {data.sender_node_id} — {security_check['reason']}")
+        return {"status": "rejected", "reason": security_check["reason"]}
     
     # Validate block
     if not await validate_block(block):
@@ -2161,6 +2168,9 @@ async def receive_broadcast_block(data: BroadcastBlock):
         )
     
     logging.info(f"Received block #{block['index']} from peer {data.sender_node_id}")
+    
+    # SECURITY: Auto-checkpoint periodically
+    await auto_checkpoint()
     
     # Re-broadcast to other peers
     asyncio.create_task(broadcast_to_peers(
