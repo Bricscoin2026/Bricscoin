@@ -649,8 +649,8 @@ export default function MobileWallet() {
             onClick={() => { setActiveWallet(w); setView("wallet"); }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                  <Atom className="w-5 h-5 text-emerald-400" />
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-amber-500/20">
+                  <img src={LOGO_URL} alt="BricsCoin" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="font-medium text-sm">{w.name}</p>
