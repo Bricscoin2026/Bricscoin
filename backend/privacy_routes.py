@@ -315,8 +315,8 @@ async def send_private_transaction(req: PrivateSendRequest):
 
     # If not enough real decoys, generate synthetic ones for privacy
     while len(decoy_keys) < decoy_count:
-        from ecdsa import SigningKey
-        fake_sk = SigningKey.generate(curve=SECP256k1)
+        from ecdsa import SigningKey, SECP256k1 as _SECP256k1
+        fake_sk = SigningKey.generate(curve=_SECP256k1)
         decoy_keys.append(fake_sk.get_verifying_key().to_string().hex())
 
     # Build ring with real signer at random position
