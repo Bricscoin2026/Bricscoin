@@ -307,6 +307,87 @@ export default function Mining() {
         </CardContent>
       </Card>
 
+      {/* Merge Mining (AuxPoW) */}
+      <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/30" data-testid="merge-mining-section">
+        <CardHeader className="border-b border-orange-500/20">
+          <CardTitle className="font-heading flex items-center gap-2">
+            <Link2 className="w-5 h-5 text-orange-400" />
+            Merge Mining (AuxPoW)
+            <Badge variant="outline" className="border-green-500/50 text-green-400 text-xs ml-2">ENABLED</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <p className="text-muted-foreground text-sm">
+            Bitcoin miners can mine BricsCoin <strong className="text-orange-400">simultaneously at zero extra cost</strong>. 
+            BricsCoin's block hash is embedded in the Bitcoin coinbase transaction, allowing both chains to share the same Proof of Work.
+          </p>
+
+          {/* AuxPoW Stats */}
+          {auxpowStatus && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="p-3 bg-black/40 rounded-lg border border-orange-500/10 text-center">
+                <p className="text-xl font-bold text-orange-400" data-testid="auxpow-blocks-count">{auxpowStatus.statistics?.auxpow_blocks || 0}</p>
+                <p className="text-xs text-muted-foreground">AuxPoW Blocks</p>
+              </div>
+              <div className="p-3 bg-black/40 rounded-lg border border-blue-500/10 text-center">
+                <p className="text-xl font-bold text-blue-400">{auxpowStatus.statistics?.native_blocks || 0}</p>
+                <p className="text-xs text-muted-foreground">Native Blocks</p>
+              </div>
+              <div className="p-3 bg-black/40 rounded-lg border border-white/10 text-center">
+                <p className="text-xl font-bold text-primary">{auxpowStatus.statistics?.auxpow_percentage || 0}%</p>
+                <p className="text-xs text-muted-foreground">Merge Mined</p>
+              </div>
+              <div className="p-3 bg-black/40 rounded-lg border border-white/10 text-center">
+                <p className="text-xl font-bold text-primary">{auxpowStatus.current_difficulty?.toLocaleString() || "-"}</p>
+                <p className="text-xs text-muted-foreground">Difficulty</p>
+              </div>
+            </div>
+          )}
+
+          {/* How it works */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold text-orange-400">How to Merge Mine</h4>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div className="flex items-start gap-3 p-3 bg-black/20 rounded-lg">
+                <span className="text-orange-400 font-bold shrink-0">1.</span>
+                <span>Request work: <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs">GET /api/auxpow/create-work?miner_address=YOUR_ADDRESS</code></span>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-black/20 rounded-lg">
+                <span className="text-orange-400 font-bold shrink-0">2.</span>
+                <span>Embed the <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs">coinbase_commitment</code> in your Bitcoin coinbase scriptSig</span>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-black/20 rounded-lg">
+                <span className="text-orange-400 font-bold shrink-0">3.</span>
+                <span>Mine Bitcoin normally. If the block hash meets BricsCoin difficulty, submit the proof</span>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-black/20 rounded-lg">
+                <span className="text-orange-400 font-bold shrink-0">4.</span>
+                <span>Submit proof: <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs">POST /api/auxpow/submit</code> with parent header + coinbase + merkle branch</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Key benefits */}
+          <div className="p-4 bg-orange-500/5 border border-orange-500/10 rounded-lg">
+            <h4 className="text-sm font-bold text-orange-400 mb-2">Key Benefits</h4>
+            <ul className="text-xs text-muted-foreground space-y-1.5">
+              <li className="flex items-start gap-2"><CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" /> Zero extra cost for Bitcoin miners</li>
+              <li className="flex items-start gap-2"><CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" /> Massive hashrate increase from Bitcoin network</li>
+              <li className="flex items-start gap-2"><CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" /> 51% attack becomes virtually impossible</li>
+              <li className="flex items-start gap-2"><CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" /> Full independence — BricsCoin keeps its own blockchain and rules</li>
+              <li className="flex items-start gap-2"><CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" /> Reversible — native PoW blocks always accepted</li>
+            </ul>
+          </div>
+
+          {/* API Documentation link */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Activity className="w-4 h-4 text-orange-400" />
+            <span>API Status: <code className="bg-white/10 px-1.5 py-0.5 rounded">/api/auxpow/status</code></span>
+            <span className="text-green-400 font-bold">ONLINE</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Supported Miners */}
       <Card className="bg-card border-white/10">
         <CardHeader className="border-b border-white/10">
