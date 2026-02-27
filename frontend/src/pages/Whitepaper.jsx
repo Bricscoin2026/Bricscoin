@@ -433,6 +433,58 @@ export default function Whitepaper() {
             <li><strong>MongoDB</strong> with authentication and network isolation</li>
           </ul>
 
+          <SectionHeading id="sec-dandelion" level={3}>8.4 Dandelion++ Transaction Privacy</SectionHeading>
+          <p>
+            BricsCoin implements the <strong>Dandelion++ protocol</strong> (Fanti et al., 2018) to mitigate network-level transaction origin analysis. 
+            When a transaction is created, instead of being broadcast immediately to all peers, it enters a <em>stem phase</em> where it is 
+            forwarded to a single randomly selected relay peer. After a probabilistic number of hops (1-N), the transaction transitions to the 
+            <em>diffusion phase</em> and is broadcast normally. This significantly raises the cost for network observers attempting to correlate 
+            transactions with originating nodes.
+          </p>
+          <SpecTable rows={[
+            ["Protocol", "Dandelion++ (arxiv.org/abs/1805.11060)"],
+            ["Stem Routing Rate", "~90% of transactions enter stem phase"],
+            ["Epoch Rotation", "Stem relay peer rotated every 10 minutes"],
+            ["Failsafe", "Embargo timeout: stuck transactions auto-diffuse"],
+            ["Tor Integration", "Hidden Service (.onion) for additional network privacy"],
+          ]} />
+
+          <SectionHeading id="sec-lightclient" level={3}>8.5 Light Client & Pruning</SectionHeading>
+          <p>
+            To address the increased storage requirements from PQC signatures (~19x larger than ECDSA), BricsCoin provides a <strong>Light Client API</strong> for 
+            SPV-style verification and a <strong>block pruning system</strong> that removes full transaction data from old blocks while preserving headers and PQC signatures.
+          </p>
+          <SpecTable rows={[
+            ["Light Headers API", "Block headers without transaction data for SPV clients"],
+            ["Verified Balance", "Balance queries with chain height proof"],
+            ["TX Inclusion Proof", "Verify transaction existence with block header"],
+            ["Block Pruning", "Remove old TX data, keep headers + PQC signatures"],
+            ["Estimated Savings", "40-60% for blocks with large transaction lists"],
+          ]} />
+
+          <SectionHeading id="sec-privacymodes" level={3}>8.6 Privacy Mode Selection</SectionHeading>
+          <p>
+            BricsCoin offers three privacy levels for transactions, allowing users to choose the appropriate tradeoff 
+            between speed, cost, and privacy without requiring technical knowledge:
+          </p>
+          <SpecTable rows={[
+            ["Safe", "Standard PQC transaction — quantum-resistant, fast, low fees. Amount and addresses visible on-chain."],
+            ["Strong Privacy", "Shielded zk-STARK transaction — amount hidden with zero-knowledge proof, addresses visible."],
+            ["Maximum Privacy", "Ring signatures + Stealth addresses + hidden amount — sender, recipient, and amount all protected."],
+          ]} />
+          <p className="mt-2">
+            <strong>Note:</strong> No privacy mode provides absolute guarantees. Each level <em>reduces</em> the attack surface 
+            and <em>raises the cost</em> of chain analysis. Users should evaluate their threat model accordingly.
+          </p>
+
+          <SectionHeading id="sec-threatmodel" level={3}>8.7 Threat Model</SectionHeading>
+          <p>
+            BricsCoin publishes a comprehensive, versioned <strong>Threat Model</strong> (available at <code className="bg-white/5 px-1 rounded">/threat-model</code>) 
+            that transparently documents: what the protocol protects against, what it does not, and the assumptions underlying each defense. 
+            The model follows the STRIDE framework adapted for blockchain systems and covers cryptographic attacks (including quantum), 
+            chain analysis, network-level threats, and consensus attacks.
+          </p>
+
           {/* 9. ROADMAP */}
           <SectionHeading id="roadmap" level={2}>9. Roadmap</SectionHeading>
 
