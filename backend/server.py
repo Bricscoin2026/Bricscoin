@@ -2976,6 +2976,7 @@ async def api_initialize_checkpoints():
 # ==================== DANDELION++ STATUS ====================
 
 @api_router.get("/dandelion/status")
+@limiter.exempt
 async def dandelion_status():
     """Get Dandelion++ protocol status and statistics."""
     now = time.time()
