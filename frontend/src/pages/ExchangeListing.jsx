@@ -117,7 +117,7 @@ LINKS:
 
 WALLETS: Web wallet (desktop + PWA mobile), PQC hybrid signing
 NODE: Downloadable from website, Docker support
-STRATUM: stratum+tcp://stratum.bricscoin26.org:3333 (port 3333)`;
+STRATUM: stratum+tcp://stratum.bricscoin26.org:3333 (ports 3333/3334)`;
 
   return (
     <div className="space-y-16 pb-16" data-testid="exchange-listing-page">
