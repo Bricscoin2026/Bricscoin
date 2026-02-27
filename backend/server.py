@@ -2134,18 +2134,43 @@ async def migrate_to_pqc(request: Request, tx_request: SecureTransactionRequest)
 
 @api_router.get("/pqc/stats")
 async def get_pqc_stats():
-    """Get PQC network statistics (cached 10s - heavy query)"""
+    """Get PQC network statistics (cached 30s - heavy query, optimized with aggregation)"""
     cached = get_cached("pqc_stats")
     if cached:
         return cached
     
-    # Count only wallets with balance > 0 (active wallets)
+    # Get all PQC wallet addresses in one query
     all_pqc_wallets = await db.pqc_wallets.find({}, {"_id": 0, "address": 1}).to_list(1000)
+    pqc_addresses = [w["address"] for w in all_pqc_wallets]
+    
+    # Count active wallets using aggregation instead of N+1 individual queries
     active_count = 0
-    for w in all_pqc_wallets:
-        bal = await get_balance(w["address"])
-        if bal > 0:
-            active_count += 1
+    if pqc_addresses:
+        # Single aggregation: sum received - sum sent per address
+        pipeline = [
+            {"$match": {"$or": [
+                {"sender": {"$in": pqc_addresses}},
+                {"recipient": {"$in": pqc_addresses}}
+            ]}},
+            {"$facet": {
+                "received": [
+                    {"$match": {"recipient": {"$in": pqc_addresses}}},
+                    {"$group": {"_id": "$recipient", "total": {"$sum": "$amount"}}}
+                ],
+                "sent": [
+                    {"$match": {"sender": {"$in": pqc_addresses}}},
+                    {"$group": {"_id": "$sender", "total": {"$sum": {"$add": ["$amount", {"$ifNull": ["$fee", 0]}]}}}}
+                ]
+            }}
+        ]
+        agg_result = await db.transactions.aggregate(pipeline).to_list(1)
+        if agg_result:
+            received_map = {r["_id"]: r["total"] for r in agg_result[0].get("received", [])}
+            sent_map = {s["_id"]: s["total"] for s in agg_result[0].get("sent", [])}
+            for addr in pqc_addresses:
+                balance = received_map.get(addr, 0) - sent_map.get(addr, 0)
+                if balance > 0:
+                    active_count += 1
     
     total_pqc_txs = await db.transactions.count_documents({"signature_scheme": "ecdsa_secp256k1+ml-dsa-65"})
     total_migrations = await db.transactions.count_documents({"migration": True})
@@ -2160,7 +2185,7 @@ async def get_pqc_stats():
         "quantum_resistant": True,
         "status": "active"
     }
-    set_cached("pqc_stats", result)
+    set_cached("pqc_stats", result, ttl=30)
     return result
 
 
