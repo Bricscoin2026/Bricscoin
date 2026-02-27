@@ -543,6 +543,131 @@ async def send_to_peer(peer_url: str, endpoint: str, data: dict) -> bool:
         logging.error(f"Failed to send to peer {peer_url}: {e}")
         return False
 
+
+# ==================== DANDELION++ CORE ====================
+
+def dandelion_select_stem_peer() -> Optional[str]:
+    """Select a random stem peer for the current epoch.
+    Called once per epoch (~10 min). All stem-phase txs in this epoch
+    route through this single peer, making graph analysis harder."""
+    global dandelion_stem_peer, dandelion_epoch_start
+    
+    peers = list(connected_peers.keys())
+    if not peers:
+        dandelion_stem_peer = None
+        return None
+    
+    dandelion_stem_peer = random.choice(peers)
+    dandelion_epoch_start = time.time()
+    logger.info(f"Dandelion++ new epoch: stem peer = {dandelion_stem_peer[:8]}...")
+    return dandelion_stem_peer
+
+
+def dandelion_get_stem_peer() -> Optional[str]:
+    """Get current stem peer, rotating if epoch expired."""
+    global dandelion_stem_peer, dandelion_epoch_start
+    
+    now = time.time()
+    if now - dandelion_epoch_start > DANDELION_EPOCH_SECONDS or dandelion_stem_peer is None:
+        return dandelion_select_stem_peer()
+    
+    # Verify stem peer is still connected
+    if dandelion_stem_peer not in connected_peers:
+        return dandelion_select_stem_peer()
+    
+    return dandelion_stem_peer
+
+
+async def dandelion_stem_forward(transaction: dict, hop_count: int = 0):
+    """Forward a transaction in stem phase (single peer) or transition to fluff.
+    
+    Decision at each hop (per Dandelion++ paper):
+    - With probability DANDELION_STEM_PROBABILITY: continue stem to next peer
+    - Otherwise: transition to fluff (broadcast to all)
+    - If max hops reached: forced fluff
+    """
+    tx_id = transaction.get("id", transaction.get("tx_id", ""))
+    
+    # Track in stempool for embargo timeout
+    dandelion_stempool[tx_id] = {
+        "transaction": transaction,
+        "timestamp": time.time(),
+        "hop_count": hop_count,
+    }
+    
+    # Decision: continue stem or fluff?
+    should_fluff = (
+        hop_count >= DANDELION_MAX_STEM_HOPS or
+        random.random() > DANDELION_STEM_PROBABILITY
+    )
+    
+    if should_fluff:
+        # Transition to fluff: broadcast to ALL peers
+        logger.info(f"Dandelion++ FLUFF tx {tx_id[:8]}... after {hop_count} stem hops")
+        dandelion_seen_in_fluff.add(tx_id)
+        dandelion_stempool.pop(tx_id, None)
+        await broadcast_to_peers(
+            "broadcast/transaction",
+            {"transaction": transaction, "sender_node_id": NODE_ID}
+        )
+    else:
+        # Continue stem: forward to ONE peer only
+        stem_peer_id = dandelion_get_stem_peer()
+        if stem_peer_id and stem_peer_id in connected_peers:
+            peer = connected_peers[stem_peer_id]
+            logger.info(f"Dandelion++ STEM tx {tx_id[:8]}... hop {hop_count} -> peer {stem_peer_id[:8]}...")
+            success = await send_to_peer(
+                peer['url'],
+                "dandelion/stem",
+                {
+                    "transaction": transaction,
+                    "hop_count": hop_count + 1,
+                    "sender_node_id": NODE_ID,
+                }
+            )
+            if not success:
+                # Stem failed -> fallback to fluff
+                logger.warning(f"Dandelion++ stem failed for tx {tx_id[:8]}..., falling back to fluff")
+                dandelion_seen_in_fluff.add(tx_id)
+                dandelion_stempool.pop(tx_id, None)
+                await broadcast_to_peers(
+                    "broadcast/transaction",
+                    {"transaction": transaction, "sender_node_id": NODE_ID}
+                )
+        else:
+            # No stem peer available -> fluff immediately
+            dandelion_seen_in_fluff.add(tx_id)
+            dandelion_stempool.pop(tx_id, None)
+            await broadcast_to_peers(
+                "broadcast/transaction",
+                {"transaction": transaction, "sender_node_id": NODE_ID}
+            )
+
+
+async def dandelion_embargo_check():
+    """Check for transactions stuck in stempool past embargo timeout.
+    If a tx has been in stem phase for too long without appearing in fluff,
+    this node takes responsibility and broadcasts it (prevents tx loss)."""
+    now = time.time()
+    expired = []
+    
+    for tx_id, data in list(dandelion_stempool.items()):
+        if tx_id in dandelion_seen_in_fluff:
+            expired.append(tx_id)
+            continue
+        if now - data["timestamp"] > DANDELION_EMBARGO_SECONDS:
+            logger.warning(f"Dandelion++ embargo expired for tx {tx_id[:8]}..., forcing fluff")
+            expired.append(tx_id)
+            dandelion_seen_in_fluff.add(tx_id)
+            await broadcast_to_peers(
+                "broadcast/transaction",
+                {"transaction": data["transaction"], "sender_node_id": NODE_ID}
+            )
+    
+    for tx_id in expired:
+        dandelion_stempool.pop(tx_id, None)
+
+
 async def sync_blockchain_from_peer(peer_url: str, full_sync: bool = False):
     """Sync blockchain from a peer if they have a longer chain.
     Protected by: checkpoint validation + deep reorg rejection."""
