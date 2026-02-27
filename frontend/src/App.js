@@ -49,6 +49,7 @@ function App() {
             <Route path="network" element={<Network />} />
             <Route path="whitepaper" element={<Whitepaper />} />
             <Route path="threat-model" element={<ThreatModel />} />
+            <Route path="protocol-status" element={<ProtocolStatus />} />
             <Route path="downloads" element={<Downloads />} />
             <Route path="about" element={<About />} />
           </Route>
