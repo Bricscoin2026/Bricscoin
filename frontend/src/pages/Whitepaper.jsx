@@ -353,6 +353,27 @@ export default function Whitepaper() {
             ["Final Coin", "~Year 2150 (estimated)"],
           ]} />
 
+          <SectionHeading id="token-jabos" level={3}>6.4 Jabos (JBS) &mdash; The Sub-unit of BricsCoin</SectionHeading>
+          <p>
+            Just as Bitcoin has the <strong>Satoshi</strong> (its smallest indivisible unit), BricsCoin has the <strong>Jabos (JBS)</strong>,
+            named after <strong>Jabo86</strong>, the creator of BricsCoin.
+          </p>
+          <SpecTable rows={[
+            ["Name", "Jabos (JBS)"],
+            ["Ratio", "1 BRICS = 100,000,000 JBS"],
+            ["Smallest Unit", "1 JBS = 0.00000001 BRICS"],
+            ["Named After", "Jabo86, the creator of BricsCoin"],
+            ["Purpose", "Human-readable micro-transactions and fee display"],
+          ]} />
+          <p className="mt-3">
+            Jabos is a <strong>display-level convention</strong>, not a separate token. The blockchain internally processes values with 8 decimal places,
+            and 1 JBS corresponds to the smallest possible fraction. This makes it intuitive to express small amounts:
+            instead of writing <code className="bg-white/5 px-1 rounded">0.00003500 BRICS</code>, users can say <code className="bg-white/5 px-1 rounded">3,500 JBS</code>.
+          </p>
+          <p className="mt-2">
+            Both the desktop wallet and the mobile wallet support JBS display through a currency selector, alongside real-time crypto pair conversions (USDT, BTC, ETH, etc.) powered by CoinGecko.
+          </p>
+
           {/* 7. ON-CHAIN APPS */}
           <SectionHeading id="applications" level={2}>7. On-Chain Applications</SectionHeading>
           <p>BricsCoin hosts a suite of on-chain applications that leverage PQC signatures and the deflationary burn-fee mechanism.</p>
