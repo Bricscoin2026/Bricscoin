@@ -123,7 +123,7 @@ class TestPQCAndSecurityEndpoints:
         assert response.status_code == 200, f"PQC stats failed: {response.text}"
         assert elapsed < 0.5, f"PQC stats too slow: {elapsed}s"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/pqc/stats - Status: 200, Time: {elapsed:.3f}s")
     
     def test_pqc_node_keys(self):
@@ -131,7 +131,7 @@ class TestPQCAndSecurityEndpoints:
         response = requests.get(f"{BASE_URL}/api/pqc/node/keys")
         assert response.status_code == 200, f"PQC node keys failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/pqc/node/keys - Status: {response.status_code}")
     
     def test_dandelion_status(self):
@@ -142,7 +142,7 @@ class TestPQCAndSecurityEndpoints:
         assert "protocol" in data, "Missing protocol"
         assert "enabled" in data, "Missing enabled"
         assert "config" in data, "Missing config"
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/dandelion/status - Has protocol, enabled, config")
     
     def test_security_status(self):
@@ -150,7 +150,7 @@ class TestPQCAndSecurityEndpoints:
         response = requests.get(f"{BASE_URL}/api/security/status")
         assert response.status_code == 200, f"Security status failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/security/status - Status: {response.status_code}")
     
     def test_security_checkpoints(self):
@@ -158,7 +158,7 @@ class TestPQCAndSecurityEndpoints:
         response = requests.get(f"{BASE_URL}/api/security/checkpoints")
         assert response.status_code == 200, f"Security checkpoints failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/security/checkpoints - Status: {response.status_code}")
 
 
