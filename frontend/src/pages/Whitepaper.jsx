@@ -454,8 +454,13 @@ export default function Whitepaper() {
               "Automatic per-block difficulty adjustment",
               "Merge Mining (AuxPoW) with Bitcoin hashrate",
               "Jabos (JBS): sub-unit of BricsCoin (1 BRICS = 100M JBS)",
-              "Mobile Wallet PWA with PQC-only support",
-              "Multi-currency price ticker (USDT, BTC, ETH, JBS)",
+              "Mobile Wallet PWA with PQC-only support and multi-currency price ticker",
+              "BRICS/JBS toggle in send form with auto-conversion",
+              "Wallet management: rename, delete, backup",
+              "Multi-currency price ticker (USDT, USDC, BTC, SOL, ETH, BNB, XRP, DOGE, JBS)",
+              "Miner reward routing to PQC addresses",
+              "NFT Premine Renunciation certificate on-chain",
+              "Exchange Listing application page with ready-to-send documentation",
               "Production deployment with Docker and Cloudflare",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
@@ -468,11 +473,13 @@ export default function Whitepaper() {
           <SectionHeading id="road-future" level={3}>9.2 Future Development</SectionHeading>
           <div className="space-y-2 my-4">
             {[
-              "Miner reward routing to PQC addresses",
-              "Mobile wallet application (iOS / Android)",
+              "PQC Smart Contracts (escrow, multisig, time-lock, token creation) — first blockchain with quantum-resistant contract signing",
+              "Verifiable AI Oracle with on-chain zk-proofs — AI responses signed with PQC and permanently recorded on-chain",
               "Stratum v2 protocol support",
               "Variable difficulty (Vardiff) for low-power miners",
               "Lightning-style payment channels for instant transactions",
+              "Exchange listing on TradeOgre, MEXC, and decentralized exchanges",
+              "Native mobile application (iOS / Android)",
               "CI/CD pipeline for automated deployment",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
