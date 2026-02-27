@@ -515,6 +515,14 @@ export default function Whitepaper() {
               "Exchange Listing application page with ready-to-send documentation",
               "zk-STARK zero-knowledge proofs for shielded transactions",
               "Total Privacy Suite: zk-STARK + Ring Signatures + Stealth Addresses",
+              "Dandelion++ protocol for network-level transaction privacy (Fanti et al., 2018)",
+              "Light Client API with SPV-style block header verification",
+              "Block pruning system for PQC signature storage optimization",
+              "Privacy Mode selection: Safe / Strong Privacy / Maximum Privacy",
+              "Published Threat Model (STRIDE framework, versioned, 12 threats analyzed)",
+              "Privacy Score: per-wallet metric aggregating PQC, shielded TX, and privacy suite usage",
+              "API rate limiting, DDoS protection, and IP-based blocking",
+              "Tor Hidden Service (.onion) for network-layer privacy",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-green-500 mt-0.5">&#10003;</span>
