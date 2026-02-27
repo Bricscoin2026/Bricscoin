@@ -198,6 +198,7 @@ export default function Dashboard() {
   const [chatFeed, setChatFeed] = useState([]);
   const [chatStats, setChatStats] = useState(null);
   const [capsuleStats, setCapsuleStats] = useState(null);
+  const [dandelion, setDandelion] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
