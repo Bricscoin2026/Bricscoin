@@ -28,7 +28,7 @@ class TestCoreEndpoints:
         assert "circulating_supply" in data, "Missing circulating_supply"
         assert "total_blocks" in data, "Missing total_blocks"
         # Check no _id leak
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/network/stats - Has total_supply, circulating_supply, total_blocks")
     
     def test_tokenomics(self):
@@ -36,7 +36,7 @@ class TestCoreEndpoints:
         response = requests.get(f"{BASE_URL}/api/tokenomics")
         assert response.status_code == 200, f"Tokenomics failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/tokenomics - Status: {response.status_code}")
     
     def test_blocks_list(self):
@@ -46,7 +46,7 @@ class TestCoreEndpoints:
         data = response.json()
         assert "blocks" in data or isinstance(data, list), "Expected blocks array"
         # Check no _id leak
-        assert "_id" not in str(data), "MongoDB _id leak detected in blocks"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected in blocks"
         print(f"✓ GET /api/blocks?limit=2 - Returns blocks array")
     
     def test_transactions_list(self):
@@ -55,7 +55,7 @@ class TestCoreEndpoints:
         assert response.status_code == 200, f"Transactions list failed: {response.text}"
         data = response.json()
         assert "transactions" in data or isinstance(data, list), "Expected transactions array"
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/transactions?limit=2 - Returns transactions array")
     
     def test_richlist(self):
@@ -63,7 +63,7 @@ class TestCoreEndpoints:
         response = requests.get(f"{BASE_URL}/api/richlist?limit=5")
         assert response.status_code == 200, f"Richlist failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/richlist?limit=5 - Status: {response.status_code}")
 
 
