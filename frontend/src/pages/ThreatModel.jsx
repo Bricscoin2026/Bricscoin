@@ -208,6 +208,14 @@ export default function ThreatModel() {
           A transparent analysis of what BricsCoin protects against, what it does not, and the assumptions underlying each defense. 
           This document follows responsible disclosure principles.
         </p>
+        <div className="flex items-center gap-3 mt-3">
+          <span className="text-[10px] font-mono text-muted-foreground px-2 py-1 rounded bg-white/[0.03] border border-white/[0.06]">
+            v1.0 — February 2026
+          </span>
+          <span className="text-[10px] text-muted-foreground">
+            Updates only for material changes. Each version is archived.
+          </span>
+        </div>
       </motion.div>
 
       {/* Summary Stats */}
