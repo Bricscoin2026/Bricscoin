@@ -489,40 +489,61 @@ export default function Whitepaper() {
           <SectionHeading id="roadmap" level={2}>9. Roadmap</SectionHeading>
 
           <SectionHeading id="road-done" level={3}>9.1 Completed</SectionHeading>
-          <div className="space-y-2 my-4">
+          
+          <p className="text-xs uppercase tracking-widest text-primary/60 font-bold mt-4 mb-2">Core Protocol</p>
+          <div className="space-y-2 my-2">
             {[
-              "SHA-256 PoW blockchain with Stratum v1 mining protocol",
+              "SHA-256 PoW blockchain with automatic per-block difficulty adjustment",
               "ECDSA wallets, transactions, and client-side signing",
-              "Web interface: Dashboard, Block Explorer, Wallet, Mining",
-              "Post-Quantum Cryptography (ML-DSA-65) hybrid signatures",
+              "Post-Quantum Cryptography (ML-DSA-65) hybrid signatures on every block",
               "PQC wallets with zero-cost migration from legacy",
+              "Deflationary burn-fee mechanism",
+              "SOLO + PPLNS dual mining pools with Stratum v1 protocol",
+              "Merge Mining (AuxPoW) with Bitcoin hashrate",
+              "Miner reward routing to PQC addresses",
+              "Jabos (JBS): sub-unit of BricsCoin (1 BRICS = 100M JBS)",
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm">
+                <span className="text-green-500 mt-0.5">&#10003;</span>
+                <span className="text-muted-foreground">{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs uppercase tracking-widest text-emerald-400/60 font-bold mt-6 mb-2">Security & Privacy</p>
+          <div className="space-y-2 my-2">
+            {[
+              "zk-STARK zero-knowledge proofs for shielded transactions",
+              "Total Privacy Suite: zk-STARK + Ring Signatures + Stealth Addresses",
+              "Privacy Mode selection: Safe / Strong Privacy / Maximum Privacy",
+              "Dandelion++ protocol for network-level transaction privacy (Fanti et al., 2018)",
+              "Tor Hidden Service (.onion) for network-layer privacy",
+              "Privacy Score: per-wallet metric aggregating PQC, shielded TX, and privacy suite usage",
+              "Published Threat Model (STRIDE framework, versioned, 12 threats analyzed)",
+              "API rate limiting, DDoS protection, and IP-based blocking",
+              "Light Client API with SPV-style block header verification",
+              "Block pruning system for PQC signature storage optimization",
               "Live security audit (27/27 automated tests)",
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm">
+                <span className="text-green-500 mt-0.5">&#10003;</span>
+                <span className="text-muted-foreground">{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs uppercase tracking-widest text-violet-400/60 font-bold mt-6 mb-2">Ecosystem</p>
+          <div className="space-y-2 my-2">
+            {[
+              "Web interface: Dashboard, Block Explorer, Wallet, Mining",
               "BricsChat: on-chain PQC-encrypted messaging",
               "Decentralized Time Capsule",
               "BricsNFT: PQC-signed on-chain certificates",
               "AI Blockchain Oracle (off-chain advisory, does not influence consensus)",
-              "Deflationary burn-fee mechanism",
-              "SOLO + PPLNS dual mining pools",
-              "Automatic per-block difficulty adjustment",
-              "Merge Mining (AuxPoW) with Bitcoin hashrate",
-              "Jabos (JBS): sub-unit of BricsCoin (1 BRICS = 100M JBS)",
-              "Mobile Wallet PWA with PQC-only support and multi-currency price ticker",
-              "BRICS/JBS toggle in send form with auto-conversion",
-              "Wallet management: rename, delete, backup",
-              "Multi-currency price ticker (USDT, USDC, BTC, SOL, ETH, BNB, XRP, DOGE, JBS)",
-              "Miner reward routing to PQC addresses",
               "NFT Premine Renunciation certificate on-chain",
-              "Exchange Listing application page with ready-to-send documentation",
-              "zk-STARK zero-knowledge proofs for shielded transactions",
-              "Total Privacy Suite: zk-STARK + Ring Signatures + Stealth Addresses",
-              "Dandelion++ protocol for network-level transaction privacy (Fanti et al., 2018)",
-              "Light Client API with SPV-style block header verification",
-              "Block pruning system for PQC signature storage optimization",
-              "Privacy Mode selection: Safe / Strong Privacy / Maximum Privacy",
-              "Published Threat Model (STRIDE framework, versioned, 12 threats analyzed)",
-              "Privacy Score: per-wallet metric aggregating PQC, shielded TX, and privacy suite usage",
-              "API rate limiting, DDoS protection, and IP-based blocking",
-              "Tor Hidden Service (.onion) for network-layer privacy",
+              "Mobile Wallet PWA with multi-currency price ticker",
+              "BRICS/JBS toggle in send form with auto-conversion",
+              "Exchange Listing application page",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-green-500 mt-0.5">&#10003;</span>
