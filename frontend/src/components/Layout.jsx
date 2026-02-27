@@ -18,7 +18,8 @@ import {
   Pickaxe,
   Link2,
   Smartphone,
-  Coins
+  Coins,
+  Shield
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
