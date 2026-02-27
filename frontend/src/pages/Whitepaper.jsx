@@ -461,7 +461,8 @@ export default function Whitepaper() {
               "Miner reward routing to PQC addresses",
               "NFT Premine Renunciation certificate on-chain",
               "Exchange Listing application page with ready-to-send documentation",
-              "Production deployment with Docker and Cloudflare",
+              "zk-STARK zero-knowledge proofs for shielded transactions",
+              "Total Privacy Suite: zk-STARK + Ring Signatures + Stealth Addresses",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-green-500 mt-0.5">&#10003;</span>
