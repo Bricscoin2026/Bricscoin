@@ -2007,6 +2007,10 @@ async def create_pqc_transaction(request: Request, tx: PQCSecureTransactionReque
     transaction.pop("_id", None)
 
     logger.info(f"PQC transaction created: {tx_id[:16]}... from {tx.sender_address[:15]}...")
+
+    # Dandelion++: route through stem phase before broadcast
+    asyncio.create_task(dandelion_stem_forward(transaction))
+
     return transaction
 
 
