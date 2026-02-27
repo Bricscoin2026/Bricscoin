@@ -59,6 +59,7 @@ export default function Layout() {
     { to: "/oracle", icon: Brain, label: "AI Oracle" },
     { to: "/nft", icon: Award, label: "BricsNFT" },
     { to: "/threat-model", icon: Shield, label: "Threat Model" },
+    { to: "/protocol-status", icon: Activity, label: "Protocol Status" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
