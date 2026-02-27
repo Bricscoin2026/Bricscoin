@@ -371,7 +371,7 @@ export default function Whitepaper() {
             instead of writing <code className="bg-white/5 px-1 rounded">0.00003500 BRICS</code>, users can say <code className="bg-white/5 px-1 rounded">3,500 JBS</code>.
           </p>
           <p className="mt-2">
-            Both the desktop wallet and the mobile wallet support JBS display through a currency selector, alongside real-time crypto pair conversions (USDT, BTC, ETH, etc.) powered by CoinGecko.
+            Both the desktop wallet and the mobile wallet support JBS display through a currency selector, alongside real-time crypto pair conversions (USDT, BTC, ETH, etc.) via a backend price proxy.
           </p>
 
           {/* 7. ON-CHAIN APPS */}
