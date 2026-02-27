@@ -32,7 +32,7 @@ const LINKS = [
   { label: "Block Explorer", url: "https://bricscoin26.org/blockchain", icon: Layers },
   { label: "Whitepaper", url: "https://bricscoin26.org/whitepaper", icon: FileText },
   { label: "Mining Pool", url: "https://bricscoin26.org/mining", icon: Pickaxe },
-  { label: "Source Code", url: "https://codeberg.org/jabo86", icon: Code },
+  { label: "Source Code", url: "https://codeberg.org/Bricscoin_26/Bricscoin", icon: Code },
   { label: "Mobile Wallet", url: "https://bricscoin26.org/mobile-wallet", icon: Smartphone },
 ];
 
