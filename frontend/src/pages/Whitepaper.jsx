@@ -485,6 +485,14 @@ export default function Whitepaper() {
             chain analysis, network-level threats, and consensus attacks.
           </p>
 
+          <SectionHeading id="sec-protocolstatus" level={3}>8.8 Protocol Status & Freeze Checklist</SectionHeading>
+          <p>
+            The <strong>Protocol Status</strong> page (available at <code className="bg-white/5 px-1 rounded">/protocol-status</code>) tracks the stability
+            of every protocol component across three layers: Core Protocol, Security & Privacy, and Network & Scalability.
+            It defines the criteria that must be met before the protocol is considered frozen for production use, including
+            load testing benchmarks, documentation currency, and zero critical bugs in the backlog.
+          </p>
+
           {/* 9. ROADMAP */}
           <SectionHeading id="roadmap" level={2}>9. Roadmap</SectionHeading>
 
