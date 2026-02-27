@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   Globe, Server, Users, RefreshCw, Shield, Activity,
-  Blocks, Copy, Pickaxe, Link as LinkIcon, Wifi, WifiOff, Download
+  Blocks, Copy, Pickaxe, Link as LinkIcon, Wifi, WifiOff, Download,
+  Sprout, HardDrive, Database
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { getNetworkStats, getNodeInfo, getPeers } from "../lib/api";
+import api from "../lib/api";
 
 export default function Network() {
   const [stats, setStats] = useState(null);
