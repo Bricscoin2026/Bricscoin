@@ -430,6 +430,153 @@ python node.py
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Dandelion++ Protocol */}
+      {dandelion && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <Card className="bg-card border-white/10" data-testid="dandelion-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sprout className="w-5 h-5 text-emerald-400" />
+                Dandelion++ Protocol
+                <span className="ml-auto text-[10px] font-normal px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ACTIVE</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground leading-relaxed">{dandelion.description}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: "Stem Probability", value: `${dandelion.config.stem_probability * 100}%`, sub: "chance to continue stem" },
+                  { label: "Max Stem Hops", value: dandelion.config.max_stem_hops, sub: "before forced fluff" },
+                  { label: "Epoch Duration", value: `${dandelion.config.epoch_seconds / 60} min`, sub: "stem peer rotation" },
+                  { label: "Embargo Timeout", value: `${dandelion.config.embargo_seconds}s`, sub: "failsafe broadcast" },
+                ].map((item, i) => (
+                  <div key={i} className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
+                    <p className="text-lg font-heading font-bold text-emerald-400">{item.value}</p>
+                    <p className="text-xs font-medium mt-0.5">{item.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{item.sub}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02]">
+                <p className="text-xs font-bold mb-2">How it works:</p>
+                <div className="flex items-center gap-2 text-[10px] text-muted-foreground flex-wrap">
+                  <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-400 font-medium">TX Created</span>
+                  <span>→</span>
+                  <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">Stem (1 peer)</span>
+                  <span>→</span>
+                  <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">Stem (1 peer)</span>
+                  <span>→</span>
+                  <span className="px-2 py-1 rounded bg-cyan-500/10 text-cyan-400 font-medium">Fluff (all peers)</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Network observers cannot determine which node originated a transaction.
+                </p>
+              </div>
+              <a href="https://arxiv.org/abs/1805.11060" target="_blank" rel="noopener noreferrer"
+                className="text-[10px] text-primary hover:underline">
+                Paper: Dandelion++ (Fanti et al., 2018) — arxiv.org/abs/1805.11060
+              </a>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Chain Size Analysis */}
+      {chainAnalysis && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+          <Card className="bg-card border-white/10" data-testid="chain-analysis-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <HardDrive className="w-5 h-5 text-primary" />
+                Chain Size Analysis & Pruning
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
+                  <p className="text-lg font-heading font-bold gold-text">{chainAnalysis.chain_stats.total_blocks.toLocaleString()}</p>
+                  <p className="text-xs font-medium">Total Blocks</p>
+                </div>
+                <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
+                  <p className="text-lg font-heading font-bold gold-text">{chainAnalysis.chain_stats.total_transactions.toLocaleString()}</p>
+                  <p className="text-xs font-medium">Total TXs</p>
+                </div>
+                <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
+                  <p className="text-lg font-heading font-bold gold-text">{chainAnalysis.chain_stats.estimated_chain_size_mb} MB</p>
+                  <p className="text-xs font-medium">Est. Chain Size</p>
+                </div>
+                <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
+                  <p className="text-lg font-heading font-bold gold-text">{chainAnalysis.chain_stats.avg_block_size_bytes}</p>
+                  <p className="text-xs font-medium">Avg Block (bytes)</p>
+                </div>
+              </div>
+
+              {/* PQC Signature Analysis */}
+              <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02]">
+                <p className="text-xs font-bold mb-2 flex items-center gap-2">
+                  <Database className="w-3.5 h-3.5 text-cyan-400" />
+                  PQC Signature Size Impact
+                </p>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-sm font-mono font-bold text-cyan-400">{chainAnalysis.pqc_analysis.avg_pqc_signature_bytes} B</p>
+                    <p className="text-[10px] text-muted-foreground">PQC (ML-DSA-65)</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-mono font-bold text-amber-400">{chainAnalysis.pqc_analysis.avg_ecdsa_signature_bytes} B</p>
+                    <p className="text-[10px] text-muted-foreground">ECDSA (secp256k1)</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-mono font-bold text-red-400">{chainAnalysis.pqc_analysis.pqc_size_multiplier}</p>
+                    <p className="text-[10px] text-muted-foreground">Size Multiplier</p>
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-2">{chainAnalysis.pqc_analysis.note}</p>
+              </div>
+
+              {/* Transaction Type Breakdown */}
+              <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02]">
+                <p className="text-xs font-bold mb-2">Transaction Types</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { label: "Standard", value: chainAnalysis.transaction_types.standard, color: "text-white" },
+                    { label: "Shielded (zk)", value: chainAnalysis.transaction_types.shielded_zk, color: "text-emerald-400" },
+                    { label: "Private (Ring)", value: chainAnalysis.transaction_types.private_ring, color: "text-violet-400" },
+                    { label: "PQC Signed", value: chainAnalysis.transaction_types.pqc_signed, color: "text-cyan-400" },
+                  ].map((t, i) => (
+                    <div key={i} className="text-center">
+                      <p className={`text-sm font-mono font-bold ${t.color}`}>{t.value.toLocaleString()}</p>
+                      <p className="text-[10px] text-muted-foreground">{t.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pruning Info */}
+              <div className="p-3 rounded-sm border border-amber-500/10 bg-amber-500/5">
+                <p className="text-xs font-bold mb-1 text-amber-400">Block Pruning</p>
+                <p className="text-[10px] text-muted-foreground">
+                  <strong>Pruneable:</strong> {chainAnalysis.pruning_info.pruneable_data}<br />
+                  <strong>Always kept:</strong> {chainAnalysis.pruning_info.always_kept}<br />
+                  <strong>Est. savings:</strong> {chainAnalysis.pruning_info.estimated_savings}
+                </p>
+              </div>
+
+              {/* Light Client Info */}
+              <div className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02]">
+                <p className="text-xs font-bold mb-1">Light Client API</p>
+                <div className="space-y-1 text-[10px] font-mono text-muted-foreground">
+                  <p><span className="text-emerald-400">GET</span> /api/light/headers — Block headers (SPV)</p>
+                  <p><span className="text-emerald-400">GET</span> /api/light/balance/:addr — Verified balance</p>
+                  <p><span className="text-emerald-400">GET</span> /api/light/verify-tx/:id — TX inclusion proof</p>
+                  <p><span className="text-amber-400">POST</span> /api/chain/prune — Prune old block data</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 }
