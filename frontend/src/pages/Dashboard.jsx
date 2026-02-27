@@ -419,7 +419,7 @@ export default function Dashboard() {
               {[
                 { icon: MessageSquareLock, label: "BricsChat", desc: "PQC-encrypted on-chain messaging", stat: chatStats?.total_messages ?? 0, sub: `${chatStats?.unique_users ?? 0} users`, color: "primary", to: "/chat" },
                 { icon: Clock, label: "Time Capsules", desc: "Decentralized time-locked storage", stat: capsuleStats?.total_capsules ?? 0, sub: `${capsuleStats?.locked ?? 0} locked`, color: "blue-400", to: "/timecapsule" },
-                { icon: Brain, label: "AI Oracle", desc: "GPT-5.2 powered blockchain intelligence", stat: "", sub: "Ask anything", color: "violet-400", to: "/oracle" },
+                { icon: Brain, label: "AI Oracle", desc: "Off-chain advisory oracle (does not influence consensus)", stat: "", sub: "Query data", color: "violet-400", to: "/oracle" },
                 { icon: Award, label: "BricsNFT", desc: "PQC-signed on-chain certificates", stat: "", sub: "Mint & verify", color: "amber-400", to: "/nft" },
               ].map((app, i) => (
                 <Link key={i} to={app.to} className={`flex items-center gap-4 p-3 bg-${app.color === "primary" ? "primary" : app.color.split("-")[0]}-500/5 rounded border border-${app.color === "primary" ? "primary" : app.color.split("-")[0]}-500/15 hover:bg-white/[0.04] transition-colors`} data-testid={`app-card-${app.label.toLowerCase().replace(/ /g, "-")}`}>
