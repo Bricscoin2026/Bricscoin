@@ -71,6 +71,9 @@ export default function MobileWallet() {
   const [renameValue, setRenameValue] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
 
+  // Privacy Score
+  const [privacyScore, setPrivacyScore] = useState(null);
+
   // Send form
   const [sendForm, setSendForm] = useState({ recipient: "", amount: "" });
   const [sending, setSending] = useState(false);
