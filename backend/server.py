@@ -1026,7 +1026,7 @@ async def get_network_stats(request: Request):
     # Formula dalla difficulty: hashrate = difficulty * 2^32 / target_block_time
     hashrate_estimate = (current_difficulty * HASHRATE_MULTIPLIER) / TARGET_BLOCK_TIME
     
-    return NetworkStats(
+    result = NetworkStats(
         total_supply=MAX_SUPPLY,
         circulating_supply=circulating,
         remaining_supply=MAX_SUPPLY - circulating,
@@ -1039,6 +1039,8 @@ async def get_network_stats(request: Request):
         next_halving_block=next_halving,
         current_reward=get_mining_reward(current_height)
     )
+    set_cached("network_stats", result)
+    return result
 
 @api_router.get("/tokenomics")
 async def get_tokenomics(request: Request):
