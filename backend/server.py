@@ -3090,6 +3090,21 @@ async def startup_event():
     asyncio.create_task(periodic_sync())
     asyncio.create_task(periodic_miners_cleanup())
     asyncio.create_task(periodic_peer_heartbeat())
+    asyncio.create_task(periodic_dandelion_embargo())
+
+
+async def periodic_dandelion_embargo():
+    """Periodically check for stuck transactions in Dandelion++ stem phase.
+    Runs every 10 seconds to enforce the embargo timeout."""
+    while True:
+        try:
+            await dandelion_embargo_check()
+            # Clean up old entries from seen_in_fluff (keep last 10000)
+            if len(dandelion_seen_in_fluff) > 10000:
+                dandelion_seen_in_fluff.clear()
+        except Exception as e:
+            logger.error(f"Dandelion++ embargo check error: {e}")
+        await asyncio.sleep(10)
 
 
 async def periodic_miners_cleanup():
