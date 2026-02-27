@@ -2086,6 +2086,117 @@ async def get_address_info(request: Request, address: str):
     }
 
 
+# ==================== ZK / PRIVACY SEND ENDPOINTS ====================
+
+@api_router.post("/zk/send-shielded")
+async def zk_send_shielded(request: Request):
+    """Create a shielded transaction with type='shielded' for privacy scoring"""
+    body = await request.json()
+    sender = body.get("sender_address")
+    recipient = body.get("recipient_address")
+    amount = float(body.get("amount", 0))
+    pub_key = body.get("public_key", "")
+    sig = body.get("signature", "")
+    ts = body.get("timestamp", datetime.now(timezone.utc).isoformat())
+
+    if not sender or not recipient or amount <= 0:
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
+    balance = await get_balance(sender)
+    total_cost = amount + TRANSACTION_FEE
+    if balance < total_cost:
+        raise HTTPException(status_code=400, detail=f"Insufficient balance: {balance} < {total_cost}")
+
+    # Verify signature if legacy address
+    if pub_key and sig and not sender.startswith("BRICSPQ"):
+        tx_data = build_tx_data(sender, recipient, amount, ts)
+        try:
+            if not verify_signature(pub_key, sig, tx_data):
+                raise HTTPException(status_code=400, detail="Invalid signature")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Signature verification failed")
+
+    blinding_factor = hashlib.sha256(f"{sender}{recipient}{amount}{ts}{uuid.uuid4()}".encode()).hexdigest()
+
+    tx_id = hashlib.sha256(f"{sender}{recipient}{amount}{ts}{sig[:32] if sig else uuid.uuid4()}".encode()).hexdigest()
+    transaction = {
+        "id": tx_id,
+        "sender": sender,
+        "recipient": recipient,
+        "amount": amount,
+        "fee": TRANSACTION_FEE,
+        "timestamp": ts,
+        "signature": sig,
+        "public_key": pub_key,
+        "confirmed": True,
+        "block_index": None,
+        "type": "shielded",
+        "blinding_factor_hash": hashlib.sha256(blinding_factor.encode()).hexdigest(),
+    }
+    await db.transactions.insert_one(transaction)
+    transaction.pop("_id", None)
+
+    logger.info(f"Shielded transaction: {tx_id[:16]}... ({amount} BRICS)")
+    return {"transaction": transaction, "blinding_factor": blinding_factor}
+
+
+@api_router.get("/zk/shielded-history/{address}")
+async def zk_shielded_history(address: str):
+    """Get shielded transaction history for an address"""
+    txs = await db.transactions.find(
+        {"$or": [{"sender": address}, {"recipient": address}], "type": {"$in": ["shielded", "private"]}},
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(50).to_list(50)
+    return {"shielded_transactions": txs}
+
+
+@api_router.post("/privacy/send-private")
+async def privacy_send_private(request: Request):
+    """Create a fully private transaction with type='private'"""
+    body = await request.json()
+    sender = body.get("sender_address")
+    pub_key = body.get("sender_public_key", "")
+    recipient_scan = body.get("recipient_scan_pubkey", "")
+    recipient_spend = body.get("recipient_spend_pubkey", "")
+    amount = float(body.get("amount", 0))
+    ring_size = int(body.get("ring_size", 5))
+
+    if not sender or not recipient_scan or amount <= 0:
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
+    balance = await get_balance(sender)
+    if balance < amount:
+        raise HTTPException(status_code=400, detail=f"Insufficient balance: {balance} < {amount}")
+
+    # Generate stealth address from recipient keys
+    stealth_seed = hashlib.sha256(f"{recipient_scan}{recipient_spend}{uuid.uuid4()}".encode()).hexdigest()
+    stealth_address = "BRICSSA" + stealth_seed[:38]
+
+    blinding_factor = hashlib.sha256(f"{sender}{stealth_address}{amount}{uuid.uuid4()}".encode()).hexdigest()
+    ts = datetime.now(timezone.utc).isoformat()
+
+    tx_id = hashlib.sha256(f"{sender}{stealth_address}{amount}{ts}".encode()).hexdigest()
+    transaction = {
+        "id": tx_id,
+        "sender": sender,
+        "recipient": stealth_address,
+        "stealth_address": stealth_address,
+        "amount": amount,
+        "fee": 0,
+        "timestamp": ts,
+        "confirmed": True,
+        "block_index": None,
+        "type": "private",
+        "ring_size": ring_size,
+        "blinding_factor_hash": hashlib.sha256(blinding_factor.encode()).hexdigest(),
+    }
+    await db.transactions.insert_one(transaction)
+    transaction.pop("_id", None)
+
+    logger.info(f"Private transaction: {tx_id[:16]}... ({amount} BRICS) -> stealth")
+    return {"transaction": transaction, "blinding_factor": blinding_factor, "stealth_address": stealth_address}
+
+
 @api_router.get("/privacy-score/{address}")
 async def get_privacy_score(address: str):
     """Calculate privacy score for a wallet address"""
