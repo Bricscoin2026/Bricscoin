@@ -206,7 +206,7 @@ class TestLightClientEndpoints:
         response = requests.get(f"{BASE_URL}/api/light/headers?limit=2")
         assert response.status_code == 200, f"Light headers failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/light/headers?limit=2 - Status: {response.status_code}")
     
     def test_chain_size_analysis(self):
@@ -214,7 +214,7 @@ class TestLightClientEndpoints:
         response = requests.get(f"{BASE_URL}/api/chain/size-analysis")
         assert response.status_code == 200, f"Chain size analysis failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/chain/size-analysis - Status: {response.status_code}")
 
 
