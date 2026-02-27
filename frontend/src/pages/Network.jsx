@@ -446,10 +446,10 @@ python node.py
               <p className="text-xs text-muted-foreground leading-relaxed">{dandelion.description}</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: "Stem Probability", value: `${dandelion.config.stem_probability * 100}%`, sub: "chance to continue stem" },
-                  { label: "Max Stem Hops", value: dandelion.config.max_stem_hops, sub: "before forced fluff" },
-                  { label: "Epoch Duration", value: `${dandelion.config.epoch_seconds / 60} min`, sub: "stem peer rotation" },
-                  { label: "Embargo Timeout", value: `${dandelion.config.embargo_seconds}s`, sub: "failsafe broadcast" },
+                  { label: "Stem Routing", value: `${dandelion.config.stem_probability * 100}%`, sub: "of TXs enter stem phase" },
+                  { label: "Relay Mode", value: "Multi-hop", sub: "random peer relaying" },
+                  { label: "Epoch Rotation", value: `${dandelion.config.epoch_seconds / 60} min`, sub: "relay peer rotation" },
+                  { label: "Failsafe", value: "Embargo", sub: "stuck TXs auto-diffuse" },
                 ].map((item, i) => (
                   <div key={i} className="p-3 rounded-sm border border-white/[0.06] bg-white/[0.02] text-center">
                     <p className="text-lg font-heading font-bold text-emerald-400">{item.value}</p>
