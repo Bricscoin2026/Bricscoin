@@ -1516,7 +1516,8 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
     # Dandelion++: route through stem phase before broadcast
     asyncio.create_task(dandelion_stem_forward(transaction))
     
-    logger.info(f"Secure transaction created: {tx_id} ({tx_request.amount} BRICS)")    return transaction
+    logger.info(f"Secure transaction created: {tx_id} ({tx_request.amount} BRICS)")
+    return transaction
 
 # DEPRECATED: Legacy endpoint - will be removed in future versions
 @api_router.post("/transactions")
