@@ -2962,10 +2962,10 @@ async def dandelion_status():
             "total_fluffed": len(dandelion_seen_in_fluff),
         },
         "description": (
-            "Dandelion++ prevents network-level deanonymization. "
+            "Dandelion++ significantly raises the cost of network-level TX origin analysis. "
             "Transactions first travel through a random 'stem' path (single peer hops) "
-            "before being 'fluffed' (broadcast to all). This makes it impossible for "
-            "network observers to determine which node originated a transaction."
+            "before being diffused to all peers. This makes it substantially more difficult for "
+            "network observers to correlate transactions with originating nodes."
         ),
     }
 
