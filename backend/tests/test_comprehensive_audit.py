@@ -67,29 +67,48 @@ class TestCoreEndpoints:
         print(f"✓ GET /api/richlist?limit=5 - Status: {response.status_code}")
 
 
+def check_mongodb_id_leak(data):
+    """
+    Check if MongoDB _id is present in response data.
+    Returns True if _id leak detected, False otherwise.
+    Note: 'node_id' is a valid field name, not a leak.
+    """
+    if isinstance(data, dict):
+        if "_id" in data:
+            return True
+        for v in data.values():
+            if check_mongodb_id_leak(v):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if check_mongodb_id_leak(item):
+                return True
+    return False
+
+
 class TestWalletEndpoints:
     """Wallet creation endpoints"""
     
     def test_create_legacy_wallet(self):
         """Test legacy wallet creation"""
-        response = requests.post(f"{BASE_URL}/api/wallet/create")
+        response = requests.post(f"{BASE_URL}/api/wallet/create", json={})
         assert response.status_code == 200, f"Wallet create failed: {response.text}"
         data = response.json()
         assert "address" in data, "Missing address"
         assert "public_key" in data, "Missing public_key"
         assert "private_key" in data, "Missing private_key"
         assert "seed_phrase" in data, "Missing seed_phrase"
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ POST /api/wallet/create - Returns address, public_key, private_key, seed_phrase")
     
     def test_create_pqc_wallet(self):
         """Test PQC wallet creation with Dilithium keys"""
-        response = requests.post(f"{BASE_URL}/api/pqc/wallet/create")
+        response = requests.post(f"{BASE_URL}/api/pqc/wallet/create", json={})
         assert response.status_code == 200, f"PQC wallet create failed: {response.text}"
         data = response.json()
         assert "address" in data, "Missing address"
         # Check for dilithium key indicators
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ POST /api/pqc/wallet/create - Returns PQC wallet with dilithium keys")
 
 
