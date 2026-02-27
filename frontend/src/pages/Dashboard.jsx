@@ -165,6 +165,15 @@ export default function Dashboard() {
       </motion.div>
 
       {/* ==================== CHAIN STATS ==================== */}
+      {/* ==================== LAYER 1: CORE PROTOCOL ==================== */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60 px-2 py-0.5 rounded bg-primary/5 border border-primary/10">Layer 1</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Core Protocol</span>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">SHA-256 Proof-of-Work &middot; Post-Quantum Signatures &middot; Privacy by Design</p>
+      </motion.div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Coins} title="Circulating Supply" value={`${stats?.circulating_supply?.toLocaleString() || 0} BRICS`} subtitle={`of ${(21000000).toLocaleString()} max`} delay={0} />
         <StatCard icon={TrendingUp} title="Remaining to Mine" value={`${stats?.remaining_supply?.toLocaleString() || 0} BRICS`} subtitle={`of ${(21000000).toLocaleString()} max`} delay={1} />
