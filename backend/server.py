@@ -2065,6 +2065,66 @@ async def get_address_info(request: Request, address: str):
         "recent_transactions": recent_txs
     }
 
+
+@api_router.get("/privacy-score/{address}")
+async def get_privacy_score(address: str):
+    """Calculate privacy score for a wallet address"""
+    is_pqc = address.startswith("BRICSPQ")
+    
+    total_txs = await db.transactions.count_documents(
+        {"$or": [{"sender": address}, {"recipient": address}]}
+    )
+    shielded_txs = await db.transactions.count_documents(
+        {"$or": [{"sender": address}, {"recipient": address}], "type": {"$in": ["shielded", "private"]}}
+    )
+    
+    # Score calculation (out of 100)
+    score = 0
+    details = []
+    
+    # PQC wallet: +30 points
+    if is_pqc:
+        score += 30
+        details.append({"feature": "PQC Wallet (ML-DSA-65)", "points": 30, "status": "active"})
+    else:
+        details.append({"feature": "PQC Wallet (ML-DSA-65)", "points": 0, "status": "inactive", "tip": "Migrate to PQC for quantum resistance"})
+    
+    # Shielded transactions ratio: up to +40 points
+    if total_txs > 0:
+        shielded_ratio = shielded_txs / total_txs
+        shielded_points = min(40, int(shielded_ratio * 40))
+        score += shielded_points
+        details.append({"feature": f"Shielded Transactions ({shielded_txs}/{total_txs})", "points": shielded_points, "status": "active" if shielded_points > 20 else "partial", "tip": "Use shielded sends for maximum privacy"})
+    else:
+        details.append({"feature": "Shielded Transactions", "points": 0, "status": "none", "tip": "Make shielded transactions to increase score"})
+    
+    # Has used privacy features at all: +15 points
+    if shielded_txs > 0:
+        score += 15
+        details.append({"feature": "Privacy Suite Used", "points": 15, "status": "active"})
+    else:
+        details.append({"feature": "Privacy Suite Used", "points": 0, "status": "inactive", "tip": "Try the zk-STARK privacy feature"})
+    
+    # Not exposing on rich list (balance under threshold): +15 points
+    balance = await get_balance(address)
+    if balance < 100 or shielded_txs > 0:
+        score += 15
+        details.append({"feature": "Low Exposure", "points": 15, "status": "active"})
+    else:
+        details.append({"feature": "Low Exposure", "points": 0, "status": "partial", "tip": "Use shielded transactions to hide large balances"})
+    
+    level = "Critical" if score < 25 else "Low" if score < 50 else "Medium" if score < 75 else "High" if score < 90 else "Maximum"
+    
+    return {
+        "address": address,
+        "score": min(100, score),
+        "level": level,
+        "is_pqc": is_pqc,
+        "total_transactions": total_txs,
+        "shielded_transactions": shielded_txs,
+        "details": details
+    }
+
 # ==================== P2P ENDPOINTS ====================
 @api_router.post("/p2p/register")
 async def register_peer(peer: PeerRegister):
