@@ -21,23 +21,10 @@ import {
   createPQCWallet, importPQCWallet, getPQCWalletInfo, createPQCTransaction
 } from "../lib/api";
 import { preparePQCTransaction } from "../lib/pqc-crypto";
+import { CRYPTO_PAIRS, JBS_PER_BRICS } from "../hooks/useWalletData";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 const LOGO_URL = "/bricscoin-logo.png";
-
-const CRYPTO_PAIRS = [
-  { id: "jabos", symbol: "JBS", color: "#D4AF37", isJbs: true },
-  { id: "tether", symbol: "USDT", color: "#26A17B" },
-  { id: "usd-coin", symbol: "USDC", color: "#2775CA" },
-  { id: "bitcoin", symbol: "BTC", color: "#F7931A" },
-  { id: "solana", symbol: "SOL", color: "#9945FF" },
-  { id: "ethereum", symbol: "ETH", color: "#627EEA" },
-  { id: "binancecoin", symbol: "BNB", color: "#F3BA2F" },
-  { id: "ripple", symbol: "XRP", color: "#23292F" },
-  { id: "dogecoin", symbol: "DOGE", color: "#C2A633" },
-];
-
-const JBS_PER_BRICS = 100_000_000;
 
 function copyText(text) {
   navigator.clipboard.writeText(text);
