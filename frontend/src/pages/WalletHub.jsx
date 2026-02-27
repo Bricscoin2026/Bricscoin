@@ -96,11 +96,25 @@ function PortfolioSummary() {
 
   useEffect(() => {
     fetchTotalBalance(); fetchCryptoPrices();
+    const legacyRaw = localStorage.getItem("bricscoin_wallets");
     const pqcRaw = localStorage.getItem("bricscoin_pqc_wallets");
+    const legacyWallets = legacyRaw ? JSON.parse(legacyRaw) : [];
     const pqcWallets = pqcRaw ? JSON.parse(pqcRaw) : [];
-    if (pqcWallets.length > 0) {
-      fetch(`${API}/api/privacy-score/${pqcWallets[0].address}`)
-        .then(r => r.json()).then(setPrivacyScore).catch(() => {});
+    const allAddresses = [
+      ...pqcWallets.map(w => w.address),
+      ...legacyWallets.map(w => w.address),
+    ];
+    if (allAddresses.length > 0) {
+      Promise.all(allAddresses.map(addr =>
+        fetch(`${API}/api/privacy-score/${addr}`).then(r => r.json()).catch(() => null)
+      )).then(results => {
+        const valid = results.filter(Boolean);
+        if (valid.length > 0) {
+          const best = valid.reduce((a, b) => (a.score >= b.score ? a : b));
+          setPrivacyScore(best);
+        }
+      });
+    }
     }
   }, [fetchTotalBalance, fetchCryptoPrices]);
 
