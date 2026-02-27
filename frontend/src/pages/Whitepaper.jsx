@@ -418,7 +418,7 @@ export default function Whitepaper() {
             ["Replay Attack", "Signature uniqueness + timestamp validation"],
             ["51% Attack", "SHA-256 PoW (same security model as Bitcoin)"],
             ["Sybil Attack", "Proof-of-Work requirement for block creation"],
-            ["DDoS", "Rate limiting (120 req/min) + IP blacklisting"],
+            ["DDoS", "Rate limiting (500 req/min default) + burst detection + IP blacklisting"],
             ["Quantum Attack", "ML-DSA-65 hybrid signatures (NIST FIPS 204)"],
             ["Key Theft", "Client-side signing (keys never leave the device)"],
             ["Double Spend", "Confirmation depth + UTXO-style balance checks"],
