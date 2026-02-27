@@ -50,6 +50,7 @@ export default function Layout() {
 
   const moreItems = [
     { to: "/jabos", icon: Coins, label: "Jabos (JBS)" },
+    { to: "/listing", icon: Globe, label: "Exchange Listing" },
     { to: "/mobile-wallet", icon: Smartphone, label: "Mobile Wallet" },
     { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
