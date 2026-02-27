@@ -387,88 +387,85 @@ export default function Dashboard() {
                     <Sprout className="w-6 h-6 text-emerald-400" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-base">Dandelion++ Live</h3>
+                    <h3 className="font-heading font-bold text-base">Dandelion++ Network Privacy</h3>
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-xs text-muted-foreground">Network Privacy Active</span>
+                      <span className="text-xs text-muted-foreground">Active — Reducing TX origin exposure</span>
                     </div>
                   </div>
                 </div>
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
-                  LIVE
+                  ACTIVE
                 </Badge>
               </div>
 
-              {/* Visual Pipeline */}
+              {/* Visual Pipeline — aggregate only */}
               <div className="flex items-center gap-1.5 mb-5 p-3 rounded-sm bg-white/[0.02] border border-white/[0.06]">
                 <div className="flex-1 text-center">
                   <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center mx-auto mb-1 border border-amber-500/20">
                     <Send className="w-3.5 h-3.5 text-amber-400" />
                   </div>
-                  <p className="text-[9px] text-muted-foreground">TX Created</p>
-                </div>
-                <div className="text-muted-foreground/30 text-xs">→</div>
-                <div className="flex-1 text-center">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-1 border border-emerald-500/20 relative">
-                    <Sprout className="w-3.5 h-3.5 text-emerald-400" />
-                    {dandelion.state.stempool_size > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full text-[8px] font-bold text-black flex items-center justify-center animate-pulse">
-                        {dandelion.state.stempool_size}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[9px] text-emerald-400 font-bold">Stem Phase</p>
-                  <p className="text-[8px] text-muted-foreground">1 peer only</p>
+                  <p className="text-[9px] text-muted-foreground">New TX</p>
                 </div>
                 <div className="text-muted-foreground/30 text-xs">→</div>
                 <div className="flex-1 text-center">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-1 border border-emerald-500/20">
                     <Sprout className="w-3.5 h-3.5 text-emerald-400" />
                   </div>
-                  <p className="text-[9px] text-emerald-400">Stem Hop</p>
-                  <p className="text-[8px] text-muted-foreground">1-4 hops</p>
+                  <p className="text-[9px] text-emerald-400 font-bold">Stem Phase</p>
+                  <p className="text-[8px] text-muted-foreground">single relay</p>
                 </div>
                 <div className="text-muted-foreground/30 text-xs">→</div>
                 <div className="flex-1 text-center">
-                  <div className="w-8 h-8 rounded-full bg-cyan-500/15 flex items-center justify-center mx-auto mb-1 border border-cyan-500/20 relative">
-                    <Activity className="w-3.5 h-3.5 text-cyan-400" />
-                    {dandelion.state.total_fluffed > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 rounded-full text-[8px] font-bold text-black flex items-center justify-center">
-                        {dandelion.state.total_fluffed > 99 ? "99+" : dandelion.state.total_fluffed}
-                      </span>
-                    )}
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-1 border border-emerald-500/20">
+                    <Sprout className="w-3.5 h-3.5 text-emerald-400" />
                   </div>
-                  <p className="text-[9px] text-cyan-400 font-bold">Fluff</p>
+                  <p className="text-[9px] text-emerald-400">Random Hops</p>
+                  <p className="text-[8px] text-muted-foreground">1-N relays</p>
+                </div>
+                <div className="text-muted-foreground/30 text-xs">→</div>
+                <div className="flex-1 text-center">
+                  <div className="w-8 h-8 rounded-full bg-cyan-500/15 flex items-center justify-center mx-auto mb-1 border border-cyan-500/20">
+                    <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                  </div>
+                  <p className="text-[9px] text-cyan-400 font-bold">Diffusion</p>
                   <p className="text-[8px] text-muted-foreground">all peers</p>
                 </div>
               </div>
 
-              {/* Stats Grid */}
-              <div className="grid grid-cols-4 gap-3">
+              {/* Aggregate-only stats — no precise counts or timers */}
+              <div className="grid grid-cols-3 gap-3">
                 <div className="bg-white/[0.03] rounded-sm p-3 border border-white/5 text-center">
-                  <p className="text-lg font-bold text-emerald-400">{dandelion.state.stempool_size}</p>
-                  <p className="text-[9px] text-muted-foreground">In Stem</p>
+                  <p className="text-lg font-bold text-emerald-400">
+                    {dandelion.state.total_fluffed > 0
+                      ? `~${Math.round(dandelion.config.stem_probability * 100)}%`
+                      : "90%"}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">Stem Routing Rate</p>
                 </div>
                 <div className="bg-white/[0.03] rounded-sm p-3 border border-white/5 text-center">
-                  <p className="text-lg font-bold text-cyan-400">{dandelion.state.total_fluffed}</p>
-                  <p className="text-[9px] text-muted-foreground">Fluffed</p>
+                  <p className="text-lg font-bold text-cyan-400">
+                    {dandelion.state.total_fluffed > 0 ? "Active" : "Ready"}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">Propagation Status</p>
                 </div>
                 <div className="bg-white/[0.03] rounded-sm p-3 border border-white/5 text-center">
-                  <p className="text-lg font-bold">{dandelion.state.epoch_remaining_seconds}s</p>
-                  <p className="text-[9px] text-muted-foreground">Epoch Left</p>
-                </div>
-                <div className="bg-white/[0.03] rounded-sm p-3 border border-white/5 text-center">
-                  <p className="text-lg font-bold">{dandelion.config.max_stem_hops}</p>
-                  <p className="text-[9px] text-muted-foreground">Max Hops</p>
+                  <p className="text-lg font-bold">Multi-hop</p>
+                  <p className="text-[9px] text-muted-foreground">Relay Mode</p>
                 </div>
               </div>
+
+              <p className="text-[10px] text-muted-foreground mt-4 leading-relaxed">
+                Dandelion++ makes it significantly more costly for network observers to correlate transactions with originating nodes. 
+                Based on <a href="https://arxiv.org/abs/1805.11060" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Fanti et al. (2018)</a>.
+              </p>
 
               {/* CTA */}
               <div className="mt-4">
                 <Button asChild variant="outline" size="sm" className="w-full border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 rounded-sm" data-testid="dandelion-network-cta">
                   <Link to="/network">
                     <Sprout className="w-4 h-4 mr-2" />
-                    Full Dandelion++ Details
+                    Protocol Details
                     <ChevronRight className="w-4 h-4 ml-auto" />
                   </Link>
                 </Button>
