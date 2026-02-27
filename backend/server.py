@@ -951,6 +951,10 @@ async def root():
 @limiter.exempt
 async def get_network_stats(request: Request):
     """Get network statistics"""
+    cached = get_cached("network_stats")
+    if cached:
+        return cached
+    
     blocks_count = await db.blocks.count_documents({})
     pending_count = await db.transactions.count_documents({"confirmed": False})
     
