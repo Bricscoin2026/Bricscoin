@@ -223,6 +223,46 @@ function PortfolioSummary() {
           </div>
         </div>
       </div>
+
+      {/* Privacy Score Card */}
+      <div className="rounded-sm border border-white/10 bg-card p-5" data-testid="desktop-privacy-score">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+            <Shield className="w-4 h-4" /> Privacy Score
+          </p>
+          {privacyScore && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{
+              background: privacyScore.score >= 75 ? "#10B98120" : privacyScore.score >= 50 ? "#F59E0B20" : "#EF444420",
+              color: privacyScore.score >= 75 ? "#10B981" : privacyScore.score >= 50 ? "#F59E0B" : "#EF4444"
+            }}>{privacyScore.level}</span>
+          )}
+        </div>
+        {privacyScore ? (
+          <>
+            <p className="text-3xl sm:text-4xl font-heading font-bold mb-2" style={{
+              color: privacyScore.score >= 75 ? "#10B981" : privacyScore.score >= 50 ? "#F59E0B" : "#EF4444"
+            }}>{privacyScore.score}<span className="text-lg text-muted-foreground">/100</span></p>
+            <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden mb-3">
+              <div className="h-full rounded-full transition-all" style={{
+                width: `${privacyScore.score}%`,
+                background: privacyScore.score >= 75 ? "#10B981" : privacyScore.score >= 50 ? "#F59E0B" : "#EF4444"
+              }} />
+            </div>
+            <div className="space-y-1">
+              {privacyScore.details?.map((d, i) => (
+                <div key={i} className="flex items-center justify-between text-[10px]">
+                  <span className="text-muted-foreground">{d.feature}</span>
+                  <span className={d.status === "active" ? "text-emerald-400" : d.status === "partial" ? "text-amber-400" : "text-red-400"}>
+                    {d.status === "active" ? `+${d.points}` : d.tip || "+0"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">Create a PQC wallet to see your score</p>
+        )}
+      </div>
     </motion.div>
   );
 }
