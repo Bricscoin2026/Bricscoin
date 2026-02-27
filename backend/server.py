@@ -1218,6 +1218,27 @@ async def get_tokenomics(request: Request):
         }
     }
 
+@api_router.get("/prices/crypto")
+@limiter.exempt
+async def get_crypto_prices(request: Request):
+    """Proxy for CoinGecko price data — avoids CORS issues on frontend (cached 60s)"""
+    cached = get_cached("crypto_prices")
+    if cached:
+        return cached
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            ids = "tether,usd-coin,bitcoin,solana,ethereum,binancecoin,ripple,dogecoin"
+            resp = await client.get(
+                f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd"
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            set_cached("crypto_prices", data, ttl=60)
+            return data
+    except Exception as e:
+        logger.warning(f"CoinGecko proxy error: {e}")
+        return {}
+
 @api_router.get("/richlist")
 @limiter.limit("30/minute")
 async def get_rich_list(request: Request, limit: int = 100):
