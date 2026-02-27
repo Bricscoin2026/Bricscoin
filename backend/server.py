@@ -2352,6 +2352,10 @@ async def privacy_send_private(request: Request):
     transaction.pop("_id", None)
 
     logger.info(f"Private transaction: {tx_id[:16]}... ({amount} BRICS) -> stealth")
+
+    # Dandelion++: route through stem phase before broadcast
+    asyncio.create_task(dandelion_stem_forward(transaction))
+
     return {"transaction": transaction, "blinding_factor": blinding_factor, "stealth_address": stealth_address}
 
 
