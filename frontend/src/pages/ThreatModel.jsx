@@ -87,12 +87,12 @@ const THREATS = [
         assumption: "At least one honest seed node is reachable. Internet connection is not fully controlled by adversary.",
       },
       {
-        name: "Network-Level Deanonymization",
+        name: "Network-Level TX Origin Exposure",
         severity: "High",
-        description: "A network observer monitoring multiple nodes can determine which node first broadcast a transaction, revealing the originator's IP.",
-        protection: "Dandelion++ protocol (stem/fluff phases). Tor Hidden Service (.onion) for anonymous node access. IP address never linked to transaction data on-chain.",
+        description: "A network observer monitoring multiple nodes can attempt to determine which node first broadcast a transaction, potentially revealing the originator's IP.",
+        protection: "Dandelion++ protocol (stem/fluff phases) significantly raises the cost of this attack. Tor Hidden Service (.onion) provides additional network-layer privacy. IP address never linked to transaction data on-chain.",
         status: "mitigated",
-        assumption: "Dandelion++ provides formal anonymity guarantees with sufficient honest nodes (>50% of stem relay nodes).",
+        assumption: "Dandelion++ provides formal privacy guarantees with sufficient honest nodes (>50% of stem relay nodes).",
       },
       {
         name: "DDoS / Rate Limiting",
