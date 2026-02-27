@@ -475,12 +475,6 @@ export default function Whitepaper() {
             {[
               "PQC Smart Contracts (escrow, multisig, time-lock, token creation) — first blockchain with quantum-resistant contract signing",
               "Verifiable AI Oracle with on-chain zk-proofs — AI responses signed with PQC and permanently recorded on-chain",
-              "Stratum v2 protocol support",
-              "Variable difficulty (Vardiff) for low-power miners",
-              "Lightning-style payment channels for instant transactions",
-              "Exchange listing on TradeOgre, MEXC, and decentralized exchanges",
-              "Native mobile application (iOS / Android)",
-              "CI/CD pipeline for automated deployment",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-primary mt-0.5">&#9679;</span>
