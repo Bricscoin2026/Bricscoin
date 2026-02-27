@@ -434,11 +434,14 @@ export default function MobileWallet() {
         <button onClick={() => setView("wallet")} className="flex items-center gap-1 text-sm text-muted-foreground mb-6">
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
-        <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Send className="w-5 h-5 text-emerald-400" /> Send BRICS</h2>
+        <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Send className="w-5 h-5 text-emerald-400" /> Send {sendInJbs ? "JBS" : "BRICS"}</h2>
         <p className="text-xs text-muted-foreground mb-6">Signed locally with ECDSA + ML-DSA-65</p>
         <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 mb-6 flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Balance</span>
-          <span className="font-bold text-emerald-400">{balStr} BRICS</span>
+          <div className="text-right">
+            <span className="font-bold text-emerald-400">{balStr} BRICS</span>
+            <p className="text-[10px] font-mono" style={{ color: "#D4AF37" }}>{balance ? Math.round(parseFloat(balance) * JBS_PER_BRICS).toLocaleString() : 0} JBS</p>
+          </div>
         </div>
         <div className="space-y-4">
           <div>
@@ -447,16 +450,34 @@ export default function MobileWallet() {
               placeholder="BRICSPQ..." className="font-mono text-xs h-12" data-testid="send-recipient" />
           </div>
           <div>
-            <Label>Amount</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>Amount</Label>
+              <button
+                onClick={() => { setSendInJbs(!sendInJbs); setSendForm(p => ({...p, amount: ""})); }}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md border text-xs font-medium transition-colors"
+                style={sendInJbs ? { borderColor: "#D4AF3750", color: "#D4AF37", background: "#D4AF3710" } : { borderColor: "rgba(255,255,255,0.1)", color: "inherit" }}
+                data-testid="send-toggle-jbs"
+              >
+                <Coins className="w-3 h-3" />
+                {sendInJbs ? "JBS" : "BRICS"}
+              </button>
+            </div>
             <div className="flex gap-2">
               <Input type="number" value={sendForm.amount} onChange={e => setSendForm(p => ({...p, amount: e.target.value}))}
-                placeholder="0.00" className="h-12 flex-1" data-testid="send-amount" />
+                placeholder={sendInJbs ? "0" : "0.00"} className="h-12 flex-1" data-testid="send-amount" />
               <Button variant="outline" className="h-12" onClick={() => {
                 const max = Math.max(0, parseFloat(balance || 0) - 0.000005);
-                setSendForm(p => ({...p, amount: max.toFixed(8).replace(/\.?0+$/, "")}));
+                setSendForm(p => ({...p, amount: sendInJbs ? Math.round(max * JBS_PER_BRICS).toString() : max.toFixed(8).replace(/\.?0+$/, "")}));
               }} data-testid="send-max">MAX</Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Fee: 0.000005 BRICS</p>
+            {sendForm.amount && (
+              <p className="text-xs mt-1" style={{ color: "#D4AF37" }}>
+                {sendInJbs
+                  ? `= ${(parseFloat(sendForm.amount || 0) / JBS_PER_BRICS).toFixed(8).replace(/\.?0+$/, "")} BRICS`
+                  : `= ${Math.round(parseFloat(sendForm.amount || 0) * JBS_PER_BRICS).toLocaleString()} JBS`}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Fee: 0.000005 BRICS (500 JBS)</p>
           </div>
           <Button onClick={handleSend} disabled={sending || !sendForm.recipient || !sendForm.amount}
             className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-base" data-testid="send-confirm">
