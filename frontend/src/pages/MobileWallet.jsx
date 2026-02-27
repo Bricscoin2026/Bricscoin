@@ -118,6 +118,13 @@ export default function MobileWallet() {
 
   useEffect(() => { fetchBalance(); }, [fetchBalance]);
 
+  // Fetch privacy score
+  useEffect(() => {
+    if (!activeWallet?.address) return;
+    fetch(`${API}/api/privacy-score/${activeWallet.address}`)
+      .then(r => r.json()).then(setPrivacyScore).catch(() => {});
+  }, [activeWallet?.address, balance]);
+
   // Fetch crypto prices from CoinGecko
   const fetchCryptoPrices = useCallback(async () => {
     setPricesLoading(true);
