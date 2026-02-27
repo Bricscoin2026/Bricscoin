@@ -257,12 +257,12 @@ STRATUM: stratum+tcp://stratum.bricscoin26.org:3333 (port 3333)`;
               </div>
             </div>
             <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-              <span className="text-sm text-muted-foreground">RPC Port</span>
-              <code className="text-sm font-mono">8332</code>
+              <span className="text-sm text-muted-foreground">Stratum Port</span>
+              <code className="text-sm font-mono">3333</code>
             </div>
             <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-              <span className="text-sm text-muted-foreground">P2P Port</span>
-              <code className="text-sm font-mono">8333</code>
+              <span className="text-sm text-muted-foreground">Stratum Port (alt)</span>
+              <code className="text-sm font-mono">3334</code>
             </div>
           </CardContent>
         </Card>
