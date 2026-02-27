@@ -295,31 +295,6 @@ STRATUM: stratum+tcp://stratum.bricscoin26.org:3333 (ports 3333/3334)`;
         </Card>
       </section>
 
-      {/* Exchange Targets */}
-      <section>
-        <h2 className="text-lg font-heading font-bold mb-4 flex items-center gap-2">
-          <Eye className="w-5 h-5 text-emerald-400" /> Where to Apply
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { name: "TradeOgre", type: "Free listing", desc: "Specializzato in PoW e privacy coin. Scrivi a support@tradeogre.com o DM @TradeOgre su Twitter.", color: "#10B981", priority: "RECOMMENDED" },
-            { name: "MEXC", type: "Free application", desc: "Grande exchange, lista molte coin PoW piccole. Applica su listing.mexc.com.", color: "#3B82F6", priority: "HIGH VISIBILITY" },
-            { name: "Bisq", type: "Decentralized", desc: "DEX decentralizzato. Nessun permesso necessario, chiunque crea un mercato BTC/BRICS.", color: "#F97316", priority: "NO PERMISSION" },
-          ].map((ex) => (
-            <Card key={ex.name} className="border-white/[0.06] bg-white/[0.02]">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-bold">{ex.name}</h3>
-                  <Badge variant="outline" className="text-[9px] px-1.5 py-0" style={{ borderColor: `${ex.color}40`, color: ex.color }}>{ex.priority}</Badge>
-                </div>
-                <p className="text-[10px] text-muted-foreground mb-2">{ex.type}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{ex.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
       {/* CTA */}
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
         className="text-center py-8 border-t border-white/5">
