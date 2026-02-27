@@ -4,7 +4,7 @@ import {
   ShieldCheck, Plus, Copy, Check, Eye, EyeOff, Download, RefreshCw,
   Send, Atom, Key, Lock, ArrowLeft, QrCode, ArrowDownLeft,
   History, ChevronRight, AlertTriangle, EyeOff as EyeOffIcon,
-  TrendingUp, ChevronDown, Pencil, Trash2
+  TrendingUp, ChevronDown, Pencil, Trash2, Coins
 } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
