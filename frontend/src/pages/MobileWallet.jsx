@@ -740,6 +740,45 @@ export default function MobileWallet() {
           </div>
         </div>
 
+        {/* Privacy Score Card */}
+        {privacyScore && (
+          <div className="rounded-2xl p-5 mb-6 border border-white/10 bg-white/[0.02]" data-testid="mobile-privacy-score">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span className="text-sm font-medium">Privacy Score</span>
+              </div>
+              <Badge className="text-[10px] px-2 py-0.5" style={{
+                background: privacyScore.score >= 75 ? "#10B98120" : privacyScore.score >= 50 ? "#F59E0B20" : "#EF444420",
+                color: privacyScore.score >= 75 ? "#10B981" : privacyScore.score >= 50 ? "#F59E0B" : "#EF4444",
+                border: `1px solid ${privacyScore.score >= 75 ? "#10B98130" : privacyScore.score >= 50 ? "#F59E0B30" : "#EF444430"}`
+              }}>{privacyScore.level}</Badge>
+            </div>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-3xl font-black" style={{
+                color: privacyScore.score >= 75 ? "#10B981" : privacyScore.score >= 50 ? "#F59E0B" : "#EF4444"
+              }}>{privacyScore.score}</span>
+              <span className="text-sm text-muted-foreground">/ 100</span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+              <div className="h-full rounded-full transition-all" style={{
+                width: `${privacyScore.score}%`,
+                background: privacyScore.score >= 75 ? "#10B981" : privacyScore.score >= 50 ? "#F59E0B" : "#EF4444"
+              }} />
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {privacyScore.details?.map((d, i) => (
+                <div key={i} className="flex items-center justify-between text-[11px]">
+                  <span className="text-muted-foreground">{d.feature}</span>
+                  <span className={d.status === "active" ? "text-emerald-400" : d.status === "partial" ? "text-amber-400" : "text-red-400"}>
+                    {d.status === "active" ? `+${d.points}` : d.tip || "+0"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           {[
