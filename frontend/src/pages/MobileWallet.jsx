@@ -671,7 +671,7 @@ export default function MobileWallet() {
                     >
                       <span style={{ color: pair.color }} className="font-medium">{pair.symbol}</span>
                       <span className="text-xs text-muted-foreground font-mono">
-                        {cryptoPrices[pair.id]?.usd ? `$${cryptoPrices[pair.id].usd.toLocaleString()}` : "..."}
+                        {pair.isJbs ? "100M" : cryptoPrices[pair.id]?.usd ? `$${cryptoPrices[pair.id].usd.toLocaleString()}` : "..."}
                       </span>
                     </button>
                   ))}
@@ -680,17 +680,23 @@ export default function MobileWallet() {
             </div>
           </div>
           <p className="text-3xl font-black text-muted-foreground" data-testid="mobile-price-ticker-value">
-            0 <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span>
+            {selectedPair.isJbs && balance != null ? (
+              <>{Math.round(parseFloat(balance) * JBS_PER_BRICS).toLocaleString()} <span style={{ color: selectedPair.color }}>JBS</span></>
+            ) : (
+              <>0 <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span></>
+            )}
           </p>
           <p className="text-xs text-muted-foreground mt-1" data-testid="mobile-brics-pair-label">
-            1 BRICS = 0 {selectedPair.symbol}
+            {selectedPair.isJbs ? `1 BRICS = ${JBS_PER_BRICS.toLocaleString()} JBS` : `1 BRICS = 0 ${selectedPair.symbol}`}
           </p>
           <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              <span style={{ color: selectedPair.color }} className="font-medium">{selectedPair.symbol}</span> Price
+              <span style={{ color: selectedPair.color }} className="font-medium">{selectedPair.symbol}</span> {selectedPair.isJbs ? "Rate" : "Price"}
             </span>
             <span className="text-sm font-mono font-medium" data-testid="mobile-real-crypto-price">
-              {pricesLoading ? (
+              {selectedPair.isJbs ? (
+                "1 JBS = 0.00000001 BRICS"
+              ) : pricesLoading ? (
                 <span className="animate-pulse text-muted-foreground">...</span>
               ) : cryptoPrices[selectedPair.id]?.usd != null ? (
                 `$${cryptoPrices[selectedPair.id].usd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
