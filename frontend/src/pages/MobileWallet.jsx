@@ -26,6 +26,7 @@ const API = process.env.REACT_APP_BACKEND_URL;
 const LOGO_URL = "/bricscoin-logo.png";
 
 const CRYPTO_PAIRS = [
+  { id: "jabos", symbol: "JBS", color: "#D4AF37", isJbs: true },
   { id: "tether", symbol: "USDT", color: "#26A17B" },
   { id: "usd-coin", symbol: "USDC", color: "#2775CA" },
   { id: "bitcoin", symbol: "BTC", color: "#F7931A" },
@@ -35,6 +36,8 @@ const CRYPTO_PAIRS = [
   { id: "ripple", symbol: "XRP", color: "#23292F" },
   { id: "dogecoin", symbol: "DOGE", color: "#C2A633" },
 ];
+
+const JBS_PER_BRICS = 100_000_000;
 
 function copyText(text) {
   navigator.clipboard.writeText(text);
