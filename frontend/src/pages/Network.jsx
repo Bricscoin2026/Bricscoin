@@ -17,6 +17,8 @@ export default function Network() {
   const [peers, setPeers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [dandelion, setDandelion] = useState(null);
+  const [chainAnalysis, setChainAnalysis] = useState(null);
 
   const fetchData = async () => {
     try {
