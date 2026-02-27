@@ -2282,6 +2282,10 @@ async def zk_send_shielded(request: Request):
     prove_time = round(0.8 + (amount % 1) * 0.5, 1)
 
     logger.info(f"Shielded transaction: {tx_id[:16]}... ({amount} BRICS)")
+
+    # Dandelion++: route through stem phase before broadcast
+    asyncio.create_task(dandelion_stem_forward(transaction))
+
     return {
         "transaction": transaction,
         "blinding_factor": blinding_factor,
