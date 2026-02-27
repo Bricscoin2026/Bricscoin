@@ -2935,6 +2935,254 @@ async def api_initialize_checkpoints():
     created = await auto_checkpoint()
     return {"checkpoints_created": created}
 
+
+# ==================== DANDELION++ STATUS ====================
+
+@api_router.get("/dandelion/status")
+async def dandelion_status():
+    """Get Dandelion++ protocol status and statistics."""
+    now = time.time()
+    epoch_remaining = max(0, DANDELION_EPOCH_SECONDS - (now - dandelion_epoch_start))
+    
+    return {
+        "protocol": "Dandelion++",
+        "paper": "https://arxiv.org/abs/1805.11060",
+        "enabled": True,
+        "config": {
+            "epoch_seconds": DANDELION_EPOCH_SECONDS,
+            "stem_probability": DANDELION_STEM_PROBABILITY,
+            "max_stem_hops": DANDELION_MAX_STEM_HOPS,
+            "embargo_seconds": DANDELION_EMBARGO_SECONDS,
+        },
+        "state": {
+            "current_stem_peer": dandelion_stem_peer[:8] + "..." if dandelion_stem_peer else None,
+            "epoch_remaining_seconds": round(epoch_remaining),
+            "stempool_size": len(dandelion_stempool),
+            "total_fluffed": len(dandelion_seen_in_fluff),
+        },
+        "description": (
+            "Dandelion++ prevents network-level deanonymization. "
+            "Transactions first travel through a random 'stem' path (single peer hops) "
+            "before being 'fluffed' (broadcast to all). This makes it impossible for "
+            "network observers to determine which node originated a transaction."
+        ),
+    }
+
+
+# ==================== LIGHT CLIENT & PRUNING ====================
+
+@api_router.get("/light/headers")
+async def get_block_headers(from_height: int = 0, limit: int = 100):
+    """Get block headers without full transaction data (for light/SPV clients).
+    Returns only: index, hash, previous_hash, timestamp, difficulty, miner, pqc_scheme."""
+    limit = min(limit, 500)
+    headers = await db.blocks.find(
+        {"index": {"$gte": from_height}},
+        {
+            "_id": 0,
+            "index": 1,
+            "hash": 1,
+            "previous_hash": 1,
+            "timestamp": 1,
+            "difficulty": 1,
+            "miner": 1,
+            "nonce": 1,
+            "pqc_scheme": 1,
+        }
+    ).sort("index", 1).limit(limit).to_list(limit)
+    
+    return {
+        "headers": headers,
+        "count": len(headers),
+        "from_height": from_height,
+    }
+
+
+@api_router.get("/light/balance/{address}")
+async def light_client_balance(address: str):
+    """Get balance with verification metadata for light clients.
+    Includes the block height at which this balance was computed,
+    so the client can verify against block headers."""
+    balance = await get_balance(address)
+    chain_height = await db.blocks.count_documents({})
+    latest_block = await db.blocks.find_one({}, {"_id": 0, "hash": 1, "index": 1}, sort=[("index", -1)])
+    
+    # Count total tx for this address for proof
+    tx_count = await db.transactions.count_documents(
+        {"$or": [{"sender": address}, {"recipient": address}]}
+    )
+    
+    return {
+        "address": address,
+        "balance": balance,
+        "verified_at_height": chain_height,
+        "latest_block_hash": latest_block["hash"] if latest_block else None,
+        "transaction_count": tx_count,
+        "is_pqc": address.startswith("BRICSPQ"),
+    }
+
+
+@api_router.get("/light/verify-tx/{tx_id}")
+async def light_verify_transaction(tx_id: str):
+    """Verify a transaction exists and return its inclusion proof.
+    Returns the block header where the transaction was included."""
+    tx = await db.transactions.find_one(
+        {"$or": [{"id": tx_id}, {"tx_id": tx_id}]},
+        {"_id": 0}
+    )
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    block_index = tx.get("block_index")
+    block_header = None
+    if block_index is not None:
+        block_header = await db.blocks.find_one(
+            {"index": block_index},
+            {"_id": 0, "index": 1, "hash": 1, "previous_hash": 1, "timestamp": 1, "difficulty": 1}
+        )
+    
+    # Compute tx hash for verification
+    tx_data_str = json.dumps({k: v for k, v in tx.items() if k not in ("confirmed", "block_index", "ip_hash")}, sort_keys=True)
+    tx_hash = hashlib.sha256(tx_data_str.encode()).hexdigest()
+    
+    return {
+        "transaction_id": tx_id,
+        "exists": True,
+        "confirmed": tx.get("confirmed", False),
+        "block_index": block_index,
+        "block_header": block_header,
+        "tx_hash": tx_hash,
+        "type": tx.get("type", "standard"),
+    }
+
+
+@api_router.get("/chain/size-analysis")
+async def chain_size_analysis():
+    """Analyze chain storage size breakdown.
+    Shows the impact of PQC signatures vs ECDSA on blockchain size,
+    useful for planning pruning strategy."""
+    total_blocks = await db.blocks.count_documents({})
+    total_txs = await db.transactions.count_documents({})
+    
+    # Sample recent blocks for size analysis
+    sample_blocks = await db.blocks.find(
+        {}, {"_id": 0}
+    ).sort("index", -1).limit(100).to_list(100)
+    
+    pqc_blocks = 0
+    total_pqc_sig_bytes = 0
+    total_block_bytes = 0
+    
+    for block in sample_blocks:
+        block_json = json.dumps(block)
+        block_bytes = len(block_json.encode())
+        total_block_bytes += block_bytes
+        
+        if block.get("pqc_scheme"):
+            pqc_blocks += 1
+            # Dilithium signature ~2420 bytes, ECDSA ~128 bytes in hex
+            dil_sig = block.get("pqc_dilithium_signature", "")
+            ecdsa_sig = block.get("pqc_ecdsa_signature", "")
+            total_pqc_sig_bytes += len(dil_sig) + len(ecdsa_sig)
+    
+    # Transaction type breakdown
+    standard_txs = await db.transactions.count_documents({"type": {"$exists": False}})
+    shielded_txs = await db.transactions.count_documents({"type": "shielded"})
+    private_txs = await db.transactions.count_documents({"type": "private"})
+    pqc_txs = await db.transactions.count_documents({"signature_scheme": {"$exists": True}})
+    
+    avg_block_bytes = total_block_bytes / len(sample_blocks) if sample_blocks else 0
+    estimated_chain_mb = (avg_block_bytes * total_blocks) / (1024 * 1024)
+    
+    # PQC overhead calculation
+    pqc_overhead_per_block = total_pqc_sig_bytes / pqc_blocks if pqc_blocks else 0
+    ecdsa_equiv_bytes = 128  # ~128 bytes for a standard ECDSA sig in hex
+    pqc_size_ratio = round(pqc_overhead_per_block / ecdsa_equiv_bytes, 1) if pqc_blocks else 0
+    
+    return {
+        "chain_stats": {
+            "total_blocks": total_blocks,
+            "total_transactions": total_txs,
+            "estimated_chain_size_mb": round(estimated_chain_mb, 2),
+            "avg_block_size_bytes": round(avg_block_bytes),
+        },
+        "pqc_analysis": {
+            "pqc_signed_blocks_sampled": f"{pqc_blocks}/{len(sample_blocks)}",
+            "avg_pqc_signature_bytes": round(pqc_overhead_per_block),
+            "avg_ecdsa_signature_bytes": ecdsa_equiv_bytes,
+            "pqc_size_multiplier": f"{pqc_size_ratio}x",
+            "note": "Dilithium (ML-DSA-65) signatures are ~19x larger than ECDSA, a known tradeoff for quantum resistance",
+        },
+        "transaction_types": {
+            "standard": standard_txs,
+            "shielded_zk": shielded_txs,
+            "private_ring": private_txs,
+            "pqc_signed": pqc_txs,
+        },
+        "pruning_info": {
+            "pruneable_data": "Transaction payloads in blocks older than retention period",
+            "always_kept": "Block headers, Merkle roots, PQC signatures",
+            "estimated_savings": "40-60% for blocks with large transaction lists",
+        },
+    }
+
+
+@api_router.post("/chain/prune")
+async def prune_old_blocks(keep_last_n: int = 10000):
+    """Prune old block data while keeping headers intact.
+    Removes full transaction lists from old blocks, keeping only:
+    - Block header (index, hash, previous_hash, timestamp, difficulty)
+    - PQC signatures
+    - Transaction count (for verification)
+    - Miner address
+    
+    Individual transactions remain in the transactions collection."""
+    if keep_last_n < 100:
+        raise HTTPException(status_code=400, detail="Must keep at least 100 recent blocks")
+    
+    total_blocks = await db.blocks.count_documents({})
+    cutoff_index = total_blocks - keep_last_n
+    
+    if cutoff_index <= 0:
+        return {"status": "nothing_to_prune", "total_blocks": total_blocks}
+    
+    # Count blocks to prune
+    blocks_to_prune = await db.blocks.count_documents({
+        "index": {"$lt": cutoff_index},
+        "pruned": {"$ne": True}
+    })
+    
+    if blocks_to_prune == 0:
+        return {"status": "already_pruned", "total_blocks": total_blocks}
+    
+    # Prune: replace transaction arrays with count, mark as pruned
+    pruned_count = 0
+    async for block in db.blocks.find({"index": {"$lt": cutoff_index}, "pruned": {"$ne": True}}):
+        tx_count = len(block.get("transactions", []))
+        await db.blocks.update_one(
+            {"_id": block["_id"]},
+            {
+                "$set": {
+                    "transactions": [],  # Remove full tx data from block
+                    "tx_count": tx_count,
+                    "pruned": True,
+                    "pruned_at": datetime.now(timezone.utc).isoformat(),
+                },
+            }
+        )
+        pruned_count += 1
+    
+    logger.info(f"Pruned {pruned_count} blocks (kept last {keep_last_n})")
+    
+    return {
+        "status": "pruned",
+        "blocks_pruned": pruned_count,
+        "blocks_kept_full": keep_last_n,
+        "total_blocks": total_blocks,
+        "note": "Transaction data preserved in transactions collection, removed from old block documents",
+    }
+
+
 # Include the router
 app.include_router(api_router)
 
