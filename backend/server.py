@@ -49,7 +49,7 @@ def get_rate_limit_key(request: Request) -> str:
         return "whitelisted"  # All whitelisted IPs share one bucket with no real limit
     return client_ip
 
-limiter = Limiter(key_func=get_rate_limit_key, default_limits=["120/minute"])
+limiter = Limiter(key_func=get_rate_limit_key, default_limits=["500/minute"])
 
 # Security logging
 security_logger = logging.getLogger("security")
