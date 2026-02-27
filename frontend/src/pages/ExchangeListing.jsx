@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Globe, Shield, Pickaxe, Atom, Lock, Eye, Copy, Check,
+  Globe, Shield, Pickaxe, Atom, Lock, Copy, Check,
   ExternalLink, FileText, Code, Users, Layers, Zap,
   Link2, Coins, Smartphone, Brain, ChevronRight
 } from "lucide-react";
