@@ -119,6 +119,7 @@ export default function Mining() {
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">{stats?.current_reward || 50}</p>
+            <p className="text-[10px] font-mono" style={{ color: "#D4AF37" }}>{((stats?.current_reward || 50) * 100000000).toLocaleString()} JBS</p>
             <p className="text-xs text-muted-foreground">Block Reward</p>
           </CardContent>
         </Card>
@@ -299,7 +300,7 @@ export default function Mining() {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Current block reward: <strong>{stats?.current_reward || 50} BRICS</strong></span>
+              <span>Current block reward: <strong>{stats?.current_reward || 50} BRICS</strong> <span style={{ color: "#D4AF37" }}>({((stats?.current_reward || 50) * 100000000).toLocaleString()} JBS)</span></span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
