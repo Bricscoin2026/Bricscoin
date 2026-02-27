@@ -317,10 +317,10 @@ export default function Whitepaper() {
             BricsCoin implements a fully automatic, <strong>per-block difficulty adjustment algorithm</strong> targeting a block time of <strong>600 seconds</strong> (10 minutes). The algorithm:
           </p>
           <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-            <li>Uses a <strong>sliding window of the last 5 blocks</strong> for fast convergence</li>
+            <li>Uses a <strong>sliding window of the last 20 blocks</strong> for stability</li>
             <li>Estimates network hashrate from total work done divided by elapsed time</li>
             <li>Calculates new difficulty as: <code className="bg-white/5 px-1 rounded">new_diff = hashrate_estimate * 600</code></li>
-            <li>Applies a <strong>safety clamp</strong> (max 4x increase or 0.25x decrease) to prevent extreme oscillations</li>
+            <li>Applies a <strong>safety clamp</strong> (max 1.5x increase or 0.67x decrease) to prevent oscillations</li>
             <li>Recalculates on <strong>every single block</strong> for maximum responsiveness to hashrate changes</li>
           </ul>
           <p className="mt-3">
