@@ -294,7 +294,7 @@ class TestMiningEndpoints:
         response = requests.get(f"{BASE_URL}/api/mining/template")
         assert response.status_code == 200, f"Mining template failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/mining/template - Status: {response.status_code}")
     
     def test_mining_miners(self):
@@ -302,7 +302,7 @@ class TestMiningEndpoints:
         response = requests.get(f"{BASE_URL}/api/mining/miners")
         assert response.status_code == 200, f"Mining miners failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/mining/miners - Status: {response.status_code}")
     
     def test_miners_stats(self):
@@ -310,7 +310,7 @@ class TestMiningEndpoints:
         response = requests.get(f"{BASE_URL}/api/miners/stats")
         assert response.status_code == 200, f"Miners stats failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/miners/stats - Status: {response.status_code}")
     
     def test_miners_count(self):
@@ -318,7 +318,7 @@ class TestMiningEndpoints:
         response = requests.get(f"{BASE_URL}/api/miners/count")
         assert response.status_code == 200, f"Miners count failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/miners/count - Status: {response.status_code}")
     
     def test_p2p_peers(self):
@@ -326,7 +326,7 @@ class TestMiningEndpoints:
         response = requests.get(f"{BASE_URL}/api/p2p/peers")
         assert response.status_code == 200, f"P2P peers failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/p2p/peers - Status: {response.status_code}")
     
     def test_p2p_chain_info(self):
@@ -334,7 +334,7 @@ class TestMiningEndpoints:
         response = requests.get(f"{BASE_URL}/api/p2p/chain/info")
         assert response.status_code == 200, f"P2P chain info failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/p2p/chain/info - Status: {response.status_code}")
 
 
