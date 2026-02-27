@@ -333,8 +333,8 @@ function RichListSection() {
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
         <Card className="bg-card border-white/10"><CardContent className="p-4 text-center"><p className="text-lg font-bold">{data?.total_holders || 0}</p><p className="text-xs text-muted-foreground">Total Holders</p></CardContent></Card>
-        <Card className="bg-card border-white/10"><CardContent className="p-4 text-center"><p className="text-lg font-bold">{data?.circulating_supply?.toLocaleString() || 0}</p><p className="text-xs text-muted-foreground">Circulating Supply</p></CardContent></Card>
-        <Card className="bg-card border-white/10"><CardContent className="p-4 text-center"><p className="text-lg font-bold gold-text">{data?.wallets?.[0]?.balance?.toLocaleString() || 0}</p><p className="text-xs text-muted-foreground">Top Wallet</p></CardContent></Card>
+        <Card className="bg-card border-white/10"><CardContent className="p-4 text-center"><p className="text-lg font-bold">{data?.circulating_supply?.toLocaleString() || 0} <span className="text-xs text-muted-foreground">BRICS</span></p><p className="text-[10px] text-muted-foreground" style={{ color: "#D4AF37" }}>{data?.circulating_supply ? Math.round(data.circulating_supply * 100000000).toLocaleString() : 0} JBS</p><p className="text-xs text-muted-foreground">Circulating Supply</p></CardContent></Card>
+        <Card className="bg-card border-white/10"><CardContent className="p-4 text-center"><p className="text-lg font-bold gold-text">{data?.wallets?.[0]?.balance?.toLocaleString() || 0} <span className="text-xs text-muted-foreground">BRICS</span></p><p className="text-[10px] text-muted-foreground" style={{ color: "#D4AF37" }}>{data?.wallets?.[0]?.balance ? Math.round(data.wallets[0].balance * 100000000).toLocaleString() : 0} JBS</p><p className="text-xs text-muted-foreground">Top Wallet</p></CardContent></Card>
       </div>
       <Card className="bg-card border-white/10">
         <CardContent className="p-0">
@@ -353,7 +353,10 @@ function RichListSection() {
                     {copiedAddr === w.address ? <Check className="w-3 h-3 text-green-500"/> : <Copy className="w-3 h-3 text-muted-foreground"/>}
                   </button>
                 </div>
-                <div className="col-span-3 text-right font-mono text-xs font-bold">{w.balance.toLocaleString()} <span className="text-muted-foreground">BRICS</span></div>
+                <div className="col-span-3 text-right">
+                  <span className="font-mono text-xs font-bold">{w.balance.toLocaleString()} <span className="text-muted-foreground">BRICS</span></span>
+                  <p className="text-[10px] font-mono" style={{ color: "#D4AF37" }}>{Math.round(w.balance * 100000000).toLocaleString()} JBS</p>
+                </div>
                 <div className="col-span-2 text-right text-xs text-muted-foreground">{w.percentage}%</div>
               </div>
             ))}
