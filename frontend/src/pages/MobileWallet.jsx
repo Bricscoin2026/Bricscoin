@@ -201,8 +201,9 @@ export default function MobileWallet() {
     if (!activeWallet) return;
     setSending(true);
     try {
-      const amount = parseFloat(sendForm.amount);
-      if (!sendForm.recipient || amount <= 0) { toast.error("Invalid data"); return; }
+      let amount = parseFloat(sendForm.amount);
+      if (sendInJbs) amount = amount / JBS_PER_BRICS;
+      if (!sendForm.recipient || amount <= 0) { toast.error("Invalid data"); setSending(false); return; }
       const txPayload = preparePQCTransaction(activeWallet, sendForm.recipient, amount);
       await createPQCTransaction(txPayload);
       toast.success("Transaction sent!");
