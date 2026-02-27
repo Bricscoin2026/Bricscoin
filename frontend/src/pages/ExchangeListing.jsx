@@ -17,7 +17,7 @@ const SPECS = [
   ["Ticker", "BRICS"],
   ["Sub-unit", "Jabos (JBS) — 1 BRICS = 100,000,000 JBS"],
   ["Algorithm", "SHA-256 Proof-of-Work (Bitcoin-compatible)"],
-  ["Block Time", "~60 seconds"],
+  ["Block Time", "~600 seconds (~10 minutes)"],
   ["Block Reward", "50 BRICS (halving every 210,000 blocks)"],
   ["Max Supply", "21,000,000 BRICS"],
   ["Premine", "None (renounced via on-chain NFT)"],
@@ -95,7 +95,7 @@ export default function ExchangeListing() {
 ALGORITHM: SHA-256 Proof-of-Work (Bitcoin-compatible)
 CONSENSUS: Nakamoto Consensus + AuxPoW (Merge Mining with Bitcoin)
 MAX SUPPLY: 21,000,000 BRICS
-BLOCK TIME: ~60 seconds
+BLOCK TIME: ~600 seconds (~10 minutes)
 BLOCK REWARD: 50 BRICS (halving every 210,000 blocks)
 PREMINE: None (renounced via on-chain NFT certificate)
 SUB-UNIT: Jabos (JBS) — 1 BRICS = 100,000,000 JBS
