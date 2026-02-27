@@ -500,7 +500,7 @@ export default function Whitepaper() {
               "BricsChat: on-chain PQC-encrypted messaging",
               "Decentralized Time Capsule",
               "BricsNFT: PQC-signed on-chain certificates",
-              "AI Blockchain Oracle powered by GPT-5.2",
+              "AI Blockchain Oracle (off-chain advisory, does not influence consensus)",
               "Deflationary burn-fee mechanism",
               "SOLO + PPLNS dual mining pools",
               "Automatic per-block difficulty adjustment",
