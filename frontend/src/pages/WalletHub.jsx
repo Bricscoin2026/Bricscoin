@@ -1,126 +1,24 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Wallet as WalletIcon, ShieldCheck, ArrowRight, RefreshCw, TrendingUp, ChevronDown, Lock, Atom, Shield } from "lucide-react";
+import { Wallet as WalletIcon, ShieldCheck, ArrowRight, RefreshCw, TrendingUp, ChevronDown, Lock, Atom, Shield, Zap, Eye } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { motion } from "framer-motion";
-import { getWalletBalance, getPQCWalletInfo } from "../lib/api";
 import LegacyWallet from "./Wallet";
 import PQCWalletPage from "./PQCWallet";
 import WalletMigrationPage from "./WalletMigration";
 import ZKPrivacy from "./ZKPrivacy";
 import PrivacySuite from "./PrivacySuite";
+import { useWalletData, CRYPTO_PAIRS, JBS_PER_BRICS } from "../hooks/useWalletData";
 
-const API = process.env.REACT_APP_BACKEND_URL;
+function PortfolioSummary({ onSelectTab }) {
+  const {
+    totalBalance, walletCount, loading,
+    cryptoPrices, pricesLoading, privacyScore,
+    fetchTotalBalance,
+  } = useWalletData();
 
-const CRYPTO_PAIRS = [
-  { id: "jabos", symbol: "JBS", color: "#D4AF37", isJbs: true },
-  { id: "tether", symbol: "USDT", color: "#26A17B" },
-  { id: "usd-coin", symbol: "USDC", color: "#2775CA" },
-  { id: "bitcoin", symbol: "BTC", color: "#F7931A" },
-  { id: "solana", symbol: "SOL", color: "#9945FF" },
-  { id: "ethereum", symbol: "ETH", color: "#627EEA" },
-  { id: "binancecoin", symbol: "BNB", color: "#F3BA2F" },
-  { id: "ripple", symbol: "XRP", color: "#23292F" },
-  { id: "dogecoin", symbol: "DOGE", color: "#C2A633" },
-];
-
-const JBS_PER_BRICS = 100_000_000;
-
-function PortfolioSummary() {
-  const [totalBalance, setTotalBalance] = useState(null);
-  const [walletCount, setWalletCount] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [selectedPair, setSelectedPair] = useState(CRYPTO_PAIRS[0]);
-  const [cryptoPrices, setCryptoPrices] = useState({});
-  const [pricesLoading, setPricesLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [privacyScore, setPrivacyScore] = useState(null);
-
-  const fetchTotalBalance = useCallback(async () => {
-    setLoading(true);
-    try {
-      const legacyRaw = localStorage.getItem("bricscoin_wallets");
-      const pqcRaw = localStorage.getItem("bricscoin_pqc_wallets");
-      const legacyWallets = legacyRaw ? JSON.parse(legacyRaw) : [];
-      const pqcWallets = pqcRaw ? JSON.parse(pqcRaw) : [];
-
-      const allAddresses = [
-        ...legacyWallets.map(w => ({ address: w.address, type: "legacy" })),
-        ...pqcWallets.map(w => ({ address: w.address, type: "pqc" })),
-      ];
-
-      setWalletCount(allAddresses.length);
-
-      if (allAddresses.length === 0) {
-        setTotalBalance(0);
-        setLoading(false);
-        return;
-      }
-
-      const results = await Promise.allSettled(
-        allAddresses.map(({ address, type }) =>
-          type === "legacy"
-            ? getWalletBalance(address).then(r => r.data.balance)
-            : getPQCWalletInfo(address).then(r => r.data.balance)
-        )
-      );
-
-      const sum = results.reduce((acc, r) => {
-        if (r.status === "fulfilled" && typeof r.value === "number") {
-          return acc + r.value;
-        }
-        return acc;
-      }, 0);
-
-      setTotalBalance(sum);
-    } catch {
-      setTotalBalance(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchCryptoPrices = useCallback(async () => {
-    setPricesLoading(true);
-    try {
-      const ids = CRYPTO_PAIRS.map(p => p.id).join(",");
-      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-      const data = await res.json();
-      setCryptoPrices(data);
-    } catch {
-      setCryptoPrices({});
-    } finally {
-      setPricesLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTotalBalance(); fetchCryptoPrices();
-    const legacyRaw = localStorage.getItem("bricscoin_wallets");
-    const pqcRaw = localStorage.getItem("bricscoin_pqc_wallets");
-    const legacyWallets = legacyRaw ? JSON.parse(legacyRaw) : [];
-    const pqcWallets = pqcRaw ? JSON.parse(pqcRaw) : [];
-    const allAddresses = [
-      ...pqcWallets.map(w => w.address),
-      ...legacyWallets.map(w => w.address),
-    ];
-    if (allAddresses.length > 0) {
-      Promise.all(allAddresses.map(addr =>
-        fetch(`${API}/api/privacy-score/${addr}`).then(r => r.json()).catch(() => null)
-      )).then(results => {
-        const valid = results.filter(Boolean);
-        if (valid.length > 0) {
-          const best = valid.reduce((a, b) => (a.score >= b.score ? a : b));
-          setPrivacyScore(best);
-        }
-      });
-    }
-  }, [fetchTotalBalance, fetchCryptoPrices]);
-
-  useEffect(() => {
-    const interval = setInterval(() => { fetchTotalBalance(); fetchCryptoPrices(); }, 60000);
-    return () => clearInterval(interval);
-  }, [fetchTotalBalance, fetchCryptoPrices]);
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -145,22 +43,14 @@ function PortfolioSummary() {
         <div className="relative">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm text-muted-foreground font-medium">Total Balance</p>
-            <button
-              onClick={fetchTotalBalance}
-              className="text-muted-foreground hover:text-primary transition-colors"
-              data-testid="refresh-total-balance-btn"
-            >
+            <button onClick={fetchTotalBalance} className="text-muted-foreground hover:text-primary transition-colors" data-testid="refresh-total-balance-btn">
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             </button>
           </div>
           <p className="text-3xl sm:text-4xl font-heading font-bold gold-text" data-testid="total-balance-value">
-            {loading ? (
-              <span className="animate-pulse text-2xl">Loading...</span>
-            ) : totalBalance !== null ? (
-              `${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BRICS`
-            ) : (
-              "Error"
-            )}
+            {loading ? <span className="animate-pulse text-2xl">Loading...</span>
+              : totalBalance !== null ? `${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BRICS`
+              : "Error"}
           </p>
           <p className="text-xs text-muted-foreground mt-2" data-testid="wallet-count-label">
             {walletCount} wallet{walletCount !== 1 ? "s" : ""} connected
@@ -177,23 +67,15 @@ function PortfolioSummary() {
               <p className="text-sm text-muted-foreground font-medium">BRICS Pair</p>
             </div>
             <div className="relative" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-white/10 bg-background hover:border-primary/40 transition-colors text-sm font-medium"
-                data-testid="currency-selector-btn"
-              >
+              <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-white/10 bg-background hover:border-primary/40 transition-colors text-sm font-medium" data-testid="currency-selector-btn">
                 <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
               </button>
               {dropdownOpen && (
                 <div className="absolute right-0 top-full mt-1 z-50 bg-card border border-white/10 rounded-sm shadow-xl overflow-hidden min-w-[120px]">
                   {CRYPTO_PAIRS.map((pair) => (
-                    <button
-                      key={pair.id}
-                      onClick={() => { setSelectedPair(pair); setDropdownOpen(false); }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 transition-colors flex items-center justify-between ${
-                        selectedPair.id === pair.id ? "bg-white/5" : ""
-                      }`}
+                    <button key={pair.id} onClick={() => { setSelectedPair(pair); setDropdownOpen(false); }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 transition-colors flex items-center justify-between ${selectedPair.id === pair.id ? "bg-white/5" : ""}`}
                       data-testid={`select-pair-${pair.symbol.toLowerCase()}`}
                     >
                       <span style={{ color: pair.color }} className="font-medium">{pair.symbol}</span>
@@ -206,33 +88,23 @@ function PortfolioSummary() {
               )}
             </div>
           </div>
-
           <p className="text-3xl sm:text-4xl font-heading font-bold text-muted-foreground" data-testid="price-ticker-value">
-            {selectedPair.isJbs && totalBalance != null ? (
-              <>{Math.round(totalBalance * JBS_PER_BRICS).toLocaleString()} <span style={{ color: selectedPair.color }}>JBS</span></>
-            ) : (
-              <>0 <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span></>
-            )}
+            {selectedPair.isJbs && totalBalance != null
+              ? <>{Math.round(totalBalance * JBS_PER_BRICS).toLocaleString()} <span style={{ color: selectedPair.color }}>JBS</span></>
+              : <>0 <span style={{ color: selectedPair.color }}>{selectedPair.symbol}</span></>}
           </p>
           <p className="text-xs text-muted-foreground mt-1" data-testid="brics-pair-label">
             {selectedPair.isJbs ? `1 BRICS = ${JBS_PER_BRICS.toLocaleString()} JBS` : `1 BRICS = 0 ${selectedPair.symbol}`}
           </p>
-
           <div className="mt-3 pt-3 border-t border-white/5">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
                 <span style={{ color: selectedPair.color }} className="font-medium">{selectedPair.symbol}</span> {selectedPair.isJbs ? "Rate" : "Price"}
               </span>
               <span className="text-sm font-mono font-medium" data-testid="real-crypto-price">
-                {selectedPair.isJbs ? (
-                  "1 JBS = 0.00000001 BRICS"
-                ) : pricesLoading ? (
-                  <span className="animate-pulse text-muted-foreground">...</span>
-                ) : realPrice !== null ? (
-                  `$${realPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                ) : (
-                  "N/A"
-                )}
+                {selectedPair.isJbs ? "1 JBS = 0.00000001 BRICS"
+                  : pricesLoading ? <span className="animate-pulse text-muted-foreground">...</span>
+                  : realPrice !== null ? `$${realPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "N/A"}
               </span>
             </div>
           </div>
@@ -282,9 +154,94 @@ function PortfolioSummary() {
   );
 }
 
+const PRIVACY_MODES = [
+  {
+    id: "safe",
+    label: "Safe",
+    tab: "pqc",
+    icon: ShieldCheck,
+    color: "text-emerald-400",
+    borderColor: "border-emerald-500/20",
+    bgColor: "bg-emerald-500/5",
+    description: "Standard PQC transaction. Fast, quantum-proof. Amount and addresses visible on-chain.",
+    features: ["Quantum-safe signature (ML-DSA-65)", "Fast confirmation", "Low fees"],
+    privacyLevel: 1,
+  },
+  {
+    id: "strong",
+    label: "Strong Privacy",
+    tab: "zk",
+    icon: Eye,
+    color: "text-violet-400",
+    borderColor: "border-violet-500/20",
+    bgColor: "bg-violet-500/5",
+    description: "Shielded transaction. Amount hidden with zk-STARK proof. Addresses visible.",
+    features: ["Hidden amount (zk-STARK)", "Verifiable without revealing data", "Moderate speed"],
+    privacyLevel: 2,
+  },
+  {
+    id: "maximum",
+    label: "Maximum Anonymity",
+    tab: "privacy",
+    icon: Lock,
+    color: "text-red-400",
+    borderColor: "border-red-500/20",
+    bgColor: "bg-red-500/5",
+    description: "Full privacy. Ring signatures hide sender, stealth address hides recipient, amount hidden.",
+    features: ["Hidden sender (Ring Signature)", "Hidden recipient (Stealth Address)", "Hidden amount (Pedersen Commitment)"],
+    privacyLevel: 3,
+  },
+];
+
+function PrivacyModePicker({ onSelectTab }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+      <div className="flex items-center gap-2 mb-3">
+        <Zap className="w-4 h-4 text-primary" />
+        <p className="text-sm font-bold">Quick Send — Choose Privacy Level</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {PRIVACY_MODES.map((mode) => (
+          <button
+            key={mode.id}
+            onClick={() => onSelectTab(mode.tab)}
+            className={`text-left p-4 rounded-sm border ${mode.borderColor} ${mode.bgColor} hover:bg-white/[0.04] transition-all group cursor-pointer`}
+            data-testid={`privacy-mode-${mode.id}`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <mode.icon className={`w-5 h-5 ${mode.color}`} />
+              <span className="font-bold text-sm">{mode.label}</span>
+              <div className="ml-auto flex gap-0.5">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className={`w-1.5 h-3 rounded-sm ${i <= mode.privacyLevel ? mode.color.replace("text-", "bg-") : "bg-white/10"}`} />
+                ))}
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{mode.description}</p>
+            <div className="space-y-1">
+              {mode.features.map((f, i) => (
+                <p key={i} className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                  <span className={`w-1 h-1 rounded-full ${mode.color.replace("text-", "bg-")}`} />
+                  {f}
+                </p>
+              ))}
+            </div>
+            <div className="mt-3 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: mode.color.includes("emerald") ? "#10B981" : mode.color.includes("violet") ? "#8B5CF6" : "#EF4444" }}>
+              Select & Send →
+            </div>
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 export default function WalletHub() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "legacy";
+  
+  const handleSelectTab = (tab) => setSearchParams({ tab });
+
   return (
     <div className="space-y-6" data-testid="wallet-hub-page">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -295,7 +252,8 @@ export default function WalletHub() {
         <p className="text-muted-foreground">Manage your BRICS wallets — Legacy, Quantum-Proof, Zero-Knowledge, Total Privacy & Migration</p>
       </motion.div>
 
-      <PortfolioSummary />
+      <PortfolioSummary onSelectTab={handleSelectTab} />
+      <PrivacyModePicker onSelectTab={handleSelectTab} />
 
       <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v })} className="space-y-5">
         <TabsList className="bg-card border border-white/10 flex-wrap h-auto gap-1 p-1">
@@ -316,21 +274,11 @@ export default function WalletHub() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="legacy">
-          <LegacyWallet embedded />
-        </TabsContent>
-        <TabsContent value="pqc">
-          <PQCWalletPage embedded />
-        </TabsContent>
-        <TabsContent value="zk">
-          <ZKPrivacy embedded />
-        </TabsContent>
-        <TabsContent value="privacy">
-          <PrivacySuite embedded />
-        </TabsContent>
-        <TabsContent value="migration">
-          <WalletMigrationPage embedded />
-        </TabsContent>
+        <TabsContent value="legacy"><LegacyWallet embedded /></TabsContent>
+        <TabsContent value="pqc"><PQCWalletPage embedded /></TabsContent>
+        <TabsContent value="zk"><ZKPrivacy embedded /></TabsContent>
+        <TabsContent value="privacy"><PrivacySuite embedded /></TabsContent>
+        <TabsContent value="migration"><WalletMigrationPage embedded /></TabsContent>
       </Tabs>
     </div>
   );
