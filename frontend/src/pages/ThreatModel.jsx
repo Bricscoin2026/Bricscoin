@@ -67,7 +67,7 @@ const THREATS = [
         description: "Correlating transaction submission times with user activity patterns to deanonymize.",
         protection: "Dandelion++ protocol randomizes transaction propagation path. Transactions pass through 1-4 random stem hops before broadcast, obscuring the originating node.",
         status: "mitigated",
-        assumption: "Sufficient network size (>10 nodes) for effective Dandelion++ anonymization.",
+        assumption: "Sufficient network size (>10 nodes) for effective Dandelion++ privacy protection.",
       },
     ],
   },
