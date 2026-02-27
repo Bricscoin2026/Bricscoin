@@ -10,7 +10,7 @@
 
 ## Risultati Test Difficoltà BricsCoin
 
-**Backend URL testato:** https://frontend-rebuild-6.preview.emergentagent.com
+**Backend URL testato:** https://protocol-hardening.preview.emergentagent.com
 
 ### ✅ Tutti i test superati (7/7)
 
