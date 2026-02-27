@@ -51,7 +51,7 @@ const THREATS = [
         description: "Analyzing transaction patterns to link addresses and deanonymize users (e.g., common-input ownership heuristic).",
         protection: "Ring signatures obscure the true sender among decoys. Stealth addresses generate one-time recipient addresses. Pedersen commitments hide transaction amounts.",
         status: "mitigated",
-        assumption: "Ring size >= 5 provides sufficient anonymity set. Users follow privacy best practices.",
+        assumption: "Ring size >= 5 provides sufficient privacy set. Users follow privacy best practices.",
       },
       {
         name: "Amount Correlation",
