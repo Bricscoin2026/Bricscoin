@@ -59,7 +59,7 @@ const FEATURES = [
   },
   {
     title: "AI Blockchain Oracle",
-    desc: "On-chain AI Oracle powered by GPT-5.2. Query blockchain data, get analysis, and verify AI responses with PQC signatures.",
+    desc: "Off-chain advisory oracle for blockchain data queries and analysis. Does not influence consensus or on-chain state.",
     icon: Brain, color: "#8B5CF6", tag: "AI"
   },
   {
