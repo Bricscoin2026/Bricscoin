@@ -21,6 +21,7 @@ import MobileWallet from "./pages/MobileWallet";
 import Network from "./pages/Network";
 import Whitepaper from "./pages/Whitepaper";
 import ThreatModel from "./pages/ThreatModel";
+import ProtocolStatus from "./pages/ProtocolStatus";
 import "./App.css";
 
 function App() {
