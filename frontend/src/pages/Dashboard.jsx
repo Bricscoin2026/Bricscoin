@@ -181,12 +181,13 @@ export default function Dashboard() {
         <StatCard icon={Pickaxe} title="Block Reward" value={`${stats?.current_reward || 50} BRICS`} subtitle={`Next halving: Block ${stats?.next_halving_block?.toLocaleString() || 210000}`} delay={3} />
       </div>
 
-      {/* ==================== SECURITY & PRIVACY ==================== */}
+      {/* ==================== LAYER 2: NETWORK & PRIVACY ==================== */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        <div className="flex items-center gap-2 mb-4">
-          <Shield className="w-5 h-5 text-emerald-400" />
-          <h2 className="text-lg font-heading font-bold">Security & Privacy</h2>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60 px-2 py-0.5 rounded bg-emerald-500/5 border border-emerald-500/10">Layer 2</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Security & Privacy</span>
         </div>
+        <p className="text-xs text-muted-foreground mb-4">Quantum-Resistant Signatures &middot; Dandelion++ &middot; Tor &middot; SPV Light Client</p>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
