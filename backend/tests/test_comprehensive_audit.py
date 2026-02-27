@@ -170,7 +170,7 @@ class TestPrivacyEndpoints:
         response = requests.get(f"{BASE_URL}/api/zk/status")
         assert response.status_code == 200, f"ZK status failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/zk/status - Status: {response.status_code}")
     
     def test_zk_info(self):
@@ -178,7 +178,7 @@ class TestPrivacyEndpoints:
         response = requests.get(f"{BASE_URL}/api/zk/info")
         assert response.status_code == 200, f"ZK info failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/zk/info - Status: {response.status_code}")
     
     def test_privacy_status(self):
@@ -186,7 +186,7 @@ class TestPrivacyEndpoints:
         response = requests.get(f"{BASE_URL}/api/privacy/status")
         assert response.status_code == 200, f"Privacy status failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/privacy/status - Status: {response.status_code}")
     
     def test_privacy_key_images(self):
@@ -194,7 +194,7 @@ class TestPrivacyEndpoints:
         response = requests.get(f"{BASE_URL}/api/privacy/key-images")
         assert response.status_code == 200, f"Privacy key images failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/privacy/key-images - Status: {response.status_code}")
 
 
