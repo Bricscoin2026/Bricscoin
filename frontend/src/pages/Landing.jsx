@@ -5,7 +5,7 @@ import {
   Blocks, Shield, Wallet, MessageSquareLock, Clock, Award,
   Brain, Pickaxe, Globe, ArrowRight, Zap, Lock, Eye, EyeOff,
   ChevronDown, Atom, Network, ShieldCheck, UserX, Fingerprint,
-  CheckCircle, Layers, Scan, Link2
+  CheckCircle, Layers, Scan, Link2, Coins, Smartphone
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 
@@ -350,7 +350,11 @@ export default function Landing() {
               description="Mine BRICS with SHA-256 hardware. Join the PPLNS pool for steady rewards or mine solo for 50 BRICS/block. Fair launch — zero premine." />
             <FeatureCard icon={Link2} title="Merge Mining" link="/merge-mining" color="#F97316" delay={10} tag="AuxPoW"
               description="Bitcoin miners can mine BricsCoin simultaneously at zero extra cost. AuxPoW leverages Bitcoin's massive hashrate to secure BricsCoin. Fully reversible." />
-            <FeatureCard icon={Network} title="P2P Network" link="/network" color="#06B6D4" delay={11} tag="Infrastructure"
+            <FeatureCard icon={Coins} title="Jabos (JBS)" link="/jabos" color="#D4AF37" delay={11} tag="Sub-unit"
+              description="The smallest unit of BricsCoin, named after its creator Jabo86. 1 BRICS = 100,000,000 JBS. Like Satoshi for Bitcoin, Jabos makes micro-transactions human-readable." />
+            <FeatureCard icon={Smartphone} title="Mobile Wallet" link="/mobile-wallet" color="#3B82F6" delay={12} tag="PWA"
+              description="Install the mobile wallet directly from your browser. Send, receive, and shield transactions on the go. PQC-only, with multi-currency price ticker." />
+            <FeatureCard icon={Network} title="P2P Network" link="/network" color="#06B6D4" delay={13} tag="Infrastructure"
               description="Fully decentralized peer-to-peer network. Nodes discover each other, sync the blockchain, and propagate transactions. Download and join." />
           </div>
         </div>
