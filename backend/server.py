@@ -2647,6 +2647,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
 # Add security middlewares
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(IPBlockingMiddleware)
+app.add_middleware(DDoSProtectionMiddleware)
 
 # CORS Middleware - Restricted to allowed origins
 cors_origins = os.environ.get('CORS_ORIGINS', 'https://bricscoin26.org').split(',')
