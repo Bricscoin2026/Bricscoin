@@ -452,6 +452,10 @@ export default function Whitepaper() {
               "Deflationary burn-fee mechanism",
               "SOLO + PPLNS dual mining pools",
               "Automatic per-block difficulty adjustment",
+              "Merge Mining (AuxPoW) with Bitcoin hashrate",
+              "Jabos (JBS): sub-unit of BricsCoin (1 BRICS = 100M JBS)",
+              "Mobile Wallet PWA with PQC-only support",
+              "Multi-currency price ticker (USDT, BTC, ETH, JBS)",
               "Production deployment with Docker and Cloudflare",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
