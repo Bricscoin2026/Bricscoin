@@ -463,14 +463,14 @@ python node.py
                 <div className="flex items-center gap-2 text-[10px] text-muted-foreground flex-wrap">
                   <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-400 font-medium">TX Created</span>
                   <span>→</span>
-                  <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">Stem (1 peer)</span>
+                  <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">Stem (1 relay)</span>
                   <span>→</span>
-                  <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">Stem (1 peer)</span>
+                  <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">Random Hops</span>
                   <span>→</span>
-                  <span className="px-2 py-1 rounded bg-cyan-500/10 text-cyan-400 font-medium">Fluff (all peers)</span>
+                  <span className="px-2 py-1 rounded bg-cyan-500/10 text-cyan-400 font-medium">Diffusion (all peers)</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-2">
-                  Network observers cannot determine which node originated a transaction.
+                  Significantly raises the cost for network observers attempting to correlate transactions with originating nodes.
                 </p>
               </div>
               <a href="https://arxiv.org/abs/1805.11060" target="_blank" rel="noopener noreferrer"
