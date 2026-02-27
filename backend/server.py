@@ -2621,6 +2621,29 @@ class IPBlockingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         return response
 
+# DDoS Burst Detection Middleware
+burst_tracker: Dict[str, list] = defaultdict(list)
+BURST_WINDOW = 10  # seconds
+BURST_MAX_REQUESTS = 50  # max requests per window before auto-block
+
+class DDoSProtectionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        client_ip = get_remote_address(request)
+        if client_ip in RATE_LIMIT_WHITELIST:
+            return await call_next(request)
+        
+        now = time.time()
+        # Clean old entries
+        burst_tracker[client_ip] = [t for t in burst_tracker[client_ip] if now - t < BURST_WINDOW]
+        burst_tracker[client_ip].append(now)
+        
+        if len(burst_tracker[client_ip]) > BURST_MAX_REQUESTS:
+            ip_blacklist[client_ip] = datetime.now(timezone.utc) + timedelta(seconds=BLACKLIST_DURATION)
+            security_logger.warning(f"DDoS burst detected from {client_ip}: {len(burst_tracker[client_ip])} reqs in {BURST_WINDOW}s — IP blocked for {BLACKLIST_DURATION}s")
+            return JSONResponse(status_code=429, content={"detail": "Too many requests. IP temporarily blocked."})
+        
+        return await call_next(request)
+
 # Add security middlewares
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(IPBlockingMiddleware)
