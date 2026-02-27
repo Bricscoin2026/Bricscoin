@@ -535,7 +535,7 @@ export default function Whitepaper() {
           <div className="space-y-2 my-4">
             {[
               "PQC Smart Contracts (escrow, multisig, time-lock, token creation) — first blockchain with quantum-resistant contract signing",
-              "Verifiable AI Oracle with on-chain zk-proofs — AI responses signed with PQC and permanently recorded on-chain",
+              "Verifiable AI Oracle with on-chain zk-proofs — off-chain advisory responses signed with PQC and proof hash recorded on-chain",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
                 <span className="text-primary mt-0.5">&#9679;</span>
