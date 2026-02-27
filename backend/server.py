@@ -1567,10 +1567,8 @@ async def create_transaction_legacy(request: Request, tx_request: TransactionReq
     del transaction["_id"]
     
     # Broadcast transaction to peers
-    asyncio.create_task(broadcast_to_peers(
-        "broadcast/transaction",
-        {"transaction": transaction, "sender_node_id": NODE_ID}
-    ))
+    # Dandelion++: route through stem phase before broadcast
+    asyncio.create_task(dandelion_stem_forward(transaction))
     
     return {
         **transaction,
