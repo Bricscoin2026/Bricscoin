@@ -121,7 +121,7 @@ function PortfolioSummary() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       data-testid="portfolio-summary"
     >
       {/* Total Balance Card */}
