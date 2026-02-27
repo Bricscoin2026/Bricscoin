@@ -60,6 +60,20 @@ failed_attempts: Dict[str, int] = defaultdict(int)
 MAX_FAILED_ATTEMPTS = 10
 BLACKLIST_DURATION = 3600  # 1 hour in seconds
 
+# Simple response cache for high-traffic endpoints
+_response_cache: Dict[str, dict] = {}
+_cache_timestamps: Dict[str, float] = {}
+CACHE_TTL = 5  # seconds
+
+def get_cached(key: str):
+    if key in _response_cache and (time.time() - _cache_timestamps.get(key, 0)) < CACHE_TTL:
+        return _response_cache[key]
+    return None
+
+def set_cached(key: str, value: dict):
+    _response_cache[key] = value
+    _cache_timestamps[key] = time.time()
+
 # Allowed domains for CORS (production)
 ALLOWED_ORIGINS = [
     "https://bricscoin26.org",
