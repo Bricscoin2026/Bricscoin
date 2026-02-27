@@ -66,14 +66,19 @@ _response_cache: Dict[str, dict] = {}
 _cache_timestamps: Dict[str, float] = {}
 CACHE_TTL = 5  # seconds
 
+_cache_ttls: Dict[str, int] = {}  # per-key TTL overrides
+
 def get_cached(key: str):
-    if key in _response_cache and (time.time() - _cache_timestamps.get(key, 0)) < CACHE_TTL:
+    ttl = _cache_ttls.get(key, CACHE_TTL)
+    if key in _response_cache and (time.time() - _cache_timestamps.get(key, 0)) < ttl:
         return _response_cache[key]
     return None
 
-def set_cached(key: str, value: dict):
+def set_cached(key: str, value: dict, ttl: int = None):
     _response_cache[key] = value
     _cache_timestamps[key] = time.time()
+    if ttl is not None:
+        _cache_ttls[key] = ttl
 
 # Allowed domains for CORS (production)
 ALLOWED_ORIGINS = [
