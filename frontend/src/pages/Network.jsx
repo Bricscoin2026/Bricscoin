@@ -30,6 +30,9 @@ export default function Network() {
       setStats(statsRes.data);
       setNodeInfo(nodeRes.data);
       setPeers(peersRes.data?.peers || []);
+      // Fetch Dandelion++ and chain analysis
+      api.get("/dandelion/status").then(r => setDandelion(r.data)).catch(() => {});
+      api.get("/chain/size-analysis").then(r => setChainAnalysis(r.data)).catch(() => {});
     } catch (error) {
       console.error("Error fetching network data:", error);
     } finally {
