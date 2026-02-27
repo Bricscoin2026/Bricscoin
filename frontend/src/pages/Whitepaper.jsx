@@ -565,6 +565,9 @@ export default function Whitepaper() {
             <li>SEC 2: Recommended Elliptic Curve Domain Parameters (secp256k1). Certicom Research, 2010.</li>
             <li>Grover, L. K. &ldquo;A fast quantum mechanical algorithm for database search.&rdquo; STOC, 1996.</li>
             <li>Shor, P. W. &ldquo;Algorithms for quantum computation: discrete logarithms and factoring.&rdquo; FOCS, 1994.</li>
+            <li>Fanti, G. et al. &ldquo;Dandelion++: Lightweight Cryptocurrency Networking with Formal Anonymity Guarantees.&rdquo; ACM SIGMETRICS, 2018. <a href="https://arxiv.org/abs/1805.11060" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">arxiv.org/abs/1805.11060</a></li>
+            <li>Ben-Sasson, E. et al. &ldquo;Scalable, transparent, and post-quantum secure computational integrity.&rdquo; (zk-STARKs), 2018.</li>
+            <li>Noether, S. et al. &ldquo;Ring Confidential Transactions.&rdquo; Ledger, 2016.</li>
           </ol>
 
           {/* Footer */}
