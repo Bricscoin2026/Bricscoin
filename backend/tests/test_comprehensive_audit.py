@@ -226,7 +226,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/chat/stats")
         assert response.status_code == 200, f"Chat stats failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/chat/stats - Status: {response.status_code}")
     
     def test_chat_feed(self):
@@ -234,7 +234,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/chat/feed")
         assert response.status_code == 200, f"Chat feed failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/chat/feed - Status: {response.status_code}")
     
     def test_nft_certificates(self):
@@ -242,7 +242,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/nft/certificates")
         assert response.status_code == 200, f"NFT certificates failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/nft/certificates - Status: {response.status_code}")
     
     def test_nft_stats(self):
@@ -250,7 +250,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/nft/stats")
         assert response.status_code == 200, f"NFT stats failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/nft/stats - Status: {response.status_code}")
     
     def test_oracle_history(self):
@@ -258,7 +258,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/oracle/history")
         assert response.status_code == 200, f"Oracle history failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/oracle/history - Status: {response.status_code}")
     
     def test_timecapsule_list(self):
@@ -266,7 +266,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/timecapsule/list")
         assert response.status_code == 200, f"TimeCapsule list failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/timecapsule/list - Status: {response.status_code}")
     
     def test_p2pool_stats(self):
@@ -274,7 +274,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/p2pool/stats")
         assert response.status_code == 200, f"P2Pool stats failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/p2pool/stats - Status: {response.status_code}")
     
     def test_auxpow_status(self):
@@ -282,7 +282,7 @@ class TestEcosystemEndpoints:
         response = requests.get(f"{BASE_URL}/api/auxpow/status")
         assert response.status_code == 200, f"AuxPoW status failed: {response.text}"
         data = response.json()
-        assert "_id" not in str(data), "MongoDB _id leak detected"
+        assert not check_mongodb_id_leak(data), "MongoDB _id leak detected"
         print(f"✓ GET /api/auxpow/status - Status: {response.status_code}")
 
 
