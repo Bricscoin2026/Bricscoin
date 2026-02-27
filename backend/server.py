@@ -1513,14 +1513,10 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
     del transaction["_id"]
     del transaction["ip_hash"]  # Don't return ip_hash to client
     
-    # Broadcast transaction to peers
-    asyncio.create_task(broadcast_to_peers(
-        "broadcast/transaction",
-        {"transaction": transaction, "sender_node_id": NODE_ID}
-    ))
+    # Dandelion++: route through stem phase before broadcast
+    asyncio.create_task(dandelion_stem_forward(transaction))
     
-    logger.info(f"Secure transaction created: {tx_id} ({tx_request.amount} BRICS)")
-    return transaction
+    logger.info(f"Secure transaction created: {tx_id} ({tx_request.amount} BRICS)")    return transaction
 
 # DEPRECATED: Legacy endpoint - will be removed in future versions
 @api_router.post("/transactions")
