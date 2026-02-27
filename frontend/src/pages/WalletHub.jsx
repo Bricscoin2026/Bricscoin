@@ -4,6 +4,9 @@ import { Wallet as WalletIcon, ShieldCheck, ArrowRight, RefreshCw, TrendingUp, C
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { motion } from "framer-motion";
 import { getWalletBalance, getPQCWalletInfo } from "../lib/api";
+
+const API = process.env.REACT_APP_BACKEND_URL || "";
+
 import LegacyWallet from "./Wallet";
 import PQCWalletPage from "./PQCWallet";
 import WalletMigrationPage from "./WalletMigration";
