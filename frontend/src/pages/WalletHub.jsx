@@ -32,6 +32,7 @@ function PortfolioSummary() {
   const [cryptoPrices, setCryptoPrices] = useState({});
   const [pricesLoading, setPricesLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [privacyScore, setPrivacyScore] = useState(null);
 
   const fetchTotalBalance = useCallback(async () => {
     setLoading(true);
