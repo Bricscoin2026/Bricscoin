@@ -2977,7 +2977,7 @@ async def api_initialize_checkpoints():
 
 @api_router.get("/dandelion/status")
 @limiter.exempt
-async def dandelion_status():
+async def dandelion_status(request: Request):
     """Get Dandelion++ protocol status and statistics."""
     now = time.time()
     epoch_remaining = max(0, DANDELION_EPOCH_SECONDS - (now - dandelion_epoch_start))
