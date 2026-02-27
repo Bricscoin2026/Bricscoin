@@ -2577,6 +2577,38 @@ async def receive_broadcast_transaction(data: BroadcastTransaction):
     
     return {"status": "accepted", "tx_id": tx['id']}
 
+
+@api_router.post("/p2p/dandelion/stem")
+async def receive_dandelion_stem(request: Request):
+    """Receive a transaction in Dandelion++ stem phase.
+    This node will either continue the stem or transition to fluff."""
+    body = await request.json()
+    tx = body.get("transaction", {})
+    hop_count = body.get("hop_count", 0)
+    sender_node = body.get("sender_node_id", "")
+    
+    tx_id = tx.get("id", tx.get("tx_id", ""))
+    if not tx_id:
+        return {"status": "invalid"}
+    
+    # Check if we already have this transaction
+    existing = await db.transactions.find_one({"id": tx_id})
+    if existing:
+        return {"status": "already_exists"}
+    
+    # Store the transaction locally
+    await db.transactions.insert_one(tx)
+    if "_id" in tx:
+        del tx["_id"]
+    
+    logger.info(f"Dandelion++ received STEM tx {tx_id[:8]}... hop {hop_count} from {sender_node[:8]}...")
+    
+    # Continue Dandelion++ routing (stem or fluff decision)
+    asyncio.create_task(dandelion_stem_forward(tx, hop_count))
+    
+    return {"status": "stem_accepted", "hop": hop_count}
+
+
 @api_router.post("/p2p/sync")
 async def trigger_sync():
     """Manually trigger blockchain sync with peers"""
