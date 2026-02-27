@@ -3293,7 +3293,7 @@ class IPBlockingMiddleware(BaseHTTPMiddleware):
 # DDoS Burst Detection Middleware
 burst_tracker: Dict[str, list] = defaultdict(list)
 BURST_WINDOW = 10  # seconds
-BURST_MAX_REQUESTS = 200  # max requests per window before auto-block
+BURST_MAX_REQUESTS = 500  # max requests per window before auto-block (high for legitimate API consumers)
 
 class DDoSProtectionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
