@@ -405,7 +405,7 @@ async def get_current_difficulty() -> int:
     avg_block_time = actual_time / num_blocks
     
     current_index = recent_blocks[-1].get("index", 0)
-    logging.info(
+    logging.debug(
         "DIFFICULTY [block %d]: window=%d, avg_time=%.0fs, target=%ds, curr=%d, NEW=%d",
         current_index, num_blocks, avg_block_time, TARGET_BLOCK_TIME, current_diff, new_difficulty
     )
