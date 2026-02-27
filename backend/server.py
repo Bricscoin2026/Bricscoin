@@ -131,6 +131,22 @@ PEER_MAX_AGE = 600  # Seconds before a peer is considered stale
 connected_peers: Dict[str, Dict] = {}
 sync_lock = asyncio.Lock()
 
+# ==================== DANDELION++ PROTOCOL ====================
+# Dandelion++ prevents network-level deanonymization by routing transactions
+# through a random "stem" path before broadcasting (fluff) to all peers.
+# Paper: https://arxiv.org/abs/1805.11060
+
+DANDELION_EPOCH_SECONDS = 600       # New stem peer every 10 minutes
+DANDELION_STEM_PROBABILITY = 0.9    # 90% chance to continue stem, 10% to fluff
+DANDELION_MAX_STEM_HOPS = 4         # Max hops before forced fluff
+DANDELION_EMBARGO_SECONDS = 30      # If stem tx not seen in fluff after 30s, node fluffs it
+
+# Dandelion state
+dandelion_stem_peer: Optional[str] = None       # Current epoch's stem peer node_id
+dandelion_epoch_start: float = 0                 # When current epoch started
+dandelion_stempool: Dict[str, Dict] = {}         # tx_id -> {transaction, timestamp, hop_count}
+dandelion_seen_in_fluff: set = set()             # tx_ids we've seen broadcast normally
+
 # Node PQC keypair for block signing (loaded on startup)
 node_pqc_keys: Dict[str, str] = {}
 
