@@ -133,7 +133,7 @@ connected_peers: Dict[str, Dict] = {}
 sync_lock = asyncio.Lock()
 
 # ==================== DANDELION++ PROTOCOL ====================
-# Dandelion++ prevents network-level deanonymization by routing transactions
+# Dandelion++ significantly raises the cost of network-level TX origin analysis by routing transactions
 # through a random "stem" path before broadcasting (fluff) to all peers.
 # Paper: https://arxiv.org/abs/1805.11060
 
