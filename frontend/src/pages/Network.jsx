@@ -443,7 +443,11 @@ python node.py
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-xs text-muted-foreground leading-relaxed">{dandelion.description}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Dandelion++ significantly raises the cost of network-level TX origin analysis. Transactions first travel through 
+                a random stem path (single peer relays) before being diffused to all peers, making it substantially more difficult 
+                for observers to correlate transactions with originating nodes.
+              </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: "Stem Routing", value: `${dandelion.config.stem_probability * 100}%`, sub: "of TXs enter stem phase" },
