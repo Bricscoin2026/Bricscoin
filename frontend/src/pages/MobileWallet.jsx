@@ -74,6 +74,7 @@ export default function MobileWallet() {
   // Send form
   const [sendForm, setSendForm] = useState({ recipient: "", amount: "" });
   const [sending, setSending] = useState(false);
+  const [sendInJbs, setSendInJbs] = useState(false);
 
   // Shielded send form
   const [shieldedForm, setShieldedForm] = useState({ recipient: "", amount: "" });
