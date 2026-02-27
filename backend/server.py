@@ -2956,10 +2956,8 @@ async def dandelion_status():
             "embargo_seconds": DANDELION_EMBARGO_SECONDS,
         },
         "state": {
-            "current_stem_peer": dandelion_stem_peer[:8] + "..." if dandelion_stem_peer else None,
-            "epoch_remaining_seconds": round(epoch_remaining),
-            "stempool_size": len(dandelion_stempool),
-            "total_fluffed": len(dandelion_seen_in_fluff),
+            "status": "active" if dandelion_stem_peer else "ready",
+            "propagation_mode": "stem_and_diffuse",
         },
         "description": (
             "Dandelion++ significantly raises the cost of network-level TX origin analysis. "
