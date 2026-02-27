@@ -2129,7 +2129,11 @@ async def migrate_to_pqc(request: Request, tx_request: SecureTransactionRequest)
 
 @api_router.get("/pqc/stats")
 async def get_pqc_stats():
-    """Get PQC network statistics"""
+    """Get PQC network statistics (cached 10s - heavy query)"""
+    cached = get_cached("pqc_stats")
+    if cached:
+        return cached
+    
     # Count only wallets with balance > 0 (active wallets)
     all_pqc_wallets = await db.pqc_wallets.find({}, {"_id": 0, "address": 1}).to_list(1000)
     active_count = 0
@@ -2139,11 +2143,10 @@ async def get_pqc_stats():
             active_count += 1
     
     total_pqc_txs = await db.transactions.count_documents({"signature_scheme": "ecdsa_secp256k1+ml-dsa-65"})
-    # Count migration transactions too
     total_migrations = await db.transactions.count_documents({"migration": True})
     total_pqc_blocks = await db.blocks.count_documents({"pqc_scheme": {"$exists": True}})
     total_blocks = await db.blocks.count_documents({})
-    return {
+    result = {
         "total_pqc_wallets": active_count,
         "total_pqc_transactions": total_pqc_txs + total_migrations,
         "total_pqc_blocks": total_pqc_blocks,
@@ -2152,6 +2155,8 @@ async def get_pqc_stats():
         "quantum_resistant": True,
         "status": "active"
     }
+    set_cached("pqc_stats", result)
+    return result
 
 
 @api_router.get("/pqc/node/keys")
