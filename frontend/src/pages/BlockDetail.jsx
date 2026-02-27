@@ -280,6 +280,7 @@ export default function BlockDetail() {
                     </div>
                   </div>
                   <span className="font-mono text-primary">{tx.amount} BRICS</span>
+                  <span className="text-xs text-muted-foreground ml-1">({Math.round(parseFloat(tx.amount) * 100000000).toLocaleString()} JBS)</span>
                 </Link>
               ))}
             </CardContent>

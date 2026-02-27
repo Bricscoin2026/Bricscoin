@@ -283,6 +283,7 @@ function ExplorerSection() {
                           <span className="text-amber-400 font-bold">SHIELDED</span>
                         ) : (
                           <span className="text-primary">{tx.amount} BRICS</span>
+                          <span className="text-[10px] text-muted-foreground ml-1">({Math.round(parseFloat(tx.amount) * 100000000).toLocaleString()} JBS)</span>
                         )}
                       </td>
                       <td className="p-3"><Badge variant="outline" className={tx.confirmed ? "border-green-500/50 text-green-400 text-xs" : "border-yellow-500/50 text-yellow-400 text-xs"}>{tx.confirmed ? "Confirmed" : "Pending"}</Badge></td>

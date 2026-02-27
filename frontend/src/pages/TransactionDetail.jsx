@@ -212,7 +212,7 @@ export default function TransactionDetail() {
             {transaction.type === "shielded" || transaction.type === "private" ? (
               <InfoRow label="Amount" value="SHIELDED" />
             ) : (
-              <InfoRow label="Amount" value={`${transaction.amount} BRICS`} />
+              <InfoRow label="Amount" value={`${transaction.amount} BRICS (${Math.round(parseFloat(transaction.amount) * 100000000).toLocaleString()} JBS)`} />
             )}
             {transaction.type && (
               <InfoRow label="Privacy" value={
@@ -265,7 +265,7 @@ export default function TransactionDetail() {
                     {transaction.amount === "SHIELDED" ? "?" : transaction.amount}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground">{transaction.amount === "SHIELDED" ? "SHIELDED" : "BRICS"}</span>
+                <span className="text-xs text-muted-foreground">{transaction.amount === "SHIELDED" ? "SHIELDED" : `BRICS (${Math.round(parseFloat(transaction.amount) * 100000000).toLocaleString()} JBS)`}</span>
               </div>
 
               {/* Recipient */}
