@@ -363,12 +363,13 @@ export default function Dashboard() {
         </Card>
       </motion.div>
 
-      {/* ==================== COMMUNITY & APPS ==================== */}
+      {/* ==================== LAYER 3: ECOSYSTEM ==================== */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
-        <div className="flex items-center gap-2 mb-4">
-          <MessageCircle className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-heading font-bold">Community & On-Chain Apps</h2>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400/60 px-2 py-0.5 rounded bg-violet-500/5 border border-violet-500/10">Layer 3</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Ecosystem</span>
         </div>
+        <p className="text-xs text-muted-foreground mb-4">On-Chain Applications &middot; Community &middot; Off-Chain Services</p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
