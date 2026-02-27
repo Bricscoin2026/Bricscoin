@@ -15,6 +15,7 @@ import BricsNFT from "./pages/BricsNFT";
 import P2Pool from "./pages/P2Pool";
 import Mining from "./pages/Mining";
 import MergeMiningGuide from "./pages/MergeMiningGuide";
+import JabosGuide from "./pages/JabosGuide";
 import MobileWallet from "./pages/MobileWallet";
 import Network from "./pages/Network";
 import Whitepaper from "./pages/Whitepaper";
@@ -40,6 +41,7 @@ function App() {
             <Route path="p2pool" element={<P2Pool />} />
             <Route path="mining" element={<Mining />} />
             <Route path="merge-mining" element={<MergeMiningGuide />} />
+            <Route path="jabos" element={<JabosGuide />} />
             <Route path="network" element={<Network />} />
             <Route path="whitepaper" element={<Whitepaper />} />
             <Route path="downloads" element={<Downloads />} />

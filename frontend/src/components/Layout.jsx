@@ -48,6 +48,7 @@ export default function Layout() {
   ];
 
   const moreItems = [
+    { to: "/jabos", icon: Award, label: "Jabos (JBS)" },
     { to: "/mobile-wallet", icon: Smartphone, label: "Mobile Wallet" },
     { to: "/chat", icon: MessageSquareLock, label: "BricsChat" },
     { to: "/timecapsule", icon: Clock, label: "Time Capsule" },
