@@ -14,13 +14,15 @@ import {
   MessageCircle,
   FileText,
   MessageSquareLock,
-  Send
+  Send,
+  Sprout
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Skeleton } from "../components/ui/skeleton";
 import { Badge } from "../components/ui/badge";
 import { getNetworkStats, getBlocks, getPQCStats, getPQCNodeKeys, getChatStats, getChatFeed, getTimeCapsuleStats } from "../lib/api";
+import api from "../lib/api";
 import { motion } from "framer-motion";
 
 function StatCard({ icon: Icon, title, value, subtitle, delay = 0 }) {
