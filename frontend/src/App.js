@@ -20,6 +20,7 @@ import ExchangeListing from "./pages/ExchangeListing";
 import MobileWallet from "./pages/MobileWallet";
 import Network from "./pages/Network";
 import Whitepaper from "./pages/Whitepaper";
+import ThreatModel from "./pages/ThreatModel";
 import "./App.css";
 
 function App() {
