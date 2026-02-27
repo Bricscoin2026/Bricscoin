@@ -2235,9 +2235,9 @@ async def get_privacy_score(address: str):
         details.append({"feature": "PQC Wallet (ML-DSA-65)", "points": 0, "status": "inactive", "tip": "Migrate to PQC for quantum resistance"})
     
     # Shielded transactions ratio: up to +40 points
-    if total_txs > 0:
+    if total_txs > 0 and shielded_txs > 0:
         shielded_ratio = shielded_txs / total_txs
-        shielded_points = min(40, int(shielded_ratio * 40))
+        shielded_points = max(5, min(40, int(shielded_ratio * 100)))  # At least 5 points if any shielded tx
         score += shielded_points
         details.append({"feature": f"Shielded Transactions ({shielded_txs}/{total_txs})", "points": shielded_points, "status": "active" if shielded_points > 20 else "partial", "tip": "Use shielded sends for maximum privacy"})
     else:
