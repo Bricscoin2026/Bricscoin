@@ -220,6 +220,7 @@ export default function Dashboard() {
         if (feedRes) setChatFeed(feedRes.data?.messages || []);
         if (chatStatsRes) setChatStats(chatStatsRes.data);
         if (capsuleRes) setCapsuleStats(capsuleRes.data);
+        api.get("/dandelion/status").then(r => setDandelion(r.data)).catch(() => {});
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
