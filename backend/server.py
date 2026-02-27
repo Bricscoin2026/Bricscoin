@@ -2134,7 +2134,7 @@ async def migrate_to_pqc(request: Request, tx_request: SecureTransactionRequest)
 
 @api_router.get("/pqc/stats")
 @limiter.exempt
-async def get_pqc_stats():
+async def get_pqc_stats(request: Request):
     """Get PQC network statistics (cached 30s - heavy query, optimized with aggregation)"""
     cached = get_cached("pqc_stats")
     if cached:
