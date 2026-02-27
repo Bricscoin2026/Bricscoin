@@ -92,7 +92,15 @@ function PortfolioSummary() {
     }
   }, []);
 
-  useEffect(() => { fetchTotalBalance(); fetchCryptoPrices(); }, [fetchTotalBalance, fetchCryptoPrices]);
+  useEffect(() => {
+    fetchTotalBalance(); fetchCryptoPrices();
+    const pqcRaw = localStorage.getItem("bricscoin_pqc_wallets");
+    const pqcWallets = pqcRaw ? JSON.parse(pqcRaw) : [];
+    if (pqcWallets.length > 0) {
+      fetch(`${API}/api/privacy-score/${pqcWallets[0].address}`)
+        .then(r => r.json()).then(setPrivacyScore).catch(() => {});
+    }
+  }, [fetchTotalBalance, fetchCryptoPrices]);
 
   useEffect(() => {
     const interval = setInterval(() => { fetchTotalBalance(); fetchCryptoPrices(); }, 60000);
