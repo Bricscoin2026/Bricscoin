@@ -947,6 +947,27 @@ async def get_pool_stats(request: Request):
             "if_block_found_now": pplns_preview[:10],
             "miners_in_window": len(pplns_preview),
         },
+        "merge_mining": {
+            "enabled": True,
+            "protocol": "AuxPoW",
+            "parent_chains": ["bitcoin"],
+            "auxpow_blocks": auxpow_blocks,
+            "native_blocks": native_blocks,
+            "auxpow_percentage": round(auxpow_blocks / max(1, total_blocks) * 100, 2),
+            "pending_work": pending_auxpow_work,
+            "last_auxpow_block": {
+                "index": last_auxpow["index"] if last_auxpow else None,
+                "miner": last_auxpow["miner"] if last_auxpow else None,
+                "parent_chain": last_auxpow.get("auxpow", {}).get("parent_chain") if last_auxpow else None,
+                "parent_hash": (last_auxpow.get("auxpow", {}).get("parent_hash", "")[:16] + "...") if last_auxpow else None,
+                "timestamp": last_auxpow["timestamp"] if last_auxpow else None,
+            },
+            "api_endpoints": {
+                "create_work": "/api/auxpow/create-work",
+                "submit": "/api/auxpow/submit",
+                "status": "/api/auxpow/status",
+            },
+        },
     }
 
 
