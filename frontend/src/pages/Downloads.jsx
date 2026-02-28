@@ -39,7 +39,7 @@ const platforms = [
     bg: "bg-gray-500/20",
     file: "BricsCoin.Core-3.0.0-arm64-mac.zip",
     label: "BricsCoin Core-3.0.0-arm64-mac.zip",
-    sha256: "997c3148b541ff33d67df7a7d3547f51fdc92e1556272a40560624564c90ea78",
+    sha256: "23ec56e59298bfa48e40f9b59d3351166023e799f4d42c749875cb98243ea7d1",
     desc: "Apple Silicon (M1/M2/M3) - Extract and run",
     size: "~88 MB",
     instructions: [
