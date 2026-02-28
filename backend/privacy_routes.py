@@ -289,15 +289,26 @@ async def send_private_transaction(req: PrivateSendRequest):
 
     db = await get_db()
 
-    # ── Step 1: Verify sender balance ──
+    # ── Step 1: Verify sender balance (includes private balance ops) ──
+    from datetime import timedelta
+    
+    # Non-private received
     received_cursor = db.transactions.find(
-        {"recipient": req.sender_address, "confirmed": True},
-        {"amount": 1, "_id": 0}
+        {"recipient": req.sender_address, "confirmed": True, "type": {"$ne": "private"}},
+        {"amount": 1, "sender": 1, "block_index": 1, "_id": 0}
     )
     received = 0.0
+    # Coinbase maturity
+    current_height = await db.blocks.count_documents({})
+    maturity_cutoff = current_height - 150  # COINBASE_MATURITY
     async for tx in received_cursor:
+        if tx.get("sender") == "COINBASE":
+            block_idx = tx.get("block_index", 0) or 0
+            if block_idx > maturity_cutoff:
+                continue
         received += tx.get("amount", 0)
 
+    # Non-private sent
     sent_cursor = db.transactions.find(
         {"sender": req.sender_address, "confirmed": True},
         {"amount": 1, "fee": 1, "_id": 0}
@@ -306,19 +317,30 @@ async def send_private_transaction(req: PrivateSendRequest):
     async for tx in sent_cursor:
         sent += tx.get("amount", 0) + tx.get("fee", 0)
 
-    blocks_cursor = db.blocks.find(
-        {"miner": req.sender_address}, {"reward": 1, "_id": 0}
+    # Private debits (from private_balance_ops)
+    private_debits_cursor = db.private_balance_ops.find(
+        {"type": "debit", "address": req.sender_address},
+        {"amount": 1, "_id": 0}
     )
-    mined = 0.0
-    async for block in blocks_cursor:
-        mined += block.get("reward", 0)
+    private_debited = 0.0
+    async for d in private_debits_cursor:
+        private_debited += d.get("amount", 0)
 
-    balance = received + mined - sent
+    # Private credits (if this address is a stealth address)
+    private_credits_cursor = db.private_balance_ops.find(
+        {"type": "credit", "stealth_address": req.sender_address},
+        {"amount": 1, "_id": 0}
+    )
+    private_credited = 0.0
+    async for c in private_credits_cursor:
+        private_credited += c.get("amount", 0)
+
+    balance = received + private_credited - sent - private_debited
     fee = 0.000005
     total_needed = req.amount + fee
 
     if balance < total_needed:
-        raise HTTPException(400, f"Insufficient balance. Need: {total_needed}, Available: {balance}")
+        raise HTTPException(400, f"Insufficient balance. Need: {total_needed}, Available: {round(balance, 8)}")
 
     # ── Step 2: Generate Stealth Address (hide receiver) ──
     stealth_start = time.time()
@@ -383,16 +405,15 @@ async def send_private_transaction(req: PrivateSendRequest):
 
     proof_hash = hashlib.sha256(str(stark_proof).encode()).hexdigest()
 
-    # ── Step 5: Create the private transaction ──
+    # ── Step 5: Create the private transaction (NO plaintext sender/amount on-chain) ──
     tx_id = str(uuid.uuid4())
     transaction = {
         "id": tx_id,
         "type": "private",
         "sender": "RING_HIDDEN",
         "recipient": stealth_result["stealth_address"],
-        "real_sender": req.sender_address,
-        "real_recipient_scan_pubkey": req.recipient_scan_pubkey,
-        "amount": req.amount,
+        # NO real_sender — sender hidden by ring signature
+        # NO amount — amount hidden by zk-STARK commitment
         "display_amount": "SHIELDED",
         "commitment": commitment,
         "proof_hash": proof_hash,
@@ -429,6 +450,22 @@ async def send_private_transaction(req: PrivateSendRequest):
         "key_image": key_image,
         "tx_id": tx_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+
+    # ── Step 6: Store private balance operations (internal node state, NOT on-chain) ──
+    # Separate records: debit and credit are unlinkable (no shared tx_id)
+    await db.private_balance_ops.insert_one({
+        "type": "debit",
+        "key_image": key_image,
+        "address": req.sender_address,
+        "amount": req.amount + fee,
+        "timestamp": tx_timestamp,
+    })
+    await db.private_balance_ops.insert_one({
+        "type": "credit",
+        "stealth_address": stealth_result["stealth_address"],
+        "amount": req.amount,
+        "timestamp": tx_timestamp,
     })
 
     # Public-facing response (strip internal fields)
