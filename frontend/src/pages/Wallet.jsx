@@ -469,13 +469,13 @@ function ImportDialog({ onSuccess }) {
           toast.error("Enter the seed phrase");
           return;
         }
-        res = await importWalletSeed(seedPhrase.trim(), walletName || "Wallet Importato");
+        res = await importWalletSeed(seedPhrase.trim(), walletName || "Imported Wallet");
       } else {
         if (!privateKey.trim()) {
           toast.error("Enter the private key");
           return;
         }
-        res = await importWalletKey(privateKey.trim(), walletName || "Wallet Importato");
+        res = await importWalletKey(privateKey.trim(), walletName || "Imported Wallet");
       }
       
       toast.success("Wallet importato!");
@@ -496,12 +496,12 @@ function ImportDialog({ onSuccess }) {
       <DialogTrigger asChild>
         <Button variant="outline" className="border-white/20 rounded-sm" data-testid="import-wallet-btn">
           <Upload className="w-4 h-4 mr-2" />
-          Importa Wallet
+          Import Wallet
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-card border-white/10 max-w-md" data-testid="import-dialog">
         <DialogHeader>
-          <DialogTitle className="font-heading">Importa Wallet</DialogTitle>
+          <DialogTitle className="font-heading">Import Wallet</DialogTitle>
           <DialogDescription>
             Recover an existing wallet with a seed phrase or private key
           </DialogDescription>
@@ -553,7 +553,7 @@ function ImportDialog({ onSuccess }) {
         <div>
           <Label>Nome Wallet (opzionale)</Label>
           <Input
-            placeholder="Wallet Importato"
+            placeholder="Imported Wallet"
             value={walletName}
             onChange={(e) => setWalletName(e.target.value)}
             className="bg-background border-white/20"
@@ -719,14 +719,14 @@ export default function Wallet({ embedded }) {
             data-testid="refresh-btn"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Aggiorna
+            Refresh
           </Button>
           <ImportDialog onSuccess={handleImportSuccess} />
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gold-button rounded-sm" data-testid="create-wallet-btn">
                 <Plus className="w-4 h-4 mr-2" />
-                Nuovo Wallet
+                New Wallet
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10" data-testid="create-wallet-dialog">
