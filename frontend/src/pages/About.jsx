@@ -37,6 +37,8 @@ const ICON_MAP = {
   "lock": Lock,
   "atom": Atom,
   "shield-alert": AlertTriangle,
+  "eye-off": Eye,
+  "shield-check": ShieldCheck,
 };
 
 function AuditCategory({ category }) {
