@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
 
-// Pool della community - possono essere aggiunti dinamicamente in futuro
+// Community pools - can be added dynamically in the future
 const COMMUNITY_POOLS = [
   {
     id: "official",
@@ -28,7 +28,7 @@ const COMMUNITY_POOLS = [
     featured: true,
     description: "Pool ufficiale gestito dal team BricsCoin. Zero commissioni, pagamenti diretti al tuo wallet."
   },
-  // Placeholder per pool futuri della community
+  // Placeholder for future community pools
   // {
   //   id: "community-1",
   //   name: "Community Pool Example",
@@ -215,17 +215,17 @@ export default function Pools() {
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">2</div>
               <h4 className="font-semibold mb-2">Configura il Miner</h4>
-              <p className="text-sm text-muted-foreground">Inserisci l'URL del pool nelle impostazioni del tuo miner.</p>
+              <p className="text-sm text-muted-foreground">Enter the pool URL in your miner settings.</p>
             </div>
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">3</div>
               <h4 className="font-semibold mb-2">Imposta il Worker</h4>
-              <p className="text-sm text-muted-foreground">Usa il tuo indirizzo wallet BricsCoin come nome worker.</p>
+              <p className="text-sm text-muted-foreground">Use your BricsCoin wallet address as worker name.</p>
             </div>
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">4</div>
               <h4 className="font-semibold mb-2">Inizia a Minare!</h4>
-              <p className="text-sm text-muted-foreground">Avvia il miner e controlla i tuoi guadagni sulla pagina Mining.</p>
+              <p className="text-sm text-muted-foreground">Start the miner and check your earnings on the Mining page.</p>
             </div>
           </div>
         </CardContent>

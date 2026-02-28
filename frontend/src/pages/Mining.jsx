@@ -60,7 +60,7 @@ export default function Mining() {
       setWalletAddress(wallet.address || "");
     }
 
-    // Avvia fetch asincroni senza aspettarli sincronicamente
+    // Start async fetches without waiting synchronously
     fetchStats();
   }, []);
 
