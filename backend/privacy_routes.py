@@ -100,7 +100,7 @@ class PrivateSendRequest(BaseModel):
     recipient_scan_pubkey: str
     recipient_spend_pubkey: str
     amount: float
-    ring_size: int = DEFAULT_RING_SIZE
+    ring_size: int = DEFAULT_RING_SIZE  # Default 32, min 32, max 64
 
 
 # ─── Endpoints ───
