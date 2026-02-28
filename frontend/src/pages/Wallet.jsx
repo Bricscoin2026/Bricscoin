@@ -69,7 +69,7 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success(`${label} copiato`);
+    toast.success(`${label} copied`);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -709,7 +709,7 @@ export default function Wallet({ embedded }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold">Wallet</h1>
-          <p className="text-muted-foreground">Gestisci i tuoi wallet BRICS</p>
+          <p className="text-muted-foreground">Manage your BRICS wallets</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button

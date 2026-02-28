@@ -26,7 +26,7 @@ const COMMUNITY_POOLS = [
     location: "Europe (Germany)",
     status: "online",
     featured: true,
-    description: "Pool ufficiale gestito dal team BricsCoin. Zero commissioni, pagamenti diretti al tuo wallet."
+    description: "Official pool run by the BricsCoin team. Zero fees, direct payouts to your wallet."
   },
   // Placeholder for future community pools
   // {
