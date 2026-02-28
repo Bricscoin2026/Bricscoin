@@ -117,6 +117,24 @@ INITIAL_DIFFICULTY = 1000000  # Bitcoin-style difficulty (higher = harder)
 PREMINE_AMOUNT = 0  # No premine - 100% fair launch, all 21M coins are mineable
 TRANSACTION_FEE = 0.000005  # Fee per transaction in BRICS
 
+# ==================== COINBASE MATURITY (Anti-Reorg) ====================
+COINBASE_MATURITY = 150  # Mining rewards spendable only after 150 block confirmations
+
+# ==================== ELASTIC BLOCK SIZE ====================
+BASE_BLOCK_SIZE = 100          # Base max transactions per block
+BLOCK_SIZE_MEDIAN_WINDOW = 100 # Look at last 100 blocks for median
+BLOCK_SIZE_MAX_GROWTH = 2.0    # Max 2x the median (penalty applies above median)
+BLOCK_SIZE_PENALTY_RATE = 0.5  # 50% reward penalty per 100% oversize
+
+# ==================== ANTI-SYBIL ====================
+PEER_POW_DIFFICULTY = 16       # Bits of leading zeros required in peer handshake PoW
+PEER_MAX_PER_ASN = 3           # Max peers from same ASN (Autonomous System Number)
+PEER_RATE_LIMIT_SLOTS = 50     # Max total peer slots
+
+# ==================== CRYPTO AGILITY ====================
+CRYPTO_AGILITY_VERSION = 1     # Current crypto scheme version
+SUPPORTED_KEY_VERSIONS = [1]   # List of supported key scheme versions
+
 # Chain Security
 from chain_security import (
     set_db as security_set_db, auto_checkpoint, can_accept_block,
