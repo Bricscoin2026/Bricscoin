@@ -12,8 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 
-const CODEBERG_BASE = "https://codeberg.org/Bricscoin_26/Bricscoin/raw/branch/main/downloads/BricsCoin%20Core%203.0.0";
-const CODEBERG_FOLDER = "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads/BricsCoin%20Core%203.0.0";
+const GITHUB_RELEASE = "https://github.com/Bricscoin2026/Bricscoin/releases/download/v2.2.0";
+const GITHUB_RELEASES_PAGE = "https://github.com/Bricscoin2026/Bricscoin/releases/tag/v2.2.0";
 
 const platforms = [
   {
@@ -21,10 +21,11 @@ const platforms = [
     icon: Monitor,
     color: "text-blue-500",
     bg: "bg-blue-500/20",
-    file: "BricsCoin%20Wallet%201.0.0.exe",
-    label: "BricsCoin Wallet 1.0.0.exe",
+    file: "BricsCoin.Core.2.1.1.exe",
+    label: "BricsCoin Core 2.1.1.exe",
+    sha256: "55d28363585b036cd9e12d03a81317928dea1073ed4f1e527692a4b5ec343c75",
     desc: "Portable .exe - No installation needed",
-    size: "~69 MB",
+    size: "~66 MB",
     instructions: [
       "Download the .exe file",
       "Run the file directly (no install)",
@@ -36,15 +37,16 @@ const platforms = [
     icon: Apple,
     color: "text-gray-300",
     bg: "bg-gray-500/20",
-    file: "BricsCoin%20Wallet-1.0.0-arm64-mac.zip",
-    label: "BricsCoin Wallet-1.0.0-arm64-mac.zip",
+    file: "BricsCoin.Core-2.1.1-arm64-mac.zip",
+    label: "BricsCoin Core-2.1.1-arm64-mac.zip",
+    sha256: "bf57d63cadfa39f8226a0278575a851a756854608d672e8d76fb0aeb410175d7",
     desc: "Apple Silicon (M1/M2/M3) - Extract and run",
     size: "~87 MB",
     instructions: [
       "Download the .zip file",
       "Extract the archive",
       "Move to Applications folder",
-      "Right-click → Open (first time only)"
+      "Right-click > Open (first time only)"
     ]
   },
   {
@@ -52,8 +54,9 @@ const platforms = [
     icon: HardDrive,
     color: "text-orange-500",
     bg: "bg-orange-500/20",
-    file: "BricsCoin%20Wallet-1.0.0-arm64.AppImage",
-    label: "BricsCoin Wallet-1.0.0-arm64.AppImage",
+    file: "BricsCoin.Core-2.1.1.AppImage",
+    label: "BricsCoin Core-2.1.1.AppImage",
+    sha256: "328c268dcc692888fa816beb613a3be8642c421ad6ac2ca1a63016d20a256614",
     desc: "AppImage - Make executable and run",
     size: "~100 MB",
     instructions: [
