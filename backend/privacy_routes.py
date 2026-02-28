@@ -148,8 +148,8 @@ async def privacy_status():
 @router.post("/ring/sign")
 async def api_ring_sign(req: RingSignRequest):
     """Create a ring signature (hides the real signer)."""
-    if len(req.public_keys) < 2:
-        raise HTTPException(400, "Ring must have at least 2 members")
+    if len(req.public_keys) < MIN_RING_SIZE:
+        raise HTTPException(400, f"Ring must have at least {MIN_RING_SIZE} members (provided: {len(req.public_keys)})")
     if req.real_index < 0 or req.real_index >= len(req.public_keys):
         raise HTTPException(400, "Invalid real_index")
 
