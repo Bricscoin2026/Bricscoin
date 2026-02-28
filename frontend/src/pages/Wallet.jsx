@@ -187,7 +187,7 @@ function SendDialog({ wallet, onSuccess }) {
 
     // Validate recipient address format
     if (!isValidAddress(recipient)) {
-      toast.error("Indirizzo destinatario non valido. Deve iniziare con BRICS");
+      toast.error("Invalid recipient address. Must start with BRICS");
       return;
     }
 
@@ -198,7 +198,7 @@ function SendDialog({ wallet, onSuccess }) {
     }
 
     if (parseFloat(amount) <= 0) {
-      toast.error("L'importo deve essere maggiore di zero");
+      toast.error("Amount must be greater than zero");
       return;
     }
 
@@ -217,7 +217,7 @@ function SendDialog({ wallet, onSuccess }) {
       toast.success(
         <div className="flex items-center gap-2">
           <Shield className="w-4 h-4 text-green-500" />
-          <span>Transazione inviata! (Fee: {TRANSACTION_FEE} BRICS)</span>
+          <span>Transaction sent! (Fee: {TRANSACTION_FEE} BRICS)</span>
         </div>
       );
       setOpen(false);
