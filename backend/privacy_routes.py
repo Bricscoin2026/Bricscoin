@@ -115,26 +115,37 @@ async def privacy_status():
 
     return {
         "status": "active",
+        "privacy_mandatory": PRIVACY_MANDATORY,
         "features": {
             "ring_signatures": {
                 "protocol": "LSAG (Linkable SAG)",
                 "curve": "secp256k1",
-                "purpose": "Hide sender identity",
+                "purpose": "Hide sender identity among decoy ring members",
                 "min_ring_size": MIN_RING_SIZE,
                 "default_ring_size": DEFAULT_RING_SIZE,
                 "max_ring_size": MAX_RING_SIZE,
+                "dynamic_sizing": True,
                 "mandatory_minimum": True,
+                "decoy_selection": "Gamma distribution (realistic temporal decay)",
             },
             "stealth_addresses": {
                 "protocol": "DHKE Stealth Address",
                 "curve": "secp256k1",
-                "purpose": "Hide receiver identity",
+                "purpose": "Hide receiver identity — one-time addresses per TX",
                 "address_prefix": "BRICSX",
+                "mandatory": True,
             },
             "shielded_amounts": {
                 "protocol": "zk-STARK (FRI)",
-                "purpose": "Hide transaction amount",
+                "purpose": "Hide transaction amount with zero-knowledge proof",
                 "integrated": True,
+                "mandatory": True,
+            },
+            "network_layer": {
+                "dandelion_pp": True,
+                "dummy_traffic": True,
+                "propagation_jitter": True,
+                "tor_hidden_service": True,
             },
         },
         "stats": {
@@ -142,7 +153,7 @@ async def privacy_status():
             "stealth_addresses_registered": stealth_count,
             "key_images_recorded": ring_key_images,
         },
-        "privacy_level": "TOTAL — sender, receiver, and amount all hidden",
+        "privacy_level": "MANDATORY TOTAL — Ring(32-64) + Stealth + zk-STARK on every transaction. No transparent mode.",
     }
 
 
