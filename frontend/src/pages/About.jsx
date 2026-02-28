@@ -262,14 +262,19 @@ export default function About() {
           </p>
         </InfoSection>
 
-        <InfoSection icon={Eye} title="Trasparenza" color="primary" delay={6}>
+        <InfoSection icon={Eye} title="Trasparenza e Compliance" color="primary" delay={6}>
           <p>
-            Tutto in BricsCoin è <strong className="text-foreground">pubblico e verificabile</strong>.
-            Il codice sorgente è aperto (open source) e disponibile su Codeberg. Chiunque può leggere, verificare e contribuire al codice.
+            BricsCoin è <strong className="text-foreground">"privato di default, compliant on-demand"</strong>.
+            Il codice sorgente è aperto (open source) e disponibile su Codeberg. Chiunque può leggere, verificare e contribuire.
           </p>
           <p>
-            Ogni transazione, ogni blocco, ogni indirizzo è visibile nel <strong className="text-foreground">Block Explorer</strong>
-            del sito. Non ci sono operazioni nascoste o segrete.
+            Il <strong className="text-foreground">Privacy Explorer</strong> pubblico mostra i blocchi e le transazioni come appaiono sulla chain:
+            nessun mittente, nessun importo in chiaro — solo prove crittografiche opache.
+          </p>
+          <p>
+            Per la compliance, BricsCoin offre i <strong className="text-foreground">View-Keys</strong>: chiavi speciali che permettono
+            a un utente di rivelare selettivamente le proprie transazioni a un auditor, senza compromettere le chiavi di spesa
+            o la privacy degli altri utenti della rete.
           </p>
         </InfoSection>
       </div>
