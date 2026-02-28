@@ -3475,6 +3475,7 @@ async def startup_event():
     asyncio.create_task(periodic_miners_cleanup())
     asyncio.create_task(periodic_peer_heartbeat())
     asyncio.create_task(periodic_dandelion_embargo())
+    asyncio.create_task(periodic_dummy_traffic())
 
 
 async def periodic_dandelion_embargo():
