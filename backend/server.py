@@ -174,6 +174,7 @@ dandelion_stem_peer: Optional[str] = None       # Current epoch's stem peer node
 dandelion_epoch_start: float = 0                 # When current epoch started
 dandelion_stempool: Dict[str, Dict] = {}         # tx_id -> {transaction, timestamp, hop_count}
 dandelion_seen_in_fluff: set = set()             # tx_ids we've seen broadcast normally
+dandelion_pending_batch: list = []               # Batch accumulator for jittered forwarding
 
 # Node PQC keypair for block signing (loaded on startup)
 node_pqc_keys: Dict[str, str] = {}
