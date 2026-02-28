@@ -129,6 +129,7 @@ export default function Landing() {
               { icon: EyeOff, label: "Receiver Hidden", color: "#06B6D4" },
               { icon: Lock, label: "Amount Hidden", color: "#10B981" },
               { icon: Atom, label: "Quantum-Proof", color: "#F59E0B" },
+              { icon: ShieldCheck, label: "Consensus Enforced", color: "#EF4444" },
             ].map((b, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 + i * 0.1 }}
@@ -331,8 +332,8 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <FeatureCard icon={Wallet} title="Wallet Hub" link="/wallet" color="#FFD700" delay={0} tag="Core"
               description="Create wallets instantly. Legacy ECDSA or Post-Quantum PQC. Send BRICS worldwide with a 12-word seed phrase backup. No signup, no KYC." />
-            <FeatureCard icon={Shield} title="Total Privacy" link="/wallet?tab=privacy" color="#8B5CF6" delay={1} tag="Privacy"
-              description="Send fully anonymous transactions. Ring Signatures hide the sender, Stealth Addresses hide the receiver, zk-STARKs hide the amount. No one can trace your payments." />
+            <FeatureCard icon={Shield} title="Total Privacy" link="/wallet?tab=privacy" color="#8B5CF6" delay={1} tag="Privacy 10/10"
+              description="True 10/10 privacy enforced at consensus level. Ring Signatures (32 decoys) hide the sender, Stealth Addresses hide the receiver, zk-STARKs hide the amount. No plaintext data stored on-chain." />
             <FeatureCard icon={Lock} title="zk-STARK Shielded" link="/wallet?tab=zk" color="#10B981" delay={2} tag="Zero Knowledge"
               description="Generate STARK proofs to verify transactions without revealing amounts. 128-bit security, quantum-resistant, no trusted setup. Based on the FRI protocol." />
             <FeatureCard icon={Atom} title="Post-Quantum" link="/wallet?tab=pqc" color="#06B6D4" delay={3} tag="Quantum-Proof"
