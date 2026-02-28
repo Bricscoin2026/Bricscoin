@@ -117,6 +117,12 @@ const PROTOCOL_LAYERS = [
         status: "stable",
         notes: "Read-only endpoints exempt from per-route limits. Write endpoints strictly rate-limited.",
       },
+      {
+        name: "Anti-Sybil PoW Handshake",
+        description: "New peers must solve a computational puzzle before being accepted. Prevents low-cost Sybil attacks via VPS flooding.",
+        status: "stable",
+        notes: "16-bit PoW difficulty, max 3 peers per ASN, 50 total peer slots. Opening 500 VPS is no longer free.",
+      },
     ],
   },
 ];
