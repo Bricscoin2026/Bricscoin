@@ -28,6 +28,11 @@ from stark_engine import (
     stark_prove, stark_verify,
     create_amount_commitment, encrypt_amount_for_parties,
     generate_blinding_factor,
+
+# Ring signature protocol constants
+MIN_RING_SIZE = 11       # Minimum enforced (privacy floor)
+DEFAULT_RING_SIZE = 16   # Default (matches Monero v16)
+MAX_RING_SIZE = 64       # Maximum allowed
 )
 
 router = APIRouter(prefix="/api/privacy", tags=["privacy"])
