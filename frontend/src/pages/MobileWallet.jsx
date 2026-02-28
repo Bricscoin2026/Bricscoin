@@ -43,6 +43,8 @@ export default function MobileWallet() {
   const [wallets, setWallets] = useState([]);
   const [activeWallet, setActiveWallet] = useState(null);
   const [balance, setBalance] = useState(null);
+  const [immatureBalance, setImmatureBalance] = useState(0);
+  const [maturingRewards, setMaturingRewards] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [view, setView] = useState("home"); // home | wallet | send | receive | history | create | import | shielded
   const [loadingBal, setLoadingBal] = useState(false);
