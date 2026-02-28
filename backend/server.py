@@ -614,7 +614,12 @@ async def dandelion_stem_forward(transaction: dict, hop_count: int = 0):
     - With probability DANDELION_STEM_PROBABILITY: continue stem to next peer
     - Otherwise: transition to fluff (broadcast to all)
     - If max hops reached: forced fluff
+    - Jitter: random delay before forwarding to defeat timing analysis
     """
+    # Apply propagation jitter to defeat timing analysis
+    jitter_ms = random.randint(*DANDELION_JITTER_MS)
+    await asyncio.sleep(jitter_ms / 1000.0)
+    
     tx_id = transaction.get("id", transaction.get("tx_id", ""))
     
     # Track in stempool for embargo timeout
