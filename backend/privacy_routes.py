@@ -423,6 +423,7 @@ async def send_private_transaction(req: PrivateSendRequest):
             "c0": ring_sig["c0"],
             "s": ring_sig["s"],
             "key_image": ring_sig["key_image"],
+            "tx_nonce": ring_sig["tx_nonce"],
             "ring_size": ring_sig["ring_size"],
             "public_keys": ring_sig["public_keys"],
             "message": tx_message,
