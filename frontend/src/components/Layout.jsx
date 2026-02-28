@@ -60,6 +60,8 @@ export default function Layout() {
     { to: "/nft", icon: Award, label: "BricsNFT" },
     { to: "/threat-model", icon: Shield, label: "Threat Model" },
     { to: "/protocol-status", icon: Activity, label: "Protocol Status" },
+    { to: "/privacy-explorer", icon: Eye, label: "Privacy Explorer" },
+    { to: "/yellow-paper", icon: FileText, label: "Yellow Paper" },
     { to: "/downloads", icon: Download, label: "Downloads" },
     { to: "/about", icon: Info, label: "About" },
   ];
