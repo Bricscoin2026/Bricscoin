@@ -976,23 +976,30 @@ def generate_address_from_public_key(public_key_hex: str) -> str:
     return "BRICS" + address_hash[:40]
 
 async def get_balance(address: str) -> float:
-    """Calculate balance for an address (includes pending transactions)"""
+    """Calculate balance for an address.
+    Mining rewards are subject to COINBASE_MATURITY (150 block confirmations).
+    """
     balance = 0.0
+    current_height = await db.blocks.count_documents({})
+    maturity_cutoff = current_height - COINBASE_MATURITY
     
-    # Add ALL received transactions (confirmed + pending) - includes mining rewards
-    received = await db.transactions.find({"recipient": address}, {"_id": 0}).to_list(10000)
+    # Add received transactions
+    received = await db.transactions.find({"recipient": address}, {"_id": 0, "amount": 1, "sender": 1, "block_index": 1}).to_list(10000)
     for tx in received:
+        # Coinbase maturity: mining rewards only spendable after N confirmations
+        if tx.get("sender") == "COINBASE":
+            block_idx = tx.get("block_index", 0) or 0
+            if block_idx > maturity_cutoff:
+                continue  # Immature coinbase — not yet spendable
         balance += tx['amount']
     
-    # Subtract ALL sent transactions (confirmed + pending) including fees
-    sent = await db.transactions.find({"sender": address}, {"_id": 0}).to_list(10000)
+    # Subtract sent transactions including fees
+    sent = await db.transactions.find({"sender": address}, {"_id": 0, "amount": 1, "fee": 1}).to_list(10000)
     for tx in sent:
         balance -= tx['amount']
-        balance -= tx.get('fee', 0)  # Subtract fee too
+        balance -= tx.get('fee', 0)
     
-    # Round to 8 decimal places to prevent floating point display errors
     balance = round(balance, 8)
-    # Never return negative balance (floating point artifact)
     return max(0.0, balance)
 
 # ==================== API ENDPOINTS ====================
