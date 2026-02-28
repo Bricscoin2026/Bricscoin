@@ -48,6 +48,8 @@ import { QRCodeSVG } from "qrcode.react";
 
 function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDelete }) {
   const [balance, setBalance] = useState(null);
+  const [immatureBalance, setImmatureBalance] = useState(0);
+  const [maturingRewards, setMaturingRewards] = useState([]);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -57,6 +59,8 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
       try {
         const res = await getWalletBalance(wallet.address);
         setBalance(res.data.balance);
+        setImmatureBalance(res.data.immature_balance || 0);
+        setMaturingRewards(res.data.maturing_rewards || []);
       } catch (error) {
         console.error("Error fetching balance:", error);
       } finally {
