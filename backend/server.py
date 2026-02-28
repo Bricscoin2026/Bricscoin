@@ -2195,9 +2195,48 @@ async def import_wallet_key(request: Request, wallet_request: WalletImportPrivat
 
 @api_router.get("/wallet/{address}/balance")
 async def get_wallet_balance(request: Request, address: str):
-    """Get wallet balance"""
+    """Get wallet balance with maturity breakdown"""
     balance = await get_balance(address)
-    return {"address": address, "balance": balance}
+    
+    # Calculate immature coinbase rewards
+    current_height = await db.blocks.count_documents({})
+    maturity_cutoff = current_height - COINBASE_MATURITY
+    
+    immature_balance = 0.0
+    immature_blocks = []
+    
+    received = await db.transactions.find(
+        {"recipient": address, "sender": "COINBASE", "type": {"$ne": "private"}},
+        {"_id": 0, "amount": 1, "block_index": 1}
+    ).to_list(10000)
+    
+    for tx in received:
+        block_idx = tx.get("block_index", 0) or 0
+        if block_idx > maturity_cutoff:
+            immature_balance += tx.get("amount", 0)
+            blocks_remaining = (block_idx + COINBASE_MATURITY) - current_height
+            immature_blocks.append({
+                "block": block_idx,
+                "amount": tx.get("amount", 0),
+                "blocks_remaining": max(0, blocks_remaining),
+                "spendable_at_block": block_idx + COINBASE_MATURITY,
+            })
+    
+    immature_balance = round(immature_balance, 8)
+    
+    result = {
+        "address": address,
+        "balance": balance,
+        "immature_balance": immature_balance,
+        "total_balance": round(balance + immature_balance, 8),
+        "coinbase_maturity": COINBASE_MATURITY,
+        "current_height": current_height,
+    }
+    
+    if immature_balance > 0:
+        result["maturing_rewards"] = sorted(immature_blocks, key=lambda x: x["blocks_remaining"])
+    
+    return result
 
 @api_router.get("/wallet/{address}/qr")
 async def get_wallet_qr(address: str):
