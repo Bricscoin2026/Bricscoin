@@ -566,3 +566,218 @@ async def get_key_images(limit: int = 100):
         {}, {"_id": 0}
     ).sort("timestamp", -1).limit(limit).to_list(limit)
     return {"key_images": images, "total": len(images)}
+
+
+
+# =====================================================================
+# VIEW-KEY (AUDIT KEY) SYSTEM
+# "Private by default, compliant on-demand"
+# =====================================================================
+
+@router.post("/view-key/generate")
+async def generate_view_key(request: Request):
+    """
+    Generate a View-Key (audit key) for a wallet.
+    The View-Key allows a third party (e.g. an exchange) to see ONLY
+    this wallet's incoming/outgoing transactions and balance,
+    WITHOUT being able to sign or spend.
+
+    Input: scan_private_key + spend_public_key
+    Output: A base64-encoded view_key token
+    """
+    body = await request.json()
+    scan_priv = body.get("scan_private_key", "")
+    spend_pub = body.get("spend_public_key", "")
+
+    if not scan_priv or not spend_pub:
+        raise HTTPException(400, "scan_private_key and spend_public_key are required")
+
+    # Validate keys
+    try:
+        int(scan_priv, 16)
+        bytes.fromhex(spend_pub)
+        if len(spend_pub) != 128:
+            raise ValueError("Invalid spend public key length")
+    except ValueError as e:
+        raise HTTPException(400, f"Invalid key format: {e}")
+
+    # View-Key = base64(scan_private_key:spend_public_key)
+    import base64
+    view_key_raw = f"{scan_priv}:{spend_pub}"
+    view_key = base64.urlsafe_b64encode(view_key_raw.encode()).decode()
+
+    # Generate a fingerprint for display
+    fingerprint = hashlib.sha256(view_key_raw.encode()).hexdigest()[:16]
+
+    return {
+        "view_key": view_key,
+        "fingerprint": fingerprint,
+        "permissions": ["read_incoming", "read_outgoing", "read_balance"],
+        "restrictions": ["cannot_sign", "cannot_spend", "cannot_see_other_wallets"],
+        "warning": "This key allows viewing ALL transactions for this wallet. Share only with trusted parties.",
+    }
+
+
+@router.post("/view-key/audit")
+async def audit_with_view_key(request: Request):
+    """
+    Use a View-Key to audit a wallet's transactions.
+    Scans the blockchain for stealth payments and returns:
+    - All incoming payments (with decrypted amounts)
+    - All outgoing payments (via private_balance_ops)
+    - Current balance
+    """
+    import base64
+    body = await request.json()
+    view_key = body.get("view_key", "")
+
+    if not view_key:
+        raise HTTPException(400, "view_key is required")
+
+    # Decode view-key
+    try:
+        decoded = base64.urlsafe_b64decode(view_key.encode()).decode()
+        scan_priv, spend_pub = decoded.split(":")
+    except Exception:
+        raise HTTPException(400, "Invalid view_key format")
+
+    db = await get_db()
+
+    # Step 1: Scan all private transactions for stealth payments addressed to this wallet
+    all_private_txs = await db.transactions.find(
+        {"type": "private", "ephemeral_pubkey": {"$exists": True}},
+        {"_id": 0, "id": 1, "ephemeral_pubkey": 1, "stealth_address": 1,
+         "timestamp": 1, "fee": 1, "display_amount": 1, "ring_size": 1,
+         "encrypted_amount": 1, "commitment": 1}
+    ).to_list(10000)
+
+    # Build list for stealth scanning
+    ephemeral_list = [
+        {"tx_id": tx["id"], "ephemeral_pubkey": tx["ephemeral_pubkey"],
+         "stealth_address": tx.get("stealth_address", "")}
+        for tx in all_private_txs if tx.get("ephemeral_pubkey")
+    ]
+
+    # Use stealth engine to find payments addressed to this wallet
+    from stealth_engine import scan_for_stealth_payments
+    matched_payments = scan_for_stealth_payments(scan_priv, spend_pub, ephemeral_list)
+    matched_tx_ids = {m["tx_id"] for m in matched_payments}
+    matched_stealth_addrs = {m["stealth_address"] for m in matched_payments}
+
+    # Step 2: Get incoming TX details with amounts from private_balance_ops
+    incoming = []
+    total_received = 0.0
+    for stealth_addr in matched_stealth_addrs:
+        credit = await db.private_balance_ops.find_one(
+            {"type": "credit", "stealth_address": stealth_addr},
+            {"_id": 0}
+        )
+        if credit:
+            amount = credit.get("amount", 0)
+            total_received += amount
+            incoming.append({
+                "stealth_address": stealth_addr,
+                "amount": amount,
+                "timestamp": credit.get("timestamp"),
+                "status": "confirmed",
+            })
+
+    # Step 3: Find outgoing TXs — match key_images to debits
+    # The scan key can identify outgoing TXs by checking key_images
+    # that were created by addresses whose stealth payments we found
+    outgoing = []
+    total_sent = 0.0
+
+    # Check if any of the matched stealth addresses were used as sender in debits
+    for stealth_addr in matched_stealth_addrs:
+        debits = await db.private_balance_ops.find(
+            {"type": "debit", "address": stealth_addr},
+            {"_id": 0}
+        ).to_list(100)
+        for d in debits:
+            total_sent += d.get("amount", 0)
+            outgoing.append({
+                "key_image": d.get("key_image", "")[:24] + "...",
+                "amount": d.get("amount", 0),
+                "timestamp": d.get("timestamp"),
+                "status": "confirmed",
+            })
+
+    balance = round(total_received - total_sent, 8)
+
+    return {
+        "audit_result": {
+            "total_incoming": len(incoming),
+            "total_outgoing": len(outgoing),
+            "total_received": round(total_received, 8),
+            "total_sent": round(total_sent, 8),
+            "balance": max(0.0, balance),
+            "incoming_transactions": incoming,
+            "outgoing_transactions": outgoing,
+        },
+        "scan_summary": {
+            "transactions_scanned": len(all_private_txs),
+            "stealth_payments_found": len(matched_payments),
+        },
+        "permissions": ["read_only"],
+    }
+
+
+@router.get("/explorer/stats")
+async def privacy_explorer_stats():
+    """Public privacy explorer stats — shows network privacy health."""
+    db = await get_db()
+
+    total_private = await db.transactions.count_documents({"type": "private"})
+    total_all = await db.transactions.count_documents({})
+    total_key_images = await db.key_images.count_documents({})
+
+    # Average ring size
+    pipeline = [
+        {"$match": {"type": "private", "ring_signature.ring_size": {"$exists": True}}},
+        {"$group": {"_id": None, "avg_ring": {"$avg": "$ring_signature.ring_size"},
+                     "min_ring": {"$min": "$ring_signature.ring_size"},
+                     "max_ring": {"$max": "$ring_signature.ring_size"}}}
+    ]
+    ring_stats = await db.transactions.aggregate(pipeline).to_list(1)
+    ring_data = ring_stats[0] if ring_stats else {"avg_ring": 0, "min_ring": 0, "max_ring": 0}
+
+    # Recent private TXs (opaque view)
+    recent = await db.transactions.find(
+        {"type": "private"},
+        {"_id": 0, "id": 1, "sender": 1, "recipient": 1, "display_amount": 1,
+         "timestamp": 1, "ring_signature.ring_size": 1, "ring_signature.key_image": 1,
+         "proof_hash": 1, "stark_verified": 1, "ephemeral_pubkey": 1, "fee": 1}
+    ).sort("timestamp", -1).limit(50).to_list(50)
+
+    # Mask data for public display
+    for tx in recent:
+        tx["sender"] = "RING_HIDDEN"
+        if tx.get("recipient"):
+            tx["recipient_preview"] = tx["recipient"][:12] + "..."
+            del tx["recipient"]
+        rs = tx.get("ring_signature", {})
+        tx["ring_size"] = rs.get("ring_size", 0)
+        tx["key_image_preview"] = rs.get("key_image", "")[:16] + "..." if rs.get("key_image") else None
+        tx.pop("ring_signature", None)
+        if tx.get("proof_hash"):
+            tx["proof_hash_preview"] = tx["proof_hash"][:16] + "..."
+            del tx["proof_hash"]
+        if tx.get("ephemeral_pubkey"):
+            tx["ephemeral_preview"] = tx["ephemeral_pubkey"][:16] + "..."
+            del tx["ephemeral_pubkey"]
+
+    return {
+        "network_privacy": {
+            "total_transactions": total_all,
+            "total_private": total_private,
+            "privacy_ratio": round(total_private / max(total_all, 1) * 100, 1),
+            "total_key_images": total_key_images,
+            "ring_stats": {
+                "average": round(ring_data.get("avg_ring", 0), 1),
+                "minimum": ring_data.get("min_ring", 0),
+                "maximum": ring_data.get("max_ring", 0),
+            },
+        },
+        "recent_transactions": recent,
+    }
