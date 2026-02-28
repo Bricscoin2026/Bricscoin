@@ -329,25 +329,49 @@ class P2PNode:
     async def remove_peer_from_db(self, node_id: str):
         await db.peers.delete_one({"node_id": node_id})
 
+    # ---------- PoW handshake solver ----------
+    def solve_pow(self, challenge: str, difficulty_bits: int) -> int:
+        """Solve a PoW challenge: find nonce where SHA256(challenge+nonce) has leading zeros."""
+        required_zeros = difficulty_bits // 4
+        nonce = 0
+        while True:
+            h = hashlib.sha256(f"{challenge}{nonce}".encode()).hexdigest()
+            if h.startswith("0" * required_zeros):
+                return nonce
+            nonce += 1
+
     # ---------- registration ----------
     async def register_with_node(self, target_url: str) -> bool:
-        """Register ourselves with a remote node and learn about it."""
+        """Register ourselves with a remote node, solving PoW handshake if required."""
         if not NODE_URL:
             return False
         try:
             height = await sync_engine.get_local_height()
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                resp = await client.post(
-                    f"{target_url}/api/p2p/register",
-                    json={
-                        "node_id": NODE_ID,
-                        "url": NODE_URL,
-                        "version": NODE_VERSION,
-                        "chain_height": height,
-                    },
-                )
+            payload = {
+                "node_id": NODE_ID,
+                "url": NODE_URL,
+                "version": NODE_VERSION,
+                "chain_height": height,
+            }
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(f"{target_url}/api/p2p/register", json=payload)
                 if resp.status_code == 200:
                     data = resp.json()
+                    # Handle PoW challenge
+                    if data.get("status") == "pow_required":
+                        challenge = data["challenge"]
+                        difficulty = data.get("difficulty_bits", 16)
+                        log.info(f"Solving PoW challenge from {target_url} (difficulty={difficulty})...")
+                        nonce = self.solve_pow(challenge, difficulty)
+                        log.info(f"PoW solved (nonce={nonce}). Re-registering...")
+                        payload["pow_challenge"] = challenge
+                        payload["pow_nonce"] = nonce
+                        resp = await client.post(f"{target_url}/api/p2p/register", json=payload)
+                        if resp.status_code != 200:
+                            log.warning(f"PoW registration failed: {resp.status_code}")
+                            return False
+                        data = resp.json()
+                    
                     remote_id = data.get("node_id", "")
                     if remote_id and remote_id != NODE_ID:
                         peer_info = {
