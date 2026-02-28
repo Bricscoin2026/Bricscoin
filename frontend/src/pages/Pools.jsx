@@ -210,7 +210,7 @@ export default function Pools() {
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">1</div>
               <h4 className="font-semibold mb-2">Scegli un Pool</h4>
-              <p className="text-sm text-muted-foreground">Seleziona il pool che preferisci dalla lista sopra.</p>
+              <p className="text-sm text-muted-foreground">Select your preferred pool from the list above.</p>
             </div>
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">2</div>
