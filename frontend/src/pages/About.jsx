@@ -171,19 +171,33 @@ export default function About() {
           </p>
         </InfoSection>
 
-        <InfoSection icon={Shield} title="Sicurezza" color="emerald" delay={2}>
+        <InfoSection icon={Shield} title="Sicurezza e Privacy" color="emerald" delay={2}>
           <p>
-            BricsCoin usa lo stesso sistema di sicurezza di Bitcoin: l'algoritmo <strong className="text-foreground">SHA-256</strong>.
-            Per intenderci, è lo stesso livello di crittografia usato dalle banche e dai governi di tutto il mondo.
+            BricsCoin è costruito su un protocollo con <strong className="text-foreground">privacy obbligatoria enforced dal consenso</strong>.
+            Ogni transazione è protetta da 3 livelli crittografici indipendenti, verificati da tutti i nodi della rete.
           </p>
+          <ul className="list-none space-y-1.5 ml-1">
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Mittente nascosto</strong> — Ring Signatures LSAG (32-64 decoy) con selezione Gamma Distribution</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Destinatario nascosto</strong> — Stealth Addresses (Diffie-Hellman Key Exchange)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Importo nascosto</strong> — zk-STARKs con Range Proofs (amount &gt; 0)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span><strong className="text-foreground">Rete anonima</strong> — Dandelion++ con jitter e dummy traffic, Tor</span>
+            </li>
+          </ul>
           <p>
-            Ma BricsCoin va oltre: integra anche la <strong className="text-foreground">crittografia post-quantistica (PQC)</strong>,
-            un sistema di protezione progettato per resistere anche ai futuri computer quantistici. Questo significa che i tuoi fondi
-            sono protetti non solo oggi, ma anche nel futuro.
-          </p>
-          <p>
-            Le transazioni vengono <strong className="text-foreground">firmate direttamente nel tuo browser</strong>.
-            La tua chiave privata (la "password" del tuo wallet) non lascia mai il tuo dispositivo.
+            Integra inoltre la <strong className="text-foreground">crittografia post-quantistica ML-DSA-65</strong> (FIPS 204)
+            per la firma dei blocchi, garantendo resistenza anche ai futuri computer quantistici.
+            Le transazioni vengono <strong className="text-foreground">firmate nel tuo browser</strong> — la chiave privata non lascia mai il tuo dispositivo.
           </p>
         </InfoSection>
 
