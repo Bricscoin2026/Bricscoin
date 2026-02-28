@@ -22,6 +22,8 @@ import Network from "./pages/Network";
 import Whitepaper from "./pages/Whitepaper";
 import ThreatModel from "./pages/ThreatModel";
 import ProtocolStatus from "./pages/ProtocolStatus";
+import PrivacyExplorer from "./pages/PrivacyExplorer";
+import YellowPaper from "./pages/YellowPaper";
 import "./App.css";
 
 function App() {
@@ -50,6 +52,8 @@ function App() {
             <Route path="whitepaper" element={<Whitepaper />} />
             <Route path="threat-model" element={<ThreatModel />} />
             <Route path="protocol-status" element={<ProtocolStatus />} />
+            <Route path="privacy-explorer" element={<PrivacyExplorer />} />
+            <Route path="yellow-paper" element={<YellowPaper />} />
             <Route path="downloads" element={<Downloads />} />
             <Route path="about" element={<About />} />
           </Route>
