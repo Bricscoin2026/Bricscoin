@@ -193,7 +193,7 @@ function SendDialog({ wallet, onSuccess }) {
 
     const totalCost = parseFloat(amount) + TRANSACTION_FEE;
     if (balance !== null && totalCost > balance) {
-      toast.error(`Saldo insufficiente! Serve: ${totalCost} BRICS (${amount} + ${TRANSACTION_FEE} fee). Disponibile: ${balance} BRICS`);
+      toast.error(`Insufficient balance! Required: ${totalCost} BRICS (${amount} + ${TRANSACTION_FEE} fee). Available: ${balance} BRICS`);
       return;
     }
 
