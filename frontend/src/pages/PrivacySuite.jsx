@@ -137,7 +137,7 @@ function StealthScanner() {
       if (res.data.payments_found > 0) {
         toast.success(`Trovati ${res.data.payments_found} pagamenti stealth!`);
       } else {
-        toast.info("Nessun pagamento stealth trovato");
+        toast.info("No stealth payments found");
       }
     } catch (err) {
       toast.error(err.response?.data?.detail || "Errore scansione");
@@ -260,7 +260,7 @@ export default function PrivacySuite({ embedded = false }) {
       return;
     }
     if (parseFloat(amount) > parseFloat(balance)) {
-      toast.error("Saldo insufficiente");
+      toast.error("Insufficient balance");
       return;
     }
 

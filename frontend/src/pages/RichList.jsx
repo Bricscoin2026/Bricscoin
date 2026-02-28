@@ -280,7 +280,7 @@ export default function RichList() {
             {(!data?.wallets || data.wallets.length === 0) && (
               <div className="p-8 text-center text-muted-foreground">
                 <Wallet className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nessun wallet trovato</p>
+                <p>No wallets found</p>
               </div>
             )}
           </CardContent>

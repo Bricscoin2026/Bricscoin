@@ -211,10 +211,10 @@ export default function P2Pool() {
                 {[
                   ["Protocollo", "AuxPoW (Auxiliary Proof-of-Work)"],
                   ["Parent Chain", "Bitcoin"],
-                  ["Blocchi AuxPoW", `${stats.merge_mining.auxpow_blocks || 0} (${stats.merge_mining.auxpow_percentage || 0}%)`],
-                  ["Blocchi Nativi", stats.merge_mining.native_blocks || 0],
+                  ["AuxPoW Blocks", `${stats.merge_mining.auxpow_blocks || 0} (${stats.merge_mining.auxpow_percentage || 0}%)`],
+                  ["Native Blocks", stats.merge_mining.native_blocks || 0],
                   ["Work Pendenti", stats.merge_mining.pending_work || 0],
-                  ["Ultimo AuxPoW", stats.merge_mining.last_auxpow_block?.index ? `#${stats.merge_mining.last_auxpow_block.index}` : "Nessuno"],
+                  ["Last AuxPoW", stats.merge_mining.last_auxpow_block?.index ? `#${stats.merge_mining.last_auxpow_block.index}` : "None"],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{k}</span>
@@ -223,7 +223,7 @@ export default function P2Pool() {
                 ))}
                 <div className="pt-2 border-t border-white/5">
                   <p className="text-xs text-muted-foreground">
-                    I miner Bitcoin possono minare BricsCoin simultaneamente a <span className="text-orange-400 font-bold">costo zero</span>.
+                    Bitcoin miners can mine BricsCoin simultaneously at <span className="text-orange-400 font-bold">zero cost</span>.
                     API: <span className="font-mono text-xs text-primary">/api/auxpow/create-work</span>
                   </p>
                 </div>
