@@ -291,7 +291,7 @@ export default function RichList() {
       <Card className="bg-card border-white/10">
         <CardContent className="p-6">
           <p className="text-sm text-muted-foreground">
-            La Rich List mostra i top 100 wallet per bilancio BRICS. 
+            The Rich List shows the top 100 wallets by BRICS balance. 
             I dati vengono aggiornati automaticamente ogni minuto.
             Clicca su un indirizzo per vedere i dettagli nell&apos;Explorer.
           </p>

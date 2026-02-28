@@ -573,8 +573,8 @@ export default function PrivacySuite({ embedded = false }) {
           {[
             { step: "01", title: "Ring Signature (Sender Hidden)", desc: "Your signature is mixed with those of other users in the \"ring\". Nobody can determine who actually signed the transaction. The Key Image prevents double-spending.", color: "text-violet-400" },
             { step: "02", title: "Stealth Address (Receiver Hidden)", desc: "Viene generato un indirizzo one-time per il destinatario usando DHKE. Solo il destinatario, con la sua scan key, puo' riconoscere il pagamento.", color: "text-cyan-400" },
-            { step: "03", title: "zk-STARK Proof (Amount Hidden)", desc: "L'importo viene nascosto tramite un commitment crittografico. Una STARK proof (FRI protocol) dimostra la validita' senza rivelare l'importo.", color: "text-emerald-400" },
-            { step: "04", title: "On-Chain Result", desc: "La blockchain mostra: sender = RING_HIDDEN, receiver = BRICSX... (stealth), amount = SHIELDED. Privacy totale mantenuta.", color: "text-amber-400" },
+            { step: "03", title: "zk-STARK Proof (Amount Hidden)", desc: "The amount is hidden via a cryptographic commitment. A STARK proof (FRI protocol) proves validity without revealing the amount.", color: "text-emerald-400" },
+            { step: "04", title: "On-Chain Result", desc: "The blockchain shows: sender = RING_HIDDEN, receiver = BRICSX... (stealth), amount = SHIELDED. Total privacy maintained.", color: "text-amber-400" },
           ].map((item, i) => (
             <div key={i} className="flex gap-4 py-4 border-b border-white/[0.04] last:border-0">
               <span className={`text-xl font-heading font-black ${item.color} opacity-30 shrink-0`}>{item.step}</span>
