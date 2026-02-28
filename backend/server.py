@@ -3449,6 +3449,7 @@ from zk_routes import router as zk_router
 from zk_routes import set_db as zk_set_db
 from privacy_routes import router as privacy_router
 from privacy_routes import set_db as privacy_set_db
+from privacy_routes import MIN_RING_SIZE, DEFAULT_RING_SIZE, MAX_RING_SIZE
 from auxpow_routes import router as auxpow_router
 from auxpow_routes import init_auxpow
 app.include_router(chat_router)
