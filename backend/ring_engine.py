@@ -98,7 +98,8 @@ def ring_sign(
     message: str,
     private_key_hex: str,
     public_keys_hex: List[str],
-    real_index: int
+    real_index: int,
+    tx_nonce: str = None,
 ) -> dict:
     """
     Create a Linkable SAG (LSAG) ring signature.
@@ -108,15 +109,22 @@ def ring_sign(
         private_key_hex: Signer's private key (hex)
         public_keys_hex: List of all ring member public keys (hex, 128 chars each)
         real_index: Index of the real signer in the ring
+        tx_nonce: Per-transaction nonce (hex). If None, generated randomly.
+                  Used to derive unique key_image per transaction (account model).
 
     Returns:
-        Ring signature dict with c0, s values, key_image, and ring public keys
+        Ring signature dict with c0, s values, key_image, tx_nonce, and ring public keys
     """
     n = len(public_keys_hex)
     if n < 2:
         raise ValueError("Ring must have at least 2 members")
     if real_index < 0 or real_index >= n:
         raise ValueError("Invalid real_index")
+
+    # Generate or use tx_nonce for per-TX unique key images
+    if tx_nonce is None:
+        tx_nonce = secrets.token_hex(32)
+    nonce_bytes = bytes.fromhex(tx_nonce)
 
     # Parse keys
     x = int(private_key_hex, 16)  # real signer's private key
@@ -126,19 +134,18 @@ def ring_sign(
         vk = VerifyingKey.from_string(pk_bytes, curve=SECP256k1)
         ring_points.append(vk.pubkey.point)
 
-    # Key image
+    # Key image: I = x * Hp(P || nonce) — unique per TX via nonce
     real_pk_bytes = bytes.fromhex(public_keys_hex[real_index])
-    hp = _hash_to_point(real_pk_bytes)
+    hp = _hash_to_point(real_pk_bytes + nonce_bytes)
     key_image = x * hp
 
     # Message hash
     msg_hash = hashlib.sha256(message.encode()).digest()
 
     # Start signature
-    # Generate random alpha
     alpha = secrets.randbelow(ORDER - 1) + 1
 
-    # Compute L_pi = alpha * G and R_pi = alpha * Hp(P_pi)
+    # Compute L_pi = alpha * G and R_pi = alpha * Hp(P_pi || nonce)
     L = alpha * G
     R = alpha * hp
 
@@ -158,8 +165,8 @@ def ring_sign(
 
         # L_i = s_i * G + c_i * P_i
         L_i = s[i] * G + c[i] * ring_points[i]
-        # R_i = s_i * Hp(P_i) + c_i * I
-        hp_i = _hash_to_point(bytes.fromhex(public_keys_hex[i]))
+        # R_i = s_i * Hp(P_i || nonce) + c_i * I
+        hp_i = _hash_to_point(bytes.fromhex(public_keys_hex[i]) + nonce_bytes)
         R_i = s[i] * hp_i + c[i] * key_image
 
         c[(i + 1) % n] = _hash_to_scalar(
@@ -173,6 +180,7 @@ def ring_sign(
         "c0": hex(c[0]),
         "s": [hex(si) for si in s],
         "key_image": _point_to_bytes(key_image).hex(),
+        "tx_nonce": tx_nonce,
         "ring_size": n,
         "public_keys": public_keys_hex,
         "message_hash": msg_hash.hex(),
