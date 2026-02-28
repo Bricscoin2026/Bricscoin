@@ -136,7 +136,7 @@ export default function About() {
         className="text-center space-y-4 py-4"
       >
         <h1 className="text-4xl sm:text-5xl font-heading font-bold">
-          Cos'è <span className="gold-text">BricsCoin</span>?
+          What is <span className="gold-text">BricsCoin</span>?
         </h1>
         <p className="text-sm font-medium text-primary/80 tracking-wide">
           <span className="text-lg font-bold text-primary">B</span>lockchain{" "}
@@ -150,131 +150,131 @@ export default function About() {
           <span className="text-lg font-bold text-primary">N</span>etwork
         </p>
         <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg">
-          Immagina dei soldi digitali che nessuno controlla, nessuna banca, nessun governo, nessuna azienda.
-          BricsCoin è esattamente questo: una moneta digitale libera, sicura e trasparente.
+          Imagine digital money that nobody controls — no bank, no government, no corporation.
+          BricsCoin is exactly that: a free, secure, and transparent digital currency.
         </p>
       </motion.div>
 
       {/* Simple Explanation Sections */}
       <div className="space-y-4">
 
-        <InfoSection icon={HelpCircle} title="In parole semplici" color="primary" delay={1}>
+        <InfoSection icon={HelpCircle} title="In Simple Terms" color="primary" delay={1}>
           <p>
-            BricsCoin è una <strong className="text-foreground">criptovaluta</strong>, cioè una moneta digitale che esiste solo su internet.
-            Come l'euro o il dollaro, puoi usarla per inviare e ricevere pagamenti. Ma a differenza delle monete tradizionali,
-            non c'è nessuna banca o istituzione che la controlla.
+            BricsCoin is a <strong className="text-foreground">cryptocurrency</strong> — a digital currency that exists only on the internet.
+            Like the dollar or the euro, you can use it to send and receive payments. But unlike traditional currencies,
+            there is no bank or institution controlling it.
           </p>
           <p>
-            Funziona grazie a una tecnologia chiamata <strong className="text-foreground">blockchain</strong>: un registro pubblico dove
-            ogni transazione viene scritta in modo permanente e verificabile da tutti. Nessuno può cancellare o modificare una transazione
-            una volta confermata.
+            It works thanks to a technology called <strong className="text-foreground">blockchain</strong>: a public ledger where
+            every transaction is permanently written and verifiable by anyone. Nobody can delete or modify a transaction
+            once it is confirmed.
           </p>
         </InfoSection>
 
-        <InfoSection icon={Shield} title="Sicurezza e Privacy" color="emerald" delay={2}>
+        <InfoSection icon={Shield} title="Security & Privacy" color="emerald" delay={2}>
           <p>
-            BricsCoin è costruito su un protocollo con <strong className="text-foreground">privacy obbligatoria enforced dal consenso</strong>.
-            Ogni transazione è protetta da 3 livelli crittografici indipendenti, verificati da tutti i nodi della rete.
+            BricsCoin is built on a protocol with <strong className="text-foreground">mandatory privacy enforced at the consensus level</strong>.
+            Every transaction is protected by 3 independent cryptographic layers, verified by all nodes on the network.
           </p>
           <ul className="list-none space-y-1.5 ml-1">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Mittente nascosto</strong> — Ring Signatures LSAG (32-64 decoy) con selezione Gamma Distribution</span>
+              <span><strong className="text-foreground">Hidden Sender</strong> — LSAG Ring Signatures (32-64 decoys) with Gamma Distribution selection</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Destinatario nascosto</strong> — Stealth Addresses (Diffie-Hellman Key Exchange)</span>
+              <span><strong className="text-foreground">Hidden Receiver</strong> — Stealth Addresses (Diffie-Hellman Key Exchange)</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Importo nascosto</strong> — zk-STARKs con Range Proofs (amount &gt; 0)</span>
+              <span><strong className="text-foreground">Hidden Amount</strong> — zk-STARKs with Range Proofs (amount &gt; 0)</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Rete anonima</strong> — Dandelion++ con jitter e dummy traffic, Tor</span>
+              <span><strong className="text-foreground">Anonymous Network</strong> — Dandelion++ with jitter and dummy traffic, Tor</span>
             </li>
           </ul>
           <p>
-            Integra inoltre la <strong className="text-foreground">crittografia post-quantistica ML-DSA-65</strong> (FIPS 204)
-            per la firma dei blocchi, garantendo resistenza anche ai futuri computer quantistici.
-            Le transazioni vengono <strong className="text-foreground">firmate nel tuo browser</strong> — la chiave privata non lascia mai il tuo dispositivo.
+            It also integrates <strong className="text-foreground">post-quantum cryptography ML-DSA-65</strong> (FIPS 204)
+            for block signing, ensuring resistance against future quantum computers.
+            Transactions are <strong className="text-foreground">signed in your browser</strong> — your private key never leaves your device.
           </p>
         </InfoSection>
 
-        <InfoSection icon={Network} title="Decentralizzazione" color="primary" delay={3}>
+        <InfoSection icon={Network} title="Decentralization" color="primary" delay={3}>
           <p>
-            <strong className="text-foreground">Decentralizzato</strong> significa che non esiste un singolo punto di controllo.
-            La rete BricsCoin è composta da tanti computer indipendenti (chiamati <strong className="text-foreground">nodi</strong>)
-            sparsi nel mondo che collaborano tra loro.
+            <strong className="text-foreground">Decentralized</strong> means there is no single point of control.
+            The BricsCoin network is made up of many independent computers (called <strong className="text-foreground">nodes</strong>)
+            spread around the world, collaborating with each other.
           </p>
           <p>
-            Se un nodo si spegne, gli altri continuano a funzionare. Nessuno può censurare le transazioni o spegnere la rete.
-            Chiunque può scaricare il software e far funzionare un nodo dal proprio computer, contribuendo alla sicurezza della rete.
+            If one node goes down, the others keep running. Nobody can censor transactions or shut down the network.
+            Anyone can download the software and run a node from their own computer, contributing to network security.
           </p>
           <p>
-            I nodi comunicano tra loro tramite una rete <strong className="text-foreground">peer-to-peer (P2P)</strong>,
-            lo stesso principio usato per condividere file su internet. Non c'è un server centrale: tutti sono uguali.
+            Nodes communicate through a <strong className="text-foreground">peer-to-peer (P2P)</strong> network,
+            the same principle used for file sharing on the internet. There is no central server: everyone is equal.
           </p>
         </InfoSection>
 
-        <InfoSection icon={Wallet} title="Il Wallet (Portafoglio)" color="primary" delay={4}>
+        <InfoSection icon={Wallet} title="The Wallet" color="primary" delay={4}>
           <p>
-            Il <strong className="text-foreground">wallet</strong> è il tuo portafoglio digitale. Funziona come un'app bancaria,
-            ma senza banca. Ti permette di:
+            The <strong className="text-foreground">wallet</strong> is your digital wallet. It works like a banking app,
+            but without the bank. It allows you to:
           </p>
           <ul className="list-none space-y-1.5 ml-1">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Ricevere</strong> BRICS da chiunque, condividendo il tuo indirizzo</span>
+              <span><strong className="text-foreground">Receive</strong> BRICS from anyone by sharing your address</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Inviare</strong> BRICS a qualsiasi indirizzo nel mondo</span>
+              <span><strong className="text-foreground">Send</strong> BRICS to any address in the world</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Controllare il saldo</strong> e la cronologia delle transazioni</span>
+              <span><strong className="text-foreground">Check your balance</strong> and transaction history</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span><strong className="text-foreground">Esportare e importare</strong> il wallet con una seed phrase di 12 parole</span>
+              <span><strong className="text-foreground">Export and import</strong> wallets with a 12-word seed phrase</span>
             </li>
           </ul>
           <p>
-            La <strong className="text-foreground">seed phrase</strong> è una serie di 12 parole che funziona come backup del tuo wallet.
-            Se perdi il dispositivo, puoi recuperare i tuoi fondi inserendo queste 12 parole. Conservala in un posto sicuro e non condividerla mai!
+            The <strong className="text-foreground">seed phrase</strong> is a series of 12 words that serves as a backup of your wallet.
+            If you lose your device, you can recover your funds by entering these 12 words. Keep it in a safe place and never share it!
           </p>
         </InfoSection>
 
-        <InfoSection icon={Pickaxe} title="Il Mining" color="primary" delay={5}>
+        <InfoSection icon={Pickaxe} title="Mining" color="primary" delay={5}>
           <p>
-            Il <strong className="text-foreground">mining</strong> è il processo con cui vengono creati nuovi BRICS e verificate le transazioni.
-            I miner (minatori) usano la potenza del proprio computer per risolvere problemi matematici complessi.
-            Chi trova la soluzione per primo, aggiunge un nuovo "blocco" alla blockchain e riceve una ricompensa.
+            <strong className="text-foreground">Mining</strong> is the process by which new BRICS are created and transactions are verified.
+            Miners use their computer's processing power to solve complex mathematical problems.
+            Whoever finds the solution first adds a new "block" to the blockchain and receives a reward.
           </p>
           <p>
-            Attualmente, ogni blocco minato produce <strong className="text-foreground">50 BRICS</strong> come ricompensa.
-            Questa ricompensa si dimezza ogni 210.000 blocchi (come Bitcoin), rendendo BRICS sempre più raro nel tempo.
+            Currently, each mined block produces <strong className="text-foreground">50 BRICS</strong> as a reward.
+            This reward halves every 210,000 blocks (like Bitcoin), making BRICS increasingly scarce over time.
           </p>
           <p>
-            BricsCoin è stato lanciato con un <strong className="text-foreground">Fair Launch al 100%</strong>: nessun premine,
-            nessuna riserva per i fondatori. Tutti i 21 milioni di BRICS possono essere ottenuti solo tramite mining.
+            BricsCoin was launched with a <strong className="text-foreground">100% Fair Launch</strong>: no premine,
+            no reserves for founders. All 21 million BRICS can only be obtained through mining.
           </p>
         </InfoSection>
 
-        <InfoSection icon={Eye} title="Trasparenza e Compliance" color="primary" delay={6}>
+        <InfoSection icon={Eye} title="Transparency & Compliance" color="primary" delay={6}>
           <p>
-            BricsCoin è <strong className="text-foreground">"privato di default, compliant on-demand"</strong>.
-            Il codice sorgente è aperto (open source) e disponibile su Codeberg. Chiunque può leggere, verificare e contribuire.
+            BricsCoin is <strong className="text-foreground">"private by default, compliant on-demand"</strong>.
+            The source code is open source and available on Codeberg. Anyone can read, verify, and contribute.
           </p>
           <p>
-            Il <strong className="text-foreground">Privacy Explorer</strong> pubblico mostra i blocchi e le transazioni come appaiono sulla chain:
-            nessun mittente, nessun importo in chiaro — solo prove crittografiche opache.
+            The public <strong className="text-foreground">Privacy Explorer</strong> shows blocks and transactions as they appear on-chain:
+            no sender, no plaintext amounts — only opaque cryptographic proofs.
           </p>
           <p>
-            Per la compliance, BricsCoin offre i <strong className="text-foreground">View-Keys</strong>: chiavi speciali che permettono
-            a un utente di rivelare selettivamente le proprie transazioni a un auditor, senza compromettere le chiavi di spesa
-            o la privacy degli altri utenti della rete.
+            For compliance, BricsCoin offers <strong className="text-foreground">View-Keys</strong>: special keys that allow
+            a user to selectively reveal their transactions to an auditor, without compromising their spending keys
+            or the privacy of other users on the network.
           </p>
         </InfoSection>
       </div>
@@ -288,10 +288,10 @@ export default function About() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="w-6 h-6 text-emerald-400" />
-              Audit di Sicurezza
+              Security Audit
               {audit?.all_passed && (
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ml-2">
-                  {audit.total_passed}/{audit.total_tests} SUPERATI
+                  {audit.total_passed}/{audit.total_tests} PASSED
                 </Badge>
               )}
             </CardTitle>
@@ -304,15 +304,15 @@ export default function About() {
               data-testid="run-audit-btn"
             >
               {auditLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-              {auditLoading ? "Esecuzione..." : "Esegui Audit"}
+              {auditLoading ? "Running..." : "Run Audit"}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 relative z-10">
           <p className="text-muted-foreground text-sm">
-            Questo audit esegue test di sicurezza reali in tempo reale sulla blockchain. Verifica la crittografia classica e
-            post-quantistica, il protocollo privacy (Ring Signatures, Stealth Addresses, zk-STARKs), le 11 regole di consenso
-            enforced e la prevenzione degli attacchi.
+            This audit runs real-time security tests on the blockchain. It verifies classical and
+            post-quantum cryptography, the privacy protocol (Ring Signatures, Stealth Addresses, zk-STARKs), all 11 consensus
+            enforcement rules, and attack prevention mechanisms.
           </p>
 
           {audit ? (
@@ -337,14 +337,14 @@ export default function About() {
 
               {audit.timestamp && (
                 <p className="text-xs text-muted-foreground/50 pt-2">
-                  Ultimo audit: {new Date(audit.timestamp).toLocaleString("it-IT")}
+                  Last audit: {new Date(audit.timestamp).toLocaleString("en-US")}
                 </p>
               )}
             </>
           ) : auditLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-              <span className="ml-3 text-muted-foreground">Esecuzione test di sicurezza...</span>
+              <span className="ml-3 text-muted-foreground">Running security tests...</span>
             </div>
           ) : null}
         </CardContent>
@@ -355,16 +355,16 @@ export default function About() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Coins className="w-5 h-5 text-primary" />
-            Numeri Chiave
-            <Badge variant="outline" className="ml-2 text-xs">Dati Live</Badge>
+            Key Numbers
+            <Badge variant="outline" className="ml-2 text-xs">Live Data</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-primary/5 rounded-sm border border-primary/10 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Massima Fornitura</p>
-              <p className="text-xl font-heading font-bold gold-text">21.000.000</p>
-              <p className="text-xs text-muted-foreground">BRICS totali</p>
+              <p className="text-xs text-muted-foreground mb-1">Max Supply</p>
+              <p className="text-xl font-heading font-bold gold-text">21,000,000</p>
+              <p className="text-xs text-muted-foreground">Total BRICS</p>
             </div>
             <div className="p-4 bg-emerald-500/5 rounded-sm border border-emerald-500/20 text-center">
               <p className="text-xs text-muted-foreground mb-1">Premine</p>
@@ -372,21 +372,21 @@ export default function About() {
               <p className="text-xs text-muted-foreground">Fair Launch</p>
             </div>
             <div className="p-4 bg-primary/5 rounded-sm border border-primary/10 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Ricompensa Blocco</p>
+              <p className="text-xs text-muted-foreground mb-1">Block Reward</p>
               <p className="text-xl font-heading font-bold gold-text">{tokenomics?.mining_rewards?.current_block_reward || 50}</p>
-              <p className="text-xs text-muted-foreground">BRICS per blocco</p>
+              <p className="text-xs text-muted-foreground">BRICS per block</p>
             </div>
             <div className="p-4 bg-primary/5 rounded-sm border border-primary/10 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Fee Transazione</p>
+              <p className="text-xs text-muted-foreground mb-1">Transaction Fee</p>
               <p className="text-xl font-heading font-bold gold-text">0.000005</p>
-              <p className="text-xs text-muted-foreground">BRICS (quasi zero)</p>
+              <p className="text-xs text-muted-foreground">BRICS (near zero)</p>
             </div>
           </div>
 
           {tokenomics?.mining_rewards?.mined_so_far > 0 && (
             <div className="p-4 bg-card rounded-sm border border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Minati finora</span>
+                <span className="text-sm text-muted-foreground">Mined so far</span>
                 <span className="text-sm font-mono font-bold gold-text">
                   {tokenomics.mining_rewards.mined_so_far?.toLocaleString()} BRICS
                 </span>
@@ -398,7 +398,7 @@ export default function About() {
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-1 text-right">
-                {tokenomics.mining_rewards.percentage_mined}% del totale
+                {tokenomics.mining_rewards.percentage_mined}% of total
               </p>
             </div>
           )}
@@ -408,27 +408,27 @@ export default function About() {
       {/* Tech Specs */}
       <Card className="bg-card/50 border-white/10">
         <CardHeader>
-          <CardTitle>Specifiche Tecniche</CardTitle>
+          <CardTitle>Technical Specifications</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Algoritmo", value: "SHA-256" },
-              { label: "Fornitura Max", value: "21M BRICS" },
-              { label: "Ricompensa", value: "50 BRICS" },
-              { label: "Halving", value: "210.000 blocchi" },
-              { label: "Tempo Blocco", value: "~10 min" },
-              { label: "Difficolta", value: "Dinamica" },
-              { label: "Fee TX", value: "0.000005 BRICS" },
-              { label: "Post-Quantistico", value: "ML-DSA-65" },
+              { label: "Algorithm", value: "SHA-256" },
+              { label: "Max Supply", value: "21M BRICS" },
+              { label: "Block Reward", value: "50 BRICS" },
+              { label: "Halving", value: "210,000 blocks" },
+              { label: "Block Time", value: "~10 min" },
+              { label: "Difficulty", value: "Dynamic" },
+              { label: "TX Fee", value: "0.000005 BRICS" },
+              { label: "Post-Quantum", value: "ML-DSA-65" },
               { label: "Ring Signatures", value: "LSAG (32-64)" },
               { label: "Stealth Addr", value: "DHKE" },
               { label: "Amount Hiding", value: "zk-STARKs" },
               { label: "Network Privacy", value: "Dandelion++" },
               { label: "Merge Mining", value: "AuxPoW (BTC)" },
               { label: "Consensus Rules", value: "11 enforced" },
-              { label: "Licenza", value: "MIT" },
-              { label: "Mining", value: "Aperto a tutti" },
+              { label: "License", value: "MIT" },
+              { label: "Mining", value: "Open to all" },
             ].map((spec, i) => (
               <div key={i} className="p-3 bg-white/5 rounded-sm text-center">
                 <p className="text-xs text-muted-foreground">{spec.label}</p>
@@ -454,7 +454,7 @@ export default function About() {
             </div>
             <div>
               <h3 className="text-xl font-bold">Jabo86</h3>
-              <p className="text-muted-foreground">Fondatore & Lead Developer</p>
+              <p className="text-muted-foreground">Founder & Lead Developer</p>
               <div className="flex gap-2 mt-2">
                 <Badge variant="outline" className="text-xs">SHA-256</Badge>
                 <Badge variant="outline" className="text-xs">Blockchain</Badge>
@@ -476,7 +476,7 @@ export default function About() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              Il documento tecnico ufficiale con tutti i dettagli su architettura, tokenomics e roadmap di BricsCoin.
+              The official technical document with all details on architecture, tokenomics, and BricsCoin roadmap.
             </p>
             <Button
               onClick={() => window.location.href = '/whitepaper'}
@@ -484,7 +484,7 @@ export default function About() {
               data-testid="whitepaper-btn"
             >
               <FileText className="w-4 h-4 mr-2" />
-              Leggi il Whitepaper
+              Read the Whitepaper
             </Button>
           </CardContent>
         </Card>
@@ -493,12 +493,12 @@ export default function About() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Code className="w-5 h-5 text-primary" />
-              Codice Sorgente
+              Source Code
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              BricsCoin è completamente open source. Chiunque può leggere il codice, proporre miglioramenti o eseguire un proprio nodo.
+              BricsCoin is fully open source. Anyone can read the code, propose improvements, or run their own node.
             </p>
             <Button
               variant="outline"
@@ -507,7 +507,7 @@ export default function About() {
               data-testid="codeberg-btn"
             >
               <Code className="w-4 h-4 mr-2" />
-              Vedi su Codeberg
+              View on Codeberg
             </Button>
           </CardContent>
         </Card>
@@ -515,18 +515,18 @@ export default function About() {
 
       {/* CTA */}
       <div className="text-center space-y-4 pt-8">
-        <h2 className="text-xl sm:text-2xl font-heading font-bold">Pronto a scoprire BricsCoin?</h2>
+        <h2 className="text-xl sm:text-2xl font-heading font-bold">Ready to discover BricsCoin?</h2>
         <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-          Crea il tuo primo wallet in pochi secondi. Non servono documenti, email o registrazioni.
+          Create your first wallet in seconds. No documents, email, or registration required.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button onClick={() => window.location.href = '/wallet'} data-testid="get-started-btn">
             <Wallet className="w-4 h-4 mr-2" />
-            Crea il tuo Wallet
+            Create your Wallet
           </Button>
           <Button variant="outline" className="border-white/20" onClick={() => window.location.href = '/blockchain'}>
             <Globe className="w-4 h-4 mr-2" />
-            Esplora la Blockchain
+            Explore the Blockchain
           </Button>
           <Button variant="outline" className="border-white/20" onClick={() => window.open('https://x.com/Bricscoin26', '_blank')}>
             <ExternalLink className="w-4 h-4 mr-2" />
