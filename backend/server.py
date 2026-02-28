@@ -3541,6 +3541,54 @@ async def periodic_peer_heartbeat():
             await db.peers.delete_one({"node_id": nid})
             logging.info(f"Removed stale peer {nid[:8]} ({url})")
 
+
+async def periodic_dummy_traffic():
+    """Generate dummy transactions at random intervals to defeat timing analysis.
+    
+    Dummy TXs are indistinguishable from real ones at the network layer.
+    They use the Dandelion++ stem phase but are flagged internally and never mined.
+    """
+    while True:
+        try:
+            if DANDELION_DUMMY_TRAFFIC and connected_peers:
+                interval = random.randint(*DANDELION_DUMMY_INTERVAL)
+                await asyncio.sleep(interval)
+                
+                # Generate a dummy transaction that looks real at network level
+                dummy_tx = {
+                    "id": hashlib.sha256(f"dummy-{time.time()}-{random.random()}".encode()).hexdigest(),
+                    "sender": f"BRICS{''.join(random.choices('0123456789abcdef', k=40))}",
+                    "recipient": f"BRICS{''.join(random.choices('0123456789abcdef', k=40))}",
+                    "amount": round(random.uniform(0.001, 10.0), 8),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "type": "dummy",  # Internal flag — stripped before network broadcast
+                    "_dummy": True,
+                }
+                
+                # Route through Dandelion++ stem (looks identical to real TXs to observers)
+                # Strip internal flags before network propagation
+                network_tx = {k: v for k, v in dummy_tx.items() if k != "_dummy"}
+                network_tx["type"] = "standard"  # Appear as normal TX on the wire
+                
+                # Forward to a random stem peer with jitter
+                stem_peer = random.choice(list(connected_peers.values()))
+                try:
+                    async with httpx.AsyncClient(timeout=5.0) as client_http:
+                        await client_http.post(
+                            f"{stem_peer['url']}/api/p2p/transaction",
+                            json=network_tx
+                        )
+                except Exception:
+                    pass  # Failure is silent — dummy traffic is best-effort
+                    
+                logger.debug(f"Dummy traffic generated: {dummy_tx['id'][:12]}...")
+            else:
+                await asyncio.sleep(30)
+        except Exception as e:
+            logger.error(f"Dummy traffic error: {e}")
+            await asyncio.sleep(30)
+
+
 async def load_peers_from_db():
     """Load saved peers from database on startup"""
     try:
