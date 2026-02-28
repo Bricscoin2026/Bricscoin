@@ -1727,62 +1727,27 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
     logger.info(f"Secure transaction created: {tx_id} ({tx_request.amount} BRICS)")
     return transaction
 
-# DEPRECATED: Legacy endpoint - will be removed in future versions
+# DISABLED: Legacy endpoint removed — privacy mandatory protocol
 @api_router.post("/transactions")
 @limiter.limit("5/minute")
 async def create_transaction_legacy(request: Request, tx_request: TransactionRequest):
     """
-    DEPRECATED: This endpoint sends private keys over the network and is insecure.
-    Use POST /transactions/secure instead with client-side signing.
+    DISABLED: This endpoint has been removed as part of the privacy-mandatory protocol.
+    All transactions must use either:
+    - POST /api/transactions/secure (basic secure TX with Dandelion++)
+    - POST /api/privacy/send-private (FULL privacy: Ring + Stealth + zk-STARK)
     """
-    security_logger.warning(f"Deprecated /transactions endpoint used from {get_remote_address(request)}")
-    
-    # Validate sender has enough balance
-    sender_balance = await get_balance(tx_request.sender_address)
-    if sender_balance < tx_request.amount:
-        raise HTTPException(status_code=400, detail=f"Insufficient balance. Available: {sender_balance}")
-    
-    if tx_request.amount <= 0:
-        raise HTTPException(status_code=400, detail="Amount must be positive")
-    
-    # Create transaction data for signing
-    tx_id = str(uuid.uuid4())
-    timestamp = datetime.now(timezone.utc).isoformat()
-    tx_data = build_tx_data(tx_request.sender_address, tx_request.recipient_address, tx_request.amount, timestamp)
-    
-    # Sign transaction
-    try:
-        signature = sign_transaction(tx_request.sender_private_key, tx_data)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid private key: {str(e)}")
-    
-    # Get public key from private key
-    private_key = SigningKey.from_string(bytes.fromhex(tx_request.sender_private_key), curve=SECP256k1)
-    public_key_hex = private_key.get_verifying_key().to_string().hex()
-    
-    transaction = {
-        "id": tx_id,
-        "sender": tx_request.sender_address,
-        "recipient": tx_request.recipient_address,
-        "amount": tx_request.amount,
-        "timestamp": timestamp,
-        "signature": signature,
-        "public_key": public_key_hex,
-        "confirmed": False,
-        "block_index": None
-    }
-    
-    await db.transactions.insert_one(transaction)
-    del transaction["_id"]
-    
-    # Broadcast transaction to peers
-    # Dandelion++: route through stem phase before broadcast
-    asyncio.create_task(dandelion_stem_forward(transaction))
-    
-    return {
-        **transaction,
-        "warning": "DEPRECATED: This endpoint is insecure. Use /transactions/secure with client-side signing."
-    }
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "Legacy transparent transactions are disabled. Privacy is mandatory.",
+            "use_instead": [
+                {"endpoint": "/api/transactions/secure", "description": "Secure TX with client-side signing + Dandelion++ routing"},
+                {"endpoint": "/api/privacy/send-private", "description": "FULL privacy: Ring(32-64) + Stealth + zk-STARK"},
+            ],
+            "protocol": "BricsCoin v3.0 — Privacy Mandatory"
+        }
+    )
 
 @api_router.get("/transactions/address/{address}")
 async def get_address_transactions(request: Request, address: str, limit: int = 50):
