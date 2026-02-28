@@ -3274,8 +3274,9 @@ async def run_security_audit(request: Request):
 
     # Test: zk-STARK range proof (amount > 0)
     try:
-        proof_neg = generate_stark_proof(-5.0, 100.0)
-        privacy_tests.append({"name": "zk-STARK range proof (reject amount <= 0)", "passed": not proof_neg.get("verified", True)})
+        proof_neg = stark_prove(100, -5)
+        verify_neg = stark_verify(proof_neg)
+        privacy_tests.append({"name": "zk-STARK range proof (reject amount <= 0)", "passed": not verify_neg.get("valid", True)})
     except Exception:
         privacy_tests.append({"name": "zk-STARK range proof (reject amount <= 0)", "passed": True})
 
