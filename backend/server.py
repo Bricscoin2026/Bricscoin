@@ -2570,55 +2570,10 @@ async def zk_shielded_history(address: str):
     return {"shielded_transactions": txs}
 
 
-@api_router.post("/privacy/send-private")
-async def privacy_send_private(request: Request):
-    """Create a fully private transaction with type='private'"""
-    body = await request.json()
-    sender = body.get("sender_address")
-    pub_key = body.get("sender_public_key", "")
-    recipient_scan = body.get("recipient_scan_pubkey", "")
-    recipient_spend = body.get("recipient_spend_pubkey", "")
-    amount = float(body.get("amount", 0))
-    ring_size = int(body.get("ring_size", 5))
-
-    if not sender or not recipient_scan or amount <= 0:
-        raise HTTPException(status_code=400, detail="Missing required fields")
-
-    balance = await get_balance(sender)
-    if balance < amount:
-        raise HTTPException(status_code=400, detail=f"Insufficient balance: {balance} < {amount}")
-
-    # Generate stealth address from recipient keys
-    stealth_seed = hashlib.sha256(f"{recipient_scan}{recipient_spend}{uuid.uuid4()}".encode()).hexdigest()
-    stealth_address = "BRICSSA" + stealth_seed[:38]
-
-    blinding_factor = hashlib.sha256(f"{sender}{stealth_address}{amount}{uuid.uuid4()}".encode()).hexdigest()
-    ts = datetime.now(timezone.utc).isoformat()
-
-    tx_id = hashlib.sha256(f"{sender}{stealth_address}{amount}{ts}".encode()).hexdigest()
-    transaction = {
-        "id": tx_id,
-        "sender": sender,
-        "recipient": stealth_address,
-        "stealth_address": stealth_address,
-        "amount": amount,
-        "fee": 0,
-        "timestamp": ts,
-        "confirmed": True,
-        "block_index": None,
-        "type": "private",
-        "ring_size": ring_size,
-        "blinding_factor_hash": hashlib.sha256(blinding_factor.encode()).hexdigest(),
-    }
-    await db.transactions.insert_one(transaction)
-    transaction.pop("_id", None)
-
-    logger.info(f"Private transaction: {tx_id[:16]}... ({amount} BRICS) -> stealth")
-
-    # Dandelion++: route through stem phase before broadcast
-    asyncio.create_task(dandelion_stem_forward(transaction))
-
-    return {"transaction": transaction, "blinding_factor": blinding_factor, "stealth_address": stealth_address}
+## REMOVED: Duplicate /privacy/send-private endpoint.
+## The correct implementation lives in privacy_routes.py (privacy_router).
+## This duplicate was overriding it, causing privacy metadata (ring_signature, key_image,
+## ephemeral_key, zk_proof) to NOT be saved on-chain.
 
 
 @api_router.get("/privacy-score/{address}")
