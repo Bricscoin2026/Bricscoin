@@ -39,6 +39,30 @@ const PROTOCOL_LAYERS = [
         status: "stable",
         notes: "Consistent rounding applied across all balance calculations.",
       },
+      {
+        name: "Coinbase Maturity (Anti-Reorg)",
+        description: "Mining rewards are locked for 150 block confirmations before becoming spendable. Makes block reorganization attacks economically unattractive.",
+        status: "stable",
+        notes: "150 blocks (50% higher than Bitcoin's 100). Renders short-range reorgs unprofitable.",
+      },
+      {
+        name: "Adaptive Difficulty (EMA + Anti-Spike)",
+        description: "Dual-window EMA difficulty adjustment: 5-block short window for responsiveness, 20-block long window for stability. Anti-spike detection dampens hashrate rental attacks.",
+        status: "stable",
+        notes: "Tighter clamp (1.25x/0.75x). Detects 3x hashrate surges and dampens response to prevent post-attack difficulty crash.",
+      },
+      {
+        name: "Elastic Block Size",
+        description: "Block size adapts to demand using a median-based system. Blocks larger than the 100-block median incur a mining reward penalty.",
+        status: "stable",
+        notes: "Max 2x median growth, 50% reward penalty per 100% oversize. Prevents spam and chain bloat while allowing organic growth.",
+      },
+      {
+        name: "Crypto Agility Layer",
+        description: "Versioned key types with soft-forkable upgrade path. The protocol can change its cryptographic primitives without a hard fork.",
+        status: "stable",
+        notes: "Current version: 1. Supports upgradeable hash functions, multi-sig PQ-ready, versioned key schemes.",
+      },
     ],
   },
   {
