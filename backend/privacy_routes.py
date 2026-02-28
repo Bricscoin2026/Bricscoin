@@ -282,10 +282,20 @@ async def send_private_transaction(req: PrivateSendRequest):
     """
     if req.amount <= 0:
         raise HTTPException(400, "Amount must be positive")
+    if req.amount < 0.00000001:
+        raise HTTPException(400, "Amount below minimum (0.00000001 BRICS)")
     if req.ring_size < MIN_RING_SIZE:
         raise HTTPException(400, f"Ring size too small. Minimum enforced: {MIN_RING_SIZE} (requested: {req.ring_size})")
     if req.ring_size > MAX_RING_SIZE:
         raise HTTPException(400, f"Ring size too large. Maximum allowed: {MAX_RING_SIZE} (requested: {req.ring_size})")
+    # Validate key formats
+    try:
+        int(req.sender_private_key, 16)
+        if len(req.sender_public_key) != 128:
+            raise ValueError("Public key must be 128 hex chars")
+        bytes.fromhex(req.sender_public_key)
+    except (ValueError, TypeError) as e:
+        raise HTTPException(400, f"Invalid key format: {e}")
 
     db = await get_db()
 
