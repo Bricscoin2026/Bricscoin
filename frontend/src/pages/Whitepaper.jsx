@@ -143,7 +143,7 @@ export default function Whitepaper() {
               A Decentralized SHA-256 Proof-of-Work Cryptocurrency with Post-Quantum Cryptographic Security
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
-              <span className="bg-white/5 px-3 py-1 rounded-full">Version 3.1</span>
+              <span className="bg-white/5 px-3 py-1 rounded-full">Version 4.0</span>
               <span className="bg-white/5 px-3 py-1 rounded-full">February 2026</span>
               <span className="bg-white/5 px-3 py-1 rounded-full">Author: Jabo86</span>
               {stats && <span className="bg-primary/10 text-primary px-3 py-1 rounded-full">Block Height: {stats.block_height?.toLocaleString()}</span>}
