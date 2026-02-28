@@ -173,7 +173,7 @@ export default function Pools() {
                     data-testid={`copy-pool-${pool.id}`}
                   >
                     <Copy className="w-4 h-4 mr-1" />
-                    Copia
+                    Copy
                   </Button>
                 </div>
               </div>

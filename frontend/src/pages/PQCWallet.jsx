@@ -262,13 +262,13 @@ export default function PQCWallet({ embedded }) {
           getPQCStats().then(r => setStats(r.data)).catch(() => {});
           toast.success("Refreshed");
         }} data-testid="pqc-refresh-btn">
-          <RefreshCw className="w-4 h-4 mr-1" /> Aggiorna
+          <RefreshCw className="w-4 h-4 mr-1" /> Refresh
         </Button>
 
         <Dialog open={importOpen} onOpenChange={setImportOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" data-testid="pqc-import-btn">
-              <Key className="w-4 h-4 mr-1" /> Importa Wallet
+              <Key className="w-4 h-4 mr-1" /> Import Wallet
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card border-white/10">
@@ -307,7 +307,7 @@ export default function PQCWallet({ embedded }) {
         <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setNewWalletData(null); }}>
           <DialogTrigger asChild>
             <Button className="bg-emerald-600 hover:bg-emerald-700" size="sm" data-testid="pqc-create-btn">
-              <Plus className="w-4 h-4 mr-1" /> Nuovo Wallet PQC
+              <Plus className="w-4 h-4 mr-1" /> New PQC Wallet
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card border-white/10 max-w-lg">

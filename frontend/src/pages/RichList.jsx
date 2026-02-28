@@ -128,7 +128,7 @@ export default function RichList() {
           data-testid="refresh-richlist-btn"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-          Aggiorna
+          Refresh
         </Button>
       </div>
 

@@ -321,7 +321,7 @@ function SendDialog({ wallet, onSuccess }) {
             </div>
             {amount && (
               <div className="flex justify-between text-sm mt-1 pt-1 border-t border-yellow-500/20">
-                <span className="text-muted-foreground">Totale:</span>
+                <span className="text-muted-foreground">Total:</span>
                 <span className="text-primary font-bold font-mono">
                   {(parseFloat(amount || 0) + TRANSACTION_FEE).toFixed(2)} BRICS
                 </span>
@@ -444,7 +444,7 @@ function SeedPhraseDialog({ wallet, open, onOpenChange }) {
             className="gold-button rounded-sm"
           >
             {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-            Copia Seed
+            Copy Seed
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -551,7 +551,7 @@ function ImportDialog({ onSuccess }) {
         </Tabs>
         
         <div>
-          <Label>Nome Wallet (opzionale)</Label>
+          <Label>Wallet Name (optional)</Label>
           <Input
             placeholder="Imported Wallet"
             value={walletName}
@@ -737,7 +737,7 @@ export default function Wallet({ embedded }) {
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
-                <Label>Nome Wallet (opzionale)</Label>
+                <Label>Wallet Name (optional)</Label>
                 <Input
                   placeholder="My Wallet"
                   value={walletName}
@@ -753,7 +753,7 @@ export default function Wallet({ embedded }) {
                   className="gold-button rounded-sm"
                   data-testid="confirm-create-wallet-btn"
                 >
-                  {creating ? "Creazione..." : "Crea Wallet"}
+                  {creating ? "Creating..." : "Create Wallet"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -781,7 +781,7 @@ export default function Wallet({ embedded }) {
                 <DialogDescription>A 12-word seed phrase will be generated for backup</DialogDescription>
               </DialogHeader>
               <div className="py-4">
-                <Label>Nome Wallet (opzionale)</Label>
+                <Label>Wallet Name (optional)</Label>
                 <Input placeholder="My Wallet" value={walletName} onChange={(e) => setWalletName(e.target.value)} className="bg-background border-white/20" data-testid="wallet-name-input"/>
               </div>
               <DialogFooter>
@@ -854,7 +854,7 @@ export default function Wallet({ embedded }) {
                       data-testid="export-wallet-btn"
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      Esporta
+                Esporta
                     </Button>
                   </div>
                 </CardContent>
