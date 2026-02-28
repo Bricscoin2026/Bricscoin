@@ -336,7 +336,7 @@ export default function PrivacySuite({ embedded = false }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-xs text-muted-foreground">
-            Invia una transazione con <strong className="text-violet-400">privacy totale</strong>:
+            Send a transaction with <strong className="text-violet-400">total privacy</strong>:
             il mittente è nascosto tra un ring di firme, il destinatario riceve su un indirizzo stealth one-time,
             e l'importo è protetto da zk-STARK.
           </p>
@@ -367,7 +367,7 @@ export default function PrivacySuite({ embedded = false }) {
               {walletDropdownOpen && (
                 <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-card border border-white/10 rounded-sm shadow-xl max-h-60 overflow-y-auto">
                   {wallets.length === 0 ? (
-                    <p className="px-3 py-4 text-sm text-muted-foreground text-center">Nessun wallet. Creane uno nella tab Legacy o PQC.</p>
+                    <p className="px-3 py-4 text-sm text-muted-foreground text-center">No wallets. Create one in the Legacy or PQC tab.</p>
                   ) : wallets.map((w, i) => (
                     <button
                       key={i}
@@ -532,7 +532,7 @@ export default function PrivacySuite({ embedded = false }) {
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
             ) : history.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">Nessuna transazione privata ancora</p>
+              <p className="text-sm text-muted-foreground text-center py-6">No private transactions yet</p>
             ) : (
               <div className="space-y-2">
                 {history.map((tx, i) => (
@@ -571,7 +571,7 @@ export default function PrivacySuite({ embedded = false }) {
         </CardHeader>
         <CardContent className="space-y-0">
           {[
-            { step: "01", title: "Ring Signature (Sender Hidden)", desc: "La tua firma viene mescolata con quelle di altri utenti nel \"ring\". Nessuno può determinare chi ha realmente firmato la transazione. Il Key Image previene il double-spending.", color: "text-violet-400" },
+            { step: "01", title: "Ring Signature (Sender Hidden)", desc: "Your signature is mixed with those of other users in the \"ring\". Nobody can determine who actually signed the transaction. The Key Image prevents double-spending.", color: "text-violet-400" },
             { step: "02", title: "Stealth Address (Receiver Hidden)", desc: "Viene generato un indirizzo one-time per il destinatario usando DHKE. Solo il destinatario, con la sua scan key, puo' riconoscere il pagamento.", color: "text-cyan-400" },
             { step: "03", title: "zk-STARK Proof (Amount Hidden)", desc: "L'importo viene nascosto tramite un commitment crittografico. Una STARK proof (FRI protocol) dimostra la validita' senza rivelare l'importo.", color: "text-emerald-400" },
             { step: "04", title: "On-Chain Result", desc: "La blockchain mostra: sender = RING_HIDDEN, receiver = BRICSX... (stealth), amount = SHIELDED. Privacy totale mantenuta.", color: "text-amber-400" },
