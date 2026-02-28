@@ -2851,7 +2851,7 @@ async def register_peer(peer: PeerRegister):
     # Anti-Sybil: MANDATORY PoW handshake to prevent Sybil attacks
     if peer.pow_nonce is not None and peer.pow_challenge is not None:
         # Verify the PoW: sha256(challenge + nonce) must have PEER_POW_DIFFICULTY leading zero bits
-        pow_hash = hashlib.sha256(f"{pow_challenge}{pow_nonce}".encode()).hexdigest()
+        pow_hash = hashlib.sha256(f"{peer.pow_challenge}{peer.pow_nonce}".encode()).hexdigest()
         required_zeros = PEER_POW_DIFFICULTY // 4  # hex digits
         if not pow_hash.startswith("0" * required_zeros):
             raise HTTPException(status_code=403, detail=f"Invalid PoW handshake. Need {required_zeros} leading hex zeros.")
