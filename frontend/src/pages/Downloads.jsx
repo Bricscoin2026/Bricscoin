@@ -183,8 +183,8 @@ export default function Downloads() {
                 <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
                   {p.instructions.map((step, j) => (
                     <li key={j}>
-                      {step.startsWith("chmod") || step.startsWith("./") 
-                        ? <code className="bg-white/10 px-1 rounded">{step}</code>
+                      {step.startsWith("chmod") || step.startsWith("./") || step.startsWith("cd ") || step.startsWith("unzip") || step.startsWith("sudo") || step.startsWith("mv ") || step.startsWith("open ")
+                        ? <code className="bg-white/10 px-1 rounded text-xs">{step}</code>
                         : step}
                     </li>
                   ))}
