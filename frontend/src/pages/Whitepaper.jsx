@@ -635,6 +635,8 @@ export default function Whitepaper() {
             <li>Fanti, G. et al. &ldquo;Dandelion++: Lightweight Cryptocurrency Networking with Formal Anonymity Guarantees.&rdquo; ACM SIGMETRICS, 2018. <a href="https://arxiv.org/abs/1805.11060" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">arxiv.org/abs/1805.11060</a></li>
             <li>Ben-Sasson, E. et al. &ldquo;Scalable, transparent, and post-quantum secure computational integrity.&rdquo; (zk-STARKs), 2018.</li>
             <li>Noether, S. et al. &ldquo;Ring Confidential Transactions.&rdquo; Ledger, 2016.</li>
+            <li>Liu, J.K. et al. &ldquo;Linkable Spontaneous Anonymous Group Signature for Ad Hoc Groups.&rdquo; ACISP, 2004.</li>
+            <li>Todd, P. &ldquo;Stealth Addresses.&rdquo; Bitcoin Developer Guide, 2014. Diffie-Hellman Key Exchange one-time address derivation.</li>
           </ol>
 
           {/* Footer */}
