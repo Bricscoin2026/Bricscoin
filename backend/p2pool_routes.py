@@ -871,10 +871,20 @@ async def get_pool_stats(request: Request):
 
     # Network info
     last_block = await db.blocks.find_one(
-        {}, {"_id": 0, "index": 1, "timestamp": 1, "miner": 1, "difficulty": 1, "hash": 1},
+        {}, {"_id": 0, "index": 1, "timestamp": 1, "miner": 1, "difficulty": 1, "hash": 1, "block_type": 1},
         sort=[("index", -1)]
     )
     total_blocks = await db.blocks.count_documents({})
+
+    # AuxPoW (merge mining) statistics
+    auxpow_blocks = await db.blocks.count_documents({"block_type": "auxpow"})
+    native_blocks = total_blocks - auxpow_blocks
+    last_auxpow = await db.blocks.find_one(
+        {"block_type": "auxpow"},
+        {"_id": 0, "index": 1, "timestamp": 1, "miner": 1, "auxpow.parent_hash": 1, "auxpow.parent_chain": 1},
+        sort=[("index", -1)]
+    )
+    pending_auxpow_work = await db.auxpow_work.count_documents({"used": False})
 
     # PPLNS payout preview
     pplns_preview = await calculate_pplns_payouts(BLOCK_REWARD)
