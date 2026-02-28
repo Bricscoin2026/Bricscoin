@@ -74,9 +74,15 @@ const PROTOCOL_LAYERS = [
     criteria: [
       {
         name: "Dandelion++ Transaction Propagation",
-        description: "Transactions route through a random stem path before broadcast, raising the cost of network-level origin analysis.",
+        description: "Transactions route through a random stem path before broadcast, with propagation jitter and randomized batching to defeat timing analysis.",
         status: "stable",
-        notes: "10-minute epochs, 90% stem probability, 4-hop max, 30s embargo timeout. Per Dandelion++ paper (arXiv:1805.11060).",
+        notes: "10-min epochs, 90% stem probability, 4-hop max, 30s embargo. Jitter: 100-2000ms random delay. Batch: 2-5 TXs accumulated before forwarding.",
+      },
+      {
+        name: "Dummy Traffic Generation",
+        description: "Every node periodically generates indistinguishable decoy transactions. Observers cannot differentiate real from fake traffic at the network layer.",
+        status: "stable",
+        notes: "Random intervals (15-60s). Dummy TXs use identical Dandelion++ routing. Destroys timing analysis correlation.",
       },
       {
         name: "LSAG Ring Signatures",
