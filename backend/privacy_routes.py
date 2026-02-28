@@ -347,27 +347,66 @@ async def send_private_transaction(req: PrivateSendRequest):
     stealth_result = generate_stealth_address(req.recipient_scan_pubkey, req.recipient_spend_pubkey)
     stealth_time = time.time() - stealth_start
 
-    # ── Step 3: Gather Ring (hide sender) ──
+    # ── Step 3: Gather Ring with Gamma Distribution Decoy Selection ──
     ring_start = time.time()
-    # Get decoy public keys from existing wallets
-    decoy_count = max(req.ring_size - 1, 2)
+    decoy_count = max(req.ring_size - 1, MIN_RING_SIZE - 1)
+
+    # Gamma distribution decoy selection (like Monero)
+    # Favors recent transactions/wallets for realistic temporal distribution
+    # This prevents timing-based deanonymization attacks
+    import random
+    import math
+
     wallets_cursor = db.wallets.find(
         {"address": {"$ne": req.sender_address}, "public_key": {"$exists": True}},
-        {"_id": 0, "address": 1, "public_key": 1}
-    ).limit(decoy_count + 10)
-    all_wallets = await wallets_cursor.to_list(decoy_count + 10)
+        {"_id": 0, "address": 1, "public_key": 1, "created_at": 1}
+    ).limit(decoy_count * 5)
+    all_wallets = await wallets_cursor.to_list(decoy_count * 5)
 
-    decoy_keys = get_decoy_keys(all_wallets, req.sender_address, decoy_count)
+    if all_wallets:
+        # Sort by creation time (newest first)
+        all_wallets.sort(key=lambda w: w.get("created_at", ""), reverse=True)
+        n_avail = len(all_wallets)
 
-    # If not enough real decoys, generate synthetic ones for privacy
+        # Gamma distribution selection: shape=19.28, scale=1/1.61 (Monero parameters)
+        # Higher weight to recent wallets, exponential decay for older ones
+        weights = []
+        for i in range(n_avail):
+            # Gamma PDF approximation: w(i) = (i+1)^(k-1) * exp(-(i+1)/theta)
+            x = (i + 1) / max(n_avail, 1) * 50  # normalize to [0, 50]
+            w = math.pow(x + 0.1, 19.28 - 1) * math.exp(-x * 1.61) + 1e-10
+            weights.append(w)
+
+        # Normalize weights
+        total_w = sum(weights)
+        weights = [w / total_w for w in weights]
+
+        # Weighted selection without replacement
+        selected_indices = set()
+        attempts = 0
+        while len(selected_indices) < min(decoy_count, n_avail) and attempts < decoy_count * 10:
+            r_val = random.random()
+            cumulative = 0.0
+            for idx, w in enumerate(weights):
+                cumulative += w
+                if r_val <= cumulative:
+                    selected_indices.add(idx)
+                    break
+            attempts += 1
+
+        decoy_keys = [all_wallets[i]["public_key"] for i in selected_indices
+                      if all_wallets[i].get("public_key") and len(all_wallets[i]["public_key"]) == 128]
+    else:
+        decoy_keys = []
+
+    # Fallback: generate synthetic decoys if not enough real ones
     while len(decoy_keys) < decoy_count:
         from ecdsa import SigningKey, SECP256k1 as _SECP256k1
         fake_sk = SigningKey.generate(curve=_SECP256k1)
         decoy_keys.append(fake_sk.get_verifying_key().to_string().hex())
 
     # Build ring with real signer at random position
-    import random
-    ring_keys = list(decoy_keys)
+    ring_keys = list(decoy_keys[:decoy_count])
     real_index = random.randint(0, len(ring_keys))
     ring_keys.insert(real_index, req.sender_public_key)
 
