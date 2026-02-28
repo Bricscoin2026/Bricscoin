@@ -814,7 +814,7 @@ export default function Wallet({ embedded }) {
                 data-testid="create-first-wallet-btn"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Crea Wallet
+                Create Wallet
               </Button>
               <ImportDialog onSuccess={handleImportSuccess} />
             </div>
@@ -824,7 +824,7 @@ export default function Wallet({ embedded }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Wallets List */}
           <div className="space-y-4">
-            <h2 className="font-heading font-bold">I Tuoi Wallet</h2>
+            <h2 className="font-heading font-bold">Your Wallets</h2>
             {wallets.map((wallet) => (
               <WalletCard
                 key={wallet.address}
@@ -854,7 +854,7 @@ export default function Wallet({ embedded }) {
                       data-testid="export-wallet-btn"
                     >
                       <Download className="w-4 h-4 mr-2" />
-                Esporta
+                Export
                     </Button>
                   </div>
                 </CardContent>
@@ -863,7 +863,7 @@ export default function Wallet({ embedded }) {
               {/* Transaction History */}
               <Card className="bg-card border-white/10" data-testid="transaction-history-card">
                 <CardHeader className="border-b border-white/10">
-                  <CardTitle className="font-heading">Cronologia Transazioni</CardTitle>
+                  <CardTitle className="font-heading">Transaction History</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   {transactions.length === 0 ? (
