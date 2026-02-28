@@ -281,7 +281,7 @@ function SendDialog({ wallet, onSuccess }) {
             />
           </div>
           <div>
-            <Label>Indirizzo Destinatario</Label>
+            <Label>Recipient Address</Label>
             <Input
               placeholder="BRICS..."
               value={recipient}
@@ -292,7 +292,7 @@ function SendDialog({ wallet, onSuccess }) {
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <Label>Importo (BRICS)</Label>
+              <Label>Amount (BRICS)</Label>
               <Button 
                 variant="ghost" 
                 size="sm" 

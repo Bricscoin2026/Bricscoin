@@ -93,7 +93,7 @@ export default function Pools() {
       <div className="space-y-4">
         <h2 className="text-2xl font-heading font-bold flex items-center gap-2">
           <Server className="w-6 h-6 text-primary" />
-          Pool Disponibili
+          Available Pools
         </h2>
 
         {pools.map((pool) => (
