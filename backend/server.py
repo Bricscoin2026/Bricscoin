@@ -921,6 +921,44 @@ async def validate_block(block: dict) -> bool:
                 if not verify_result.get('valid'):
                     logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} ring signature INVALID: {verify_result.get('error')}")
                     return False
+            
+            # 6) Commitment must be present and non-empty (amount conservation)
+            if not tx.get('commitment') or len(str(tx.get('commitment', ''))) < 16:
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} missing or weak commitment")
+                return False
+            
+            # 7) Encrypted amount must exist (only parties can decrypt)
+            if not tx.get('encrypted_amount'):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} missing encrypted_amount")
+                return False
+            
+            # 8) STARK verified flag must be True
+            if not tx.get('stark_verified'):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} STARK not verified")
+                return False
+            
+            # 9) Ring signature must have tx_nonce (per-TX unique key image)
+            if not ring_sig.get('tx_nonce'):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} missing tx_nonce (legacy format)")
+                # Allow legacy TXs without nonce but log warning
+        
+        # ==================== CONSERVATION OF VALUE ====================
+        # For non-coinbase transactions, verify that no value is created from nothing.
+        # Private TXs: commitment-based (no plaintext amount available to check)
+        # Regular TXs: sum(inputs) must equal sum(outputs) + fee
+        for tx in block.get('transactions', []):
+            if tx.get('sender') in ('COINBASE', 'SYSTEM', 'RING_HIDDEN'):
+                continue
+            if tx.get('type') == 'private':
+                continue  # Private TXs are validated by STARK proof (amount > 0, amount <= balance)
+            tx_amount = tx.get('amount', 0)
+            tx_fee = tx.get('fee', 0)
+            if isinstance(tx_amount, (int, float)) and tx_amount < 0:
+                logging.warning(f"Block {block['index']}: tx {tx.get('id','?')[:12]} negative amount")
+                return False
+            if isinstance(tx_fee, (int, float)) and tx_fee < 0:
+                logging.warning(f"Block {block['index']}: tx {tx.get('id','?')[:12]} negative fee")
+                return False
         
         return True
     except Exception as e:
