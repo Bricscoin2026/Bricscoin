@@ -30,10 +30,11 @@ from stark_engine import (
     generate_blinding_factor,
 )
 
-# Ring signature protocol constants
-MIN_RING_SIZE = 11       # Minimum enforced (privacy floor)
-DEFAULT_RING_SIZE = 16   # Default (matches Monero v16)
+# Ring signature protocol constants — HARDENED
+MIN_RING_SIZE = 32       # Minimum enforced (privacy mandatory — beyond Monero's 16)
+DEFAULT_RING_SIZE = 32   # Default ring size (2x Monero)
 MAX_RING_SIZE = 64       # Maximum allowed
+PRIVACY_MANDATORY = True # All transactions MUST use Ring + Stealth + zk-STARK
 
 router = APIRouter(prefix="/api/privacy", tags=["privacy"])
 
