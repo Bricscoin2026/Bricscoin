@@ -119,7 +119,10 @@ async def privacy_status():
                 "protocol": "LSAG (Linkable SAG)",
                 "curve": "secp256k1",
                 "purpose": "Hide sender identity",
-                "default_ring_size": 5,
+                "min_ring_size": MIN_RING_SIZE,
+                "default_ring_size": DEFAULT_RING_SIZE,
+                "max_ring_size": MAX_RING_SIZE,
+                "mandatory_minimum": True,
             },
             "stealth_addresses": {
                 "protocol": "DHKE Stealth Address",
