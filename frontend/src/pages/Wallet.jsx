@@ -403,7 +403,7 @@ function SeedPhraseDialog({ wallet, open, onOpenChange }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(wallet?.seed_phrase || "");
     setCopied(true);
-    toast.success("Seed phrase copiata!");
+    toast.success("Seed phrase copied!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -574,7 +574,7 @@ function ImportDialog({ onSuccess }) {
             className="gold-button rounded-sm"
             data-testid="confirm-import-btn"
           >
-            {importing ? "Importazione..." : "Importa"}
+            {importing ? "Importing..." : "Import"}
           </Button>
         </DialogFooter>
       </DialogContent>
