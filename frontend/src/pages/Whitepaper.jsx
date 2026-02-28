@@ -436,12 +436,18 @@ export default function Whitepaper() {
           <SectionHeading id="sec-mitigations" level={3}>8.2 Attack Mitigations</SectionHeading>
           <SpecTable rows={[
             ["Replay Attack", "Signature uniqueness + timestamp validation"],
-            ["51% Attack", "SHA-256 PoW (same security model as Bitcoin)"],
-            ["Sybil Attack", "Proof-of-Work requirement for block creation"],
+            ["51% Attack", "SHA-256 PoW (same security model as Bitcoin) + merge mining with BTC"],
+            ["Sybil Attack", "PoW handshake (16-bit) + per-ASN limits (max 3) + 50 peer slots"],
             ["DDoS", "Rate limiting (500 req/min default) + burst detection + IP blacklisting"],
             ["Quantum Attack", "ML-DSA-65 hybrid signatures (NIST FIPS 204)"],
             ["Key Theft", "Client-side signing (keys never leave the device)"],
-            ["Double Spend", "Confirmation depth + UTXO-style balance checks"],
+            ["Double Spend", "Key image tracking per private TX + confirmation depth"],
+            ["Chain Analysis", "LSAG Ring Signatures (32-64 decoys) — sender NOT stored on-chain"],
+            ["Amount Tracing", "zk-STARK proofs — plaintext amount NEVER stored on-chain"],
+            ["Recipient Linking", "Stealth addresses (DHKE) — one-time addresses per payment"],
+            ["Timing Analysis", "Dandelion++ with propagation jitter (100-2000ms) + dummy traffic"],
+            ["Block Reorg", "Coinbase maturity (150 blocks) + checkpoint depth (100 blocks)"],
+            ["Hashrate Spike", "Adaptive difficulty with anti-spike dampening (detects 3x surges)"],
           ]} />
 
           <SectionHeading id="sec-infra" level={3}>8.3 Infrastructure Security</SectionHeading>
