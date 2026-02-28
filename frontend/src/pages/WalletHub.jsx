@@ -156,18 +156,6 @@ function PortfolioSummary({ onSelectTab }) {
 
 const PRIVACY_MODES = [
   {
-    id: "safe",
-    label: "Safe",
-    tab: "pqc",
-    icon: ShieldCheck,
-    color: "text-emerald-400",
-    borderColor: "border-emerald-500/20",
-    bgColor: "bg-emerald-500/5",
-    description: "Standard PQC transaction. Fast, quantum-resistant. Amount and addresses visible on-chain.",
-    features: ["Quantum-resistant signature (ML-DSA-65)", "Fast confirmation", "Low fees"],
-    privacyLevel: 1,
-  },
-  {
     id: "strong",
     label: "Strong Privacy",
     tab: "zk",
@@ -175,8 +163,8 @@ const PRIVACY_MODES = [
     color: "text-violet-400",
     borderColor: "border-violet-500/20",
     bgColor: "bg-violet-500/5",
-    description: "Shielded transaction. Amount hidden with zk-STARK proof. Reduces amount correlation attacks.",
-    features: ["Hidden amount (zk-STARK)", "Verifiable without revealing data", "Moderate speed"],
+    description: "Shielded transaction. Amount hidden with zk-STARK proof. Ring signature hides sender among 32 decoys.",
+    features: ["Hidden amount (zk-STARK)", "Ring signature (32 members)", "Dandelion++ routing"],
     privacyLevel: 2,
   },
   {
@@ -187,8 +175,8 @@ const PRIVACY_MODES = [
     color: "text-red-400",
     borderColor: "border-red-500/20",
     bgColor: "bg-red-500/5",
-    description: "Full privacy layering. Ring signatures obscure sender, stealth address protects recipient, amount hidden. Significantly raises the cost of chain analysis.",
-    features: ["Sender obscured (Ring Signature)", "Recipient protected (Stealth Address)", "Amount hidden (Pedersen Commitment)"],
+    description: "Full privacy stack. Ring(32-64) + Stealth + zk-STARK + Dandelion++ + dummy traffic. Deanonymization becomes economically impractical.",
+    features: ["Ring Signature (32-64 decoys)", "One-time Stealth Address", "zk-STARK hidden amount", "Network-level obfuscation"],
     privacyLevel: 3,
   },
 ];
