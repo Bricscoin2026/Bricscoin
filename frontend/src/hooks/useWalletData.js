@@ -19,6 +19,7 @@ export const JBS_PER_BRICS = 100_000_000;
 
 export function useWalletData() {
   const [totalBalance, setTotalBalance] = useState(null);
+  const [totalImmatureBalance, setTotalImmatureBalance] = useState(0);
   const [walletCount, setWalletCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [cryptoPrices, setCryptoPrices] = useState({});
@@ -41,6 +42,7 @@ export function useWalletData() {
 
       if (allAddresses.length === 0) {
         setTotalBalance(0);
+        setTotalImmatureBalance(0);
         setLoading(false);
         return;
       }
@@ -48,18 +50,24 @@ export function useWalletData() {
       const results = await Promise.allSettled(
         allAddresses.map(({ address, type }) =>
           type === "legacy"
-            ? getWalletBalance(address).then(r => r.data.balance)
-            : getPQCWalletInfo(address).then(r => r.data.balance)
+            ? getWalletBalance(address).then(r => r.data)
+            : getPQCWalletInfo(address).then(r => r.data)
         )
       );
 
-      const sum = results.reduce((acc, r) => {
-        if (r.status === "fulfilled" && typeof r.value === "number") return acc + r.value;
-        return acc;
-      }, 0);
+      let sum = 0;
+      let immatureSum = 0;
+      for (const r of results) {
+        if (r.status === "fulfilled" && r.value) {
+          sum += typeof r.value.balance === "number" ? r.value.balance : 0;
+          immatureSum += typeof r.value.immature_balance === "number" ? r.value.immature_balance : 0;
+        }
+      }
       setTotalBalance(sum);
+      setTotalImmatureBalance(immatureSum);
     } catch {
       setTotalBalance(null);
+      setTotalImmatureBalance(0);
     } finally {
       setLoading(false);
     }
