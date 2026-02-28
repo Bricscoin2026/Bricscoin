@@ -41,7 +41,7 @@ load_dotenv(ROOT_DIR / '.env')
 # ==================== SECURITY CONFIGURATION ====================
 # Rate Limiting
 # Whitelist internal server IPs from rate limiting
-RATE_LIMIT_WHITELIST = {"157.180.123.105", "127.0.0.1", "172.19.0.1", "65.108.55.10"}
+RATE_LIMIT_WHITELIST = {"157.180.123.105", "127.0.0.1", "172.19.0.1", "65.108.55.10", "46.224.54.167"}
 
 def get_rate_limit_key(request: Request) -> str:
     client_ip = get_remote_address(request)
