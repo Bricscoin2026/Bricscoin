@@ -103,7 +103,7 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
 
       <div className="space-y-3">
         <div>
-          <p className="text-xs text-muted-foreground mb-1">Indirizzo</p>
+          <p className="text-xs text-muted-foreground mb-1">Address</p>
           <div className="flex items-center gap-2">
             <p className="font-mono text-xs truncate flex-1">{wallet.address}</p>
             <Button
@@ -537,7 +537,7 @@ function ImportDialog({ onSuccess }) {
           
           <TabsContent value="key" className="space-y-4 mt-4">
             <div>
-              <Label>Chiave Privata</Label>
+              <Label>Private Key</Label>
               <Input
                 type="password"
                 placeholder="Enter the hexadecimal private key"
@@ -805,7 +805,7 @@ export default function Wallet({ embedded }) {
             <WalletIcon className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-xl font-heading font-bold mb-2">No Wallet</h2>
             <p className="text-muted-foreground mb-6">
-              Crea un nuovo wallet o importane uno esistente
+              Create a new wallet or import an existing one
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button 

@@ -220,7 +220,7 @@ export default function RichList() {
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 text-sm text-muted-foreground font-medium">
               <div className="col-span-1">#</div>
-              <div className="col-span-5 md:col-span-6">Indirizzo</div>
+              <div className="col-span-5 md:col-span-6">Address</div>
               <div className="col-span-4 md:col-span-3 text-right">Bilancio</div>
               <div className="col-span-2 text-right">%</div>
             </div>
