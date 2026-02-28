@@ -1865,8 +1865,25 @@ async def submit_mined_block(submission: MiningSubmit):
     if existing:
         raise HTTPException(status_code=409, detail="Block already mined")
     
-    # Get pending transactions
-    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(100).to_list(100)
+    # Get pending transactions — ELASTIC BLOCK SIZE ENFORCEMENT
+    recent_block_sizes = await db.blocks.find(
+        {}, {"_id": 0, "transactions": 1}
+    ).sort("index", -1).limit(BLOCK_SIZE_MEDIAN_WINDOW).to_list(BLOCK_SIZE_MEDIAN_WINDOW)
+    
+    block_sizes = sorted([len(b.get("transactions", [])) for b in recent_block_sizes]) if recent_block_sizes else [BASE_BLOCK_SIZE]
+    median_size = block_sizes[len(block_sizes) // 2] if block_sizes else BASE_BLOCK_SIZE
+    effective_max = max(BASE_BLOCK_SIZE, int(median_size * BLOCK_SIZE_MAX_GROWTH))
+    
+    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(effective_max).to_list(effective_max)
+    
+    # Calculate reward with elastic block penalty
+    base_reward = get_mining_reward(new_index)
+    tx_count = len(pending_txs)
+    reward_penalty = 0.0
+    if median_size > 0 and tx_count > median_size:
+        oversize_ratio = (tx_count - median_size) / median_size
+        reward_penalty = min(oversize_ratio * BLOCK_SIZE_PENALTY_RATE, 0.9)
+    effective_reward = round(base_reward * (1.0 - reward_penalty), 8)
     
     # Create the new block
     timestamp = datetime.now(timezone.utc).isoformat()
