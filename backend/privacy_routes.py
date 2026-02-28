@@ -350,7 +350,8 @@ async def send_private_transaction(req: PrivateSendRequest):
     ring_keys.insert(real_index, req.sender_public_key)
 
     # Create ring signature
-    tx_message = f"{req.sender_address}:{stealth_result['stealth_address']}:{req.amount}:{datetime.now(timezone.utc).isoformat()}"
+    tx_timestamp = datetime.now(timezone.utc).isoformat()
+    tx_message = f"{req.sender_address}:{stealth_result['stealth_address']}:{req.amount}:{tx_timestamp}"
     ring_sig = ring_sign(tx_message, req.sender_private_key, ring_keys, real_index)
     ring_time = time.time() - ring_start
 
@@ -403,6 +404,7 @@ async def send_private_transaction(req: PrivateSendRequest):
             "key_image": ring_sig["key_image"],
             "ring_size": ring_sig["ring_size"],
             "public_keys": ring_sig["public_keys"],
+            "message": tx_message,
         },
         "stealth_address": stealth_result["stealth_address"],
         "stealth_pubkey": stealth_result["stealth_pubkey"],
