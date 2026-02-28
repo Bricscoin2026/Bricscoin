@@ -649,7 +649,7 @@ export default function Wallet({ embedded }) {
       
       toast.success("Wallet created! Save the seed phrase!");
     } catch (error) {
-      toast.error("Creazione wallet fallita");
+      toast.error("Wallet creation failed");
     } finally {
       setCreating(false);
     }
