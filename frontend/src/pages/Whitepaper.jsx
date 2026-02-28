@@ -488,19 +488,22 @@ export default function Whitepaper() {
             ["Estimated Savings", "40-60% for blocks with large transaction lists"],
           ]} />
 
-          <SectionHeading id="sec-privacymodes" level={3}>8.6 Privacy Mode Selection</SectionHeading>
+          <SectionHeading id="sec-privacymodes" level={3}>8.6 Mandatory Privacy (Consensus-Enforced)</SectionHeading>
           <p>
-            BricsCoin offers three privacy levels for transactions, allowing users to choose the appropriate tradeoff 
-            between speed, cost, and privacy without requiring technical knowledge:
+            All user-to-user transactions on BricsCoin are <strong>fully private by default and by protocol</strong>. The transparent transaction endpoint 
+            has been permanently disabled (returns HTTP 410 Gone). Privacy is not optional &mdash; it is enforced at the consensus level.
           </p>
           <SpecTable rows={[
-            ["Safe", "Standard PQC transaction — quantum-resistant, fast, low fees. Amount and addresses visible on-chain."],
-            ["Strong Privacy", "Shielded zk-STARK transaction — amount hidden with zero-knowledge proof, addresses visible."],
-            ["Maximum Privacy", "LSAG Ring signatures (mandatory min 32, default 32, max 64 members) + Stealth addresses + hidden amount — sender, recipient, and amount all hidden. No transparent mode exists."],
+            ["Sender Privacy", "LSAG Ring Signatures with 32-64 decoys. Sender stored as 'RING_HIDDEN'. Per-TX nonce (I = x*Hp(P||nonce)) ensures unique key images."],
+            ["Receiver Privacy", "Diffie-Hellman Stealth Addresses (BRICSX...). One-time address per payment. Only recipient with scan key can identify incoming payments."],
+            ["Amount Privacy", "zk-STARK commitment + encrypted_amount. No plaintext amount exists in the transaction document. Only the sender and recipient can decrypt."],
+            ["Consensus Enforcement", "Nodes reject blocks containing private TXs with: missing ring_signature, ring_size < 32, missing ephemeral_pubkey, missing proof_hash, or invalid ring signature verification."],
+            ["Double-Spend", "Key image recorded per TX. Duplicate key images rejected at both TX submission and block validation."],
+            ["Balance Ledger", "Private balance operations stored in separate, unlinkable debit/credit records. Not synced to peers. No cross-reference between sender and receiver."],
           ]} />
           <p className="mt-2">
-            <strong>Note:</strong> No privacy mode provides absolute guarantees. Each level <em>reduces</em> the attack surface 
-            and <em>raises the cost</em> of chain analysis. Users should evaluate their threat model accordingly.
+            <strong>On-chain view of a private transaction:</strong> <code className="bg-white/5 px-1 rounded">sender: "RING_HIDDEN"</code>, <code className="bg-white/5 px-1 rounded">recipient: "BRICSXa4f..."</code>, <code className="bg-white/5 px-1 rounded">display_amount: "SHIELDED"</code>. 
+            No plaintext sender address, no plaintext amount, no linkable metadata.
           </p>
 
           <SectionHeading id="sec-threatmodel" level={3}>8.7 Threat Model</SectionHeading>
