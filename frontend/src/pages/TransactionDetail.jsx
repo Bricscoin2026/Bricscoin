@@ -180,7 +180,7 @@ export default function TransactionDetail() {
                 <div className="flex-1">
                   <p className="font-medium text-emerald-400 flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4" />
-                    Firmato Localmente - Quantum-Safe
+                    Signed Locally - Quantum-Safe
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Hybrid ECDSA + ML-DSA-65 (FIPS 204) signature. Private keys never left the sender's device.

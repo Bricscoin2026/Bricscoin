@@ -42,7 +42,7 @@ function TxRow({ tx }) {
       </div>
       <div className="ml-auto flex items-center gap-1 text-muted-foreground">
         <Clock size={10} />
-        <span>{tx.timestamp ? new Date(tx.timestamp).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}</span>
+        <span>{tx.timestamp ? new Date(tx.timestamp).toLocaleString("en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}</span>
       </div>
     </div>
   );
@@ -169,7 +169,7 @@ export default function PrivacyExplorer() {
                     <div key={i} className="flex items-center gap-3 py-1.5 text-xs font-mono border-b border-white/[0.04]">
                       <span className="text-cyan-400">{tx.stealth_address?.substring(0, 16)}...</span>
                       <span className="text-emerald-400 font-bold">+{tx.amount} BRICS</span>
-                      <span className="text-muted-foreground ml-auto">{tx.timestamp ? new Date(tx.timestamp).toLocaleString("it-IT") : ""}</span>
+                      <span className="text-muted-foreground ml-auto">{tx.timestamp ? new Date(tx.timestamp).toLocaleString("en-US") : ""}</span>
                     </div>
                   ))}
                 </div>
