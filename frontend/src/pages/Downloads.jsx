@@ -12,8 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 
-const GITHUB_RELEASE = "https://github.com/Bricscoin2026/Bricscoin/releases/download/v2.2.0";
-const GITHUB_RELEASES_PAGE = "https://github.com/Bricscoin2026/Bricscoin/releases/tag/v2.2.0";
+const CODEBERG_BASE = "https://codeberg.org/Bricscoin_26/Bricscoin/raw/branch/main/downloads/BricsCoin%20Core%203.0.0";
+const CODEBERG_FOLDER = "https://codeberg.org/Bricscoin_26/Bricscoin/src/branch/main/downloads/BricsCoin%20Core%203.0.0";
 
 const platforms = [
   {
