@@ -146,12 +146,17 @@ export default function Downloads() {
                   <div className="flex-1" />
                   <Button
                     className="gold-button rounded-sm w-full mt-4"
-                    onClick={() => window.open(CODEBERG_FOLDER, '_blank')}
+                    onClick={() => window.open(`${GITHUB_RELEASE}/${p.file}`, '_blank')}
                     data-testid={`download-${p.name.toLowerCase()}-btn`}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download {p.name}
                   </Button>
+                  {p.sha256 && (
+                    <p className="text-[10px] text-muted-foreground/50 mt-2 font-mono break-all">
+                      SHA256: {p.sha256}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
