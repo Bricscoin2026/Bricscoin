@@ -284,7 +284,7 @@ export default function PrivacySuite({ embedded = false }) {
       });
 
       setTxResult(res.data);
-      toast.success("Transazione privata inviata con successo!");
+      toast.success("Private transaction sent successfully!");
 
       // Save blinding factor
       const savedFactors = JSON.parse(localStorage.getItem("bricscoin_blinding_factors") || "{}");

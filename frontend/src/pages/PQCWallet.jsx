@@ -186,7 +186,7 @@ export default function PQCWallet({ embedded }) {
 
       // Send only signatures and public keys to server for verification
       const res = await createPQCTransaction(txPayload);
-      toast.success(`Transazione firmata e inviata: ${res.data.tx_id?.slice(0, 16)}...`);
+      toast.success(`Transaction signed and sent: ${res.data.tx_id?.slice(0, 16)}...`);
       setSendOpen(false);
       setSendForm({ recipient: "", amount: "" });
     } catch (err) {
