@@ -1815,7 +1815,14 @@ async def get_mining_template():
         "transactions": pending_txs,
         "previous_hash": last_block['hash'],
         "difficulty": difficulty,
-        "reward": reward,
+        "reward": effective_reward,
+        "base_reward": reward,
+        "reward_penalty": round(reward_penalty * 100, 1),
+        "elastic_block": {
+            "median_size": median_size,
+            "effective_max": effective_max,
+            "tx_count": tx_count,
+        },
         "target": "0" * difficulty
     }
     
