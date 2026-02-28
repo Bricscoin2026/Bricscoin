@@ -663,6 +663,27 @@ export default function MobileWallet() {
               <p className="text-4xl font-black text-emerald-400" data-testid="wallet-balance">{balStr}</p>
             )}
             <p className="text-sm text-muted-foreground mt-1">BRICS</p>
+            {immatureBalance > 0 && (
+              <div className="mt-3 space-y-1.5" data-testid="immature-balance-mobile">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <History className="w-4 h-4 text-amber-400 shrink-0" />
+                  <div>
+                    <span className="text-sm text-amber-400 font-bold font-mono">
+                      +{immatureBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })} BRICS
+                    </span>
+                    <span className="text-xs text-amber-400/70 ml-1">maturing</span>
+                    {maturingRewards.length > 0 && (
+                      <p className="text-[10px] text-amber-400/50 mt-0.5">
+                        ~{Math.max(...maturingRewards.map(r => r.blocks_remaining))} blocks remaining
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground/50 leading-tight px-1">
+                  Mining rewards require 150 block confirmations before they become spendable. Anti-fraud protection against chain reorganizations.
+                </p>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <code className="text-[10px] font-mono text-muted-foreground truncate">{activeWallet.address}</code>
