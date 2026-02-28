@@ -49,17 +49,17 @@ const THREATS = [
         name: "Transaction Graph Analysis",
         severity: "High",
         description: "Analyzing transaction patterns to link addresses and deanonymize users (e.g., common-input ownership heuristic).",
-        protection: "Ring signatures obscure the true sender among decoys. Stealth addresses generate one-time recipient addresses. Pedersen commitments hide transaction amounts.",
+        protection: "Ring signatures (min 32 decoys, max 64) obscure the true sender — sender address is NOT stored on-chain, only 'RING_HIDDEN'. Stealth addresses generate one-time recipient addresses. zk-STARK commitments hide transaction amounts. Per-TX nonce ensures unique key images across transactions.",
         status: "mitigated",
-        assumption: "Ring size >= 5 provides sufficient privacy set. Users follow privacy best practices.",
+        assumption: "Ring size >= 32 provides a large anonymity set. Sender and amount are not stored in the transaction document. Only the originating node's internal ledger tracks balance operations, in separate unlinkable records.",
       },
       {
         name: "Amount Correlation",
         severity: "Medium",
         description: "Matching input/output amounts to trace fund flows, even with address privacy.",
-        protection: "zk-STARK proofs hide transaction amounts while proving validity. Amounts displayed as 'SHIELDED' in the public explorer.",
+        protection: "Plaintext amounts are NEVER stored on-chain. Only a cryptographic commitment, encrypted_amount (decryptable only by sender/recipient), and a zk-STARK proof_hash exist in the transaction. Amounts displayed as 'SHIELDED' in the public explorer. Consensus rejects blocks with missing proofs.",
         status: "mitigated",
-        assumption: "zk-STARK proofs are zero-knowledge and computationally sound under the Random Oracle Model.",
+        assumption: "zk-STARK proofs are zero-knowledge and computationally sound under the Random Oracle Model. No plaintext amount leakage possible from the blockchain.",
       },
       {
         name: "Timing Analysis",
@@ -210,10 +210,10 @@ export default function ThreatModel() {
         </p>
         <div className="flex items-center gap-3 mt-3">
           <span className="text-[10px] font-mono text-muted-foreground px-2 py-1 rounded bg-white/[0.03] border border-white/[0.06]">
-            v1.0 — February 2026
+            v1.1 — February 2026
           </span>
           <span className="text-[10px] text-muted-foreground">
-            Updates only for material changes. Each version is archived.
+            Updated: True 10/10 privacy (no sender/amount on-chain). Each version is archived.
           </span>
         </div>
       </motion.div>
@@ -248,7 +248,7 @@ export default function ThreatModel() {
               {[
                 { label: "Consensus", sub: "SHA-256 PoW", icon: Cpu, color: "text-amber-400" },
                 { label: "Signatures", sub: "ECDSA + ML-DSA-65", icon: Lock, color: "text-emerald-400" },
-                { label: "Privacy", sub: "zk-STARK + Ring Sig", icon: Eye, color: "text-violet-400" },
+                { label: "Privacy", sub: "Ring(32)+Stealth+STARK", icon: Eye, color: "text-violet-400" },
                 { label: "Network", sub: "Dandelion++ + Tor", icon: Wifi, color: "text-cyan-400" },
                 { label: "DDoS", sub: "Rate Limit + Cache", icon: Shield, color: "text-red-400" },
               ].map((l, i) => (

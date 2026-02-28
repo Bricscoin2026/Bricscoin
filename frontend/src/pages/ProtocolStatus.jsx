@@ -86,21 +86,21 @@ const PROTOCOL_LAYERS = [
       },
       {
         name: "LSAG Ring Signatures",
-        description: "Linkable Spontaneous Anonymous Group signatures hide the real sender among a set of decoys. Mandatory minimum ring size enforced at protocol level.",
+        description: "Linkable Spontaneous Anonymous Group signatures hide the real sender among a ring of decoys. Per-transaction nonce ensures unique key images. Consensus enforcement rejects blocks with invalid ring signatures.",
         status: "stable",
-        notes: "Min ring size: 32 (2x Monero), Default: 32, Max: 64. Dynamic sizing based on UTXO set. Key images prevent double-spend.",
+        notes: "Min ring size: 32 (2x Monero), Default: 32, Max: 64. Per-TX nonce (I = x*Hp(P||nonce)) enables multiple TXs from same account. Key images prevent double-spend. Sender address NOT stored on-chain — only 'RING_HIDDEN'.",
       },
       {
         name: "Shielded Transactions (zk-STARK)",
-        description: "Amounts hidden using zero-knowledge proofs. Displayed as 'SHIELDED' in the public explorer.",
+        description: "Transaction amounts are truly hidden. No plaintext amount exists in the blockchain — only a cryptographic commitment and encrypted data. Amounts displayed as 'SHIELDED' in the public explorer.",
         status: "stable",
-        notes: "Privacy score reflects actual shielded transaction usage per wallet.",
+        notes: "On-chain: only commitment + encrypted_amount + proof_hash. Plaintext amount never stored in transaction document. FRI protocol, 128-bit security, quantum-resistant, no trusted setup.",
       },
       {
-        name: "Privacy Modes (Strong / Maximum)",
-        description: "All transactions are private by default. No transparent mode exists. Users choose between Strong (zk-STARK + Ring) and Maximum (full stack with stealth addresses).",
+        name: "Privacy Modes (Mandatory 10/10)",
+        description: "ALL transactions are fully private. No transparent mode exists. Every TX uses Ring Signatures (sender), Stealth Addresses (receiver), and zk-STARKs (amount). Privacy enforced at consensus level.",
         status: "stable",
-        notes: "Privacy is MANDATORY. The 'Safe' transparent mode has been eliminated from the protocol.",
+        notes: "Privacy is MANDATORY. Transparent endpoint returns 410 Gone. Consensus validation rejects blocks with missing privacy proofs. Private balance ledger (debit/credit) separated with no cross-linkable fields.",
       },
       {
         name: "Chain Security (Checkpoints & Reorg Protection)",
