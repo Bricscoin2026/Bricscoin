@@ -418,20 +418,20 @@ async def get_current_difficulty() -> int:
     Calcola la difficoltà per il PROSSIMO blocco.
     Target: 1 blocco ogni 600 secondi.
     
-    Usa una finestra scorrevole di 20 blocchi per stabilità.
-    Formula: hashrate = sum(block_diffs) / actual_time, new_diff = hashrate * TARGET_TIME
-    Clamp: massimo 1.5x aumento o 0.67x riduzione per step (smooth adjustments).
+    Uses dual-window EMA: short (5 blocks) for responsiveness + long (20 blocks) for stability.
+    Anti-spike: detects sudden hashrate surges (rental attacks) and dampens response.
+    Clamp: max 1.25x increase or 0.75x decrease per step (tighter than before for stability).
     """
     blocks_count = await db.blocks.count_documents({})
     
     if blocks_count < 2:
         return INITIAL_DIFFICULTY
     
-    window_size = min(20, blocks_count)
-    
+    # Long window (stability)
+    long_window = min(20, blocks_count)
     recent_blocks = await db.blocks.find(
         {}, {"_id": 0, "timestamp": 1, "index": 1, "difficulty": 1}
-    ).sort("index", -1).limit(window_size + 1).to_list(window_size + 1)
+    ).sort("index", -1).limit(long_window + 1).to_list(long_window + 1)
     
     if len(recent_blocks) < 2:
         return INITIAL_DIFFICULTY
@@ -441,32 +441,56 @@ async def get_current_difficulty() -> int:
     try:
         first_time = datetime.fromisoformat(recent_blocks[0]["timestamp"].replace("Z", "+00:00"))
         last_time = datetime.fromisoformat(recent_blocks[-1]["timestamp"].replace("Z", "+00:00"))
-        actual_time = (last_time - first_time).total_seconds()
+        long_actual_time = (last_time - first_time).total_seconds()
     except (ValueError, KeyError):
         return max(1, recent_blocks[-1].get("difficulty", INITIAL_DIFFICULTY))
     
-    if actual_time <= 0:
-        actual_time = 1
+    if long_actual_time <= 0:
+        long_actual_time = 1
     
-    num_blocks = len(recent_blocks) - 1
-    total_difficulty = sum(b.get("difficulty", INITIAL_DIFFICULTY) for b in recent_blocks[1:])
+    long_num = len(recent_blocks) - 1
+    long_total_diff = sum(b.get("difficulty", INITIAL_DIFFICULTY) for b in recent_blocks[1:])
+    long_hashrate = long_total_diff / long_actual_time
+    long_diff = max(1, int(long_hashrate * TARGET_BLOCK_TIME))
     
-    hashrate_estimate = total_difficulty / actual_time
-    new_difficulty = max(1, int(hashrate_estimate * TARGET_BLOCK_TIME))
+    # Short window (responsiveness) — last 5 blocks
+    short_window = min(5, long_num)
+    short_blocks = recent_blocks[-short_window - 1:]
+    try:
+        s_first = datetime.fromisoformat(short_blocks[0]["timestamp"].replace("Z", "+00:00"))
+        s_last = datetime.fromisoformat(short_blocks[-1]["timestamp"].replace("Z", "+00:00"))
+        short_actual_time = max(1, (s_last - s_first).total_seconds())
+    except (ValueError, KeyError):
+        short_actual_time = TARGET_BLOCK_TIME * short_window
     
-    # Clamp: max 1.5x up or 0.67x down per adjustment (smooth, no spikes)
+    short_num = len(short_blocks) - 1
+    short_total_diff = sum(b.get("difficulty", INITIAL_DIFFICULTY) for b in short_blocks[1:])
+    short_hashrate = short_total_diff / short_actual_time
+    short_diff = max(1, int(short_hashrate * TARGET_BLOCK_TIME))
+    
+    # EMA blend: 70% long window + 30% short window
+    ema_diff = int(long_diff * 0.7 + short_diff * 0.3)
+    
+    # Anti-spike detection: if short-term hashrate > 3x long-term, dampen the increase
     current_diff = recent_blocks[-1].get("difficulty", INITIAL_DIFFICULTY)
-    max_up = int(current_diff * 1.5)
-    max_down = int(current_diff * 0.67)
-    new_difficulty = max(max_down, min(max_up, new_difficulty))
+    if short_hashrate > long_hashrate * 3 and short_hashrate > 0:
+        # Suspected hashrate rental spike — dampen to prevent attacker from lowering diff after leaving
+        spike_factor = min(short_hashrate / long_hashrate, 5.0)
+        dampen = 1.0 / spike_factor  # The bigger the spike, the less we trust it
+        ema_diff = int(current_diff + (ema_diff - current_diff) * dampen)
+        logging.warning(f"ANTI-SPIKE: short_hr={short_hashrate:.0f} > 3x long_hr={long_hashrate:.0f}, dampening diff adjustment")
+    
+    # Tighter clamp: max 1.25x up or 0.75x down per adjustment
+    max_up = int(current_diff * 1.25)
+    max_down = int(current_diff * 0.75)
+    new_difficulty = max(max_down, min(max_up, ema_diff))
     new_difficulty = max(1, new_difficulty)
     
-    avg_block_time = actual_time / num_blocks
-    
+    avg_block_time = long_actual_time / long_num
     current_index = recent_blocks[-1].get("index", 0)
     logging.debug(
-        "DIFFICULTY [block %d]: window=%d, avg_time=%.0fs, target=%ds, curr=%d, NEW=%d",
-        current_index, num_blocks, avg_block_time, TARGET_BLOCK_TIME, current_diff, new_difficulty
+        "DIFFICULTY [block %d]: long_window=%d, short_window=%d, avg_time=%.0fs, target=%ds, curr=%d, NEW=%d",
+        current_index, long_num, short_num, avg_block_time, TARGET_BLOCK_TIME, current_diff, new_difficulty
     )
     
     return new_difficulty
