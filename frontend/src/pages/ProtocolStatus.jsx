@@ -55,6 +55,12 @@ const PROTOCOL_LAYERS = [
         notes: "10-minute epochs, 90% stem probability, 4-hop max, 30s embargo timeout. Per Dandelion++ paper (arXiv:1805.11060).",
       },
       {
+        name: "LSAG Ring Signatures",
+        description: "Linkable Spontaneous Anonymous Group signatures hide the real sender among a set of decoys. Mandatory minimum ring size enforced at protocol level.",
+        status: "stable",
+        notes: "Min ring size: 11, Default: 16, Max: 64. Comparable to Monero's ring size. Key images prevent double-spend.",
+      },
+      {
         name: "Shielded Transactions (zk-STARK)",
         description: "Amounts hidden using zero-knowledge proofs. Displayed as 'SHIELDED' in the public explorer.",
         status: "stable",
