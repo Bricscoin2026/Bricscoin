@@ -56,7 +56,7 @@ const platforms = [
     bg: "bg-orange-500/20",
     file: "BricsCoin.Core-3.0.0.AppImage",
     label: "BricsCoin Core-3.0.0.AppImage",
-    sha256: "76f33d5515947185243558198ab4b8ca545730a414fb1db0d0df65ccdca85f2c",
+    sha256: "9a6ff19d5e495c406134dc36241fae519b3e6c0eb80db3b895745501813965e0",
     desc: "AppImage - Make executable and run",
     size: "~100 MB",
     instructions: [
