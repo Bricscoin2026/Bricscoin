@@ -470,7 +470,7 @@ export default function Whitepaper() {
           <SpecTable rows={[
             ["Safe", "Standard PQC transaction — quantum-resistant, fast, low fees. Amount and addresses visible on-chain."],
             ["Strong Privacy", "Shielded zk-STARK transaction — amount hidden with zero-knowledge proof, addresses visible."],
-            ["Maximum Privacy", "LSAG Ring signatures (min 11, default 16, max 64 members) + Stealth addresses + hidden amount — sender, recipient, and amount all protected."],
+            ["Maximum Privacy", "LSAG Ring signatures (mandatory min 32, default 32, max 64 members) + Stealth addresses + hidden amount — sender, recipient, and amount all hidden. No transparent mode exists."],
           ]} />
           <p className="mt-2">
             <strong>Note:</strong> No privacy mode provides absolute guarantees. Each level <em>reduces</em> the attack surface 
