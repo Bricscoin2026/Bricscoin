@@ -868,7 +868,7 @@ export default function Wallet({ embedded }) {
                 <CardContent className="p-0">
                   {transactions.length === 0 ? (
                     <div className="p-8 text-center text-muted-foreground">
-                      Nessuna transazione
+                      No transactions
                     </div>
                   ) : (
                     <div className="divide-y divide-white/5">
@@ -892,7 +892,7 @@ export default function Wallet({ embedded }) {
                               </div>
                               <div>
                                 <p className="text-sm font-medium">
-                                  {isSent ? "Inviato" : "Ricevuto"}
+                                  {isSent ? "Sent" : "Received"}
                                 </p>
                                 <p className="text-xs text-muted-foreground font-mono">
                                   {isSent 
