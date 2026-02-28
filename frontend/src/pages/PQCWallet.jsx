@@ -38,7 +38,8 @@ import {
   importPQCWallet,
   getPQCWalletInfo,
   getPQCStats,
-  createPQCTransaction
+  createPQCTransaction,
+  getWalletBalance
 } from "../lib/api";
 import { preparePQCTransaction, isValidPQCAddress } from "../lib/pqc-crypto";
 
