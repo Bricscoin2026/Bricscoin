@@ -190,6 +190,7 @@ def ring_sign(
 def ring_verify(signature: dict, message: str) -> dict:
     """
     Verify a Linkable SAG ring signature.
+    Supports both nonce-based (per-TX unique) and legacy (no-nonce) key images.
 
     Returns verification result with details.
     """
@@ -199,6 +200,8 @@ def ring_verify(signature: dict, message: str) -> dict:
         key_image = _bytes_to_point(bytes.fromhex(signature["key_image"]))
         public_keys_hex = signature["public_keys"]
         n = len(public_keys_hex)
+        tx_nonce = signature.get("tx_nonce")
+        nonce_bytes = bytes.fromhex(tx_nonce) if tx_nonce else b""
 
         if n != signature["ring_size"] or n != len(s_values):
             return {"valid": False, "error": "Ring size mismatch"}
@@ -219,8 +222,8 @@ def ring_verify(signature: dict, message: str) -> dict:
         for i in range(n):
             # L_i = s_i * G + c_i * P_i
             L_i = s_values[i] * G + c[i] * ring_points[i]
-            # R_i = s_i * Hp(P_i) + c_i * I
-            hp_i = _hash_to_point(bytes.fromhex(public_keys_hex[i]))
+            # R_i = s_i * Hp(P_i || nonce) + c_i * I
+            hp_i = _hash_to_point(bytes.fromhex(public_keys_hex[i]) + nonce_bytes)
             R_i = s_values[i] * hp_i + c[i] * key_image
 
             c[(i + 1) % n] = _hash_to_scalar(
@@ -238,6 +241,7 @@ def ring_verify(signature: dict, message: str) -> dict:
             "protocol": "LSAG (Linkable SAG)",
             "curve": "secp256k1",
             "sender_hidden": True,
+            "nonce_used": bool(tx_nonce),
         }
 
     except Exception as e:
