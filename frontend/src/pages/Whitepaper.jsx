@@ -244,15 +244,29 @@ export default function Whitepaper() {
           ]} />
 
           <SectionHeading id="arch-tx" level={3}>3.2 Transaction Structure</SectionHeading>
-          <p>Each transaction includes:</p>
-          <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
-            <li><strong>Sender/Recipient</strong>: BRICS or BRICSPQ addresses</li>
-            <li><strong>Amount</strong>: Transfer amount (max 8 decimal places)</li>
-            <li><strong>Timestamp</strong>: Transaction creation time</li>
-            <li><strong>Signature</strong>: ECDSA digital signature (signed client-side, never server-side)</li>
-            <li><strong>Public Key</strong>: Sender's ECDSA public key for verification</li>
-            <li><strong>Type</strong>: transfer, mining_reward, burn, chat, nft, timecapsule</li>
-          </ul>
+          <p>BricsCoin supports two transaction structures. All user-to-user transactions are <strong>private by default</strong>:</p>
+          
+          <InfoCard icon={Lock} title="Private Transaction (Mandatory for all transfers)">
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>Sender</strong>: Always <code>"RING_HIDDEN"</code> &mdash; real sender is never stored on-chain</li>
+              <li><strong>Recipient</strong>: One-time stealth address (<code>BRICSX...</code>)</li>
+              <li><strong>Amount</strong>: NOT stored &mdash; only cryptographic commitment + encrypted_amount</li>
+              <li><strong>Ring Signature (LSAG)</strong>: c0, s-values, key_image, tx_nonce, public_keys ring (32-64 members)</li>
+              <li><strong>Stealth Address</strong>: ephemeral_pubkey for recipient discovery</li>
+              <li><strong>zk-STARK Proof</strong>: proof_hash + stark_verified flag</li>
+              <li><strong>Fee</strong>: 0.000005 BRICS (public, burned)</li>
+              <li><strong>Timestamp</strong>: UTC creation time (ISO 8601)</li>
+            </ul>
+          </InfoCard>
+
+          <InfoCard icon={Blocks} title="System Transactions (coinbase, chat, NFT, timecapsule)">
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>Sender/Recipient</strong>: BRICS or BRICSPQ addresses</li>
+              <li><strong>Amount</strong>: Transfer amount (max 8 decimal places)</li>
+              <li><strong>Signature</strong>: ECDSA digital signature (signed client-side)</li>
+              <li><strong>Type</strong>: mining_reward, burn, chat, nft, timecapsule</li>
+            </ul>
+          </InfoCard>
 
           <SectionHeading id="arch-network" level={3}>3.3 Network Architecture</SectionHeading>
           <InfoCard icon={Globe} title="Dual-Server Architecture">
