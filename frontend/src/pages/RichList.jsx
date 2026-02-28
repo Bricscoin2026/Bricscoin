@@ -52,7 +52,7 @@ export default function RichList() {
   const copyAddress = (address) => {
     navigator.clipboard.writeText(address);
     setCopiedAddress(address);
-    toast.success("Indirizzo copiato!");
+    toast.success("Address copied!");
     setTimeout(() => setCopiedAddress(null), 2000);
   };
 

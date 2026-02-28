@@ -112,7 +112,7 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
               className="h-6 w-6 shrink-0"
               onClick={(e) => {
                 e.stopPropagation();
-                handleCopy(wallet.address, "Indirizzo");
+                handleCopy(wallet.address, "Address");
               }}
               data-testid="copy-address-btn"
             >
@@ -225,7 +225,7 @@ function SendDialog({ wallet, onSuccess }) {
       setAmount("");
       onSuccess();
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || "Invio fallito";
+      const errorMsg = error.response?.data?.detail || "Send failed";
       toast.error(errorMsg);
     } finally {
       setSending(false);
@@ -356,7 +356,7 @@ function ReceiveDialog({ wallet }) {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(wallet?.address || "");
-    toast.success("Indirizzo copiato!");
+    toast.success("Address copied!");
   };
 
   return (

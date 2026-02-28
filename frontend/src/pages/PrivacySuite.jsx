@@ -55,7 +55,7 @@ function StealthSetup({ onMetaGenerated }) {
       setMeta(data);
       localStorage.setItem("bricscoin_stealth_meta", JSON.stringify(data));
       if (onMetaGenerated) onMetaGenerated(data);
-      toast.success("Stealth meta-address generato!");
+      toast.success("Stealth meta-address generated!");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Error generating stealth address");
     } finally {
