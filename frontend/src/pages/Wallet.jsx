@@ -485,7 +485,7 @@ function ImportDialog({ onSuccess }) {
       setWalletName("");
       onSuccess(res.data);
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Importazione fallita");
+      toast.error(error.response?.data?.detail || "Import failed");
     } finally {
       setImporting(false);
     }
