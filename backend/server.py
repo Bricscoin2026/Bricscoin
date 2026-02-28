@@ -3241,7 +3241,7 @@ async def run_security_audit(request: Request):
         test_pk = test_sk.get_verifying_key().to_string().hex()
         ring_keys = [SigningKey.generate(curve=SECP256k1).get_verifying_key().to_string().hex() for _ in range(3)]
         ring_keys.insert(1, test_pk)
-        rs = ring_sign(test_sk.to_string().hex(), ring_keys, "privacy_audit_test", 1)
+        rs = ring_sign("privacy_audit_test", test_sk.to_string().hex(), ring_keys, 1)
         rv = ring_verify(rs, "privacy_audit_test")
         privacy_tests.append({"name": "LSAG Ring Signature sign & verify", "passed": rv.get("valid", False)})
     except Exception:
@@ -3256,19 +3256,21 @@ async def run_security_audit(request: Request):
 
     # Test: Stealth Address generation (DHKE)
     try:
-        from stealth_engine import generate_stealth_address, derive_stealth_pubkey
-        stealth = generate_stealth_address()
-        privacy_tests.append({"name": "Stealth Address generation (DHKE)", "passed": bool(stealth.get("scan_pubkey"))})
+        from stealth_engine import generate_stealth_meta_address, generate_stealth_address
+        meta = generate_stealth_meta_address()
+        stealth = generate_stealth_address(meta["scan_public_key"], meta["spend_public_key"])
+        privacy_tests.append({"name": "Stealth Address generation (DHKE)", "passed": bool(stealth.get("ephemeral_pubkey"))})
     except Exception:
         privacy_tests.append({"name": "Stealth Address generation (DHKE)", "passed": False})
 
     # Test: zk-STARK proof generation
     try:
-        from stark_engine import generate_stark_proof
-        proof = generate_stark_proof(10.0, 100.0)
-        privacy_tests.append({"name": "zk-STARK proof generation", "passed": proof.get("verified", False)})
+        from stark_engine import stark_prove, stark_verify
+        proof = stark_prove(100, 10)
+        verify_result = stark_verify(proof)
+        privacy_tests.append({"name": "zk-STARK proof generation & verify", "passed": verify_result.get("valid", False)})
     except Exception:
-        privacy_tests.append({"name": "zk-STARK proof generation", "passed": False})
+        privacy_tests.append({"name": "zk-STARK proof generation & verify", "passed": False})
 
     # Test: zk-STARK range proof (amount > 0)
     try:
