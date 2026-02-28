@@ -12,7 +12,7 @@ import { useWalletData, CRYPTO_PAIRS, JBS_PER_BRICS } from "../hooks/useWalletDa
 
 function PortfolioSummary({ onSelectTab }) {
   const {
-    totalBalance, walletCount, loading,
+    totalBalance, totalImmatureBalance, walletCount, loading,
     cryptoPrices, pricesLoading, privacyScore,
     fetchTotalBalance,
   } = useWalletData();
