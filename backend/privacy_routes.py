@@ -410,7 +410,7 @@ async def send_private_transaction(req: PrivateSendRequest):
         "stealth_pubkey": stealth_result["stealth_pubkey"],
         "ephemeral_pubkey": stealth_result["ephemeral_pubkey"],
         "fee": fee,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": tx_timestamp,
         "confirmed": True,
         "stark_verified": True,
         "privacy": {
