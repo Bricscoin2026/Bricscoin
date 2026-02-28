@@ -733,7 +733,7 @@ export default function Wallet({ embedded }) {
               <DialogHeader>
                 <DialogTitle className="font-heading">Crea Nuovo Wallet</DialogTitle>
                 <DialogDescription>
-                  Verrà generata una seed phrase di 12 parole per il backup
+                  A 12-word seed phrase will be generated for backup
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
@@ -778,7 +778,7 @@ export default function Wallet({ embedded }) {
             <DialogContent className="bg-card border-white/10" data-testid="create-wallet-dialog">
               <DialogHeader>
                 <DialogTitle className="font-heading">Crea Nuovo Wallet</DialogTitle>
-                <DialogDescription>Verrà generata una seed phrase di 12 parole per il backup</DialogDescription>
+                <DialogDescription>A 12-word seed phrase will be generated for backup</DialogDescription>
               </DialogHeader>
               <div className="py-4">
                 <Label>Nome Wallet (opzionale)</Label>
