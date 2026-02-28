@@ -117,9 +117,9 @@ export default function Landing() {
           </h1>
 
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
-            The first blockchain with 6 layers of cryptographic security.
-            Ring Signatures hide the sender. Stealth Addresses hide the receiver.
-            zk-STARKs hide the amount. Merge Mining with Bitcoin secures the network.
+            The first blockchain where privacy is real and enforced at consensus level.
+            Ring Signatures (32 decoys) hide the sender. Stealth Addresses hide the receiver.
+            zk-STARKs hide the amount. No plaintext data ever touches the chain.
           </p>
 
           {/* Privacy badges inline */}
@@ -212,12 +212,12 @@ export default function Landing() {
               {
                 layer: "L4", tech: "zk-STARK (FRI Protocol)", color: "#10B981",
                 icon: Lock, purpose: "Hidden Amounts",
-                desc: "Zero-Knowledge Scalable Transparent Arguments of Knowledge. Prove a transaction is valid without revealing the amount. 128-bit security, no trusted setup, quantum-resistant hashing."
+                desc: "Zero-Knowledge Scalable Transparent Arguments of Knowledge. Prove a transaction is valid without revealing the amount. No plaintext amount exists on-chain — only commitment and encrypted data. 128-bit security, no trusted setup, quantum-resistant."
               },
               {
                 layer: "L5", tech: "Ring Signatures (LSAG)", color: "#8B5CF6",
                 icon: UserX, purpose: "Hidden Sender",
-                desc: "Linkable Spontaneous Anonymous Group signatures. The real sender is hidden among a ring of decoy public keys. A Key Image prevents double-spending without revealing identity."
+                desc: "Linkable Spontaneous Anonymous Group signatures. The real sender is hidden among a ring of 32-64 decoy public keys. Per-TX nonce ensures unique key images. Sender address is NEVER stored on-chain — only 'RING_HIDDEN'."
               },
               {
                 layer: "L6", tech: "Stealth Addresses (DHKE)", color: "#EC4899",
@@ -281,7 +281,8 @@ export default function Landing() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              On the public blockchain, a private transaction shows: <code className="text-violet-400 mx-1">RING_HIDDEN</code> {">"} <code className="text-cyan-400 mx-1">BRICSX...</code> {">"} <code className="text-emerald-400 mx-1">SHIELDED</code>
+              On the public blockchain, a private transaction shows: <code className="text-violet-400 mx-1">RING_HIDDEN</code> {">"} <code className="text-cyan-400 mx-1">BRICSX...</code> {">"} <code className="text-emerald-400 mx-1">SHIELDED</code>.
+              No sender address, no recipient identity, no amount — enforced at consensus level.
             </p>
           </motion.div>
         </div>
