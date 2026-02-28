@@ -146,6 +146,10 @@ DANDELION_EPOCH_SECONDS = 600       # New stem peer every 10 minutes
 DANDELION_STEM_PROBABILITY = 0.9    # 90% chance to continue stem, 10% to fluff
 DANDELION_MAX_STEM_HOPS = 4         # Max hops before forced fluff
 DANDELION_EMBARGO_SECONDS = 30      # If stem tx not seen in fluff after 30s, node fluffs it
+DANDELION_DUMMY_TRAFFIC = True      # Generate dummy transactions to defeat timing analysis
+DANDELION_DUMMY_INTERVAL = (15, 60) # Random interval range (seconds) between dummy TXs
+DANDELION_JITTER_MS = (100, 2000)   # Random propagation delay range (ms) before forwarding
+DANDELION_BATCH_SIZE = (2, 5)       # Random batch: accumulate 2-5 TXs before forwarding
 
 # Dandelion state
 dandelion_stem_peer: Optional[str] = None       # Current epoch's stem peer node_id
