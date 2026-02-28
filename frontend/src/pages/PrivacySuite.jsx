@@ -108,7 +108,7 @@ function StealthSetup({ onMetaGenerated }) {
           </div>
         ) : (
           <Button onClick={generateMeta} disabled={generating} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" data-testid="generate-stealth-meta-btn">
-            {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generazione...</> : <><Key className="w-4 h-4 mr-2" />Genera Stealth Meta-Address</>}
+            {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</> : <><Key className="w-4 h-4 mr-2" />Generate Stealth Meta-Address</>}
           </Button>
         )}
       </CardContent>
@@ -159,7 +159,7 @@ function StealthScanner() {
           Scan the blockchain to find stealth payments addressed to you.
         </p>
         <Button onClick={scanPayments} disabled={scanning} variant="outline" className="w-full" data-testid="scan-stealth-btn">
-          {scanning ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Scansione...</> : <><Scan className="w-4 h-4 mr-2" />Scansiona Blockchain</>}
+          {scanning ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Scanning...</> : <><Scan className="w-4 h-4 mr-2" />Scan Blockchain</>}
         </Button>
         {results && (
           <div className="p-3 bg-white/[0.02] rounded-sm border border-white/[0.04] text-xs">

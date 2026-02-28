@@ -133,7 +133,7 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
             data-testid="show-seed-btn"
           >
             <Key className="w-3 h-3 mr-2" />
-            Mostra Seed Phrase
+            Show Seed Phrase
           </Button>
         )}
         
@@ -316,7 +316,7 @@ function SendDialog({ wallet, onSuccess }) {
           {/* Fee Info */}
           <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-sm">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Fee di rete:</span>
+              <span className="text-muted-foreground">Network fee:</span>
               <span className="text-yellow-500 font-mono">{TRANSACTION_FEE} BRICS</span>
             </div>
             {amount && (
@@ -335,7 +335,7 @@ function SendDialog({ wallet, onSuccess }) {
             onClick={() => setOpen(false)}
             className="border-white/20"
           >
-            Annulla
+            Cancel
           </Button>
           <Button
             onClick={handleSend}
@@ -376,7 +376,7 @@ function ReceiveDialog({ wallet }) {
             <QRCodeSVG value={wallet?.address || ""} size={200} />
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            Scansiona il QR code o copia l&apos;indirizzo
+            Scan the QR code or copy the address
           </p>
           <div className="w-full">
             <div className="flex items-center gap-2 p-3 bg-background rounded-sm border border-white/10">
@@ -437,7 +437,7 @@ function SeedPhraseDialog({ wallet, open, onOpenChange }) {
             onClick={() => onOpenChange(false)}
             className="border-white/20"
           >
-            Chiudi
+            Close
           </Button>
           <Button
             onClick={handleCopy}
@@ -566,7 +566,7 @@ function ImportDialog({ onSuccess }) {
             onClick={() => setOpen(false)}
             className="border-white/20"
           >
-            Annulla
+            Cancel
           </Button>
           <Button
             onClick={handleImport}
@@ -949,7 +949,7 @@ export default function Wallet({ embedded }) {
               onClick={() => setDeleteDialogOpen(false)}
               className="border-white/20"
             >
-              Annulla
+              Cancel
             </Button>
             <Button
               variant="destructive"

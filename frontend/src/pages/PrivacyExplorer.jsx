@@ -88,7 +88,7 @@ export default function PrivacyExplorer() {
             </div>
             <div>
               <h1 className="text-2xl font-bold">Privacy Explorer</h1>
-              <p className="text-xs text-muted-foreground">La trasparenza dell'opacita. Questo e cio che vede un nodo.</p>
+              <p className="text-xs text-muted-foreground">The transparency of opacity. This is what a node sees.</p>
             </div>
           </div>
         </div>

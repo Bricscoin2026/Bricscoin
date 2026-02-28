@@ -144,7 +144,7 @@ export default function RichList() {
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Holders Totali</p>
                   <p className="text-2xl font-heading font-bold">{data?.total_holders || 0}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Wallet con bilancio &gt; 0</p>
+                  <p className="text-xs text-muted-foreground mt-1">Wallets with balance &gt; 0</p>
                 </div>
                 <div className="w-10 h-10 rounded-sm flex items-center justify-center bg-primary/20 text-primary">
                   <Users className="w-5 h-5" />
