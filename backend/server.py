@@ -1993,7 +1993,10 @@ async def submit_mined_block(submission: MiningSubmit):
                 or not ring_sig.get('key_image')
                 or not tx.get('ephemeral_pubkey')
                 or ring_sig.get('ring_size', 0) < MIN_RING_SIZE
-                or not tx.get('proof_hash')):
+                or not tx.get('proof_hash')
+                or not tx.get('commitment')
+                or not tx.get('encrypted_amount')
+                or not tx.get('stark_verified')):
                 logging.warning(f"Mining: excluding invalid private tx {tx.get('id','?')[:12]} — missing privacy proofs")
                 continue
             ring_message = ring_sig.get('message')
@@ -2001,6 +2004,12 @@ async def submit_mined_block(submission: MiningSubmit):
                 vr = _ring_verify_mining(ring_sig, ring_message)
                 if not vr.get('valid'):
                     logging.warning(f"Mining: excluding private tx {tx.get('id','?')[:12]} — invalid ring sig")
+                    continue
+        else:
+            # Non-private TX: reject negative amounts (conservation of value)
+            if tx.get('sender') not in ('COINBASE', 'SYSTEM') and isinstance(tx.get('amount'), (int, float)):
+                if tx['amount'] < 0:
+                    logging.warning(f"Mining: excluding tx {tx.get('id','?')[:12]} — negative amount")
                     continue
         valid_pending_txs.append(tx)
     pending_txs = valid_pending_txs
