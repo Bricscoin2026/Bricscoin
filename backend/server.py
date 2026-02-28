@@ -1634,10 +1634,10 @@ async def get_transactions(request: Request, limit: int = 20, offset: int = 0, c
             tx["confirmed"] = True  # Old transactions without field are confirmed
         # Hide data for shielded/private transactions in public API
         if tx.get("type") in ("shielded", "private"):
-            tx["amount"] = "SHIELDED"
+            tx.pop("amount", None)
             tx["display_amount"] = "SHIELDED"
             # Mask sender address with hash
-            if tx.get("sender") and tx["sender"] != "COINBASE":
+            if tx.get("sender") and tx["sender"] not in ("COINBASE", "RING_HIDDEN"):
                 sender_hash = hashlib.sha256(tx["sender"].encode()).hexdigest()
                 tx["sender"] = f"SHIELDED_{sender_hash[:8]}"
             # Mask recipient address with hash
@@ -1646,6 +1646,7 @@ async def get_transactions(request: Request, limit: int = 20, offset: int = 0, c
                 tx["recipient"] = f"SHIELDED_{recipient_hash[:8]}"
         if tx.get("type") == "private":
             tx["sender"] = "RING_HIDDEN"
+            # Remove any legacy fields that should not exist on-chain
             tx.pop("real_sender", None)
             tx.pop("real_recipient_scan_pubkey", None)
     total = await db.transactions.count_documents(query)
