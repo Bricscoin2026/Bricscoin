@@ -611,13 +611,16 @@ export default function Whitepaper() {
           {/* 10. CONCLUSION */}
           <SectionHeading id="conclusion" level={2}>10. Conclusion</SectionHeading>
           <p>
-            BricsCoin combines the proven security of SHA-256 Proof-of-Work with forward-looking post-quantum cryptographic protection. By implementing ML-DSA-65 alongside ECDSA in a hybrid scheme, BricsCoin is positioned to remain secure even as quantum computing technology advances.
+            BricsCoin combines the proven security of SHA-256 Proof-of-Work with forward-looking post-quantum cryptographic protection and <strong>mandatory, consensus-enforced privacy</strong>. By implementing ML-DSA-65 alongside ECDSA in a hybrid scheme, BricsCoin is positioned to remain secure even as quantum computing technology advances.
           </p>
           <p className="mt-3">
-            Beyond a simple payment network, BricsCoin offers a complete ecosystem of on-chain applications &mdash; from quantum-proof messaging to PQC-signed certificates &mdash; all contributing to a deflationary token economy through burn fees.
+            Every transaction on BricsCoin is fully private: the sender is hidden behind a ring of 32-64 decoys (LSAG), the receiver uses a one-time stealth address, and the amount exists only as a cryptographic commitment. No plaintext sender address or amount is ever written to the blockchain. This privacy is not optional &mdash; it is enforced at the consensus level, where nodes actively reject blocks containing transactions with missing or invalid proofs.
           </p>
           <p className="mt-3">
-            The commitment to client-side signing, open-source development, and community-driven governance ensures that BricsCoin remains transparent, accessible, and trustworthy for the post-quantum era.
+            Beyond a payment network, BricsCoin offers a complete ecosystem of on-chain applications &mdash; from quantum-proof messaging to PQC-signed certificates &mdash; all contributing to a deflationary token economy through burn fees.
+          </p>
+          <p className="mt-3">
+            The commitment to client-side signing, mandatory privacy, open-source development, and community-driven governance ensures that BricsCoin remains transparent, accessible, and trustworthy for the post-quantum era.
           </p>
 
           {/* REFERENCES */}
