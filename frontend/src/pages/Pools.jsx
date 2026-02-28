@@ -60,7 +60,7 @@ export default function Pools() {
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
           Unisciti a un pool per minare BricsCoin insieme ad altri miner. 
-          Più potenza combinata significa blocchi trovati più frequentemente!
+          More combined power means blocks are found more frequently!
         </p>
       </div>
 

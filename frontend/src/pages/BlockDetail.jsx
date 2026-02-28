@@ -185,7 +185,7 @@ export default function BlockDetail() {
             <CardHeader className="border-b border-emerald-500/10">
               <CardTitle className="font-heading flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                Firma Quantum-Safe
+                Quantum-Safe Signature
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 ml-2">
                   <Lock className="w-3 h-3" /> ML-DSA-65
                 </span>
@@ -197,11 +197,11 @@ export default function BlockDetail() {
                 <span className="text-sm text-emerald-400 font-medium">{block.pqc_scheme}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-white/5 gap-2">
-                <span className="text-muted-foreground text-sm">Firma ECDSA</span>
+                <span className="text-muted-foreground text-sm">ECDSA Signature</span>
                 <code className="text-[10px] font-mono text-muted-foreground max-w-[300px] truncate">{block.pqc_ecdsa_signature}</code>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-white/5 gap-2">
-                <span className="text-muted-foreground text-sm">Firma ML-DSA-65</span>
+                <span className="text-muted-foreground text-sm">ML-DSA-65 Signature</span>
                 <code className="text-[10px] font-mono text-muted-foreground max-w-[300px] truncate">{block.pqc_dilithium_signature?.slice(0, 80)}...</code>
               </div>
               <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/10">

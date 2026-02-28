@@ -74,7 +74,7 @@ function StealthSetup({ onMetaGenerated }) {
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
           Genera il tuo <strong className="text-cyan-400">stealth meta-address</strong> per ricevere pagamenti privati.
-          Il mittente crea un indirizzo one-time — nessuno sulla blockchain può collegarlo a te.
+          The sender creates a one-time address — nobody on the blockchain can link it to you.
         </p>
         {meta ? (
           <div className="space-y-2">

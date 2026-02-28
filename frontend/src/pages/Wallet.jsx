@@ -262,7 +262,7 @@ function SendDialog({ wallet, onSuccess }) {
           {/* Security Badge */}
           <div className="flex items-center gap-2 p-2 bg-green-500/10 border border-green-500/20 rounded-sm">
             <Shield className="w-4 h-4 text-green-500" />
-            <span className="text-xs text-green-500">Firma client-side - Massima sicurezza</span>
+            <span className="text-xs text-green-500">Client-side signing - Maximum security</span>
           </div>
           
           {/* Available Balance */}
@@ -928,7 +928,7 @@ export default function Wallet({ embedded }) {
           <DialogHeader>
             <DialogTitle className="font-heading text-red-500">Elimina Wallet</DialogTitle>
             <DialogDescription>
-              Sei sicuro di voler eliminare questo wallet? Questa azione non può essere annullata.
+              Are you sure you want to delete this wallet? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           {walletToDelete && (
