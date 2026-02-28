@@ -57,9 +57,9 @@ const THREATS = [
         name: "Amount Correlation",
         severity: "Medium",
         description: "Matching input/output amounts to trace fund flows, even with address privacy.",
-        protection: "Plaintext amounts are NEVER stored on-chain. Only a cryptographic commitment, encrypted_amount (decryptable only by sender/recipient), and a zk-STARK proof_hash exist in the transaction. Amounts displayed as 'SHIELDED' in the public explorer. Consensus rejects blocks with missing proofs.",
+        protection: "Plaintext amounts are NEVER stored on-chain. Only a cryptographic commitment, encrypted_amount (decryptable only by sender/recipient), and a zk-STARK proof_hash exist in the transaction. Range proof enforces amount > 0 and conservation of value (balance = amount + remainder). Amounts displayed as 'SHIELDED' in the public explorer. Consensus rejects blocks with missing proofs.",
         status: "mitigated",
-        assumption: "zk-STARK proofs are zero-knowledge and computationally sound under the Random Oracle Model. No plaintext amount leakage possible from the blockchain.",
+        assumption: "zk-STARK proofs are zero-knowledge and computationally sound under the Random Oracle Model. Range proof prevents negative amounts (coin creation from nothing). No plaintext amount leakage possible from the blockchain.",
       },
       {
         name: "Timing Analysis",
