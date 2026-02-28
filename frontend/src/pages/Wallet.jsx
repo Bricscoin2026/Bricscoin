@@ -926,15 +926,15 @@ export default function Wallet({ embedded }) {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="bg-card border-white/10" data-testid="delete-wallet-dialog">
           <DialogHeader>
-            <DialogTitle className="font-heading text-red-500">Elimina Wallet</DialogTitle>
+            <DialogTitle className="font-heading text-red-500">Delete Wallet</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this wallet? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           {walletToDelete && (
             <div className="py-4 space-y-2">
-              <p className="text-sm"><strong>Nome:</strong> {walletToDelete.name}</p>
-              <p className="text-sm font-mono truncate"><strong>Indirizzo:</strong> {walletToDelete.address}</p>
+              <p className="text-sm"><strong>Name:</strong> {walletToDelete.name}</p>
+              <p className="text-sm font-mono truncate"><strong>Address:</strong> {walletToDelete.address}</p>
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-sm mt-4">
                 <p className="text-sm text-red-400 flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
