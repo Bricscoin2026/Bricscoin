@@ -1298,6 +1298,122 @@ async def get_crypto_prices(request: Request):
         logger.warning(f"CoinGecko proxy error: {e}")
         return {}
 
+@api_router.get("/protocol/security-profile")
+@limiter.exempt
+async def get_security_profile(request: Request):
+    """Comprehensive security and privacy profile of the BricsCoin protocol.
+    
+    Returns all hardened protocol parameters in one call for dashboards and auditors.
+    """
+    cached = get_cached("security_profile")
+    if cached:
+        return cached
+    
+    blocks_count = await db.blocks.count_documents({})
+    utxo_count = await db.transactions.count_documents({})
+    
+    # Dynamic ring size calculation based on UTXO set
+    dynamic_ring_min = max(32, min(64, utxo_count // 100))
+    
+    result = {
+        "protocol_version": "3.0.0",
+        "privacy": {
+            "mandatory": True,
+            "description": "All transactions require Ring + Stealth + zk-STARK. No transparent mode.",
+            "ring_signatures": {
+                "scheme": "LSAG (Linkable Spontaneous Anonymous Group)",
+                "curve": "secp256k1",
+                "min_ring_size": MIN_RING_SIZE,
+                "default_ring_size": DEFAULT_RING_SIZE,
+                "max_ring_size": MAX_RING_SIZE,
+                "dynamic_ring_size": dynamic_ring_min,
+                "utxo_set_size": utxo_count,
+            },
+            "stealth_addresses": {
+                "scheme": "Dual-key stealth (scan + spend)",
+                "enabled": True,
+                "mandatory": True,
+            },
+            "amount_hiding": {
+                "scheme": "zk-STARK (Zero-Knowledge Scalable Transparent Argument of Knowledge)",
+                "mandatory": True,
+            },
+            "network_privacy": {
+                "dandelion_pp": {
+                    "enabled": True,
+                    "stem_probability": DANDELION_STEM_PROBABILITY,
+                    "max_stem_hops": DANDELION_MAX_STEM_HOPS,
+                    "embargo_seconds": DANDELION_EMBARGO_SECONDS,
+                    "epoch_seconds": DANDELION_EPOCH_SECONDS,
+                },
+                "dummy_traffic": {
+                    "enabled": DANDELION_DUMMY_TRAFFIC,
+                    "interval_range_seconds": list(DANDELION_DUMMY_INTERVAL),
+                    "purpose": "Defeats timing analysis by generating indistinguishable decoy TXs",
+                },
+                "propagation_jitter": {
+                    "enabled": True,
+                    "range_ms": list(DANDELION_JITTER_MS),
+                    "purpose": "Random delay before forwarding to prevent timing correlation",
+                },
+                "tor_hidden_service": True,
+            },
+        },
+        "consensus": {
+            "algorithm": "SHA-256 Proof-of-Work",
+            "target_block_time": TARGET_BLOCK_TIME,
+            "difficulty_adjustment": {
+                "method": "Dual-window EMA (5-block short + 20-block long)",
+                "anti_spike": True,
+                "anti_spike_threshold": "3x hashrate surge dampening",
+                "clamp": "max 1.25x up, 0.75x down per step",
+            },
+            "coinbase_maturity": COINBASE_MATURITY,
+            "block_size": {
+                "type": "elastic",
+                "base_size": BASE_BLOCK_SIZE,
+                "median_window": BLOCK_SIZE_MEDIAN_WINDOW,
+                "max_growth": BLOCK_SIZE_MAX_GROWTH,
+                "penalty_rate": BLOCK_SIZE_PENALTY_RATE,
+            },
+        },
+        "quantum_resistance": {
+            "block_signing": "ECDSA (secp256k1) + ML-DSA-65 (FIPS 204 Dilithium)",
+            "crypto_agility": {
+                "version": CRYPTO_AGILITY_VERSION,
+                "supported_versions": SUPPORTED_KEY_VERSIONS,
+                "soft_forkable": True,
+                "versioned_key_types": True,
+                "upgradeable_hash_function": True,
+            },
+        },
+        "network_hardening": {
+            "anti_sybil": {
+                "pow_handshake": True,
+                "pow_difficulty_bits": PEER_POW_DIFFICULTY,
+                "max_peers_per_asn": PEER_MAX_PER_ASN,
+                "max_peer_slots": PEER_RATE_LIMIT_SLOTS,
+            },
+            "ddos_protection": {
+                "rate_limit": "500/minute default",
+                "burst_protection": "500 requests per 10s window",
+                "ip_blacklisting": True,
+            },
+            "reorg_protection": {
+                "max_reorg_depth": 100,
+                "checkpoint_enabled": True,
+            },
+        },
+        "chain_stats": {
+            "total_blocks": blocks_count,
+            "utxo_count": utxo_count,
+        },
+    }
+    set_cached("security_profile", result, ttl=30)
+    return result
+
+
+
 @api_router.get("/richlist")
 @limiter.limit("30/minute")
 async def get_rich_list(request: Request, limit: int = 100):
