@@ -507,23 +507,53 @@ async def send_private_transaction(req: PrivateSendRequest):
 
 @router.get("/history/{address}")
 async def get_private_history(address: str, limit: int = 50):
-    """Get private transaction history for an address (checks real_sender field)."""
+    """Get private transaction history for an address.
+    Uses private_balance_ops to find transactions linked to this address
+    (since real_sender is no longer stored on-chain).
+    """
     db = await get_db()
-    txs = await db.transactions.find(
-        {
-            "type": "private",
-            "$or": [
-                {"real_sender": address},
-                {"stealth_address": {"$regex": "^BRICSX"}},
-            ]
-        },
-        {"_id": 0, "real_sender": 0, "real_recipient_scan_pubkey": 0, "ring_signature": 0}
+
+    # Find key_images for debits from this address
+    debit_ops = await db.private_balance_ops.find(
+        {"type": "debit", "address": address},
+        {"_id": 0, "key_image": 1, "amount": 1, "timestamp": 1}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+
+    # Find credits to stealth addresses (if address is a stealth address)
+    credit_ops = await db.private_balance_ops.find(
+        {"type": "credit", "stealth_address": address},
+        {"_id": 0, "stealth_address": 1, "amount": 1, "timestamp": 1}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+
+    # Find corresponding transactions via key_images
+    key_images = [d["key_image"] for d in debit_ops if d.get("key_image")]
+    sent_txs = []
+    if key_images:
+        ki_docs = await db.key_images.find(
+            {"key_image": {"$in": key_images}},
+            {"_id": 0, "tx_id": 1, "key_image": 1}
+        ).to_list(limit)
+        tx_ids = [ki["tx_id"] for ki in ki_docs]
+        if tx_ids:
+            sent_txs = await db.transactions.find(
+                {"id": {"$in": tx_ids}, "type": "private"},
+                {"_id": 0, "ring_signature": 0}
+            ).sort("timestamp", -1).to_list(limit)
+
+    # Find received stealth TXs
+    received_txs = await db.transactions.find(
+        {"type": "private", "stealth_address": address},
+        {"_id": 0, "ring_signature": 0}
     ).sort("timestamp", -1).limit(limit).to_list(limit)
 
     return {
         "address": address,
-        "private_transactions": txs,
-        "total": len(txs),
+        "sent_transactions": sent_txs,
+        "received_transactions": received_txs,
+        "debit_ops": debit_ops,
+        "credit_ops": credit_ops,
+        "total_sent": len(sent_txs),
+        "total_received": len(received_txs),
     }
 
 
