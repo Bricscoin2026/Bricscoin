@@ -1921,7 +1921,23 @@ async def submit_mined_block(submission: MiningSubmit):
     # Save block
     await db.blocks.insert_one(new_block)
     
-    # Mark transactions as confirmed
+    # Create coinbase (mining reward) transaction with block_index for maturity enforcement
+    coinbase_tx = {
+        "id": f"coinbase-{new_index}-{submission.miner_address[:16]}",
+        "sender": "COINBASE",
+        "recipient": submission.miner_address,
+        "amount": effective_reward,
+        "fee": 0,
+        "timestamp": timestamp,
+        "confirmed": True,
+        "block_index": new_index,
+        "type": "mining_reward",
+        "signature_scheme": "ecdsa_secp256k1+ml-dsa-65",
+        "privacy_enforced": True,
+    }
+    await db.transactions.insert_one(coinbase_tx)
+    
+    # Mark pending transactions as confirmed
     tx_ids = [tx.get('id', tx.get('tx_id')) for tx in pending_txs if tx.get('id') or tx.get('tx_id')]
     if tx_ids:
         await db.transactions.update_many(
