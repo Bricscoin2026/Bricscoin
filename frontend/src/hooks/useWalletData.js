@@ -125,6 +125,7 @@ export function useWalletData() {
 
   return {
     totalBalance,
+    totalImmatureBalance,
     walletCount,
     loading,
     cryptoPrices,
