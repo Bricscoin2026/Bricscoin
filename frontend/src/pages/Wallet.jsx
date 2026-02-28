@@ -88,7 +88,7 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
           <p className="text-sm text-muted-foreground">{wallet.name}</p>
           <p className="text-2xl font-heading font-bold gold-text mt-1">
             {loading ? (
-              <span className="animate-pulse">Caricamento...</span>
+              <span className="animate-pulse">Loading...</span>
             ) : balance !== null ? (
               `${balance.toLocaleString()} BRICS`
             ) : (
@@ -269,7 +269,7 @@ function SendDialog({ wallet, onSuccess }) {
           <div className="p-3 bg-primary/10 border border-primary/20 rounded-sm">
             <p className="text-sm text-muted-foreground">Available Balance</p>
             <p className="text-xl font-bold gold-text" data-testid="send-available-balance">
-              {balance !== null ? `${balance.toLocaleString()} BRICS` : "Caricamento..."}
+              {balance !== null ? `${balance.toLocaleString()} BRICS` : "Loading..."}
             </p>
           </div>
           <div>
@@ -478,7 +478,7 @@ function ImportDialog({ onSuccess }) {
         res = await importWalletKey(privateKey.trim(), walletName || "Imported Wallet");
       }
       
-      toast.success("Wallet importato!");
+      toast.success("Wallet imported!");
       setOpen(false);
       setSeedPhrase("");
       setPrivateKey("");
@@ -521,7 +521,7 @@ function ImportDialog({ onSuccess }) {
           
           <TabsContent value="seed" className="space-y-4 mt-4">
             <div>
-              <Label>Seed Phrase (12 parole)</Label>
+              <Label>Seed Phrase (12 words)</Label>
               <Textarea
                 placeholder="word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12"
                 value={seedPhrase}
@@ -699,7 +699,7 @@ export default function Wallet({ embedded }) {
     a.href = url;
     a.download = `bricscoin-wallet-${selectedWallet.address.slice(0, 10)}.json`;
     a.click();
-    toast.success("Wallet esportato!");
+    toast.success("Wallet exported!");
   };
 
   return (
@@ -896,8 +896,8 @@ export default function Wallet({ embedded }) {
                                 </p>
                                 <p className="text-xs text-muted-foreground font-mono">
                                   {isSent 
-                                    ? `A: ${tx.recipient.slice(0, 16)}...`
-                                    : `Da: ${tx.sender.slice(0, 16)}...`
+                                    ? `To: ${tx.recipient.slice(0, 16)}...`
+                                    : `From: ${tx.sender.slice(0, 16)}...`
                                   }
                                 </p>
                               </div>
@@ -907,7 +907,7 @@ export default function Wallet({ embedded }) {
                                 {isSent ? "-" : "+"}{tx.amount} BRICS
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {tx.confirmed ? "Confermato" : "In attesa"}
+                                {tx.confirmed ? "Confirmed" : "Pending"}
                               </p>
                             </div>
                           </div>
