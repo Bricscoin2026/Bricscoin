@@ -14,7 +14,7 @@ import api, { getWalletBalance, getPQCWalletInfo } from "../lib/api";
 
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text);
-  toast.success("Copiato!");
+  toast.success("Copied!");
 }
 
 function PrivacyBadges() {
@@ -123,7 +123,7 @@ function StealthScanner() {
   const scanPayments = async () => {
     const saved = localStorage.getItem("bricscoin_stealth_meta");
     if (!saved) {
-      toast.error("Prima genera uno stealth meta-address!");
+      toast.error("First generate a stealth meta-address!");
       return;
     }
     const meta = JSON.parse(saved);
@@ -164,15 +164,15 @@ function StealthScanner() {
         {results && (
           <div className="p-3 bg-white/[0.02] rounded-sm border border-white/[0.04] text-xs">
             <div className="flex justify-between mb-1">
-              <span className="text-muted-foreground">Transazioni scansionate</span>
+              <span className="text-muted-foreground">Transactions scanned</span>
               <span>{results.transactions_scanned}</span>
             </div>
             <div className="flex justify-between mb-1">
-              <span className="text-muted-foreground">Pagamenti trovati</span>
+              <span className="text-muted-foreground">Payments found</span>
               <span className={results.payments_found > 0 ? "text-emerald-400 font-bold" : ""}>{results.payments_found}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Tempo</span>
+              <span className="text-muted-foreground">Time</span>
               <span>{results.scan_time_ms}ms</span>
             </div>
           </div>
@@ -360,7 +360,7 @@ export default function PrivacySuite({ embedded = false }) {
                     )}
                   </div>
                 ) : (
-                  <span className="text-muted-foreground">Seleziona wallet...</span>
+                  <span className="text-muted-foreground">Select wallet...</span>
                 )}
                 <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 ml-2 transition-transform ${walletDropdownOpen ? "rotate-180" : ""}`} />
               </button>
@@ -446,7 +446,7 @@ export default function PrivacySuite({ embedded = false }) {
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs font-bold text-amber-400 mb-1">SALVA IL BLINDING FACTOR</p>
+                    <p className="text-xs font-bold text-amber-400 mb-1">SAVE THE BLINDING FACTOR</p>
                     <p className="text-[10px] text-muted-foreground mb-2">Needed to decrypt the amount. Automatically saved in browser.</p>
                     <div className="flex items-center gap-2">
                       <code className="text-[10px] font-mono bg-black/30 px-2 py-1 rounded truncate block flex-1">
