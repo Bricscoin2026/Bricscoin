@@ -878,6 +878,50 @@ async def validate_block(block: dict) -> bool:
                 logging.warning(f"Block {block['index']} PQC signature invalid!")
                 return False
         
+        # ==================== PRIVACY CONSENSUS ENFORCEMENT ====================
+        # Validate all private transactions in the block.
+        # Reject the block if any private TX is missing mandatory privacy proofs.
+        from ring_engine import ring_verify as _ring_verify
+        for tx in block.get('transactions', []):
+            if tx.get('type') != 'private':
+                continue
+            
+            ring_sig = tx.get('ring_signature')
+            # 1) Private TX MUST contain ring_signature, key_image, ephemeral_pubkey
+            if not ring_sig or not isinstance(ring_sig, dict):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} missing ring_signature")
+                return False
+            if not ring_sig.get('key_image'):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} missing key_image")
+                return False
+            if not tx.get('ephemeral_pubkey'):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} missing ephemeral_pubkey")
+                return False
+            
+            # 2) Ring size must meet the mandatory minimum
+            if ring_sig.get('ring_size', 0) < MIN_RING_SIZE:
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} ring_size {ring_sig.get('ring_size')} < {MIN_RING_SIZE}")
+                return False
+            
+            # 3) Key image must not already exist on-chain (double-spend prevention)
+            existing_ki = await db.key_images.find_one({"key_image": ring_sig['key_image']})
+            if existing_ki and existing_ki.get('tx_id') != tx.get('id'):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} duplicate key_image (double-spend)")
+                return False
+            
+            # 4) Proof hash must be present (zk-STARK amount hiding)
+            if not tx.get('proof_hash'):
+                logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} missing proof_hash")
+                return False
+            
+            # 5) Full ring signature cryptographic verification (if signed message stored)
+            ring_message = ring_sig.get('message')
+            if ring_message:
+                verify_result = _ring_verify(ring_sig, ring_message)
+                if not verify_result.get('valid'):
+                    logging.warning(f"Block {block['index']}: private tx {tx.get('id','?')[:12]} ring signature INVALID: {verify_result.get('error')}")
+                    return False
+        
         return True
     except Exception as e:
         logging.error(f"Block validation error: {e}")
