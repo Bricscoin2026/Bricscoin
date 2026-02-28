@@ -270,6 +270,10 @@ async def send_private_transaction(req: PrivateSendRequest):
     """
     if req.amount <= 0:
         raise HTTPException(400, "Amount must be positive")
+    if req.ring_size < MIN_RING_SIZE:
+        raise HTTPException(400, f"Ring size too small. Minimum enforced: {MIN_RING_SIZE} (requested: {req.ring_size})")
+    if req.ring_size > MAX_RING_SIZE:
+        raise HTTPException(400, f"Ring size too large. Maximum allowed: {MAX_RING_SIZE} (requested: {req.ring_size})")
 
     db = await get_db()
 
