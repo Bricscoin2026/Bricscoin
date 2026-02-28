@@ -209,11 +209,11 @@ export default function P2Pool() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  ["Protocollo", "AuxPoW (Auxiliary Proof-of-Work)"],
+                  ["Protocol", "AuxPoW (Auxiliary Proof-of-Work)"],
                   ["Parent Chain", "Bitcoin"],
                   ["AuxPoW Blocks", `${stats.merge_mining.auxpow_blocks || 0} (${stats.merge_mining.auxpow_percentage || 0}%)`],
                   ["Native Blocks", stats.merge_mining.native_blocks || 0],
-                  ["Work Pendenti", stats.merge_mining.pending_work || 0],
+                  ["Pending Work", stats.merge_mining.pending_work || 0],
                   ["Last AuxPoW", stats.merge_mining.last_auxpow_block?.index ? `#${stats.merge_mining.last_auxpow_block.index}` : "None"],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-sm">

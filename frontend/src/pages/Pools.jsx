@@ -48,7 +48,7 @@ export default function Pools() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copiato negli appunti!");
+    toast.success("Copied to clipboard!");
   };
 
   return (
@@ -70,14 +70,14 @@ export default function Pools() {
           <CardContent className="p-4 text-center">
             <Users className="w-8 h-8 text-primary mx-auto mb-2" />
             <p className="text-2xl font-bold text-primary">{pools.length}</p>
-            <p className="text-xs text-muted-foreground">Pool Attivi</p>
+            <p className="text-xs text-muted-foreground">Active Pools</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-white/10">
           <CardContent className="p-4 text-center">
             <Globe className="w-8 h-8 text-primary mx-auto mb-2" />
             <p className="text-2xl font-bold text-primary">Globale</p>
-            <p className="text-xs text-muted-foreground">Copertura</p>
+            <p className="text-xs text-muted-foreground">Coverage</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-white/10">
@@ -116,7 +116,7 @@ export default function Pools() {
                     {pool.name}
                     {pool.featured && (
                       <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                        UFFICIALE
+                        OFFICIAL
                       </span>
                     )}
                   </CardTitle>
@@ -159,7 +159,7 @@ export default function Pools() {
               <div className="space-y-3">
                 <h4 className="font-semibold flex items-center gap-2">
                   <Zap className="w-4 h-4 text-primary" />
-                  Connessione
+                  Connection
                 </h4>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-4 bg-black/40 rounded-lg border border-primary/20">
                   <code className="text-primary font-mono text-sm flex-1 break-all">
@@ -214,17 +214,17 @@ export default function Pools() {
             </div>
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">2</div>
-              <h4 className="font-semibold mb-2">Configura il Miner</h4>
+              <h4 className="font-semibold mb-2">Configure Your Miner</h4>
               <p className="text-sm text-muted-foreground">Enter the pool URL in your miner settings.</p>
             </div>
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">3</div>
-              <h4 className="font-semibold mb-2">Imposta il Worker</h4>
+              <h4 className="font-semibold mb-2">Set Your Worker</h4>
               <p className="text-sm text-muted-foreground">Use your BricsCoin wallet address as worker name.</p>
             </div>
             <div className="p-4 bg-black/20 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold mb-3">4</div>
-              <h4 className="font-semibold mb-2">Inizia a Minare!</h4>
+              <h4 className="font-semibold mb-2">Start Mining!</h4>
               <p className="text-sm text-muted-foreground">Start the miner and check your earnings on the Mining page.</p>
             </div>
           </div>
@@ -264,8 +264,8 @@ export default function Pools() {
           <div className="flex items-center gap-3">
             <Plus className="w-8 h-8 text-primary" />
             <div>
-              <h3 className="font-heading font-bold">Gestisci un Pool?</h3>
-              <p className="text-sm text-muted-foreground">Contattaci per essere aggiunto alla lista!</p>
+              <h3 className="font-heading font-bold">Run a Pool?</h3>
+              <p className="text-sm text-muted-foreground">Contact us to be added to the list!</p>
             </div>
           </div>
           <a 
@@ -275,7 +275,7 @@ export default function Pools() {
           >
             <Button variant="outline" className="border-primary/50 hover:bg-primary/10">
               <ExternalLink className="w-4 h-4 mr-2" />
-              Contattaci su X
+              Contact us on X
             </Button>
           </a>
         </CardContent>
