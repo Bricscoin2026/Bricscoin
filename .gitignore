@@ -101,3 +101,13 @@ Core
 bricscoin-core/dist/linux-unpacked/bricscoin-core
 Core-3.0.0.AppImage
 bricscoin-core/dist/win-unpacked/BricsCoin
+3.0.0/BricsCoin.Core-3.0.0.AppImage
+3.0.0/BricsCoin.Core.3.0.0.exe
+bricscoin-core/dist/BricsCoin.Core-3.0.0.AppImage
+bricscoin-core/dist/mac/BricsCoin
+Core.app/Contents/Frameworks/Electron
+Framework.framework/Versions/A/Electron
+Framework
+bricscoin-core/dist/BricsCoin.Core.3.0.0.exe
+bricscoin-core/dist/mac-arm64/BricsCoin
+Core-3.0.0-mac.zip
