@@ -320,7 +320,9 @@ export default function Whitepaper() {
             <li>Uses a <strong>sliding window of the last 20 blocks</strong> for stability</li>
             <li>Estimates network hashrate from total work done divided by elapsed time</li>
             <li>Calculates new difficulty as: <code className="bg-white/5 px-1 rounded">new_diff = hashrate_estimate * 600</code></li>
-            <li>Applies a <strong>safety clamp</strong> (max 1.5x increase or 0.67x decrease) to prevent oscillations</li>
+            <li>Applies a <strong>safety clamp</strong> (max 1.25x increase or 0.75x decrease) to prevent oscillations</li>
+            <li><strong>Anti-spike detection:</strong> if short-term hashrate exceeds 3x the long-term average, the adjustment is dampened to prevent post-attack difficulty crash</li>
+            <li><strong>Coinbase maturity:</strong> mining rewards locked for {150} block confirmations (50% higher than Bitcoin&apos;s 100)</li>
             <li>Recalculates on <strong>every single block</strong> for maximum responsiveness to hashrate changes</li>
           </ul>
           <p className="mt-3">
