@@ -45,6 +45,8 @@ import { preparePQCTransaction, isValidPQCAddress } from "../lib/pqc-crypto";
 
 function PQCWalletCard({ wallet, onSelect, isSelected }) {
   const [balance, setBalance] = useState(null);
+  const [immatureBalance, setImmatureBalance] = useState(0);
+  const [maturingRewards, setMaturingRewards] = useState([]);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -53,6 +55,12 @@ function PQCWalletCard({ wallet, onSelect, isSelected }) {
     try {
       const res = await getPQCWalletInfo(wallet.address);
       setBalance(res.data.balance);
+      // Fetch maturity info
+      try {
+        const matRes = await getWalletBalance(wallet.address);
+        setImmatureBalance(matRes.data.immature_balance || 0);
+        setMaturingRewards(matRes.data.maturing_rewards || []);
+      } catch { setImmatureBalance(0); }
     } catch {
       setBalance(0);
     } finally {
