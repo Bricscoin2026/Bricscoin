@@ -1783,8 +1783,24 @@ async def get_mining_template():
     if not last_block:
         raise HTTPException(status_code=500, detail="No genesis block")
     
-    # Get pending transactions (max 100 per block)
-    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(100).to_list(100)
+    # Elastic block size: limit TXs based on median of recent blocks
+    recent_block_sizes = await db.blocks.find(
+        {}, {"_id": 0, "transactions": 1}
+    ).sort("index", -1).limit(BLOCK_SIZE_MEDIAN_WINDOW).to_list(BLOCK_SIZE_MEDIAN_WINDOW)
+    
+    block_sizes = sorted([len(b.get("transactions", [])) for b in recent_block_sizes]) if recent_block_sizes else [BASE_BLOCK_SIZE]
+    median_size = block_sizes[len(block_sizes) // 2] if block_sizes else BASE_BLOCK_SIZE
+    effective_max = max(BASE_BLOCK_SIZE, int(median_size * BLOCK_SIZE_MAX_GROWTH))
+    
+    # Get pending transactions (capped by elastic block size)
+    pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(effective_max).to_list(effective_max)
+    
+    # Calculate reward penalty if block exceeds median
+    tx_count = len(pending_txs)
+    reward_penalty = 0.0
+    if median_size > 0 and tx_count > median_size:
+        oversize_ratio = (tx_count - median_size) / median_size
+        reward_penalty = min(oversize_ratio * BLOCK_SIZE_PENALTY_RATE, 0.9)  # Max 90% penalty
     
     new_index = last_block['index'] + 1
     difficulty = await get_current_difficulty()
