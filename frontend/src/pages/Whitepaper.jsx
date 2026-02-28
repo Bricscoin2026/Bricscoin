@@ -522,7 +522,7 @@ export default function Whitepaper() {
           <div className="space-y-2 my-2">
             {[
               "zk-STARK zero-knowledge proofs for shielded transactions",
-              "Total Privacy Suite: zk-STARK + Ring Signatures + Stealth Addresses",
+              "Total Privacy Suite: zk-STARK + LSAG Ring Signatures (mandatory min 11, default 16) + Stealth Addresses",
               "Privacy Mode selection: Safe / Strong Privacy / Maximum Privacy",
               "Dandelion++ protocol for network-level transaction privacy (Fanti et al., 2018)",
               "Tor Hidden Service (.onion) for network-layer privacy",
