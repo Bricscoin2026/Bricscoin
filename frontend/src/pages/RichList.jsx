@@ -93,7 +93,7 @@ export default function RichList() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-heading font-bold">Rich List</h1>
-            <p className="text-muted-foreground">Caricamento...</p>
+            <p className="text-muted-foreground">Loading...</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -142,7 +142,7 @@ export default function RichList() {
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Holders Totali</p>
+                  <p className="text-sm text-muted-foreground mb-1">Total Holders</p>
                   <p className="text-2xl font-heading font-bold">{data?.total_holders || 0}</p>
                   <p className="text-xs text-muted-foreground mt-1">Wallets with balance &gt; 0</p>
                 </div>
@@ -163,11 +163,11 @@ export default function RichList() {
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Supply Circolante</p>
+                  <p className="text-sm text-muted-foreground mb-1">Circulating Supply</p>
                   <p className="text-2xl font-heading font-bold">
                     {data?.circulating_supply?.toLocaleString() || 0}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">BRICS in circolazione</p>
+                  <p className="text-xs text-muted-foreground mt-1">BRICS in circulation</p>
                 </div>
                 <div className="w-10 h-10 rounded-sm flex items-center justify-center bg-secondary/20 text-secondary">
                   <TrendingUp className="w-5 h-5" />
@@ -191,7 +191,7 @@ export default function RichList() {
                     {data?.wallets?.[0]?.balance?.toLocaleString() || 0}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {data?.wallets?.[0]?.percentage || 0}% del circolante
+                    {data?.wallets?.[0]?.percentage || 0}% of circulating
                   </p>
                 </div>
                 <div className="w-10 h-10 rounded-sm flex items-center justify-center bg-yellow-500/20 text-yellow-500">
@@ -221,7 +221,7 @@ export default function RichList() {
             <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 text-sm text-muted-foreground font-medium">
               <div className="col-span-1">#</div>
               <div className="col-span-5 md:col-span-6">Address</div>
-              <div className="col-span-4 md:col-span-3 text-right">Bilancio</div>
+              <div className="col-span-4 md:col-span-3 text-right">Balance</div>
               <div className="col-span-2 text-right">%</div>
             </div>
 
