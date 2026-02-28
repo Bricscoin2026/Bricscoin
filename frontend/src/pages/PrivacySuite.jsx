@@ -416,10 +416,10 @@ export default function PrivacySuite({ embedded = false }) {
                 className="w-full px-3 py-2 rounded-sm border border-white/10 bg-background text-sm"
                 data-testid="privacy-ring-size-select"
               >
-                <option value="3">3 (Fast)</option>
-                <option value="5">5 (Default)</option>
-                <option value="7">7 (Higher Privacy)</option>
-                <option value="11">11 (Maximum)</option>
+                <option value="11">11 (Minimum)</option>
+                <option value="16">16 (Default)</option>
+                <option value="32">32 (High Privacy)</option>
+                <option value="64">64 (Maximum)</option>
               </select>
             </div>
           </div>
