@@ -245,17 +245,17 @@ function SendDialog({ wallet, onSuccess }) {
       <DialogTrigger asChild>
         <Button className="gold-button rounded-sm" data-testid="send-btn">
           <Send className="w-4 h-4 mr-2" />
-          Invia
+          Send
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-card border-white/10" data-testid="send-dialog">
         <DialogHeader>
           <DialogTitle className="font-heading flex items-center gap-2">
             <Shield className="w-5 h-5 text-green-500" />
-            Invia BRICS (Sicuro)
+            Send BRICS (Secure)
           </DialogTitle>
           <DialogDescription className="text-green-500/80 text-xs">
-            La chiave privata non lascia mai il tuo dispositivo
+            Your private key never leaves your device
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -267,7 +267,7 @@ function SendDialog({ wallet, onSuccess }) {
           
           {/* Available Balance */}
           <div className="p-3 bg-primary/10 border border-primary/20 rounded-sm">
-            <p className="text-sm text-muted-foreground">Saldo Disponibile</p>
+            <p className="text-sm text-muted-foreground">Available Balance</p>
             <p className="text-xl font-bold gold-text" data-testid="send-available-balance">
               {balance !== null ? `${balance.toLocaleString()} BRICS` : "Caricamento..."}
             </p>
@@ -343,7 +343,7 @@ function SendDialog({ wallet, onSuccess }) {
             className="gold-button rounded-sm"
             data-testid="confirm-send-btn"
           >
-            {sending ? "Firma e Invio..." : "Firma e Invia"}
+            {sending ? "Signing & Sending..." : "Sign & Send"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -364,12 +364,12 @@ function ReceiveDialog({ wallet }) {
       <DialogTrigger asChild>
         <Button variant="outline" className="border-white/20 rounded-sm" data-testid="receive-btn">
           <QrCode className="w-4 h-4 mr-2" />
-          Ricevi
+          Receive
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-card border-white/10" data-testid="receive-dialog">
         <DialogHeader>
-          <DialogTitle className="font-heading">Ricevi BRICS</DialogTitle>
+          <DialogTitle className="font-heading">Receive BRICS</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center py-6 space-y-4">
           <div className="qr-container">
@@ -803,7 +803,7 @@ export default function Wallet({ embedded }) {
         <Card className="bg-card border-white/10 text-center py-12" data-testid="no-wallets">
           <CardContent>
             <WalletIcon className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-heading font-bold mb-2">Nessun Wallet</h2>
+            <h2 className="text-xl font-heading font-bold mb-2">No Wallet</h2>
             <p className="text-muted-foreground mb-6">
               Crea un nuovo wallet o importane uno esistente
             </p>
