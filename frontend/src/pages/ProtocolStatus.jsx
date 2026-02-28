@@ -58,7 +58,7 @@ const PROTOCOL_LAYERS = [
         name: "LSAG Ring Signatures",
         description: "Linkable Spontaneous Anonymous Group signatures hide the real sender among a set of decoys. Mandatory minimum ring size enforced at protocol level.",
         status: "stable",
-        notes: "Min ring size: 11, Default: 16, Max: 64. Comparable to Monero's ring size. Key images prevent double-spend.",
+        notes: "Min ring size: 32 (2x Monero), Default: 32, Max: 64. Dynamic sizing based on UTXO set. Key images prevent double-spend.",
       },
       {
         name: "Shielded Transactions (zk-STARK)",
