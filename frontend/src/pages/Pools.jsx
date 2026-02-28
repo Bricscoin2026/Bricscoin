@@ -202,7 +202,7 @@ export default function Pools() {
         <CardHeader>
           <CardTitle className="font-heading flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-primary" />
-            Come Connettersi
+            How to Connect
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
