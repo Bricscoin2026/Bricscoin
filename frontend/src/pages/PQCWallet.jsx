@@ -114,6 +114,21 @@ function PQCWalletCard({ wallet, onSelect, isSelected }) {
           </>
         )}
       </div>
+      {immatureBalance > 0 && (
+        <div className="mt-2 space-y-1" data-testid="pqc-immature-balance">
+          <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-amber-500/10 border border-amber-500/20">
+            <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="text-xs text-amber-400 font-mono font-bold">
+              +{immatureBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })} BRICS
+            </span>
+            <span className="text-[10px] text-amber-400/70">maturing</span>
+          </div>
+          <p className="text-[10px] text-muted-foreground/50 leading-tight">
+            Mining rewards need 150 confirmations. Anti-fraud protection.
+            {maturingRewards.length > 0 && ` ~${Math.max(...maturingRewards.map(r => r.blocks_remaining))} blocks left.`}
+          </p>
+        </div>
+      )}
     </motion.div>
   );
 }
