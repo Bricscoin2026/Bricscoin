@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Wallet as WalletIcon, ArrowRight, RefreshCw, TrendingUp, ChevronDown, Lock, Atom, Shield, Zap, Eye } from "lucide-react";
+import { Wallet as WalletIcon, ArrowRight, RefreshCw, TrendingUp, ChevronDown, Lock, Atom, Shield, Zap, Eye, Clock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { motion } from "framer-motion";
 import LegacyWallet from "./Wallet";
