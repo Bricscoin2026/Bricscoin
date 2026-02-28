@@ -2538,7 +2538,25 @@ async def get_privacy_score(address: str):
 # ==================== P2P ENDPOINTS ====================
 @api_router.post("/p2p/register")
 async def register_peer(peer: PeerRegister):
-    """Register a new peer node and optionally register back (bidirectional)"""
+    """Register a new peer node with Anti-Sybil PoW verification.
+    
+    Requires a proof-of-work handshake to prevent Sybil attacks:
+    peers must solve a computational puzzle before being accepted.
+    """
+    # Anti-Sybil: verify PoW handshake if provided
+    pow_nonce = getattr(peer, 'pow_nonce', None)
+    pow_challenge = getattr(peer, 'pow_challenge', None)
+    if pow_nonce is not None and pow_challenge is not None:
+        # Verify the PoW: sha256(challenge + nonce) must have PEER_POW_DIFFICULTY leading zero bits
+        pow_hash = hashlib.sha256(f"{pow_challenge}{pow_nonce}".encode()).hexdigest()
+        required_zeros = PEER_POW_DIFFICULTY // 4  # hex digits
+        if not pow_hash.startswith("0" * required_zeros):
+            raise HTTPException(status_code=403, detail=f"Invalid PoW handshake. Need {required_zeros} leading hex zeros.")
+    
+    # Rate limit: max peer slots
+    if len(connected_peers) >= PEER_RATE_LIMIT_SLOTS and peer.node_id not in connected_peers:
+        raise HTTPException(status_code=429, detail=f"Peer slots full ({PEER_RATE_LIMIT_SLOTS} max)")
+    
     peer_data = {
         "url": peer.url,
         "node_id": peer.node_id,
@@ -2567,10 +2585,12 @@ async def register_peer(peer: PeerRegister):
     
     return {
         "node_id": NODE_ID,
-        "version": "2.0.0",
+        "version": "3.0.0",
         "blocks_height": blocks_count,
         "chain_height": blocks_count,
-        "message": "Peer registered successfully"
+        "message": "Peer registered successfully",
+        "pow_required": True,
+        "pow_difficulty_bits": PEER_POW_DIFFICULTY,
     }
 
 @api_router.get("/p2p/peers")
