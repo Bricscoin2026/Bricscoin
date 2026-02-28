@@ -198,6 +198,39 @@ export default function P2Pool() {
             </Card>
           </div>
 
+          {/* Merge Mining (AuxPoW) */}
+          {stats?.merge_mining?.enabled && (
+            <Card className="bg-card border-orange-500/20" data-testid="auxpow-section">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Link2 className="w-4 h-4 text-orange-400" />Merge Mining (AuxPoW)
+                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 ml-2">Bitcoin</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  ["Protocollo", "AuxPoW (Auxiliary Proof-of-Work)"],
+                  ["Parent Chain", "Bitcoin"],
+                  ["Blocchi AuxPoW", `${stats.merge_mining.auxpow_blocks || 0} (${stats.merge_mining.auxpow_percentage || 0}%)`],
+                  ["Blocchi Nativi", stats.merge_mining.native_blocks || 0],
+                  ["Work Pendenti", stats.merge_mining.pending_work || 0],
+                  ["Ultimo AuxPoW", stats.merge_mining.last_auxpow_block?.index ? `#${stats.merge_mining.last_auxpow_block.index}` : "Nessuno"],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{k}</span>
+                    <span className="font-mono">{v}</span>
+                  </div>
+                ))}
+                <div className="pt-2 border-t border-white/5">
+                  <p className="text-xs text-muted-foreground">
+                    I miner Bitcoin possono minare BricsCoin simultaneamente a <span className="text-orange-400 font-bold">costo zero</span>.
+                    API: <span className="font-mono text-xs text-primary">/api/auxpow/create-work</span>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Top Miners */}
           {poolMiners.top_miners?.length > 0 && (
             <Card className="bg-card border-white/10">
