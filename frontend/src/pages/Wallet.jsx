@@ -181,7 +181,7 @@ function SendDialog({ wallet, onSuccess }) {
 
   const handleSend = async () => {
     if (!recipient || !amount) {
-      toast.error("Compila tutti i campi");
+      toast.error("Fill in all fields");
       return;
     }
 
@@ -938,7 +938,7 @@ export default function Wallet({ embedded }) {
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-sm mt-4">
                 <p className="text-sm text-red-400 flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  Assicurati di aver salvato la seed phrase prima di eliminare!
+                  Make sure you have saved the seed phrase before deleting!
                 </p>
               </div>
             </div>

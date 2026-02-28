@@ -31,7 +31,7 @@ export default function RichList() {
       setData(result);
     } catch (error) {
       console.error("Error fetching rich list:", error);
-      toast.error("Errore nel caricamento della Rich List");
+      toast.error("Error loading the Rich List");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -118,7 +118,7 @@ export default function RichList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-heading font-bold">Rich List</h1>
-          <p className="text-muted-foreground">Classifica dei wallet per bilancio BRICS</p>
+          <p className="text-muted-foreground">Wallet ranking by BRICS balance</p>
         </div>
         <Button
           variant="outline"
@@ -292,7 +292,7 @@ export default function RichList() {
         <CardContent className="p-6">
           <p className="text-sm text-muted-foreground">
             The Rich List shows the top 100 wallets by BRICS balance. 
-            I dati vengono aggiornati automaticamente ogni minuto.
+            Data is updated automatically every minute.
             Clicca su un indirizzo per vedere i dettagli nell&apos;Explorer.
           </p>
         </CardContent>

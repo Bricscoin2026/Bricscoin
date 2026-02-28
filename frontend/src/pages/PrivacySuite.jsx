@@ -252,7 +252,7 @@ export default function PrivacySuite({ embedded = false }) {
 
   const sendPrivate = async () => {
     if (!selectedWallet || !recipientScan || !recipientSpend || !amount) {
-      toast.error("Compila tutti i campi");
+      toast.error("Fill in all fields");
       return;
     }
     if (parseFloat(amount) <= 0) {
