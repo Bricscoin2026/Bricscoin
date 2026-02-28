@@ -92,7 +92,7 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
             ) : balance !== null ? (
               `${balance.toLocaleString()} BRICS`
             ) : (
-              "Errore"
+              "Error"
             )}
           </p>
         </div>
