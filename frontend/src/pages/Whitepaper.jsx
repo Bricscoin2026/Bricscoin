@@ -552,13 +552,17 @@ export default function Whitepaper() {
           <p className="text-xs uppercase tracking-widest text-emerald-400/60 font-bold mt-6 mb-2">Security & Privacy</p>
           <div className="space-y-2 my-2">
             {[
-              "zk-STARK zero-knowledge proofs for shielded transactions",
-              "Total Privacy Suite: zk-STARK + LSAG Ring Signatures (mandatory min 32, dynamic up to 64) + Stealth Addresses + Dummy Traffic + Propagation Jitter",
-              "Privacy Mode selection: Safe / Strong Privacy / Maximum Privacy",
-              "Dandelion++ protocol for network-level transaction privacy (Fanti et al., 2018)",
+              "zk-STARK zero-knowledge proofs for shielded transactions (no plaintext amount on-chain)",
+              "Total Privacy Suite: LSAG Ring Signatures (32-64 decoys, per-TX nonce) + Stealth Addresses (DHKE) + zk-STARK amount hiding",
+              "Mandatory privacy: transparent mode permanently disabled (HTTP 410). All user TXs use full privacy stack",
+              "Consensus-level privacy enforcement: nodes reject blocks with missing/invalid ring signatures, proofs, or key images",
+              "Private balance ledger with unlinkable debit/credit records (no cross-reference between sender and receiver)",
+              "Dandelion++ protocol with propagation jitter (100-2000ms) and dummy traffic generation (15-60s intervals)",
+              "Anti-Sybil PoW handshake (16-bit) + per-ASN limit (max 3 peers) for all incoming connections",
+              "Coinbase maturity (150 blocks) + adaptive difficulty (dual-window EMA + anti-spike dampening)",
+              "Elastic block size (median-based) with reward penalty for oversize blocks",
               "Tor Hidden Service (.onion) for network-layer privacy",
-              "Privacy Score: per-wallet metric aggregating PQC, shielded TX, and privacy suite usage",
-              "Published Threat Model (STRIDE framework, versioned, 12 threats analyzed)",
+              "Published Threat Model v1.1 (STRIDE framework, versioned, 12 threats analyzed)",
               "API rate limiting, DDoS protection, and IP-based blocking",
               "Light Client API with SPV-style block header verification",
               "Block pruning system for PQC signature storage optimization",
