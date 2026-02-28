@@ -56,12 +56,17 @@ function PortfolioSummary({ onSelectTab }) {
             {walletCount} wallet{walletCount !== 1 ? "s" : ""} connected
           </p>
           {totalImmatureBalance > 0 && (
-            <div className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20" data-testid="total-immature-balance">
-              <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="text-xs text-amber-400 font-mono font-bold">
-                +{totalImmatureBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })} BRICS
-              </span>
-              <span className="text-xs text-amber-400/70">maturing</span>
+            <div className="mt-2 space-y-1" data-testid="total-immature-balance">
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
+                <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="text-xs text-amber-400 font-mono font-bold">
+                  +{totalImmatureBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })} BRICS
+                </span>
+                <span className="text-xs text-amber-400/70">maturing</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 leading-tight px-1">
+                Mining rewards require 150 block confirmations before they become spendable. This is an anti-fraud protection against chain reorganizations.
+              </p>
             </div>
           )}
         </div>
