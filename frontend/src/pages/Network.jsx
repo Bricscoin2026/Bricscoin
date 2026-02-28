@@ -407,25 +407,83 @@ export default function Network() {
                 </Button>
               </a>
             </div>
-            <div className="mt-4 p-4 bg-background/50 rounded-sm border border-white/10">
-              <pre className="font-mono text-xs text-muted-foreground overflow-x-auto">
-{`# BRICScoin Full Node v2.0 + Integrated Wallet
-# Option 1: Docker (recommended)
+            
+            {/* Server Setup Guide */}
+            <div className="mt-6 space-y-4">
+              <h4 className="font-heading font-bold text-sm flex items-center gap-2">
+                <Server className="w-4 h-4 text-primary" />
+                Deploy on a VPS (Hetzner, Contabo, OVH)
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  {
+                    step: "1",
+                    title: "Get a Server",
+                    desc: "Any VPS with 2+ vCPU, 4GB RAM, 40GB SSD. Ubuntu 22.04/24.04 recommended. From ~3.5 EUR/month.",
+                  },
+                  {
+                    step: "2",
+                    title: "Install & Run",
+                    desc: "SSH into your server, install Docker, clone the repo and start the node. It syncs automatically.",
+                  },
+                  {
+                    step: "3",
+                    title: "Node is Live",
+                    desc: "Your node validates blocks, registers with the P2P network, and appears on this page. You can also mine!",
+                  },
+                ].map((item) => (
+                  <div key={item.step} className="flex gap-3 p-3 rounded-sm border border-white/[0.06] bg-white/[0.02]">
+                    <div className="w-8 h-8 rounded-sm bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <span className="font-heading font-bold text-primary text-sm">{item.step}</span>
+                    </div>
+                    <div>
+                      <p className="font-heading font-bold text-sm">{item.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 bg-background/50 rounded-sm border border-white/10">
+                <p className="text-xs font-bold text-primary mb-2">Full Setup Commands (copy and paste into your server terminal):</p>
+                <pre className="font-mono text-xs text-muted-foreground overflow-x-auto whitespace-pre-wrap">
+{`# Step 1: Install Docker
+apt-get update && apt-get install -y docker.io docker-compose-v2
+
+# Step 2: Clone BricsCoin
+git clone https://codeberg.org/Bricscoin_26/Bricscoin.git
+cd Bricscoin/bricscoin-node
+
+# Step 3: Configure your node
+cp .env.example .env
+# Edit .env and set:
+#   NODE_URL=http://YOUR_SERVER_IP:8333
+#   NODE_ID=your-node-name
+#   SEED_NODE=http://5.161.254.163
+
+# Step 4: Start the node
 docker compose up -d
 
-# Option 2: Manual
-pip install -r requirements.txt
-python node.py
+# Step 5: Check logs (your node will sync the blockchain)
+docker logs bricscoin-node -f
 
-# Create your wallet:
-# curl -X POST http://localhost:8333/api/wallet/create
-#
 # Your node will automatically:
-#   Sync the entire blockchain
-#   Register with the P2P network
-#   Validate all blocks independently
-#   Include a built-in wallet for sending/receiving BRICS`}
-              </pre>
+#   - Download and validate the entire blockchain
+#   - Register with the seed node (PoW handshake)
+#   - Appear on the Network page as "Online"
+#   - Start accepting and relaying new blocks`}
+                </pre>
+              </div>
+
+              <div className="p-3 rounded-sm border border-amber-500/10 bg-amber-500/5">
+                <p className="text-xs text-amber-400 font-bold mb-1">Requirements</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-muted-foreground">
+                  <div><span className="text-amber-400 font-bold">CPU:</span> 2+ vCPU</div>
+                  <div><span className="text-amber-400 font-bold">RAM:</span> 4 GB</div>
+                  <div><span className="text-amber-400 font-bold">Disk:</span> 40 GB SSD</div>
+                  <div><span className="text-amber-400 font-bold">OS:</span> Ubuntu 22/24</div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
