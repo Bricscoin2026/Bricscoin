@@ -291,8 +291,9 @@ export default function About() {
         </CardHeader>
         <CardContent className="space-y-4 relative z-10">
           <p className="text-muted-foreground text-sm">
-            Questo audit esegue test di sicurezza reali in tempo reale sulla blockchain. Verifica la crittografia,
-            la validazione degli input, la protezione post-quantistica e la prevenzione degli attacchi.
+            Questo audit esegue test di sicurezza reali in tempo reale sulla blockchain. Verifica la crittografia classica e
+            post-quantistica, il protocollo privacy (Ring Signatures, Stealth Addresses, zk-STARKs), le 11 regole di consenso
+            enforced e la prevenzione degli attacchi.
           </p>
 
           {audit ? (
