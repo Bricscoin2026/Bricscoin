@@ -169,10 +169,13 @@ export default function Whitepaper() {
             <span className="text-base font-bold text-primary">C</span>ertified{" "}
             <span className="text-base font-bold text-primary">O</span>pen{" "}
             <span className="text-base font-bold text-primary">I</span>nnovation{" "}
-            <span className="text-base font-bold text-primary">N</span>etwork &mdash; is a decentralized cryptocurrency built on the proven SHA-256 Proof-of-Work consensus mechanism, enhanced with <strong>post-quantum cryptographic security</strong>. The name reflects the project's core mission: building resilient, open, and secure digital infrastructure for a post-quantum world. It has no political, geopolitical, or institutional affiliation of any kind.
+            <span className="text-base font-bold text-primary">N</span>etwork &mdash; is a decentralized cryptocurrency built on the proven SHA-256 Proof-of-Work consensus mechanism, enhanced with <strong>post-quantum cryptographic security</strong> and <strong>mandatory privacy at consensus level</strong>. The name reflects the project's core mission: building resilient, open, and secure digital infrastructure for a post-quantum world. It has no political, geopolitical, or institutional affiliation of any kind.
           </p>
           <p className="mt-3">
             With a fixed supply of <strong>21,000,000 coins</strong>, ultra-low transaction fees of <strong>0.000005 BRICS</strong> (burned), and a hybrid <strong>ECDSA + ML-DSA-65</strong> signature scheme providing quantum resistance, BricsCoin is a fair, transparent, secure, and future-proof digital currency.
+          </p>
+          <p className="mt-3">
+            Every transaction on BricsCoin is fully private by design: <strong>LSAG Ring Signatures</strong> (32-64 decoys) hide the sender, <strong>Stealth Addresses</strong> (DHKE) hide the receiver, and <strong>zk-STARK proofs</strong> hide the amount. No plaintext sender address or amount is ever stored on the blockchain. Privacy is enforced at the consensus level &mdash; nodes reject blocks containing private transactions with missing or invalid cryptographic proofs.
           </p>
           <p className="mt-3">
             BricsCoin goes beyond a simple payment network by offering a suite of on-chain applications: <strong>BricsChat</strong> (quantum-proof encrypted messaging), <strong>Time Capsule</strong> (time-locked on-chain data), <strong>BricsNFT</strong> (PQC-signed certificates), and an <strong>AI Oracle</strong> (GPT-5.2 powered network intelligence).
