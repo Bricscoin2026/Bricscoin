@@ -101,6 +101,13 @@ export default function MobileWallet() {
     try {
       const res = await getPQCWalletInfo(activeWallet.address);
       setBalance(res.data.balance);
+      // Fetch maturity info from legacy balance endpoint
+      try {
+        const matRes = await fetch(`${API}/api/wallet/${activeWallet.address}/balance`);
+        const matData = await matRes.json();
+        setImmatureBalance(matData.immature_balance || 0);
+        setMaturingRewards(matData.maturing_rewards || []);
+      } catch { setImmatureBalance(0); setMaturingRewards([]); }
     } catch { setBalance(0); }
     finally { setLoadingBal(false); }
   }, [activeWallet]);
