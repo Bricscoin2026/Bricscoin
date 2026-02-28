@@ -2849,9 +2849,7 @@ async def register_peer(peer: PeerRegister):
     peers must solve a computational puzzle before being accepted.
     """
     # Anti-Sybil: MANDATORY PoW handshake to prevent Sybil attacks
-    pow_nonce = getattr(peer, 'pow_nonce', None)
-    pow_challenge = getattr(peer, 'pow_challenge', None)
-    if pow_nonce is not None and pow_challenge is not None:
+    if peer.pow_nonce is not None and peer.pow_challenge is not None:
         # Verify the PoW: sha256(challenge + nonce) must have PEER_POW_DIFFICULTY leading zero bits
         pow_hash = hashlib.sha256(f"{pow_challenge}{pow_nonce}".encode()).hexdigest()
         required_zeros = PEER_POW_DIFFICULTY // 4  # hex digits
