@@ -2688,7 +2688,7 @@ async def register_peer(peer: PeerRegister):
     Requires a proof-of-work handshake to prevent Sybil attacks:
     peers must solve a computational puzzle before being accepted.
     """
-    # Anti-Sybil: verify PoW handshake if provided
+    # Anti-Sybil: MANDATORY PoW handshake to prevent Sybil attacks
     pow_nonce = getattr(peer, 'pow_nonce', None)
     pow_challenge = getattr(peer, 'pow_challenge', None)
     if pow_nonce is not None and pow_challenge is not None:
@@ -2697,6 +2697,15 @@ async def register_peer(peer: PeerRegister):
         required_zeros = PEER_POW_DIFFICULTY // 4  # hex digits
         if not pow_hash.startswith("0" * required_zeros):
             raise HTTPException(status_code=403, detail=f"Invalid PoW handshake. Need {required_zeros} leading hex zeros.")
+    else:
+        # PoW not provided — generate a challenge for the peer to solve
+        challenge = hashlib.sha256(f"{peer.node_id}{time.time()}".encode()).hexdigest()
+        return {
+            "status": "pow_required",
+            "challenge": challenge,
+            "difficulty_bits": PEER_POW_DIFFICULTY,
+            "message": f"Solve SHA256(challenge + nonce) with {PEER_POW_DIFFICULTY // 4} leading hex zeros, then re-register with pow_challenge and pow_nonce fields."
+        }
     
     # Rate limit: max peer slots
     if len(connected_peers) >= PEER_RATE_LIMIT_SLOTS and peer.node_id not in connected_peers:
