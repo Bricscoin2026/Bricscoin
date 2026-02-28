@@ -1620,9 +1620,12 @@ async def create_secure_transaction(request: Request, tx_request: SecureTransact
     """
     Create a secure transaction - PRIVATE KEY NEVER SENT TO SERVER.
     
-    The transaction must be signed CLIENT-SIDE before submission.
-    This endpoint only verifies the signature and processes the transaction.
-    Transaction fee: 0.05 BRICS
+    PRIVACY MANDATORY: This endpoint wraps the transaction with protocol-level
+    privacy enforcement. All transactions are routed through Dandelion++ with
+    jitter and recorded with privacy metadata. For FULL privacy (Ring + Stealth + 
+    zk-STARK), use POST /api/privacy/send-private instead.
+    
+    Transaction fee: 0.000005 BRICS
     """
     client_ip = get_remote_address(request)
     
