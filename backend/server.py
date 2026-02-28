@@ -1920,6 +1920,28 @@ async def submit_mined_block(submission: MiningSubmit):
     
     pending_txs = await db.transactions.find({"confirmed": False}, {"_id": 0}).limit(effective_max).to_list(effective_max)
     
+    # PRIVACY CONSENSUS: Filter out invalid private transactions before including in block
+    from ring_engine import ring_verify as _ring_verify_mining
+    valid_pending_txs = []
+    for tx in pending_txs:
+        if tx.get('type') == 'private':
+            ring_sig = tx.get('ring_signature')
+            if (not ring_sig or not isinstance(ring_sig, dict)
+                or not ring_sig.get('key_image')
+                or not tx.get('ephemeral_pubkey')
+                or ring_sig.get('ring_size', 0) < MIN_RING_SIZE
+                or not tx.get('proof_hash')):
+                logging.warning(f"Mining: excluding invalid private tx {tx.get('id','?')[:12]} — missing privacy proofs")
+                continue
+            ring_message = ring_sig.get('message')
+            if ring_message:
+                vr = _ring_verify_mining(ring_sig, ring_message)
+                if not vr.get('valid'):
+                    logging.warning(f"Mining: excluding private tx {tx.get('id','?')[:12]} — invalid ring sig")
+                    continue
+        valid_pending_txs.append(tx)
+    pending_txs = valid_pending_txs
+    
     # Calculate reward with elastic block penalty
     base_reward = get_mining_reward(new_index)
     tx_count = len(pending_txs)
