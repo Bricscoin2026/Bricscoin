@@ -193,7 +193,7 @@ export default function PrivacySuite({ embedded = false }) {
   const [recipientScan, setRecipientScan] = useState("");
   const [recipientSpend, setRecipientSpend] = useState("");
   const [amount, setAmount] = useState("");
-  const [ringSize, setRingSize] = useState("16");
+  const [ringSize, setRingSize] = useState("32");
   const [sending, setSending] = useState(false);
   const [txResult, setTxResult] = useState(null);
 
