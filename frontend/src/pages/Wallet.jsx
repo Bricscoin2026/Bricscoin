@@ -413,10 +413,10 @@ function SeedPhraseDialog({ wallet, open, onOpenChange }) {
         <DialogHeader>
           <DialogTitle className="font-heading flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-yellow-500" />
-            Seed Phrase - TIENILA SEGRETA!
+            Seed Phrase - KEEP IT SECRET!
           </DialogTitle>
           <DialogDescription className="text-yellow-500/80">
-            Queste 12 parole permettono di recuperare il tuo wallet. Non condividerle MAI con nessuno!
+            These 12 words allow you to recover your wallet. NEVER share them with anyone!
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -503,7 +503,7 @@ function ImportDialog({ onSuccess }) {
         <DialogHeader>
           <DialogTitle className="font-heading">Importa Wallet</DialogTitle>
           <DialogDescription>
-            Recupera un wallet esistente con la seed phrase o la chiave privata
+            Recover an existing wallet with a seed phrase or private key
           </DialogDescription>
         </DialogHeader>
         
@@ -515,7 +515,7 @@ function ImportDialog({ onSuccess }) {
             </TabsTrigger>
             <TabsTrigger value="key" className="data-[state=active]:bg-primary/20">
               <Key className="w-4 h-4 mr-2" />
-              Chiave Privata
+              Private Key
             </TabsTrigger>
           </TabsList>
           
@@ -647,7 +647,7 @@ export default function Wallet({ embedded }) {
       setSeedWallet(newWallet);
       setSeedDialogOpen(true);
       
-      toast.success("Wallet creato! Salva la seed phrase!");
+      toast.success("Wallet created! Save the seed phrase!");
     } catch (error) {
       toast.error("Creazione wallet fallita");
     } finally {
@@ -687,7 +687,7 @@ export default function Wallet({ embedded }) {
     }
     setDeleteDialogOpen(false);
     setWalletToDelete(null);
-    toast.success("Wallet eliminato");
+    toast.success("Wallet deleted");
   };
 
   const exportWallet = () => {
