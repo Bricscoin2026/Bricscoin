@@ -99,6 +99,17 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
               "Error"
             )}
           </p>
+          {immatureBalance > 0 && (
+            <div className="mt-1.5 flex items-center gap-1.5" data-testid="immature-balance">
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-xs text-amber-400 font-mono">
+                +{immatureBalance.toLocaleString()} BRICS maturing
+              </span>
+              <span className="text-xs text-muted-foreground">
+                ({maturingRewards.length > 0 ? `~${maturingRewards[maturingRewards.length - 1]?.blocks_remaining || 0} blocks left` : ""})
+              </span>
+            </div>
+          )}
         </div>
         <div className="w-10 h-10 rounded-sm bg-primary/20 flex items-center justify-center">
           <WalletIcon className="w-5 h-5 text-primary" />
