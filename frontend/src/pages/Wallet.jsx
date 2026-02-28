@@ -731,7 +731,7 @@ export default function Wallet({ embedded }) {
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10" data-testid="create-wallet-dialog">
               <DialogHeader>
-                <DialogTitle className="font-heading">Crea Nuovo Wallet</DialogTitle>
+                <DialogTitle className="font-heading">Create New Wallet</DialogTitle>
                 <DialogDescription>
                   A 12-word seed phrase will be generated for backup
                 </DialogDescription>
@@ -777,7 +777,7 @@ export default function Wallet({ embedded }) {
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10" data-testid="create-wallet-dialog">
               <DialogHeader>
-                <DialogTitle className="font-heading">Crea Nuovo Wallet</DialogTitle>
+                <DialogTitle className="font-heading">Create New Wallet</DialogTitle>
                 <DialogDescription>A 12-word seed phrase will be generated for backup</DialogDescription>
               </DialogHeader>
               <div className="py-4">
