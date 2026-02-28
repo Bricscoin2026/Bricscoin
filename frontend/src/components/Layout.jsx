@@ -20,7 +20,9 @@ import {
   Smartphone,
   Coins,
   Shield,
-  Activity
+  Activity,
+  Eye,
+  FileText
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
