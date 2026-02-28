@@ -183,7 +183,7 @@ export default function TransactionDetail() {
                     Firmato Localmente - Quantum-Safe
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Firma ibrida ECDSA + ML-DSA-65 (FIPS 204). Le chiavi private non hanno mai lasciato il dispositivo del mittente.
+                    Hybrid ECDSA + ML-DSA-65 (FIPS 204) signature. Private keys never left the sender's device.
                   </p>
                 </div>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
