@@ -67,10 +67,10 @@ const PROTOCOL_LAYERS = [
         notes: "Privacy score reflects actual shielded transaction usage per wallet.",
       },
       {
-        name: "Privacy Modes (Safe / Strong / Maximum)",
-        description: "User-selectable privacy levels in the wallet UI, controlling transaction routing and shielding behavior.",
+        name: "Privacy Modes (Strong / Maximum)",
+        description: "All transactions are private by default. No transparent mode exists. Users choose between Strong (zk-STARK + Ring) and Maximum (full stack with stealth addresses).",
         status: "stable",
-        notes: "Three distinct modes with clear UX indicators of privacy tradeoffs.",
+        notes: "Privacy is MANDATORY. The 'Safe' transparent mode has been eliminated from the protocol.",
       },
       {
         name: "Chain Security (Checkpoints & Reorg Protection)",
