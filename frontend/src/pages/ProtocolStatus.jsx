@@ -86,15 +86,15 @@ const PROTOCOL_LAYERS = [
       },
       {
         name: "LSAG Ring Signatures",
-        description: "Linkable Spontaneous Anonymous Group signatures hide the real sender among a ring of decoys. Per-transaction nonce ensures unique key images. Consensus enforcement rejects blocks with invalid ring signatures.",
+        description: "Linkable Spontaneous Anonymous Group signatures hide the real sender among a ring of decoys. Per-transaction nonce ensures unique key images. Gamma distribution decoy selection prevents timing analysis. Consensus enforcement rejects blocks with invalid ring signatures.",
         status: "stable",
-        notes: "Min ring size: 32 (2x Monero), Default: 32, Max: 64. Per-TX nonce (I = x*Hp(P||nonce)) enables multiple TXs from same account. Key images prevent double-spend. Sender address NOT stored on-chain — only 'RING_HIDDEN'.",
+        notes: "Min ring size: 32 (2x Monero), Default: 32, Max: 64. Per-TX nonce (I = x*Hp(P||nonce)). Gamma distribution decoy selection (shape=19.28, like Monero). 11 consensus rules enforced. Sender address NOT stored on-chain.",
       },
       {
         name: "Shielded Transactions (zk-STARK)",
-        description: "Transaction amounts are truly hidden. No plaintext amount exists in the blockchain — only a cryptographic commitment and encrypted data. Amounts displayed as 'SHIELDED' in the public explorer.",
+        description: "Transaction amounts are truly hidden. No plaintext amount exists in the blockchain — only a cryptographic commitment and encrypted data. Range proof enforced: amount > 0 AND amount <= balance. Conservation of value verified.",
         status: "stable",
-        notes: "On-chain: only commitment + encrypted_amount + proof_hash. Plaintext amount never stored in transaction document. FRI protocol, 128-bit security, quantum-resistant, no trusted setup.",
+        notes: "On-chain: only commitment + encrypted_amount + proof_hash. Range proof prevents negative amounts (coin creation from nothing). FRI protocol, 128-bit security, quantum-resistant, no trusted setup.",
       },
       {
         name: "Privacy Modes (Mandatory 10/10)",
