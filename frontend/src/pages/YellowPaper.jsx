@@ -154,6 +154,7 @@ export default function YellowPaper() {
                 <br />Accept iff c_0 == c_n (ring closes)
               </Formula>
               <p><strong>Double-spend prevention:</strong> The key image I is stored on-chain. If the same I appears in two transactions, the second is rejected. Since I = x * H_p(P || nonce), and the nonce is random, the same (x, nonce) pair has negligible probability of recurrence.</p>
+              <p className="mt-2"><strong>Decoy selection:</strong> Ring members are selected using a <strong>Gamma distribution</strong> (shape=19.28, scale=1/1.61, matching Monero's parameters). This favors recent transactions, creating a realistic temporal distribution that prevents timing-based deanonymization. If insufficient real wallets exist, synthetic decoys are generated.</p>
             </Section>
 
             <Section id="stealth" title="3. Stealth Addresses (DHKE)" icon={Eye} color="#06B6D4">
@@ -214,6 +215,7 @@ export default function YellowPaper() {
                 </div>
               </div>
               <p><strong>Why not Bulletproofs?</strong> Bulletproofs (used by Monero) rely on the discrete logarithm assumption, which is broken by quantum computers. zk-STARKs rely only on hash function collision resistance, making them quantum-resistant with no trusted setup.</p>
+              <p className="mt-2"><strong>Range proof:</strong> The execution trace enforces <code className="text-emerald-300">amount {">"} 0</code>, <code className="text-emerald-300">amount {"<="} balance</code>, and <code className="text-emerald-300">balance = amount + remainder</code> (conservation of value). A positivity witness <code className="text-emerald-300">a*(a-1)+1</code> is computed in the trace. Negative or zero amounts are rejected before proof generation.</p>
             </Section>
 
             <Section id="consensus" title="5. Privacy Consensus Rules" icon={Shield} color="#EF4444">
