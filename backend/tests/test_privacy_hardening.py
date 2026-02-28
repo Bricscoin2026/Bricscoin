@@ -13,7 +13,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://secure-brics.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://secure-ledger-11.preview.emergentagent.com').rstrip('/')
 
 # Test wallet from context
 TEST_WALLET = {
