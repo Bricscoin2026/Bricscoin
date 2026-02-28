@@ -101,7 +101,7 @@ function StealthSetup({ onMetaGenerated }) {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
                 <p className="text-[10px] text-muted-foreground">
-                  Le chiavi private sono salvate nel browser. <strong className="text-amber-400">Esegui il backup!</strong>
+                  Private keys are saved in your browser. <strong className="text-amber-400">Back them up!</strong>
                 </p>
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function PrivacySuite({ embedded = false }) {
       return;
     }
     if (parseFloat(amount) <= 0) {
-      toast.error("L'importo deve essere positivo");
+      toast.error("Amount must be positive");
       return;
     }
     if (parseFloat(amount) > parseFloat(balance)) {
@@ -301,7 +301,7 @@ export default function PrivacySuite({ embedded = false }) {
       // Refresh balance
       selectWallet(selectedWallet);
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Transazione fallita");
+      toast.error(err.response?.data?.detail || "Transaction failed");
     } finally {
       setSending(false);
     }
@@ -392,12 +392,12 @@ export default function PrivacySuite({ embedded = false }) {
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Recipient Scan Public Key</label>
               <Input value={recipientScan} onChange={e => setRecipientScan(e.target.value)}
-                placeholder="Scan public key del destinatario..." className="font-mono text-xs" data-testid="privacy-recipient-scan-input" />
+                placeholder="Recipient's scan public key..." className="font-mono text-xs" data-testid="privacy-recipient-scan-input" />
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Recipient Spend Public Key</label>
               <Input value={recipientSpend} onChange={e => setRecipientSpend(e.target.value)}
-                placeholder="Spend public key del destinatario..." className="font-mono text-xs" data-testid="privacy-recipient-spend-input" />
+                placeholder="Recipient's spend public key..." className="font-mono text-xs" data-testid="privacy-recipient-spend-input" />
             </div>
           </div>
 
@@ -447,7 +447,7 @@ export default function PrivacySuite({ embedded = false }) {
                   <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-amber-400 mb-1">SALVA IL BLINDING FACTOR</p>
-                    <p className="text-[10px] text-muted-foreground mb-2">Ti serve per decriptare l'importo. Salvato nel browser automaticamente.</p>
+                    <p className="text-[10px] text-muted-foreground mb-2">Needed to decrypt the amount. Automatically saved in browser.</p>
                     <div className="flex items-center gap-2">
                       <code className="text-[10px] font-mono bg-black/30 px-2 py-1 rounded truncate block flex-1">
                         {txResult.blinding_factor}
@@ -572,7 +572,7 @@ export default function PrivacySuite({ embedded = false }) {
         <CardContent className="space-y-0">
           {[
             { step: "01", title: "Ring Signature (Sender Hidden)", desc: "Your signature is mixed with those of other users in the \"ring\". Nobody can determine who actually signed the transaction. The Key Image prevents double-spending.", color: "text-violet-400" },
-            { step: "02", title: "Stealth Address (Receiver Hidden)", desc: "Viene generato un indirizzo one-time per il destinatario usando DHKE. Solo il destinatario, con la sua scan key, puo' riconoscere il pagamento.", color: "text-cyan-400" },
+            { step: "02", title: "Stealth Address (Receiver Hidden)", desc: "A one-time address is generated for the receiver using DHKE. Only the receiver, with their scan key, can recognize the payment.", color: "text-cyan-400" },
             { step: "03", title: "zk-STARK Proof (Amount Hidden)", desc: "The amount is hidden via a cryptographic commitment. A STARK proof (FRI protocol) proves validity without revealing the amount.", color: "text-emerald-400" },
             { step: "04", title: "On-Chain Result", desc: "The blockchain shows: sender = RING_HIDDEN, receiver = BRICSX... (stealth), amount = SHIELDED. Total privacy maintained.", color: "text-amber-400" },
           ].map((item, i) => (
