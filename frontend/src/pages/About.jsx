@@ -308,7 +308,12 @@ export default function About() {
                 <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">SHA-256</Badge>
                 <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">ECDSA secp256k1</Badge>
                 <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">ML-DSA-65 (FIPS 204)</Badge>
-                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Firma Client-Side</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">LSAG Ring Signatures</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Stealth Addresses</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">zk-STARKs</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">Dandelion++</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">AuxPoW Merge Mining</Badge>
+                <Badge variant="outline" className="text-xs border-emerald-500/20 text-emerald-400">11 Consensus Rules</Badge>
               </div>
 
               {audit.timestamp && (
