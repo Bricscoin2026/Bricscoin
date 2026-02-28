@@ -44,9 +44,12 @@ const platforms = [
     size: "~88 MB",
     instructions: [
       "Download the .zip file",
-      "Extract the archive",
-      "Move to Applications folder",
-      "Right-click > Open (first time only)"
+      "Open Terminal and run these commands:",
+      "cd ~/Downloads",
+      "unzip -o \"BricsCoin.Core-3.0.0-arm64-mac.zip\"",
+      "sudo xattr -cr \"BricsCoin Core.app\"",
+      "mv \"BricsCoin Core.app\" /Applications/",
+      "open /Applications/BricsCoin\\ Core.app"
     ]
   },
   {
