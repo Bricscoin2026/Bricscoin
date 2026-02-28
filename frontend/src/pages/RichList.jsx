@@ -293,7 +293,7 @@ export default function RichList() {
           <p className="text-sm text-muted-foreground">
             The Rich List shows the top 100 wallets by BRICS balance. 
             Data is updated automatically every minute.
-            Clicca su un indirizzo per vedere i dettagli nell&apos;Explorer.
+            Click on an address to view details in the Explorer.
           </p>
         </CardContent>
       </Card>

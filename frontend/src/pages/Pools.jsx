@@ -59,7 +59,7 @@ export default function Pools() {
           <span className="gold-text">Mining Pools</span>
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-          Unisciti a un pool per minare BricsCoin insieme ad altri miner. 
+          Join a pool to mine BricsCoin together with other miners. 
           More combined power means blocks are found more frequently!
         </p>
       </div>
@@ -188,7 +188,7 @@ export default function Pools() {
                     className="flex items-center gap-2 text-primary hover:underline text-sm"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Visita il sito del pool
+                    Visit pool website
                   </a>
                 </div>
               )}

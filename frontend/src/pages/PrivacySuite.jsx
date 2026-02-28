@@ -73,7 +73,7 @@ function StealthSetup({ onMetaGenerated }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Genera il tuo <strong className="text-cyan-400">stealth meta-address</strong> per ricevere pagamenti privati.
+          Generate your <strong className="text-cyan-400">stealth meta-address</strong> to receive private payments.
           The sender creates a one-time address — nobody on the blockchain can link it to you.
         </p>
         {meta ? (
@@ -156,7 +156,7 @@ function StealthScanner() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Scansiona la blockchain per trovare pagamenti stealth indirizzati a te.
+          Scan the blockchain to find stealth payments addressed to you.
         </p>
         <Button onClick={scanPayments} disabled={scanning} variant="outline" className="w-full" data-testid="scan-stealth-btn">
           {scanning ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Scansione...</> : <><Scan className="w-4 h-4 mr-2" />Scansiona Blockchain</>}
