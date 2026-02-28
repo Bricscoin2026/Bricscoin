@@ -1805,6 +1805,7 @@ async def get_mining_template():
     new_index = last_block['index'] + 1
     difficulty = await get_current_difficulty()
     reward = get_mining_reward(new_index)
+    effective_reward = round(reward * (1.0 - reward_penalty), 8)
     timestamp = datetime.now(timezone.utc).isoformat()
     
     # Block data to hash (without nonce - miner will add it)
