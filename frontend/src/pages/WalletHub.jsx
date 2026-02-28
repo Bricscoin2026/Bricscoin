@@ -55,6 +55,15 @@ function PortfolioSummary({ onSelectTab }) {
           <p className="text-xs text-muted-foreground mt-2" data-testid="wallet-count-label">
             {walletCount} wallet{walletCount !== 1 ? "s" : ""} connected
           </p>
+          {totalImmatureBalance > 0 && (
+            <div className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20" data-testid="total-immature-balance">
+              <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="text-xs text-amber-400 font-mono font-bold">
+                +{totalImmatureBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })} BRICS
+              </span>
+              <span className="text-xs text-amber-400/70">maturing</span>
+            </div>
+          )}
         </div>
       </div>
 
