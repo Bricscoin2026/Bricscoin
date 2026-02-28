@@ -206,8 +206,8 @@ export default function BlockDetail() {
               </div>
               <div className="p-3 rounded bg-emerald-500/5 border border-emerald-500/10">
                 <p className="text-xs text-muted-foreground">
-                  Questo blocco e protetto da una firma ibrida ECDSA + ML-DSA-65 (FIPS 204), 
-                  resistente agli attacchi dei computer quantistici.
+                  This block is protected by a hybrid ECDSA + ML-DSA-65 (FIPS 204) signature, 
+                  resistant to quantum computer attacks.
                 </p>
               </div>
             </CardContent>

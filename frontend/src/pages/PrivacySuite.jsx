@@ -337,8 +337,8 @@ export default function PrivacySuite({ embedded = false }) {
         <CardContent className="space-y-4">
           <p className="text-xs text-muted-foreground">
             Send a transaction with <strong className="text-violet-400">total privacy</strong>:
-            il mittente è nascosto tra un ring di firme, il destinatario riceve su un indirizzo stealth one-time,
-            e l'importo è protetto da zk-STARK.
+            the sender is hidden among a ring of signatures, the receiver gets a one-time stealth address,
+            and the amount is protected by zk-STARK.
           </p>
 
           {/* Wallet Selector */}
