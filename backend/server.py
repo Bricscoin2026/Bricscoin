@@ -1482,6 +1482,32 @@ async def get_security_profile(request: Request):
                 "max_growth": BLOCK_SIZE_MAX_GROWTH,
                 "penalty_rate": BLOCK_SIZE_PENALTY_RATE,
             },
+            "privacy_enforcement": {
+                "mandatory": True,
+                "consensus_rules": [
+                    "R1: ring_signature required",
+                    "R2: ring_size >= 32",
+                    "R3: key_image unique (double-spend)",
+                    "R4: ephemeral_pubkey required",
+                    "R5: proof_hash required (zk-STARK)",
+                    "R6: ring signature cryptographic verification",
+                    "R7: commitment required (amount hiding)",
+                    "R8: encrypted_amount required",
+                    "R9: stark_verified must be True",
+                    "R10: transparent TX disabled (410 Gone)",
+                    "R11: negative amounts rejected (conservation)",
+                ],
+            },
+            "range_proof": {
+                "enabled": True,
+                "type": "zk-STARK",
+                "proves": ["amount > 0", "amount <= balance", "conservation: balance = amount + remainder"],
+            },
+            "decoy_selection": {
+                "algorithm": "Gamma distribution (Monero-style)",
+                "parameters": "shape=19.28, scale=1/1.61",
+                "favors": "Recent transactions for realistic temporal distribution",
+            },
         },
         "quantum_resistance": {
             "block_signing": "ECDSA (secp256k1) + ML-DSA-65 (FIPS 204 Dilithium)",
