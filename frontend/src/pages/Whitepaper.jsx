@@ -140,7 +140,7 @@ export default function Whitepaper() {
               <span className="text-lg font-bold text-primary">N</span>etwork
             </p>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
-              A Decentralized SHA-256 Proof-of-Work Cryptocurrency with Post-Quantum Cryptographic Security
+              A Decentralized SHA-256 Proof-of-Work Cryptocurrency with Post-Quantum Security and Consensus-Enforced Privacy
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
               <span className="bg-white/5 px-3 py-1 rounded-full">Version 4.0</span>
