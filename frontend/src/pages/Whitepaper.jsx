@@ -199,8 +199,9 @@ export default function Whitepaper() {
           <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
             <li>Remains accessible to hardware miners worldwide via SHA-256 PoW</li>
             <li>Maintains ultra-low, deflationary transaction fees (0.000005 BRICS, burned)</li>
-            <li>Provides transparent, publicly verifiable transactions</li>
+            <li>Enforces mandatory privacy: sender, receiver, and amount hidden on every transaction</li>
             <li>Offers quantum-resistant security through ML-DSA-65 hybrid signatures</li>
+            <li>Validates privacy proofs at the consensus level &mdash; nodes reject non-compliant blocks</li>
             <li>Hosts on-chain applications: Chat, Certificates, Time Capsules, AI Oracle</li>
             <li>Operates as a fully open-source project under MIT license</li>
           </ul>
