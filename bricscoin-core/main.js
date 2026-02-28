@@ -6,53 +6,72 @@ let win;
 
 app.whenReady().then(() => {
   win = new BrowserWindow({
-    width: 1280,
-    height: 900,
-    minWidth: 900,
+    width: 480,
+    height: 820,
+    minWidth: 400,
     minHeight: 600,
-    title: 'BricsCoin Core',
+    title: 'BricsCoin Wallet',
     icon: path.join(__dirname, 'icon.png'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false
     },
-    autoHideMenuBar: true
+    autoHideMenuBar: true,
+    titleBarStyle: 'hiddenInset'
   });
 
-  // Load the wallet page directly
+  // Load wallet page
   win.loadURL(SITE_URL + '/wallet');
+
+  // Inject CSS to hide navbar and show only wallet content
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.insertCSS(`
+      /* Hide site navbar */
+      nav, header, [class*="navbar"], [class*="Navbar"],
+      [class*="nav-"], [class*="header"] {
+        display: none !important;
+      }
+      /* Hide footer */
+      footer, [class*="footer"] {
+        display: none !important;
+      }
+      /* Remove top padding that navbar would have occupied */
+      body, #root, main, [class*="main"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      /* Make wallet content full height */
+      #root > div {
+        padding-top: 8px !important;
+      }
+    `);
+  });
+
+  // Keep URL within wallet - prevent navigation to other pages
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!url.includes('/wallet') && !url.startsWith(SITE_URL + '/wallet')) {
+      event.preventDefault();
+    }
+  });
 
   // Open external links in system browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (!url.startsWith(SITE_URL)) {
-      shell.openExternal(url);
-      return { action: 'deny' };
-    }
-    return { action: 'allow' };
+    shell.openExternal(url);
+    return { action: 'deny' };
   });
 
-  // Navigation menu
+  // Minimal menu
   const menu = Menu.buildFromTemplate([
     {
-      label: 'BricsCoin',
+      label: 'BricsCoin Wallet',
       submenu: [
-        { label: 'Dashboard', click: () => win.loadURL(SITE_URL + '/') },
-        { label: 'Wallet', click: () => win.loadURL(SITE_URL + '/wallet') },
-        { label: 'Blockchain', click: () => win.loadURL(SITE_URL + '/blockchain') },
-        { label: 'Mining', click: () => win.loadURL(SITE_URL + '/mining') },
-        { type: 'separator' },
         { label: 'Reload', accelerator: 'CmdOrCtrl+R', click: () => win.reload() },
-        { label: 'Quit', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
+        { type: 'separator' },
         { role: 'zoomIn' },
         { role: 'zoomOut' },
         { role: 'resetZoom' },
         { type: 'separator' },
-        { role: 'togglefullscreen' }
+        { label: 'Quit', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
       ]
     }
   ]);
