@@ -10,7 +10,7 @@
 
 ## Risultati Test Difficoltà BricsCoin
 
-**Backend URL testato:** https://secure-ledger-11.preview.emergentagent.com
+**Backend URL testato:** https://maturing-rewards-ui.preview.emergentagent.com
 
 ### ✅ Tutti i test superati (7/7)
 
