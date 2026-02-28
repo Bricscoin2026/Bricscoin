@@ -148,7 +148,7 @@ function WalletCard({ wallet, refreshKey, onSelect, isSelected, onShowSeed, onDe
           data-testid="delete-wallet-btn"
         >
           <AlertTriangle className="w-3 h-3 mr-2" />
-          Elimina Wallet
+          Delete Wallet
         </Button>
       </div>
     </motion.div>
@@ -956,7 +956,7 @@ export default function Wallet({ embedded }) {
               onClick={confirmDeleteWallet}
               data-testid="confirm-delete-btn"
             >
-              Elimina Wallet
+              Delete Wallet
             </Button>
           </DialogFooter>
         </DialogContent>
