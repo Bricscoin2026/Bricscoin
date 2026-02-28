@@ -170,7 +170,7 @@ def create_coinbase_tx(height:int, reward:int, miner_addr:str, extranonce1:str, 
 
     extranonce1_len = len(extranonce1)//2
     extranonce2_len = extranonce2_size
-    extra_data = b'/BricsCoin Pool/'
+    extra_data = b'/BricsCoin Pool/BRIC'  # BRIC magic bytes for AuxPoW merge-mining compatibility
     script_prefix = height_script + extra_data
     script_suffix = b''
     total_script_len = len(script_prefix) + extranonce1_len + extranonce2_len + len(script_suffix)
