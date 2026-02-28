@@ -214,11 +214,11 @@ export default function Downloads() {
             <Button
               variant="outline"
               className="border-white/20"
-              onClick={() => window.open(GITHUB_RELEASES_PAGE, '_blank')}
+              onClick={() => window.open(CODEBERG_FOLDER, '_blank')}
               data-testid="codeberg-downloads-btn"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              All Downloads on GitHub
+              All Downloads on Codeberg
             </Button>
           </div>
         </CardContent>
