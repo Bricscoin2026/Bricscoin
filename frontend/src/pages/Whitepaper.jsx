@@ -471,8 +471,10 @@ export default function Whitepaper() {
             ["Protocol", "Dandelion++ (arxiv.org/abs/1805.11060)"],
             ["Stem Routing Rate", "~90% of transactions enter stem phase"],
             ["Epoch Rotation", "Stem relay peer rotated every 10 minutes"],
-            ["Failsafe", "Embargo timeout: stuck transactions auto-diffuse"],
-            ["Tor Integration", "Hidden Service (.onion) for additional network privacy"],
+            ["Propagation Jitter", "100-2000ms random delay per hop, randomized batch accumulation (2-5 TXs)"],
+            ["Dummy Traffic", "Decoy transactions generated every 15-60s, indistinguishable from real traffic"],
+            ["Failsafe", "Embargo timeout: stuck transactions auto-diffuse after 30s"],
+            ["Tor Integration", "Hidden Service (.onion) for additional network-layer privacy"],
           ]} />
 
           <SectionHeading id="sec-lightclient" level={3}>8.5 Light Client & Pruning</SectionHeading>
