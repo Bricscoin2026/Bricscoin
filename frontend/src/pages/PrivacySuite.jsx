@@ -57,7 +57,7 @@ function StealthSetup({ onMetaGenerated }) {
       if (onMetaGenerated) onMetaGenerated(data);
       toast.success("Stealth meta-address generato!");
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Errore generazione stealth");
+      toast.error(err.response?.data?.detail || "Error generating stealth address");
     } finally {
       setGenerating(false);
     }
@@ -140,7 +140,7 @@ function StealthScanner() {
         toast.info("No stealth payments found");
       }
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Errore scansione");
+      toast.error(err.response?.data?.detail || "Scan error");
     } finally {
       setScanning(false);
     }

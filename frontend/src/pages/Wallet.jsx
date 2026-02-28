@@ -466,13 +466,13 @@ function ImportDialog({ onSuccess }) {
       let res;
       if (importType === "seed") {
         if (!seedPhrase.trim()) {
-          toast.error("Inserisci la seed phrase");
+          toast.error("Enter the seed phrase");
           return;
         }
         res = await importWalletSeed(seedPhrase.trim(), walletName || "Wallet Importato");
       } else {
         if (!privateKey.trim()) {
-          toast.error("Inserisci la chiave privata");
+          toast.error("Enter the private key");
           return;
         }
         res = await importWalletKey(privateKey.trim(), walletName || "Wallet Importato");
@@ -530,7 +530,7 @@ function ImportDialog({ onSuccess }) {
                 data-testid="seed-input"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Inserisci le 12 parole separate da spazi
+                Enter the 12 words separated by spaces
               </p>
             </div>
           </TabsContent>
@@ -540,7 +540,7 @@ function ImportDialog({ onSuccess }) {
               <Label>Chiave Privata</Label>
               <Input
                 type="password"
-                placeholder="Inserisci la chiave privata esadecimale"
+                placeholder="Enter the hexadecimal private key"
                 value={privateKey}
                 onChange={(e) => setPrivateKey(e.target.value)}
                 className="font-mono bg-background border-white/20"
