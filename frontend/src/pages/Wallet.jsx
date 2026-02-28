@@ -766,13 +766,13 @@ export default function Wallet({ embedded }) {
       {embedded && (
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" className="border-white/20" onClick={handleRefresh} data-testid="refresh-btn">
-            <RefreshCw className="w-4 h-4 mr-2" />Aggiorna
+            <RefreshCw className="w-4 h-4 mr-2" />Refresh
           </Button>
           <ImportDialog onSuccess={handleImportSuccess} />
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gold-button rounded-sm" data-testid="create-wallet-btn">
-                <Plus className="w-4 h-4 mr-2" />Nuovo Wallet
+                <Plus className="w-4 h-4 mr-2" />New Wallet
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10" data-testid="create-wallet-dialog">
@@ -785,7 +785,7 @@ export default function Wallet({ embedded }) {
                 <Input placeholder="My Wallet" value={walletName} onChange={(e) => setWalletName(e.target.value)} className="bg-background border-white/20" data-testid="wallet-name-input"/>
               </div>
               <DialogFooter>
-                <Button onClick={handleCreateWallet} disabled={creating} className="gold-button rounded-sm" data-testid="confirm-create-wallet-btn">{creating ? "Creazione..." : "Crea Wallet"}</Button>
+                <Button onClick={handleCreateWallet} disabled={creating} className="gold-button rounded-sm" data-testid="confirm-create-wallet-btn">{creating ? "Creating..." : "Create Wallet"}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
