@@ -1046,26 +1046,50 @@ def generate_address_from_public_key(public_key_hex: str) -> str:
 async def get_balance(address: str) -> float:
     """Calculate balance for an address.
     Mining rewards are subject to COINBASE_MATURITY (150 block confirmations).
+    Private transaction debits/credits use the separate private_balance_ops ledger.
     """
     balance = 0.0
     current_height = await db.blocks.count_documents({})
     maturity_cutoff = current_height - COINBASE_MATURITY
     
-    # Add received transactions
-    received = await db.transactions.find({"recipient": address}, {"_id": 0, "amount": 1, "sender": 1, "block_index": 1}).to_list(10000)
+    # Add received transactions (non-private only — private TXs have no 'amount' on-chain)
+    received = await db.transactions.find(
+        {"recipient": address, "type": {"$ne": "private"}},
+        {"_id": 0, "amount": 1, "sender": 1, "block_index": 1}
+    ).to_list(10000)
     for tx in received:
         # Coinbase maturity: mining rewards only spendable after N confirmations
         if tx.get("sender") == "COINBASE":
             block_idx = tx.get("block_index", 0) or 0
             if block_idx > maturity_cutoff:
                 continue  # Immature coinbase — not yet spendable
-        balance += tx['amount']
+        balance += tx.get('amount', 0)
     
-    # Subtract sent transactions including fees
-    sent = await db.transactions.find({"sender": address}, {"_id": 0, "amount": 1, "fee": 1}).to_list(10000)
+    # Subtract sent transactions including fees (non-private)
+    sent = await db.transactions.find(
+        {"sender": address, "type": {"$ne": "private"}},
+        {"_id": 0, "amount": 1, "fee": 1}
+    ).to_list(10000)
     for tx in sent:
-        balance -= tx['amount']
+        balance -= tx.get('amount', 0)
         balance -= tx.get('fee', 0)
+    
+    # Private balance operations (internal node ledger, not on-chain)
+    # Debits: amounts this address has spent privately
+    private_debits = await db.private_balance_ops.find(
+        {"type": "debit", "address": address},
+        {"_id": 0, "amount": 1}
+    ).to_list(10000)
+    for d in private_debits:
+        balance -= d.get("amount", 0)
+    
+    # Credits: amounts received at this stealth address
+    private_credits = await db.private_balance_ops.find(
+        {"type": "credit", "stealth_address": address},
+        {"_id": 0, "amount": 1}
+    ).to_list(10000)
+    for c in private_credits:
+        balance += c.get("amount", 0)
     
     balance = round(balance, 8)
     return max(0.0, balance)
