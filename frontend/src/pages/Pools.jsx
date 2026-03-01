@@ -17,30 +17,29 @@ import { toast } from "sonner";
 // Community pools - can be added dynamically in the future
 const COMMUNITY_POOLS = [
   {
-    id: "official",
-    name: "BricsCoin Official Pool",
-    url: "stratum+tcp://stratum.bricscoin26.org:3333",
+    id: "solo",
+    name: "BricsCoin Solo Mining",
+    url: "stratum+tcp://solo.bricscoin26.org:3333",
+    website: "https://bricscoin26.org",
+    fee: "0%",
+    minPayout: "50 BRICS (full block)",
+    location: "Europe (4 servers)",
+    status: "online",
+    featured: true,
+    description: "Mine solo — find a block and keep the full 50 BRICS reward. High variance, big reward. Backed by 4 redundant servers."
+  },
+  {
+    id: "pool",
+    name: "BricsCoin PPLNS Pool",
+    url: "stratum+tcp://pool.bricscoin26.org:3334",
     website: "https://bricscoin26.org",
     fee: "0%",
     minPayout: "1 BRICS",
-    location: "Europe (Germany)",
+    location: "Europe (4 servers)",
     status: "online",
     featured: true,
-    description: "Official pool run by the BricsCoin team. Zero fees, direct payouts to your wallet."
+    description: "Pool mining with PPLNS — rewards split proportionally among miners. Steady, consistent income. Backed by 4 redundant servers."
   },
-  // Placeholder for future community pools
-  // {
-  //   id: "community-1",
-  //   name: "Community Pool Example",
-  //   url: "stratum+tcp://pool.example.com:3333",
-  //   website: "https://example.com",
-  //   fee: "1%",
-  //   minPayout: "10 BRICS",
-  //   location: "USA",
-  //   status: "online",
-  //   featured: false,
-  //   description: "Pool gestito dalla community con supporto 24/7."
-  // }
 ];
 
 export default function Pools() {
