@@ -164,42 +164,49 @@ export default function Mining() {
           
           <div className="space-y-4 font-mono text-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-primary/20">
-              <span className="text-muted-foreground">Pool URL:</span>
+              <span className="text-muted-foreground">Solo Mining URL:</span>
               <div className="flex items-center gap-2">
-                <code className="text-primary font-bold">stratum+tcp://stratum.bricscoin26.org:3333</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://stratum.bricscoin26.org:3333")}>
+                <code className="text-primary font-bold">stratum+tcp://solo.bricscoin26.org:3333</code>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://solo.bricscoin26.org:3333")}>
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
-              <span className="text-muted-foreground">Alternative (IP diretto):</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-green-500/20">
+              <span className="text-muted-foreground">Pool Mining URL:</span>
               <div className="flex items-center gap-2">
-                <code className="text-yellow-400">stratum+tcp://5.161.254.163:3333</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://5.161.254.163:3333")}>
+                <code className="text-green-400 font-bold">stratum+tcp://pool.bricscoin26.org:3334</code>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum+tcp://pool.bricscoin26.org:3334")}>
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
             </div>
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-white/10">
-              <span className="text-muted-foreground">Server:</span>
+              <span className="text-muted-foreground">Solo Server:</span>
               <div className="flex items-center gap-2">
-                <code className="text-white">stratum.bricscoin26.org</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("stratum.bricscoin26.org")}>
+                <code className="text-white">solo.bricscoin26.org</code>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("solo.bricscoin26.org")}>
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-white/10">
-              <span className="text-muted-foreground">Port:</span>
+              <span className="text-muted-foreground">Pool Server:</span>
               <div className="flex items-center gap-2">
-                <code className="text-white">3333</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("3333")}>
+                <code className="text-white">pool.bricscoin26.org</code>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard("pool.bricscoin26.org")}>
                   <Copy className="w-4 h-4" />
                 </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-black/40 rounded-lg border border-white/10">
+              <span className="text-muted-foreground">Port (Solo / Pool):</span>
+              <div className="flex items-center gap-2">
+                <code className="text-white">3333 / 3334</code>
               </div>
             </div>
 
