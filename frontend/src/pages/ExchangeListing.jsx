@@ -112,7 +112,8 @@ LINKS:
 - Block Explorer: https://bricscoin26.org/blockchain
 - Whitepaper: https://bricscoin26.org/whitepaper
 - Source Code: https://codeberg.org/Bricscoin_26/Bricscoin
-- Mining Pool: stratum+tcp://stratum.bricscoin26.org:3333
+- Solo Mining: stratum+tcp://solo.bricscoin26.org:3333
+- Pool Mining: stratum+tcp://pool.bricscoin26.org:3334
 - Mobile Wallet: https://bricscoin26.org/mobile-wallet
 
 WALLETS: Web wallet (desktop + PWA mobile), PQC hybrid signing
