@@ -274,8 +274,8 @@ export default function Mining() {
             <ol className="text-sm text-muted-foreground space-y-3 list-decimal list-inside">
               <li>Access NerdMiner via web interface</li>
               <li>Go to <strong>Settings → Mining Pool</strong></li>
-              <li>Set Pool: <code className="bg-white/10 px-1 rounded">stratum.bricscoin26.org</code> (or <code className="bg-white/10 px-1 rounded">5.161.254.163</code>)</li>
-              <li>Set Port: <code className="bg-white/10 px-1 rounded">3333</code></li>
+              <li>Set Pool: <code className="bg-white/10 px-1 rounded">solo.bricscoin26.org</code> (solo) or <code className="bg-white/10 px-1 rounded">pool.bricscoin26.org</code> (pool)</li>
+              <li>Set Port: <code className="bg-white/10 px-1 rounded">3333</code> (solo) or <code className="bg-white/10 px-1 rounded">3334</code> (pool)</li>
               <li>Set Address: Your BRICS wallet address</li>
               <li>Save and restart the device</li>
             </ol>
