@@ -55,13 +55,14 @@ NODE_URL = os.environ.get('BRICS_NODE_URL', '')
 
 
 async def auto_register_node():
-    """Auto-register this node as a P2Pool peer on startup"""
+    """Auto-register this node as P2Pool peers on startup (solo + pool)"""
     now = datetime.now(timezone.utc).isoformat()
+    # Register solo mining entry
     await db.p2pool_peers.update_one(
-        {"peer_id": NODE_ID},
+        {"peer_id": f"{NODE_ID}-solo"},
         {"$set": {
-            "peer_id": NODE_ID,
-            "node_url": NODE_URL or "https://bricscoin26.org",
+            "peer_id": f"{NODE_ID}-solo",
+            "node_url": "solo.bricscoin26.org",
             "version": "2.0.0",
             "stratum_port": 3333,
             "pool_modes": ["solo"],
@@ -71,7 +72,24 @@ async def auto_register_node():
         }},
         upsert=True
     )
-    logger.info(f"Auto-registered node: {NODE_ID}")
+    # Register pool mining entry
+    await db.p2pool_peers.update_one(
+        {"peer_id": f"{NODE_ID}-pool"},
+        {"$set": {
+            "peer_id": f"{NODE_ID}-pool",
+            "node_url": "pool.bricscoin26.org",
+            "version": "2.0.0",
+            "stratum_port": 3334,
+            "pool_modes": ["pplns"],
+            "last_seen": now,
+            "online": True,
+            "registered_at": now,
+        }},
+        upsert=True
+    )
+    # Clean up old entries with IP addresses
+    await db.p2pool_peers.delete_many({"node_url": {"$regex": r"^\d+\.\d+\.\d+\.\d+|^https?://\d+|^https?://bricscoin26"}})
+    logger.info(f"Auto-registered node: {NODE_ID} (solo + pool)")
 
 
 @router.on_event("startup")
