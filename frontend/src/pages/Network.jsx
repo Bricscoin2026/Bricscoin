@@ -251,7 +251,8 @@ export default function Network() {
                   <div>
                     <p className="font-mono text-sm text-orange-500">Stratum Mining Pool</p>
                     <p className="text-xs text-muted-foreground font-mono">
-                      stratum+tcp://stratum.bricscoin26.org:3333
+                      stratum+tcp://solo.bricscoin26.org:3333 (solo)
+                      stratum+tcp://pool.bricscoin26.org:3334 (pool)
                     </p>
                   </div>
                 </div>
