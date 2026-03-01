@@ -295,11 +295,11 @@ export default function Mining() {
           <ul className="text-sm text-muted-foreground space-y-3">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Use <strong>stratum.bricscoin26.org</strong> or the direct IP <strong>5.161.254.163</strong></span>
+              <span><strong>Solo Mining:</strong> solo.bricscoin26.org:3333 — <strong>Pool Mining:</strong> pool.bricscoin26.org:3334</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>If the domain doesn&apos;t work, use the <strong>direct IP address</strong> as fallback</span>
+              <span>Both addresses are backed by <strong>4 redundant servers</strong> — if one goes down, mining continues on the others</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
