@@ -245,26 +245,26 @@ POOL: stratum+tcp://pool.bricscoin26.org:3334 (PPLNS)`;
         <Card className="border-white/[0.06] bg-white/[0.02]">
           <CardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-              <span className="text-sm text-muted-foreground">Stratum Pool</span>
+              <span className="text-sm text-muted-foreground">Solo Mining</span>
               <div className="flex items-center gap-2">
-                <code className="text-sm text-primary font-mono">stratum+tcp://stratum.bricscoin26.org:3333</code>
-                <CopyButton text="stratum+tcp://stratum.bricscoin26.org:3333" label="Stratum URL" />
+                <code className="text-sm text-primary font-mono">stratum+tcp://solo.bricscoin26.org:3333</code>
+                <CopyButton text="stratum+tcp://solo.bricscoin26.org:3333" label="Solo URL" />
               </div>
             </div>
             <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-              <span className="text-sm text-muted-foreground">IP diretto</span>
+              <span className="text-sm text-muted-foreground">Pool Mining (PPLNS)</span>
               <div className="flex items-center gap-2">
-                <code className="text-sm text-amber-400 font-mono">stratum+tcp://5.161.254.163:3333</code>
-                <CopyButton text="stratum+tcp://5.161.254.163:3333" label="IP Address" />
+                <code className="text-sm text-green-400 font-mono">stratum+tcp://pool.bricscoin26.org:3334</code>
+                <CopyButton text="stratum+tcp://pool.bricscoin26.org:3334" label="Pool URL" />
               </div>
             </div>
             <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-              <span className="text-sm text-muted-foreground">Stratum Port</span>
-              <code className="text-sm font-mono">3333</code>
+              <span className="text-sm text-muted-foreground">Solo Port / Pool Port</span>
+              <code className="text-sm font-mono">3333 / 3334</code>
             </div>
             <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-              <span className="text-sm text-muted-foreground">Stratum Port (alt)</span>
-              <code className="text-sm font-mono">3334</code>
+              <span className="text-sm text-muted-foreground">Redundancy</span>
+              <code className="text-sm font-mono text-green-400">4 servers (auto-failover)</code>
             </div>
           </CardContent>
         </Card>
