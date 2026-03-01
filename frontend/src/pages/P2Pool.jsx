@@ -540,13 +540,13 @@ export default function P2Pool() {
                       {s.n === 2 && (
                         <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="p-3 rounded bg-background border border-primary/20">
-                            <p className="font-bold text-sm text-primary mb-1">SOLO Pool</p>
-                            <p className="font-mono text-xs text-primary">stratum+tcp://bricscoin26.org:3333</p>
+                            <p className="font-bold text-sm text-primary mb-1">SOLO Mining</p>
+                            <p className="font-mono text-xs text-primary">stratum+tcp://solo.bricscoin26.org:3333</p>
                             <p className="text-xs text-muted-foreground mt-1">Finder keeps 50 BRICS. High variance, big reward.</p>
                           </div>
                           <div className="p-3 rounded bg-background border border-green-500/20">
                             <p className="font-bold text-sm text-green-400 mb-1">PPLNS Pool</p>
-                            <p className="font-mono text-xs text-green-400">stratum+tcp://bricscoin26.org:3334</p>
+                            <p className="font-mono text-xs text-green-400">stratum+tcp://pool.bricscoin26.org:3334</p>
                             <p className="text-xs text-muted-foreground mt-1">Reward split proportionally. Steady income.</p>
                           </div>
                         </div>
